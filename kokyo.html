@@ -18,8 +18,9 @@
     <style>
         body { font-family: "Noto Sans JP", sans-serif; background-color: #f8fafc; color: #1e293b; }
         h1, h2, h3, h4, .serif { font-family: "Noto Serif JP", serif; }
-        .slide-in { animation: slideIn 0.3s ease-out forwards; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* アニメーション定義 */
+        .slide-in { animation: slideIn 0.4s ease-out forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -34,7 +35,7 @@
             return <i data-lucide={name} className={className} width={size} height={size}></i>;
         };
 
-        // --- 1. Diagnosis Component (診断ツール：完全版) ---
+        // --- 1. Diagnosis Component (診断ツール：修正版) ---
         const Diagnosis = ({ onFinish }) => {
             const [answers, setAnswers] = useState({});
             const [expandedCards, setExpandedCards] = useState({});
@@ -59,7 +60,6 @@
 
             const scores = calculateScore();
 
-            // 以前の完全なテキストデータを使用
             const questions = [
                 {
                     category: "カテゴリーA：【もしも…】お金の条件を変えてみる",
@@ -187,7 +187,8 @@
                 },
                 {
                     category: "カテゴリーG：【希望の行方】ラストシーンをどう読む？",
-                    icon: "arrow-right", color: "text-cyan-600",
+                    icon: "arrow-right",
+                    color: "text-cyan-600",
                     items: [
                         { 
                             id: 12, 
@@ -232,30 +233,12 @@
             ];
 
             return (
-                <div className="pb-32 slide-in">
-                    <div className="mb-8 p-4 bg-white rounded-xl shadow border border-slate-200">
-                        <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                            <Icon name="activity" className="text-slate-500"/>
-                            リアルタイム分析
-                        </h2>
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-2">
-                            <div className="flex items-center gap-2">
-                                <span className="bg-emerald-100 text-emerald-700 p-2 rounded-full font-bold text-xs">カネ派: {scores.money}</span>
-                                <span className="text-xs text-slate-500">貧困・環境要因</span>
-                            </div>
-                            <div className="flex-1 w-full h-4 bg-slate-100 rounded-full overflow-hidden flex relative">
-                                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-400 z-10 opacity-30"></div>
-                                <div className="bg-emerald-500 transition-all duration-500" style={{ width: scores.total === 0 ? '50%' : `${(scores.money / (scores.money + scores.heart || 1)) * 100}%` }}></div>
-                                <div className="bg-rose-500 transition-all duration-500" style={{ width: scores.total === 0 ? '50%' : `${(scores.heart / (scores.money + scores.heart || 1)) * 100}%` }}></div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs text-slate-500">心理・意識要因</span>
-                                <span className="bg-rose-100 text-rose-700 p-2 rounded-full font-bold text-xs">心派: {scores.heart}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-8">
+                // slide-in はここ（ルート）には付けない！ fixed要素に悪影響があるため。
+                <div className="pb-40">
+                    
+                    {/* 質問カードのリスト */}
+                    {/* アニメーションはコンテンツ部分にのみ適用 */}
+                    <div className="space-y-8 slide-in">
                         {questions.map((category, idx) => (
                             <section key={idx} className="space-y-4">
                                 <div className="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
@@ -311,22 +294,65 @@
                         ))}
                     </div>
 
-                    {scores.total > 0 && (
-                        <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-lg z-50">
-                            <div className="max-w-4xl mx-auto flex items-center justify-between">
-                                <div className="text-xs font-bold text-slate-500">回答: {scores.total}/15</div>
-                                <button onClick={() => { window.scrollTo(0,0); onFinish('reference'); }} className="bg-slate-800 text-white px-6 py-3 rounded-full font-bold shadow-lg hover:bg-slate-700 transition flex items-center gap-2">
-                                    <Icon name="file-text" size={18}/>
-                                    {scores.total === 15 ? "診断終了！資料で裏付けをとる" : "資料を見に行く"}
-                                </button>
+                    {/* 下部固定の追尾型メーター＆ボタン */}
+                    {/* fixed は slide-in の影響を受けないように外に出したため、PCでも正しく追従するはず */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-200 shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.1)] z-[9999]">
+                        {/* メーター部分 */}
+                        <div className="px-4 pt-3 pb-2 max-w-4xl mx-auto">
+                            <div className="flex justify-between text-xs font-bold mb-1">
+                                <span className="flex items-center gap-1 text-emerald-700">
+                                    <Icon name="banknote" size={14}/> カネ派: {scores.money}
+                                </span>
+                                <span className="text-slate-400 font-normal">回答数: {scores.total} / 15</span>
+                                <span className="flex items-center gap-1 text-rose-700">
+                                    心派: {scores.heart} <Icon name="heart" size={14}/>
+                                </span>
+                            </div>
+                            <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex relative">
+                                {/* 中央線 */}
+                                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-300 z-10 opacity-50"></div>
+                                {/* カネ派バー (右寄せで伸びる) */}
+                                <div className="flex-1 flex justify-end bg-slate-50">
+                                     <div 
+                                        className="h-full bg-emerald-500 transition-all duration-500" 
+                                        style={{ width: scores.total === 0 ? '0%' : `${(scores.money / (scores.money + scores.heart || 1)) * 100}%` }}
+                                     ></div>
+                                </div>
+                                {/* 心派バー (左寄せで伸びる) */}
+                                <div className="flex-1 flex justify-start bg-slate-50">
+                                     <div 
+                                        className="h-full bg-rose-500 transition-all duration-500" 
+                                        style={{ width: scores.total === 0 ? '0%' : `${(scores.heart / (scores.money + scores.heart || 1)) * 100}%` }}
+                                     ></div>
+                                </div>
                             </div>
                         </div>
-                    )}
+
+                        {/* アクションボタン */}
+                        <div className="px-4 pb-4 pt-1 max-w-4xl mx-auto">
+                             {scores.total > 0 ? (
+                                <button 
+                                    onClick={() => { window.scrollTo(0,0); onFinish('reference'); }} 
+                                    className={`w-full py-3 rounded-lg font-bold shadow-md transition flex items-center justify-center gap-2 ${scores.total === 15 ? 'bg-slate-800 text-white animate-bounce shadow-xl' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                                >
+                                    {scores.total === 15 ? (
+                                         <><Icon name="check-circle" size={20}/> 診断完了！資料で裏付けをとる</>
+                                    ) : (
+                                         <><Icon name="arrow-right" size={18}/> 途中ですが資料を見る</>
+                                    )}
+                                </button>
+                             ) : (
+                                <div className="text-center text-xs text-slate-400 py-2">
+                                    まずは直感で質問に答えてみましょう
+                                </div>
+                             )}
+                        </div>
+                    </div>
                 </div>
             );
         };
 
-        // --- 2. Reference Component (探究資料：タイトル修正版) ---
+        // --- 2. Reference Component (探究資料) ---
         const Reference = () => {
             return (
                 <div className="space-y-16 pb-32 slide-in">
@@ -645,8 +671,10 @@
                         <div className="max-w-4xl mx-auto px-4 relative z-10">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                                 <div>
-                                    <span className="bg-amber-500 text-slate-900 text-xs font-bold px-3 py-1 rounded-full inline-block mb-2 shadow">2025年度 中3国語</span>
-                                    <h1 className="text-3xl md:text-4xl font-black tracking-wider serif mb-2">『厚い壁』の正体を暴け</h1>
+                                    <span className="bg-amber-500 text-slate-900 text-xs font-bold px-3 py-1 rounded-full inline-block mb-2 shadow">中3国語『故郷』</span>
+                                    <h1 className="text-2xl md:text-3xl font-black tracking-wider serif mb-2 leading-tight">
+                                        論題：「私」と「閏土」の心を隔てた『厚い壁』の正体は、「経済格差（カネ）」か、「精神的格差（心）」か。
+                                    </h1>
                                     <p className="text-slate-400 text-sm">直感的な「診断」と、客観的な「資料」。二つのアプローチで真実に迫る。</p>
                                 </div>
                             </div>
@@ -675,7 +703,8 @@
                     </header>
 
                     {/* Main Content Area */}
-                    <main className="max-w-4xl mx-auto px-4 -mt-6 relative z-20">
+                    {/* 文字被りの原因であった -mt-6 を削除し、単純にコンテンツを表示する */}
+                    <main className="max-w-4xl mx-auto px-4 py-8 relative z-20">
                         {mode === 'diagnosis' ? (
                             <Diagnosis onFinish={setMode} />
                         ) : (
