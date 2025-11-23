@@ -120,9 +120,10 @@
     <!-- Huge Background Watermark (Fixed & Visible on Pure Black) -->
     <!-- Opacity increased slightly for better visibility on pure black -->
     <div class="fixed inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
-        <div class="flex flex-col items-center transform -rotate-12 scale-150 md:scale-100 opacity-[0.08]">
-            <i class="fab fa-apple text-[20rem] md:text-[35rem] text-white mb-8"></i>
-            <span class="text-[5rem] md:text-[10rem] font-black text-white whitespace-nowrap tracking-tighter leading-none">
+        <!-- スマホでのサイズ調整: scale-75, textサイズ縮小 -->
+        <div class="flex flex-col items-center transform -rotate-12 scale-75 md:scale-100 opacity-[0.08]">
+            <i class="fab fa-apple text-[12rem] md:text-[35rem] text-white mb-4 md:mb-8"></i>
+            <span class="text-[3rem] md:text-[10rem] font-black text-white whitespace-nowrap tracking-tighter leading-none">
                 神山の思考
             </span>
         </div>
