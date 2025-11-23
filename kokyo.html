@@ -35,209 +35,195 @@
             return <i data-lucide={name} className={className} width={size} height={size}></i>;
         };
 
-        // --- 1. Diagnosis Component (診断ツール：修正版) ---
-        const Diagnosis = ({ onFinish }) => {
-            const [answers, setAnswers] = useState({});
+        // --- Questions Data (Shared) ---
+        const questions = [
+            {
+                category: "カテゴリーA：【もしも…】お金の条件を変えてみる",
+                icon: "banknote", color: "text-emerald-600",
+                items: [
+                    { 
+                        id: 1, 
+                        q: "もし閏土が宝くじに当たって大金持ちになっていたら、「私」を「旦那様」と呼んだかな？", 
+                        options: [
+                            { type: 'money', label: "呼ばない", sub: "「やあ、迅ちゃん！」と呼ぶ", reason: "「お金さえあれば対等になれた」と考えているからです。今の卑屈な態度は性格ではなく、貧しさが作らせたものだと捉えています。" }, 
+                            { type: 'heart', label: "やっぱり呼ぶ", sub: "金持ちでも丁寧語を使う", reason: "「お金があっても、染み付いた身分意識や上下関係は消えない」と考えているからです。壁の原因は心の中のルールにあります。" }
+                        ] 
+                    },
+                    { 
+                        id: 2, 
+                        q: "もし「私」が大富豪で、「閏ちゃん、これ100万円あげるよ」と言ったら、二人の壁は消えたかな？", 
+                        options: [
+                            { type: 'money', label: "消える", sub: "泣いて感謝して仲良くなる", reason: "今の気まずさは、「助けてあげられない無力感」や「生活の苦しさ」から来ていると考えているからです。解決策（カネ）があれば壁は壊せます。" }, 
+                            { type: 'heart', label: "消えない", sub: "逆に恐縮して距離ができる", reason: "「施し（めぐみ）」を受けることで、余計に惨めさや上下関係が強調されると考えているからです。心の距離はお金では買えません。" }
+                        ] 
+                    }
+                ]
+            },
+            {
+                category: "カテゴリーB：【場面転換】シチュエーションを変えてみる",
+                icon: "message-circle", color: "text-blue-600",
+                items: [
+                    { 
+                        id: 3, 
+                        q: "もし二人がスタバのようなカフェに入って、2時間お茶をすることになったら、会話は続く？", 
+                        options: [
+                            { type: 'money', label: "続かない", sub: "沈黙しちゃう", reason: "仲が悪いのではなく、単に「共通の話題」がないだけだと捉えています。話題の差は、教育や旅などの「経験（カネで買うもの）」の差です。" }, 
+                            { type: 'heart', label: "続く", sub: "昔話で盛り上がる", reason: "本来なら話せるはずなのに、会話がなかったのは「私」が勝手に期待して、勝手にガッカリした（心を閉ざした）からだと捉えています。" }
+                        ] 
+                    },
+                    { 
+                        id: 4, 
+                        q: "もし周りに誰もいなくて、完全な二人きりの密室だったら、閏土は「迅ちゃん」と呼べたかな？", 
+                        options: [
+                            { type: 'money', label: "呼べた", sub: "甘えられた", reason: "閏土が他人行儀なのは、本心からではなく「周りの目」や「村の空気」を気にしているからだと捉えています。貧しい村の空気が彼を縛っています。" }, 
+                            { type: 'heart', label: "呼べない", sub: "やっぱり無理", reason: "誰が見ていなくても、閏土自身のプライドや恐怖心が邪魔をすると考えているからです。「落ちぶれた自分」を認めたくないという心理が壁です。" }
+                        ] 
+                    }
+                ]
+            },
+            {
+                category: "カテゴリーC：【見た目と中身】変化の正体を探る",
+                icon: "eye", color: "text-amber-600",
+                items: [
+                    { 
+                        id: 5, 
+                        q: "もし閏土が、昔と同じツヤツヤした健康的な顔のままだったら、「私」は言葉を失ったかな？", 
+                        options: [
+                            { type: 'money', label: "失わない", sub: "「変わらないね！」と抱きつく", reason: "「私」がショックを受けた最大の原因は「見た目の老化」だと捉えています。その老化の原因は、過酷な労働（カネの問題）にあります。" }, 
+                            { type: 'heart', label: "失う", sub: "やっぱり話が続かない", reason: "見た目が若くても、信じているもの（科学vs迷信）が違えば、やっぱり話は噛み合わないと考えているからです。" }
+                        ] 
+                    },
+                    { 
+                        id: 6, 
+                        q: "閏土が去り際に「香炉（神様グッズ）」じゃなくて、「現金」を欲しがったら、「私」はどう思った？", 
+                        options: [
+                            { type: 'money', label: "納得する", sub: "まあ、生活苦しいもんね", reason: "香炉だろうが現金だろうが、結局は「生きるために必要なもの」だと捉えています。形が違うだけで、根本原因は貧困です。" }, 
+                            { type: 'heart', label: "軽蔑する", sub: "えっ、がめついな", reason: "「私」は美しい思い出や「品格」を求めているから、生々しい現実を突きつけられると引いてしまう（心を閉ざす）と考えているからです。" }
+                        ] 
+                    }
+                ]
+            },
+            {
+                category: "カテゴリーD：【未来】次世代の関係を予想する",
+                icon: "users", color: "text-indigo-600",
+                items: [
+                    { 
+                        id: 7, 
+                        q: "10年後、水生（閏土の子）と宏児（私の子）が再会したら、二人は仲良くなれる？", 
+                        options: [
+                            { type: 'money', label: "なれない", sub: "水生が「旦那様」と呼ぶ", reason: "結局、水生は学校に行けず、宏児はエリートになるからです。親と同じ「経済格差」の道を辿る以上、同じ壁ができると考えます。" }, 
+                            { type: 'heart', label: "なれる", sub: "対等に話す", reason: "もし仲良くなれるなら、今の二人に壁があるのは「古い時代の教育（身分意識）」のせいだからです。新しい心を持った世代なら、壁は越えられます。" }
+                            ] 
+                    }
+                ]
+            },
+            {
+                category: "カテゴリーE：【罪と罰】「灰の中の食器」事件をどう見る？",
+                icon: "gavel", color: "text-slate-600",
+                items: [
+                    { 
+                        id: 8, 
+                        q: "閏土が「灰の中に食器を隠した」と聞いた時、君はどう感じた？", 
+                        options: [
+                            { type: 'money', label: "同情する", sub: "なりふり構わないほど苦しかった", reason: "あの行為を「盗み（悪）」ではなく「生存戦略」と捉えているからです。プライドを捨てさせるほどの貧困が原因だと考えています。" }, 
+                            { type: 'heart', label: "ショック", sub: "純朴な閏土は死んでしまった", reason: "貧しさそのものより、心が卑しく変わってしまったこと（道徳心の低下）に絶望を感じているからです。これは心の問題です。" }
+                        ] 
+                    },
+                    { 
+                        id: 9, 
+                        q: "もし楊おばさんがいなくて、村がもっと平和だったら、閏土は食器を盗んだかな？", 
+                        options: [
+                            { type: 'money', label: "盗まない", sub: "平和に暮らす", reason: "閏土個人が悪いのではなく、村全体を覆う「奪い合いの空気（貧困の連鎖）」が彼を追い詰めたと考えているからです。" }, 
+                            { type: 'heart', label: "盗む", sub: "やっぱりチャンスがあればやる", reason: "周囲の環境に関係なく、今の閏土の心はすでに麻痺し、倫理観が壊れていると捉えているからです。" }
+                        ] 
+                    }
+                ]
+            },
+            {
+                category: "カテゴリーF：【責任の所在】悪いのは「誰」だ？",
+                icon: "brain", color: "text-purple-600",
+                items: [
+                    { 
+                        id: 10, 
+                        q: "閏土が「石像（木偶の坊）」みたいになった一番の犯人は何だと思う？", 
+                        options: [
+                            { type: 'money', label: "社会システム", sub: "軍閥・重税・地主", reason: "個人の努力ではどうにもならない「社会システム（カネの搾取構造）」が人間を壊したと考えているからです。" }, 
+                            { type: 'heart', label: "古い慣習", sub: "伝統・迷信・教育不足", reason: "彼を縛っているのは税金だけでなく、「こう生きるしかない」という思い込みや、古い慣習（心の中の鎖）だと考えているからです。" }
+                        ] 
+                    },
+                    { 
+                        id: 11, 
+                        q: "もし閏土が、現代の日本に生まれていたら、「私」と親友になれたかな？", 
+                        options: [
+                            { type: 'money', label: "なれた", sub: "普通の友達になる", reason: "現代日本のように極端な貧困や飢餓がなければ、性格自体は合うはずだと考えているからです。邪魔をしていたのは環境（カネ）だけです。" }, 
+                            { type: 'heart', label: "なれない", sub: "やっぱり話が合わない", reason: "結局、進学するコースや興味関心が違えば、話は合わなくなると考えているからです。人間としての「住む世界（価値観）」の違いは埋まりません。" }
+                        ] 
+                    }
+                ]
+            },
+            {
+                category: "カテゴリーG：【希望の行方】ラストシーンをどう読む？",
+                icon: "arrow-right", color: "text-cyan-600",
+                items: [
+                    { 
+                        id: 12, 
+                        q: "最後の「歩く人が多くなれば道になる」という希望。これを実現するために、一番必要なのはどっち？", 
+                        options: [
+                            { type: 'money', label: "豊かさ", sub: "政治が変わって、みんなが豊かになること", reason: "貧困が解決しない限り、誰もが自分の生活で手一杯で、道を作る（新しい関係を築く）余裕なんて生まれないと捉えているからです。" }, 
+                            { type: 'heart', label: "意識改革", sub: "みんなが意識を変えて、偶像（迷信）を捨てること", reason: "いくら豊かになっても、差別意識や依存心がある限り、本当の「新しい生活」は来ないと捉えているからです。革命は心の中で起きるべきものです。" }
+                        ] 
+                    },
+                    { 
+                        id: 13, 
+                        q: "宏児（私の子）と水生（閏土の子）が、将来「厚い壁」を感じないために必要なアイテムは？", 
+                        options: [
+                            { type: 'money', label: "ツール", sub: "スマホやチケット（カネ）", reason: "連絡を取り合ったり会いに行ったりする「経済的な余裕」さえあれば、関係は維持できると考えているからです。" }, 
+                            { type: 'heart', label: "精神力", sub: "勇気や偏見のない心", reason: "親が決めた身分や格差を飛び越えるには、強い意志（心）が必要だと考えているからです。" }
+                        ] 
+                    }
+                ]
+            },
+            {
+                category: "カテゴリーH：【私への疑惑】語り手を疑ってみる",
+                icon: "help-circle", color: "text-rose-400",
+                items: [
+                    { 
+                        id: 14, 
+                        q: "「私」は楊おばさんを「コンパス」、閏土を「石像」と呼んだ。このあだ名についてどう思う？", 
+                        options: [
+                            { type: 'money', label: "うまい例え", sub: "特徴を捉えてるな", reason: "「私」の視点を客観的で正しいものとして受け入れています。つまり、「私」のせいではなく、客観的な事実（貧困による変化）が原因だと考えがちです。" }, 
+                            { type: 'heart', label: "ひどいな", sub: "見下してるな", reason: "「私」の中に、無自覚な差別意識や冷たさを感じ取っているからです。その「上から目線」こそが壁を作った犯人です。" }
+                        ] 
+                    },
+                    { 
+                        id: 15, 
+                        q: "「私」が故郷を離れる時、「名残惜しい気はしない」と言った。これは本心？", 
+                        options: [
+                            { type: 'money', label: "本心", sub: "もう未練はない", reason: "故郷はもう「生きられない場所（貧困の地）」になってしまった。現実的に生活を立て直すには、捨てるしかないという判断です。" }, 
+                            { type: 'heart', label: "強がり", sub: "本当は悲しい", reason: "期待していた「美しい故郷」が壊れてしまったことへの、精神的なショックを隠そうとしているからです。" }
+                        ] 
+                    }
+                ]
+            }
+        ];
+
+        // --- 1. Diagnosis Component (診断ツール) ---
+        const Diagnosis = ({ answers, onAnswer }) => {
             const [expandedCards, setExpandedCards] = useState({});
 
             const toggleExpand = (id) => setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
 
-            const handleAnswer = (qId, type) => {
-                setAnswers(prev => ({ ...prev, [qId]: type }));
+            const handleLocalAnswer = (qId, type) => {
+                onAnswer(qId, type);
                 // 自動で解説を開く
                 if (!expandedCards[qId]) setExpandedCards(prev => ({ ...prev, [qId]: true }));
             };
-
-            const calculateScore = () => {
-                let money = 0;
-                let heart = 0;
-                Object.values(answers).forEach(type => {
-                    if (type === 'money') money++;
-                    if (type === 'heart') heart++;
-                });
-                return { money, heart, total: money + heart };
-            };
-
-            const scores = calculateScore();
-
-            const questions = [
-                {
-                    category: "カテゴリーA：【もしも…】お金の条件を変えてみる",
-                    icon: "banknote", color: "text-emerald-600",
-                    items: [
-                        { 
-                            id: 1, 
-                            q: "もし閏土が宝くじに当たって大金持ちになっていたら、「私」を「旦那様」と呼んだかな？", 
-                            options: [
-                                { type: 'money', label: "呼ばない", sub: "「やあ、迅ちゃん！」と呼ぶ", reason: "「お金さえあれば対等になれた」と考えているからです。今の卑屈な態度は性格ではなく、貧しさが作らせたものだと捉えています。" }, 
-                                { type: 'heart', label: "やっぱり呼ぶ", sub: "金持ちでも丁寧語を使う", reason: "「お金があっても、染み付いた身分意識や上下関係は消えない」と考えているからです。壁の原因は心の中のルールにあります。" }
-                            ] 
-                        },
-                        { 
-                            id: 2, 
-                            q: "もし「私」が大富豪で、「閏ちゃん、これ100万円あげるよ」と言ったら、二人の壁は消えたかな？", 
-                            options: [
-                                { type: 'money', label: "消える", sub: "泣いて感謝して仲良くなる", reason: "今の気まずさは、「助けてあげられない無力感」や「生活の苦しさ」から来ていると考えているからです。解決策（カネ）があれば壁は壊せます。" }, 
-                                { type: 'heart', label: "消えない", sub: "逆に恐縮して距離ができる", reason: "「施し（めぐみ）」を受けることで、余計に惨めさや上下関係が強調されると考えているからです。心の距離はお金では買えません。" }
-                            ] 
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーB：【場面転換】シチュエーションを変えてみる",
-                    icon: "message-circle", color: "text-blue-600",
-                    items: [
-                        { 
-                            id: 3, 
-                            q: "もし二人がスタバのようなカフェに入って、2時間お茶をすることになったら、会話は続く？", 
-                            options: [
-                                { type: 'money', label: "続かない", sub: "沈黙しちゃう", reason: "仲が悪いのではなく、単に「共通の話題」がないだけだと捉えています。話題の差は、教育や旅などの「経験（カネで買うもの）」の差です。" }, 
-                                { type: 'heart', label: "続く", sub: "昔話で盛り上がる", reason: "本来なら話せるはずなのに、会話がなかったのは「私」が勝手に期待して、勝手にガッカリした（心を閉ざした）からだと捉えています。" }
-                            ] 
-                        },
-                        { 
-                            id: 4, 
-                            q: "もし周りに誰もいなくて、完全な二人きりの密室だったら、閏土は「迅ちゃん」と呼べたかな？", 
-                            options: [
-                                { type: 'money', label: "呼べた", sub: "甘えられた", reason: "閏土が他人行儀なのは、本心からではなく「周りの目」や「村の空気」を気にしているからだと捉えています。貧しい村の空気が彼を縛っています。" }, 
-                                { type: 'heart', label: "呼べない", sub: "やっぱり無理", reason: "誰が見ていなくても、閏土自身のプライドや恐怖心が邪魔をすると考えているからです。「落ちぶれた自分」を認めたくないという心理が壁です。" }
-                            ] 
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーC：【見た目と中身】変化の正体を探る",
-                    icon: "eye", color: "text-amber-600",
-                    items: [
-                        { 
-                            id: 5, 
-                            q: "もし閏土が、昔と同じツヤツヤした健康的な顔のままだったら、「私」は言葉を失ったかな？", 
-                            options: [
-                                { type: 'money', label: "失わない", sub: "「変わらないね！」と抱きつく", reason: "「私」がショックを受けた最大の原因は「見た目の老化」だと捉えています。その老化の原因は、過酷な労働（カネの問題）にあります。" }, 
-                                { type: 'heart', label: "失う", sub: "やっぱり話が続かない", reason: "見た目が若くても、信じているもの（科学vs迷信）が違えば、やっぱり話は噛み合わないと考えているからです。" }
-                            ] 
-                        },
-                        { 
-                            id: 6, 
-                            q: "閏土が去り際に「香炉（神様グッズ）」じゃなくて、「現金」を欲しがったら、「私」はどう思った？", 
-                            options: [
-                                { type: 'money', label: "納得する", sub: "まあ、生活苦しいもんね", reason: "香炉だろうが現金だろうが、結局は「生きるために必要なもの」だと捉えています。形が違うだけで、根本原因は貧困です。" }, 
-                                { type: 'heart', label: "軽蔑する", sub: "えっ、がめついな", reason: "「私」は美しい思い出や「品格」を求めているから、生々しい現実を突きつけられると引いてしまう（心を閉ざす）と考えているからです。" }
-                            ] 
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーD：【未来】次世代の関係を予想する",
-                    icon: "users", color: "text-indigo-600",
-                    items: [
-                        { 
-                            id: 7, 
-                            q: "10年後、水生（閏土の子）と宏児（私の子）が再会したら、二人は仲良くなれる？", 
-                            options: [
-                                { type: 'money', label: "なれない", sub: "水生が「旦那様」と呼ぶ", reason: "結局、水生は学校に行けず、宏児はエリートになるからです。親と同じ「経済格差」の道を辿る以上、同じ壁ができると考えます。" }, 
-                                { type: 'heart', label: "なれる", sub: "対等に話す", reason: "もし仲良くなれるなら、今の二人に壁があるのは「古い時代の教育（身分意識）」のせいだからです。新しい心を持った世代なら、壁は越えられます。" }
-                            ] 
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーE：【罪と罰】「灰の中の食器」事件をどう見る？",
-                    icon: "gavel", color: "text-slate-600",
-                    items: [
-                        { 
-                            id: 8, 
-                            q: "閏土が「灰の中に食器を隠した」と聞いた時、君はどう感じた？", 
-                            options: [
-                                { type: 'money', label: "同情する", sub: "なりふり構わないほど苦しかった", reason: "あの行為を「盗み（悪）」ではなく「生存戦略」と捉えているからです。プライドを捨てさせるほどの貧困が原因だと考えています。" }, 
-                                { type: 'heart', label: "ショック", sub: "純朴な閏土は死んでしまった", reason: "貧しさそのものより、心が卑しく変わってしまったこと（道徳心の低下）に絶望を感じているからです。これは心の問題です。" }
-                            ] 
-                        },
-                        { 
-                            id: 9, 
-                            q: "もし楊おばさんがいなくて、村がもっと平和だったら、閏土は食器を盗んだかな？", 
-                            options: [
-                                { type: 'money', label: "盗まない", sub: "平和に暮らす", reason: "閏土個人が悪いのではなく、村全体を覆う「奪い合いの空気（貧困の連鎖）」が彼を追い詰めたと考えているからです。" }, 
-                                { type: 'heart', label: "盗む", sub: "やっぱりチャンスがあればやる", reason: "周囲の環境に関係なく、今の閏土の心はすでに麻痺し、倫理観が壊れていると捉えているからです。" }
-                            ] 
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーF：【責任の所在】悪いのは「誰」だ？",
-                    icon: "brain", color: "text-purple-600",
-                    items: [
-                        { 
-                            id: 10, 
-                            q: "閏土が「石像（木偶の坊）」みたいになった一番の犯人は何だと思う？", 
-                            options: [
-                                { type: 'money', label: "社会システム", sub: "軍閥・重税・地主", reason: "個人の努力ではどうにもならない「社会システム（カネの搾取構造）」が人間を壊したと考えているからです。" }, 
-                                { type: 'heart', label: "古い慣習", sub: "伝統・迷信・教育不足", reason: "彼を縛っているのは税金だけでなく、「こう生きるしかない」という思い込みや、古い慣習（心の中の鎖）だと考えているからです。" }
-                            ] 
-                        },
-                        { 
-                            id: 11, 
-                            q: "もし閏土が、現代の日本に生まれていたら、「私」と親友になれたかな？", 
-                            options: [
-                                { type: 'money', label: "なれた", sub: "普通の友達になる", reason: "現代日本のように極端な貧困や飢餓がなければ、性格自体は合うはずだと考えているからです。邪魔をしていたのは環境（カネ）だけです。" }, 
-                                { type: 'heart', label: "なれない", sub: "やっぱり話が合わない", reason: "結局、進学するコースや興味関心が違えば、話は合わなくなると考えているからです。人間としての「住む世界（価値観）」の違いは埋まりません。" }
-                            ] 
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーG：【希望の行方】ラストシーンをどう読む？",
-                    icon: "arrow-right",
-                    color: "text-cyan-600",
-                    items: [
-                        { 
-                            id: 12, 
-                            q: "最後の「歩く人が多くなれば道になる」という希望。これを実現するために、一番必要なのはどっち？", 
-                            options: [
-                                { type: 'money', label: "豊かさ", sub: "政治が変わって、みんなが豊かになること", reason: "貧困が解決しない限り、誰もが自分の生活で手一杯で、道を作る（新しい関係を築く）余裕なんて生まれないと捉えているからです。" }, 
-                                { type: 'heart', label: "意識改革", sub: "みんなが意識を変えて、偶像（迷信）を捨てること", reason: "いくら豊かになっても、差別意識や依存心がある限り、本当の「新しい生活」は来ないと捉えているからです。革命は心の中で起きるべきものです。" }
-                            ] 
-                        },
-                        { 
-                            id: 13, 
-                            q: "宏児（私の子）と水生（閏土の子）が、将来「厚い壁」を感じないために必要なアイテムは？", 
-                            options: [
-                                { type: 'money', label: "ツール", sub: "スマホやチケット（カネ）", reason: "連絡を取り合ったり会いに行ったりする「経済的な余裕」さえあれば、関係は維持できると考えているからです。" }, 
-                                { type: 'heart', label: "精神力", sub: "勇気や偏見のない心", reason: "親が決めた身分や格差を飛び越えるには、強い意志（心）が必要だと考えているからです。" }
-                            ] 
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーH：【私への疑惑】語り手を疑ってみる",
-                    icon: "help-circle", color: "text-rose-400",
-                    items: [
-                        { 
-                            id: 14, 
-                            q: "「私」は楊おばさんを「コンパス」、閏土を「石像」と呼んだ。このあだ名についてどう思う？", 
-                            options: [
-                                { type: 'money', label: "うまい例え", sub: "特徴を捉えてるな", reason: "「私」の視点を客観的で正しいものとして受け入れています。つまり、「私」のせいではなく、客観的な事実（貧困による変化）が原因だと考えがちです。" }, 
-                                { type: 'heart', label: "ひどいな", sub: "見下してるな", reason: "「私」の中に、無自覚な差別意識や冷たさを感じ取っているからです。その「上から目線」こそが壁を作った犯人です。" }
-                            ] 
-                        },
-                        { 
-                            id: 15, 
-                            q: "「私」が故郷を離れる時、「名残惜しい気はしない」と言った。これは本心？", 
-                            options: [
-                                { type: 'money', label: "本心", sub: "もう未練はない", reason: "故郷はもう「生きられない場所（貧困の地）」になってしまった。現実的に生活を立て直すには、捨てるしかないという判断です。" }, 
-                                { type: 'heart', label: "強がり", sub: "本当は悲しい", reason: "期待していた「美しい故郷」が壊れてしまったことへの、精神的なショックを隠そうとしているからです。" }
-                            ] 
-                        }
-                    ]
-                }
-            ];
 
             return (
                 // slide-in はここ（ルート）には付けない！ fixed要素に悪影響があるため。
                 <div className="pb-40">
                     
                     {/* 質問カードのリスト */}
-                    {/* アニメーションはコンテンツ部分にのみ適用 */}
                     <div className="space-y-8 slide-in">
                         {questions.map((category, idx) => (
                             <section key={idx} className="space-y-4">
@@ -255,7 +241,7 @@
                                                     <p className="font-bold text-slate-800 mb-4"><span className="bg-slate-100 text-xs px-2 py-1 rounded mr-2">Q{item.id}</span>{item.q}</p>
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                         {item.options.map((opt) => (
-                                                            <button key={opt.type} onClick={() => handleAnswer(item.id, opt.type)}
+                                                            <button key={opt.type} onClick={() => handleLocalAnswer(item.id, opt.type)}
                                                                 className={`p-4 rounded-lg text-left border flex flex-col justify-center transition-all min-h-[100px] ${answers[item.id] === opt.type 
                                                                     ? (opt.type === 'money' ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500' : 'bg-rose-50 border-rose-500 ring-1 ring-rose-500')
                                                                     : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
@@ -292,61 +278,6 @@
                                 </div>
                             </section>
                         ))}
-                    </div>
-
-                    {/* 下部固定の追尾型メーター＆ボタン */}
-                    {/* fixed は slide-in の影響を受けないように外に出したため、PCでも正しく追従するはず */}
-                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-200 shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.1)] z-[9999]">
-                        {/* メーター部分 */}
-                        <div className="px-4 pt-3 pb-2 max-w-4xl mx-auto">
-                            <div className="flex justify-between text-xs font-bold mb-1">
-                                <span className="flex items-center gap-1 text-emerald-700">
-                                    <Icon name="banknote" size={14}/> カネ派: {scores.money}
-                                </span>
-                                <span className="text-slate-400 font-normal">回答数: {scores.total} / 15</span>
-                                <span className="flex items-center gap-1 text-rose-700">
-                                    心派: {scores.heart} <Icon name="heart" size={14}/>
-                                </span>
-                            </div>
-                            <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex relative">
-                                {/* 中央線 */}
-                                <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-300 z-10 opacity-50"></div>
-                                {/* カネ派バー (右寄せで伸びる) */}
-                                <div className="flex-1 flex justify-end bg-slate-50">
-                                     <div 
-                                        className="h-full bg-emerald-500 transition-all duration-500" 
-                                        style={{ width: scores.total === 0 ? '0%' : `${(scores.money / (scores.money + scores.heart || 1)) * 100}%` }}
-                                     ></div>
-                                </div>
-                                {/* 心派バー (左寄せで伸びる) */}
-                                <div className="flex-1 flex justify-start bg-slate-50">
-                                     <div 
-                                        className="h-full bg-rose-500 transition-all duration-500" 
-                                        style={{ width: scores.total === 0 ? '0%' : `${(scores.heart / (scores.money + scores.heart || 1)) * 100}%` }}
-                                     ></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* アクションボタン */}
-                        <div className="px-4 pb-4 pt-1 max-w-4xl mx-auto">
-                             {scores.total > 0 ? (
-                                <button 
-                                    onClick={() => { window.scrollTo(0,0); onFinish('reference'); }} 
-                                    className={`w-full py-3 rounded-lg font-bold shadow-md transition flex items-center justify-center gap-2 ${scores.total === 15 ? 'bg-slate-800 text-white animate-bounce shadow-xl' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                                >
-                                    {scores.total === 15 ? (
-                                         <><Icon name="check-circle" size={20}/> 診断完了！資料で裏付けをとる</>
-                                    ) : (
-                                         <><Icon name="arrow-right" size={18}/> 途中ですが資料を見る</>
-                                    )}
-                                </button>
-                             ) : (
-                                <div className="text-center text-xs text-slate-400 py-2">
-                                    まずは直感で質問に答えてみましょう
-                                </div>
-                             )}
-                        </div>
                     </div>
                 </div>
             );
@@ -438,7 +369,7 @@
                         </div>
                     </section>
 
-                    {/* B: Tax (タイトル修正) */}
+                    {/* B: Tax */}
                     <section id="taxes" className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
                         <div className="flex items-center gap-4 mb-6 border-b pb-4">
                             <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center"><Icon name="file-text" /></div>
@@ -512,7 +443,7 @@
                         </div>
                     </section>
 
-                    {/* D: Education (タイトル修正) */}
+                    {/* D: Education */}
                     <section id="education" className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-200">
                          <div className="flex items-center gap-4 mb-6 border-b pb-4">
                             <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center"><Icon name="book-open" /></div>
@@ -663,6 +594,23 @@
         // --- 3. Main App Component (統合管理) ---
         const App = () => {
             const [mode, setMode] = useState('diagnosis'); // 'diagnosis' or 'reference'
+            const [answers, setAnswers] = useState({}); // Lifted state for answers
+
+            const handleAnswer = (qId, type) => {
+                setAnswers(prev => ({ ...prev, [qId]: type }));
+            };
+
+            const calculateScore = () => {
+                let money = 0;
+                let heart = 0;
+                Object.values(answers).forEach(type => {
+                    if (type === 'money') money++;
+                    if (type === 'heart') heart++;
+                });
+                return { money, heart, total: money + heart };
+            };
+
+            const scores = calculateScore();
 
             return (
                 <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
@@ -682,14 +630,14 @@
                             {/* Navigation Tabs */}
                             <div className="flex p-1 bg-slate-800/50 rounded-xl backdrop-blur-sm border border-slate-700/50">
                                 <button 
-                                    onClick={() => setMode('diagnosis')}
+                                    onClick={() => { window.scrollTo(0,0); setMode('diagnosis'); }}
                                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition-all ${mode === 'diagnosis' ? 'bg-amber-500 text-slate-900 shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
                                 >
                                     <Icon name="check-circle" size={20}/>
                                     <span className="hidden md:inline">STEP 1:</span> 思考タイプ診断
                                 </button>
                                 <button 
-                                    onClick={() => setMode('reference')}
+                                    onClick={() => { window.scrollTo(0,0); setMode('reference'); }}
                                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg font-bold transition-all ${mode === 'reference' ? 'bg-amber-500 text-slate-900 shadow-md' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}
                                 >
                                     <Icon name="book-open" size={20}/>
@@ -703,14 +651,72 @@
                     </header>
 
                     {/* Main Content Area */}
-                    {/* 文字被りの原因であった -mt-6 を削除し、単純にコンテンツを表示する */}
                     <main className="max-w-4xl mx-auto px-4 py-8 relative z-20">
                         {mode === 'diagnosis' ? (
-                            <Diagnosis onFinish={setMode} />
+                            <Diagnosis answers={answers} onAnswer={handleAnswer} />
                         ) : (
                             <Reference />
                         )}
                     </main>
+
+                    {/* 下部固定の追尾型メーター＆ボタン (Always Visible) */}
+                    {scores.total > 0 && (
+                        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-slate-200 shadow-[0_-4px_15px_-3px_rgba(0,0,0,0.1)] z-[9999]">
+                            {/* メーター部分 */}
+                            <div className="px-4 pt-3 pb-2 max-w-4xl mx-auto">
+                                <div className="flex justify-between text-xs font-bold mb-1">
+                                    <span className="flex items-center gap-1 text-emerald-700">
+                                        <Icon name="banknote" size={14}/> カネ派: {scores.money}
+                                    </span>
+                                    <span className="text-slate-400 font-normal">回答数: {scores.total} / 15</span>
+                                    <span className="flex items-center gap-1 text-rose-700">
+                                        心派: {scores.heart} <Icon name="heart" size={14}/>
+                                    </span>
+                                </div>
+                                <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex relative">
+                                    {/* 中央線 */}
+                                    <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-300 z-10 opacity-50"></div>
+                                    {/* カネ派バー (右寄せで伸びる) */}
+                                    <div className="flex-1 flex justify-end bg-slate-50">
+                                        <div 
+                                            className="h-full bg-emerald-500 transition-all duration-500" 
+                                            style={{ width: scores.total === 0 ? '0%' : `${(scores.money / (scores.money + scores.heart || 1)) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                    {/* 心派バー (左寄せで伸びる) */}
+                                    <div className="flex-1 flex justify-start bg-slate-50">
+                                        <div 
+                                            className="h-full bg-rose-500 transition-all duration-500" 
+                                            style={{ width: scores.total === 0 ? '0%' : `${(scores.heart / (scores.money + scores.heart || 1)) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* アクションボタン (Modeによって切り替え) */}
+                            <div className="px-4 pb-4 pt-1 max-w-4xl mx-auto">
+                                {mode === 'diagnosis' ? (
+                                    <button 
+                                        onClick={() => { window.scrollTo(0,0); setMode('reference'); }} 
+                                        className={`w-full py-3 rounded-lg font-bold shadow-md transition flex items-center justify-center gap-2 ${scores.total === 15 ? 'bg-slate-800 text-white animate-bounce shadow-xl' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                                    >
+                                        {scores.total === 15 ? (
+                                            <><Icon name="check-circle" size={20}/> 診断完了！資料で裏付けをとる</>
+                                        ) : (
+                                            <><Icon name="arrow-right" size={18}/> 途中ですが資料を見る</>
+                                        )}
+                                    </button>
+                                ) : (
+                                    <button 
+                                        onClick={() => { window.scrollTo(0,0); setMode('diagnosis'); }} 
+                                        className="w-full py-3 rounded-lg font-bold shadow-md transition flex items-center justify-center gap-2 bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-200"
+                                    >
+                                        <Icon name="rotate-ccw" size={18}/> 診断画面に戻って回答を修正する
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
