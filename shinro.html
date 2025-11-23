@@ -76,6 +76,19 @@
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Clickable card hover effects */
+        .clickable-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .clickable-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .clickable-card:active {
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -88,10 +101,10 @@
 
         const SECTIONS = [
             { id: 'dashboard', label: 'ダッシュボード', icon: 'SquaresFour' },
-            { id: 'public', label: '公立高校（道立）', icon: 'Buildings' },
+            { id: 'public', label: '道立高校', icon: 'Buildings' },
             { id: 'private', label: '私立高校', icon: 'GraduationCap' },
             { id: 'kosen', label: '高等専門学校（高専）', icon: 'Cpu' },
-            { id: 'school', label: '真龍中学校内 手続き', icon: 'School' },
+            { id: 'school', label: '生徒のTo Do List', icon: 'ClipboardText' }, 
         ];
 
         const EVENTS = [
@@ -103,14 +116,18 @@
             // 高専
             { date: '2025-11-27', displayDate: '11/27〜1/5', title: '高専：自己推薦 WEB事前登録', category: 'kosen', desc: '自己推薦選抜のWEB登録期間。\n締切：1月5日 16時まで', important: true },
             { date: '2025-11-27', displayDate: '11/27〜1/23', title: '高専：学力選抜 WEB事前登録', category: 'kosen', desc: '学力選抜のWEB登録期間。\n締切：1月23日 16時まで', important: true },
-            
+            // 修正箇所: 日程を確定し、オンライン面接である旨を追記
+            { date: '2026-01-17', displayDate: '1/17(土)', title: '釧路高専：自己推薦選抜（面接）', category: 'kosen', desc: 'オンラインでの面接になります。\n通信環境や機器の準備を事前に行いましょう。', type: 'exam', important: true },
+            { date: '2026-02-08', displayDate: '2/8(日)', title: '高専：学力検査日（全国一斉）', category: 'kosen', desc: '国立高専の学力選抜試験日です。', type: 'exam', important: true },
+
             // 道立
-            { date: '2025-12-05', displayDate: '12/5〜1/22', title: '道立：出願者情報オンライン入力', category: 'public', desc: '公立高校入試のWeb入力期間です。先生の指示に従って入力してください。', important: true },
+            { date: '2025-12-05', displayDate: '12/5〜1/22', title: '道立：出願者情報オンライン入力', category: 'public', desc: '道立高校入試のWeb入力期間です。先生の指示に従って入力してください。', important: true },
             { date: '2026-01-19', displayDate: '1/19〜1/22', title: '道立：出願受付（本出願）', category: 'public', desc: '正式な願書受付期間。' },
             { date: '2026-01-26', displayDate: '1/26 10:00', title: '道立：出願状況発表（当初倍率）', category: 'public', desc: '最初の倍率が発表されます。' },
             { date: '2026-01-27', displayDate: '1/27〜2/2', title: '道立：出願変更受付', category: 'public', desc: '倍率を見て志望校を変更できる期間（1回のみ）。' },
+            { date: '2026-02-10', displayDate: '2/10', title: '道立：推薦入学面接日', category: 'public', desc: '推薦入学者選抜の面接等が行われます。', type: 'exam', important: true },
             { date: '2026-02-12', displayDate: '2/12 10:00', title: '道立：出願変更後状況発表', category: 'public', desc: '最終的な倍率が確定します。' },
-            { date: '2026-03-04', displayDate: '3/4', title: '道立：学力検査（入試当日）', category: 'public', desc: '全力を出し切る日。', type: 'exam' },
+            { date: '2026-03-04', displayDate: '3/4', title: '道立：学力検査（一般入試）', category: 'public', desc: '全力を出し切る日。', type: 'exam', important: true },
             { date: '2026-03-17', displayDate: '3/17 10:00', title: '道立：合格発表', category: 'public', desc: '合格者の発表。', type: 'success' },
 
             // 私立
@@ -125,11 +142,17 @@
 
         // --- Sub Components ---
 
-        const StatCard = ({ label, value, sub, color }) => (
-            <div className="glass-card p-5 rounded-2xl relative overflow-hidden group">
+        const StatCard = ({ label, value, sub, color, textColor, onClick }) => (
+            <div 
+                onClick={onClick}
+                className={`glass-card p-5 rounded-2xl relative overflow-hidden group clickable-card`}
+            >
                 <div className={`absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full opacity-10 transition-transform group-hover:scale-110 ${color}`}></div>
-                <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
-                <p className="text-2xl font-bold text-slate-800 mb-1">{value}</p>
+                <div className="flex items-center justify-between mb-1">
+                    <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{label}</p>
+                    <Icon name="CaretRight" size={16} className="text-slate-300 group-hover:text-slate-500" />
+                </div>
+                <p className={`text-xl md:text-2xl font-bold mb-1 ${textColor || 'text-slate-800'}`}>{value}</p>
                 <p className="text-xs text-slate-400">{sub}</p>
             </div>
         );
@@ -186,6 +209,29 @@
             </div>
         );
 
+        const TodoItem = ({ text, subText, category }) => {
+            const [checked, setChecked] = useState(false);
+            return (
+                <label className="flex items-start p-4 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center h-5 mt-0.5">
+                        <input 
+                            type="checkbox" 
+                            checked={checked}
+                            onChange={() => setChecked(!checked)}
+                            className="w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500 border-gray-300" 
+                        />
+                    </div>
+                    <div className="ml-3">
+                        <span className={`block text-sm font-medium ${checked ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{text}</span>
+                        {subText && <span className="block text-xs text-slate-400 mt-1">{subText}</span>}
+                        {category === 'guardian' && (
+                            <span className="inline-block mt-2 px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] rounded font-bold">保護者</span>
+                        )}
+                    </div>
+                </label>
+            );
+        };
+
         // --- Main App Component ---
 
         const App = () => {
@@ -205,33 +251,70 @@
                     case 'dashboard':
                         return (
                             <div className="animate-fade-in">
-                                {/* Welcome Banner */}
-                                <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-8 text-white mb-8 shadow-xl relative overflow-hidden">
-                                    <div className="relative z-10">
-                                        <h2 className="text-2xl md:text-3xl font-bold mb-2">進路活動ダッシュボード</h2>
-                                        <p className="text-slate-300 mb-6">真龍中学校 令和7年度〜8年度版</p>
-                                        <div className="flex gap-3 flex-wrap">
-                                            <div className="bg-white/10 backdrop-blur rounded-lg px-4 py-2 flex items-center">
-                                                <Icon name="CalendarCheck" className="mr-2 text-emerald-400" />
-                                                <span className="text-sm font-medium">現在：進路決定・面談期間</span>
+                                {/* Title & School Name */}
+                                <div className="mb-6 px-1">
+                                    <h2 className="text-2xl md:text-3xl font-bold text-slate-800">進路活動ダッシュボード</h2>
+                                    <p className="text-slate-500">令和7年度 厚岸町立真龍中学校</p>
+                                </div>
+
+                                {/* Student To-Do Jump Button */}
+                                <div 
+                                    onClick={() => setActiveSection('school')}
+                                    className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white mb-8 shadow-lg relative overflow-hidden cursor-pointer hover:shadow-xl hover:scale-[1.01] transition-all group"
+                                >
+                                    <div className="relative z-10 flex items-center justify-between">
+                                        <div>
+                                            <div className="flex items-center mb-2">
+                                                <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-bold mr-2">Check!</span>
+                                                <h3 className="text-xl font-bold">生徒のTo Do Listを確認する</h3>
                                             </div>
-                                            <div className="bg-white/10 backdrop-blur rounded-lg px-4 py-2 flex items-center">
-                                                <Icon name="Warning" className="mr-2 text-amber-400" />
-                                                <span className="text-sm font-medium">高専WEB登録 開始間近</span>
-                                            </div>
+                                            <p className="text-emerald-100 text-sm">
+                                                願書の準備や校内提出期限など、<br className="hidden md:inline"/>
+                                                あなた自身が進めるべきタスクはこちらでチェック！
+                                            </p>
+                                        </div>
+                                        <div className="bg-white/20 p-3 rounded-full group-hover:bg-white/30 transition-colors">
+                                            <Icon name="ArrowRight" size={24} weight="bold" />
                                         </div>
                                     </div>
-                                    <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-10 translate-y-10">
-                                        <Icon name="RocketLaunch" size={200} weight="duotone" />
+                                    <div className="absolute right-0 bottom-0 opacity-20 transform translate-x-4 translate-y-4">
+                                        <Icon name="ClipboardText" size={120} weight="duotone" />
                                     </div>
                                 </div>
 
                                 {/* Stats/Quick Links */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                                    <StatCard label="公立入試まで" value="残り 約100日" sub="3月4日 学力検査" color="bg-blue-500" />
-                                    <StatCard label="高専推薦登録" value="11/27 開始" sub="WEB登録期間" color="bg-purple-500" />
-                                    <StatCard label="私立入試" value="2月中旬" sub="A日程/B日程" color="bg-orange-500" />
-                                    <StatCard label="校内締切" value="要確認" sub="願書下書き等" color="bg-emerald-500" />
+                                    <StatCard 
+                                        label="道立入試 一般" 
+                                        value="3月4日(水)" 
+                                        sub="タップで詳細へ" 
+                                        color="bg-blue-600" 
+                                        textColor="text-blue-700" 
+                                        onClick={() => setActiveSection('public')}
+                                    />
+                                    <StatCard 
+                                        label="道立入試 推薦" 
+                                        value="2月10日(火)" 
+                                        sub="タップで詳細へ" 
+                                        color="bg-indigo-600" 
+                                        textColor="text-indigo-700" 
+                                        onClick={() => setActiveSection('public')}
+                                    />
+                                    <StatCard 
+                                        label="私立入試" 
+                                        value="2月中旬" 
+                                        sub="タップで詳細へ" 
+                                        color="bg-orange-500" 
+                                        onClick={() => setActiveSection('private')}
+                                    />
+                                    <StatCard 
+                                        label="釧路高専 入試" 
+                                        value="学力: 2/8(日)" 
+                                        // 修正箇所: 日程を具体的に更新
+                                        sub="推薦: 1/17(土)" 
+                                        color="bg-purple-500" 
+                                        onClick={() => setActiveSection('kosen')}
+                                    />
                                 </div>
 
                                 {/* Upcoming Timeline */}
@@ -254,7 +337,7 @@
                                     </h2>
                                     <p className="text-purple-800 text-sm mb-4">
                                         道内4高専（函館・苫小牧・釧路・旭川）の受験情報です。
-                                        特に「釧路高専」の選抜では学力点や学習点の扱いが公立高校と大きく異なるため、
+                                        特に「釧路高専」の選抜では学力点や学習点の扱いが道立高校と大きく異なるため、
                                         必ず高専のホームページで最新の詳細を確認してください。
                                     </p>
                                     <div className="bg-white rounded-xl p-4 text-sm text-purple-900 shadow-sm">
@@ -272,8 +355,13 @@
                                                 <span className="text-slate-500">WEB事前登録</span>
                                                 <span className="font-bold">11/27(木) 〜 1/5(月) 16時</span>
                                             </li>
+                                             <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
+                                                <span className="text-slate-500">入試（面接）</span>
+                                                {/* 修正箇所: オンライン面接の日程を反映 */}
+                                                <span className="font-bold text-indigo-600">1月17日(土)</span>
+                                            </li>
                                             <li className="text-xs text-slate-400 mt-2">
-                                                ※入学願書・写真票・受検票・自己推薦書が必要です。
+                                                ※オンラインでの面接になります。
                                             </li>
                                         </ul>
                                     </div>
@@ -283,6 +371,10 @@
                                             <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
                                                 <span className="text-slate-500">WEB事前登録</span>
                                                 <span className="font-bold">11/27(木) 〜 1/23(金) 16時</span>
+                                            </li>
+                                            <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
+                                                <span className="text-slate-500">学力検査日</span>
+                                                <span className="font-bold text-red-600">2月8日(日)</span>
                                             </li>
                                             <li className="text-xs text-slate-400 mt-2">
                                                 ※釧路高専など、各校で日程が設定されています。
@@ -297,29 +389,43 @@
                             <div className="animate-fade-in">
                                 <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 mb-6">
                                     <h2 className="text-xl font-bold text-emerald-900 mb-2 flex items-center">
-                                        <Icon name="School" className="mr-2" />
-                                        真龍中学校 校内手続き
+                                        <Icon name="ClipboardText" className="mr-2" />
+                                        生徒の皆さんのTo Do List
                                     </h2>
                                     <p className="text-emerald-800 text-sm">
-                                        中学校を通じて行う手続きのスケジュールです。
-                                        これらの締切は、高校への提出期限より早く設定されています。遅れないように注意しましょう。
+                                        中学校を通じて行う手続きと、保護者の方にお願いする項目のリストです。
+                                        これらの締切は厳守です。遅れないように注意しましょう。
                                     </p>
                                 </div>
 
-                                <InfoSection title="To-Do リスト">
+                                <InfoSection title="【生徒】やるべきこと">
                                     <div className="space-y-3">
                                         {[
-                                            "三者面談日程の調整（担任へ連絡）",
-                                            "進路希望調査票の提出",
-                                            "入学検定料の準備（納付書の確認）",
-                                            "願書下書きの清書（誤字脱字チェック）",
-                                            "（推薦希望者）推薦書の作文作成"
+                                            { t: "三者面談日程の調整（担任へ連絡）", s: "進路最終決定のための面談です。" },
+                                            { t: "進路希望調査票の提出", s: "期限を守って提出しましょう。" },
+                                            { t: "道立：願書情報のオンライン入力", s: "12/5〜1/22 Web入力期間内に行います。" },
+                                            { t: "オンライン出願のアカウント確認", s: "メールアドレス等の登録が必要な場合があります。" },
+                                            { t: "私立・高専：Web出願登録", s: "それぞれの学校のHPから登録が必要です。" },
+                                            { t: "願書下書きの清書（誤字脱字チェック）", s: "下書きをしっかり確認してから清書します。" },
+                                            { t: "推薦書の作文作成（推薦希望者）", s: "先生の指導を受けて作成しましょう。" },
+                                            { t: "受験票の確認・保管", s: "受け取ったらすぐに記載内容を確認してください。" }
                                         ].map((todo, i) => (
-                                            <label key={i} className="flex items-center p-4 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
-                                                <input type="checkbox" className="w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500 border-gray-300 mr-3" />
-                                                <span className="text-slate-700 text-sm font-medium">{todo}</span>
-                                            </label>
+                                            <TodoItem key={i} text={todo.t} subText={todo.s} />
                                         ))}
+                                    </div>
+                                </InfoSection>
+
+                                <InfoSection title="【保護者】手続き・確認事項">
+                                    <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                                        <div className="space-y-3">
+                                            {[
+                                                { t: "入学検定料の納付", s: "道立は「収入証紙」を購入してください（※北陽高校は現金を用意！）。私立・高専は各校の指示に従ってください。" },
+                                                { t: "私立高校の「延納手続き」確認", s: "道立併願の場合、入学金納入期限の延長手続きが必要か確認してください。" },
+                                                { t: "合格発表後の入学金準備", s: "合格後、速やかに納入が必要になります。" }
+                                            ].map((todo, i) => (
+                                                <TodoItem key={i} text={todo.t} subText={todo.s} category="guardian" />
+                                            ))}
+                                        </div>
                                     </div>
                                 </InfoSection>
                             </div>
