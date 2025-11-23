@@ -18,7 +18,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
-    <!-- Phosphor Icons (より洗練されたアイコンセット) -->
+    <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
@@ -61,10 +61,19 @@
         .category-badge-school { background-color: #dcfce7; color: #15803d; }
 
         .animate-fade-in {
-            animation: fadeIn 0.5s ease-out;
+            animation: fadeIn 0.3s ease-out forwards;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* モバイルメニュー用のオーバーレイアニメーション */
+        .mobile-menu-enter {
+            animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
@@ -91,11 +100,11 @@
             { date: '2025-11-15', displayDate: '11月中旬', title: '三者面談（進路決定）', category: 'school', desc: '志望校を最終決定するための重要な面談です。', important: true },
             { date: '2025-12-01', displayDate: '12月上旬', title: '願書下書き等の作成', category: 'school', desc: '各高校へ提出する書類の準備が始まります。' },
             
-            // 高専 (from PDF snippet)
+            // 高専
             { date: '2025-11-27', displayDate: '11/27〜1/5', title: '高専：自己推薦 WEB事前登録', category: 'kosen', desc: '自己推薦選抜のWEB登録期間。\n締切：1月5日 16時まで', important: true },
             { date: '2025-11-27', displayDate: '11/27〜1/23', title: '高専：学力選抜 WEB事前登録', category: 'kosen', desc: '学力選抜のWEB登録期間。\n締切：1月23日 16時まで', important: true },
             
-            // 道立 (from PDF)
+            // 道立
             { date: '2025-12-05', displayDate: '12/5〜1/22', title: '道立：出願者情報オンライン入力', category: 'public', desc: '公立高校入試のWeb入力期間です。先生の指示に従って入力してください。', important: true },
             { date: '2026-01-19', displayDate: '1/19〜1/22', title: '道立：出願受付（本出願）', category: 'public', desc: '正式な願書受付期間。' },
             { date: '2026-01-26', displayDate: '1/26 10:00', title: '道立：出願状況発表（当初倍率）', category: 'public', desc: '最初の倍率が発表されます。' },
@@ -104,14 +113,14 @@
             { date: '2026-03-04', displayDate: '3/4', title: '道立：学力検査（入試当日）', category: 'public', desc: '全力を出し切る日。', type: 'exam' },
             { date: '2026-03-17', displayDate: '3/17 10:00', title: '道立：合格発表', category: 'public', desc: '合格者の発表。', type: 'success' },
 
-            // 私立 (General Hokkaido Schedule assumption based on context)
+            // 私立
             { date: '2026-02-15', displayDate: '2月中旬', title: '私立高校入試（A日程）', category: 'private', desc: '北海道の私立高校入試の前半日程エリア。', type: 'exam' },
             { date: '2026-02-18', displayDate: '2月中旬', title: '私立高校入試（B日程）', category: 'private', desc: '北海道の私立高校入試の後半日程エリア。', type: 'exam' },
         ];
 
         // --- Icons Component ---
-        const Icon = ({ name, size = 24, className = "" }) => {
-            return <i className={`ph ph-${name.toLowerCase().replace(/([A-Z])/g, "-$1").substring(1)} ${className}`} style={{ fontSize: size }}></i>;
+        const Icon = ({ name, size = 24, className = "", weight = "regular" }) => {
+            return <i className={`ph ph-${name.toLowerCase().replace(/([A-Z])/g, "-$1").substring(1)} ${className}`} style={{ fontSize: size, fontWeight: weight === 'bold' ? 700 : 400 }} data-weight={weight}></i>;
         };
 
         // --- Sub Components ---
@@ -183,10 +192,9 @@
             const [activeSection, setActiveSection] = useState('dashboard');
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-            // Filter events based on active section
+            // Filter events
             const filteredEvents = useMemo(() => {
                 if (activeSection === 'dashboard') {
-                    // Show upcoming important events or next 5 events
                     return EVENTS.sort((a, b) => a.date.localeCompare(b.date));
                 }
                 return EVENTS.filter(e => e.category === activeSection).sort((a, b) => a.date.localeCompare(b.date));
@@ -236,10 +244,9 @@
                                 </InfoSection>
                             </div>
                         );
-
                     case 'kosen':
                         return (
-                            <div className="animate-fade-in">
+                             <div className="animate-fade-in">
                                 <div className="bg-purple-50 border border-purple-100 rounded-2xl p-6 mb-6">
                                     <h2 className="text-xl font-bold text-purple-900 mb-2 flex items-center">
                                         <Icon name="Cpu" className="mr-2" />
@@ -285,7 +292,6 @@
                                 </div>
                             </div>
                         );
-
                     case 'school':
                         return (
                             <div className="animate-fade-in">
@@ -318,9 +324,8 @@
                                 </InfoSection>
                             </div>
                         );
-
                     default:
-                        return (
+                         return (
                             <div className="animate-fade-in">
                                 <InfoSection title={`${SECTIONS.find(s => s.id === activeSection)?.label} タイムライン`}>
                                     <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
@@ -373,21 +378,33 @@
                         </div>
                     </aside>
 
-                    {/* Mobile Header & Nav */}
-                    <div className="md:hidden fixed top-0 left-0 w-full bg-white/90 backdrop-blur z-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
+                    {/* Mobile Header (Fix applied here) */}
+                    <div className="md:hidden fixed top-0 left-0 w-full bg-white z-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-lg">
                          <h1 className="text-lg font-black text-slate-800 flex items-center">
                             <Icon name="GraduationCap" className="mr-2 text-blue-600" weight="fill" />
                             ShinryuNavi
                         </h1>
-                        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-lg bg-slate-100">
-                            <Icon name={isMobileMenuOpen ? "X" : "List"} size={24} />
+                        
+                        {/* 修正されたメニューボタン: より大きく、青い背景で目立たせました */}
+                        <button 
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold shadow-lg transition-all active:scale-95 ${
+                                isMobileMenuOpen 
+                                ? 'bg-slate-800 text-white' 
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                            style={{ minWidth: '120px', justifyContent: 'center' }}
+                        >
+                            <Icon name={isMobileMenuOpen ? "X" : "List"} size={24} weight="bold" />
+                            <span className="text-base tracking-wide">{isMobileMenuOpen ? "閉じる" : "メニュー"}</span>
                         </button>
                     </div>
 
-                    {/* Mobile Dropdown Menu */}
+                    {/* Mobile Menu Overlay */}
                     {isMobileMenuOpen && (
-                        <div className="md:hidden fixed inset-0 z-40 bg-white pt-20 px-4">
-                             <nav className="space-y-2">
+                        <div className="md:hidden fixed inset-0 z-40 bg-white/95 backdrop-blur-sm pt-24 px-4 mobile-menu-enter overflow-y-auto">
+                             <nav className="space-y-4 pb-10">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">表示したい内容を選択</p>
                                 {SECTIONS.map(section => (
                                     <button
                                         key={section.id}
@@ -395,14 +412,17 @@
                                             setActiveSection(section.id);
                                             setIsMobileMenuOpen(false);
                                         }}
-                                        className={`w-full flex items-center p-4 rounded-xl text-base font-bold border ${
+                                        className={`w-full flex items-center p-5 rounded-2xl text-lg font-bold border-2 transition-all ${
                                             activeSection === section.id 
-                                            ? 'bg-blue-50 border-blue-100 text-blue-700' 
-                                            : 'bg-white border-slate-100 text-slate-600'
+                                            ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-md' 
+                                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                         }`}
                                     >
-                                        <Icon name={section.icon} className="mr-3" weight={activeSection === section.id ? "fill" : "regular"} size={24} />
+                                        <div className={`mr-4 p-3 rounded-xl ${activeSection === section.id ? 'bg-white text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
+                                            <Icon name={section.icon} weight={activeSection === section.id ? "fill" : "regular"} size={28} />
+                                        </div>
                                         {section.label}
+                                        {activeSection === section.id && <Icon name="CheckCircle" className="ml-auto text-blue-600" weight="fill" size={24} />}
                                     </button>
                                 ))}
                             </nav>
@@ -410,7 +430,7 @@
                     )}
 
                     {/* Main Content */}
-                    <main className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto">
+                    <main className="flex-1 md:ml-64 p-4 md:p-8 pt-24 md:pt-8 max-w-5xl mx-auto">
                         {renderContent()}
                     </main>
                 </div>
