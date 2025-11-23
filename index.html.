@@ -110,8 +110,8 @@
         ];
 
         // --- Icons Component ---
-        const Icon = ({ name, size = 24, className = "" }) => {
-            return <i className={`ph ph-${name.toLowerCase().replace(/([A-Z])/g, "-$1").substring(1)} ${className}`} style={{ fontSize: size }}></i>;
+        const Icon = ({ name, size = 24, className = "", weight = "regular" }) => {
+            return <i className={`ph ph-${name.toLowerCase().replace(/([A-Z])/g, "-$1").substring(1)} ${className}`} style={{ fontSize: size, fontWeight: weight === 'bold' ? 700 : 400 }} data-weight={weight}></i>;
         };
 
         // --- Sub Components ---
@@ -373,21 +373,30 @@
                         </div>
                     </aside>
 
-                    {/* Mobile Header & Nav */}
-                    <div className="md:hidden fixed top-0 left-0 w-full bg-white/90 backdrop-blur z-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
+                    {/* Mobile Header & Nav (修正箇所) */}
+                    <div className="md:hidden fixed top-0 left-0 w-full bg-white/95 backdrop-blur z-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-sm">
                          <h1 className="text-lg font-black text-slate-800 flex items-center">
                             <Icon name="GraduationCap" className="mr-2 text-blue-600" weight="fill" />
                             ShinryuNavi
                         </h1>
-                        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-lg bg-slate-100">
-                            <Icon name={isMobileMenuOpen ? "X" : "List"} size={24} />
+                        <button 
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold shadow-md transition-all active:scale-95 ${
+                                isMobileMenuOpen 
+                                ? 'bg-slate-800 text-white' 
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                        >
+                            <Icon name={isMobileMenuOpen ? "X" : "List"} size={20} weight="bold" />
+                            <span className="text-sm">{isMobileMenuOpen ? "閉じる" : "メニュー"}</span>
                         </button>
                     </div>
 
                     {/* Mobile Dropdown Menu */}
                     {isMobileMenuOpen && (
-                        <div className="md:hidden fixed inset-0 z-40 bg-white pt-20 px-4">
-                             <nav className="space-y-2">
+                        <div className="md:hidden fixed inset-0 z-40 bg-white pt-20 px-4 animate-fade-in">
+                             <nav className="space-y-3 mt-4">
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">表示切替</p>
                                 {SECTIONS.map(section => (
                                     <button
                                         key={section.id}
@@ -395,14 +404,17 @@
                                             setActiveSection(section.id);
                                             setIsMobileMenuOpen(false);
                                         }}
-                                        className={`w-full flex items-center p-4 rounded-xl text-base font-bold border ${
+                                        className={`w-full flex items-center p-4 rounded-xl text-base font-bold border transition-colors ${
                                             activeSection === section.id 
-                                            ? 'bg-blue-50 border-blue-100 text-blue-700' 
-                                            : 'bg-white border-slate-100 text-slate-600'
+                                            ? 'bg-blue-50 border-blue-100 text-blue-700 shadow-sm' 
+                                            : 'bg-white border-slate-100 text-slate-600 hover:bg-slate-50'
                                         }`}
                                     >
-                                        <Icon name={section.icon} className="mr-3" weight={activeSection === section.id ? "fill" : "regular"} size={24} />
+                                        <div className={`mr-4 p-2 rounded-lg ${activeSection === section.id ? 'bg-white' : 'bg-slate-100'}`}>
+                                            <Icon name={section.icon} weight={activeSection === section.id ? "fill" : "regular"} size={24} />
+                                        </div>
                                         {section.label}
+                                        {activeSection === section.id && <Icon name="Check" className="ml-auto text-blue-600" weight="bold" />}
                                     </button>
                                 ))}
                             </nav>
@@ -410,7 +422,7 @@
                     )}
 
                     {/* Main Content */}
-                    <main className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto">
+                    <main className="flex-1 md:ml-64 p-4 md:p-8 pt-24 md:pt-8 max-w-5xl mx-auto">
                         {renderContent()}
                     </main>
                 </div>
