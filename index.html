@@ -3,447 +3,422 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>『故郷』究極の質問リスト：カネ派vs心派診断</title>
+    <title>真龍中学校 進路ダッシュボード2026</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel (for JSX) -->
+    
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+    <!-- Phosphor Icons (より洗練されたアイコンセット) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
     <style>
-        body { font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif; }
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-item.active {
+            background-color: #e0f2fe;
+            color: #0284c7;
+            border-right: 3px solid #0284c7;
+        }
+
+        .category-badge-public { background-color: #e0f2fe; color: #0369a1; }
+        .category-badge-private { background-color: #ffedd5; color: #c2410c; }
+        .category-badge-kosen { background-color: #f3e8ff; color: #7e22ce; }
+        .category-badge-school { background-color: #dcfce7; color: #15803d; }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
-        // Icon Component Wrapper
-        const Icon = ({ name, className, size = 24 }) => {
-            useEffect(() => {
-                lucide.createIcons();
-            }, [name]); // Re-run when name changes
+        // --- Data Definitions ---
 
-            return <i data-lucide={name} className={className} width={size} height={size}></i>;
+        const SECTIONS = [
+            { id: 'dashboard', label: 'ダッシュボード', icon: 'SquaresFour' },
+            { id: 'public', label: '公立高校（道立）', icon: 'Buildings' },
+            { id: 'private', label: '私立高校', icon: 'GraduationCap' },
+            { id: 'kosen', label: '高等専門学校（高専）', icon: 'Cpu' },
+            { id: 'school', label: '真龍中学校内 手続き', icon: 'School' },
+        ];
+
+        const EVENTS = [
+            // 真龍中・校内
+            { date: '2025-11-07', displayDate: '11月7日', title: '進路説明会', category: 'school', desc: '全体説明会の実施（本日）' },
+            { date: '2025-11-15', displayDate: '11月中旬', title: '三者面談（進路決定）', category: 'school', desc: '志望校を最終決定するための重要な面談です。', important: true },
+            { date: '2025-12-01', displayDate: '12月上旬', title: '願書下書き等の作成', category: 'school', desc: '各高校へ提出する書類の準備が始まります。' },
+            
+            // 高専 (from PDF snippet)
+            { date: '2025-11-27', displayDate: '11/27〜1/5', title: '高専：自己推薦 WEB事前登録', category: 'kosen', desc: '自己推薦選抜のWEB登録期間。\n締切：1月5日 16時まで', important: true },
+            { date: '2025-11-27', displayDate: '11/27〜1/23', title: '高専：学力選抜 WEB事前登録', category: 'kosen', desc: '学力選抜のWEB登録期間。\n締切：1月23日 16時まで', important: true },
+            
+            // 道立 (from PDF)
+            { date: '2025-12-05', displayDate: '12/5〜1/22', title: '道立：出願者情報オンライン入力', category: 'public', desc: '公立高校入試のWeb入力期間です。先生の指示に従って入力してください。', important: true },
+            { date: '2026-01-19', displayDate: '1/19〜1/22', title: '道立：出願受付（本出願）', category: 'public', desc: '正式な願書受付期間。' },
+            { date: '2026-01-26', displayDate: '1/26 10:00', title: '道立：出願状況発表（当初倍率）', category: 'public', desc: '最初の倍率が発表されます。' },
+            { date: '2026-01-27', displayDate: '1/27〜2/2', title: '道立：出願変更受付', category: 'public', desc: '倍率を見て志望校を変更できる期間（1回のみ）。' },
+            { date: '2026-02-12', displayDate: '2/12 10:00', title: '道立：出願変更後状況発表', category: 'public', desc: '最終的な倍率が確定します。' },
+            { date: '2026-03-04', displayDate: '3/4', title: '道立：学力検査（入試当日）', category: 'public', desc: '全力を出し切る日。', type: 'exam' },
+            { date: '2026-03-17', displayDate: '3/17 10:00', title: '道立：合格発表', category: 'public', desc: '合格者の発表。', type: 'success' },
+
+            // 私立 (General Hokkaido Schedule assumption based on context)
+            { date: '2026-02-15', displayDate: '2月中旬', title: '私立高校入試（A日程）', category: 'private', desc: '北海道の私立高校入試の前半日程エリア。', type: 'exam' },
+            { date: '2026-02-18', displayDate: '2月中旬', title: '私立高校入試（B日程）', category: 'private', desc: '北海道の私立高校入試の後半日程エリア。', type: 'exam' },
+        ];
+
+        // --- Icons Component ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            return <i className={`ph ph-${name.toLowerCase().replace(/([A-Z])/g, "-$1").substring(1)} ${className}`} style={{ fontSize: size }}></i>;
         };
 
-        const HometownDiagnosis = () => {
-            const [answers, setAnswers] = useState({});
-            const [showResult, setShowResult] = useState(false);
-            const [expandedCards, setExpandedCards] = useState({});
+        // --- Sub Components ---
 
-            const toggleExpand = (id) => {
-                setExpandedCards(prev => ({ ...prev, [id]: !prev[id] }));
+        const StatCard = ({ label, value, sub, color }) => (
+            <div className="glass-card p-5 rounded-2xl relative overflow-hidden group">
+                <div className={`absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full opacity-10 transition-transform group-hover:scale-110 ${color}`}></div>
+                <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">{label}</p>
+                <p className="text-2xl font-bold text-slate-800 mb-1">{value}</p>
+                <p className="text-xs text-slate-400">{sub}</p>
+            </div>
+        );
+
+        const CategoryBadge = ({ category }) => {
+            const styles = {
+                public: 'category-badge-public',
+                private: 'category-badge-private',
+                kosen: 'category-badge-kosen',
+                school: 'category-badge-school'
             };
-
-            const handleAnswer = (qId, type) => {
-                setAnswers(prev => ({ ...prev, [qId]: type }));
-                // 自動的に解説を開く
-                if (!expandedCards[qId]) {
-                    setExpandedCards(prev => ({ ...prev, [qId]: true }));
-                }
+            const labels = {
+                public: '道立高校',
+                private: '私立高校',
+                kosen: '高専',
+                school: '真龍中'
             };
-
-            const calculateScore = () => {
-                let money = 0;
-                let heart = 0;
-                Object.values(answers).forEach(type => {
-                    if (type === 'money') money++;
-                    if (type === 'heart') heart++;
-                });
-                return { money, heart, total: money + heart };
-            };
-
-            const scores = calculateScore();
-            const progress = Math.round((scores.total / 15) * 100);
-
-            const reset = () => {
-                setAnswers({});
-                setShowResult(false);
-                setExpandedCards({});
-                window.scrollTo(0, 0);
-            };
-
-            // 質問データの定義
-            const questions = [
-                {
-                    category: "カテゴリーA：【もしも…】お金の条件を変えてみる",
-                    icon: "banknote",
-                    color: "text-emerald-600",
-                    items: [
-                        {
-                            id: 1,
-                            q: "もし閏土が宝くじに当たって大金持ちになっていたら、「私」を「旦那様」と呼んだかな？",
-                            options: [
-                                { type: 'money', label: "呼ばない", sub: "「やあ、迅ちゃん！」と呼ぶ", reason: "「お金さえあれば対等になれた」と考えているからです。今の卑屈な態度は性格ではなく、貧しさが作らせたものだと捉えています。" },
-                                { type: 'heart', label: "やっぱり呼ぶ", sub: "金持ちでも丁寧語を使う", reason: "「お金があっても、染み付いた身分意識や上下関係は消えない」と考えているからです。壁の原因は心の中のルールにあります。" }
-                            ]
-                        },
-                        {
-                            id: 2,
-                            q: "もし「私」が大富豪で、「閏ちゃん、これ100万円あげるよ」と言ったら、二人の壁は消えたかな？",
-                            options: [
-                                { type: 'money', label: "消える", sub: "泣いて感謝して仲良くなる", reason: "今の気まずさは、「助けてあげられない無力感」や「生活の苦しさ」から来ていると考えているからです。解決策（カネ）があれば壁は壊せます。" },
-                                { type: 'heart', label: "消えない", sub: "逆に恐縮して距離ができる", reason: "「施し（めぐみ）」を受けることで、余計に惨めさや上下関係が強調されると考えているからです。心の距離はお金では買えません。" }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーB：【場面転換】シチュエーションを変えてみる",
-                    icon: "message-circle",
-                    color: "text-blue-600",
-                    items: [
-                        {
-                            id: 3,
-                            q: "もし二人がスタバのようなカフェに入って、2時間お茶をすることになったら、会話は続く？",
-                            options: [
-                                { type: 'money', label: "続かない", sub: "沈黙しちゃう", reason: "仲が悪いのではなく、単に「共通の話題」がないだけだと捉えています。話題の差は、教育や旅などの「経験（カネで買うもの）」の差です。" },
-                                { type: 'heart', label: "続く", sub: "昔話で盛り上がる", reason: "本来なら話せるはずなのに、会話がなかったのは「私」が勝手に期待して、勝手にガッカリした（心を閉ざした）からだと捉えています。" }
-                            ]
-                        },
-                        {
-                            id: 4,
-                            q: "もし周りに誰もいなくて、完全な二人きりの密室だったら、閏土は「迅ちゃん」と呼べたかな？",
-                            options: [
-                                { type: 'money', label: "呼べた", sub: "甘えられた", reason: "閏土が他人行儀なのは、本心からではなく「周りの目」や「村の空気」を気にしているからだと捉えています。貧しい村の空気が彼を縛っています。" },
-                                { type: 'heart', label: "呼べない", sub: "やっぱり無理", reason: "誰が見ていなくても、閏土自身のプライドや恐怖心が邪魔をすると考えているからです。「落ちぶれた自分」を認めたくないという心理が壁です。" }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーC：【見た目と中身】変化の正体を探る",
-                    icon: "eye",
-                    color: "text-amber-600",
-                    items: [
-                        {
-                            id: 5,
-                            q: "もし閏土が、昔と同じツヤツヤした健康的な顔のままだったら、「私」は言葉を失ったかな？",
-                            options: [
-                                { type: 'money', label: "失わない", sub: "「変わらないね！」と抱きつく", reason: "「私」がショックを受けた最大の原因は「見た目の老化」だと捉えています。その老化の原因は、過酷な労働（カネの問題）にあります。" },
-                                { type: 'heart', label: "失う", sub: "やっぱり話が続かない", reason: "見た目が若くても、信じているもの（科学vs迷信）が違えば、やっぱり話は噛み合わないと考えているからです。" }
-                            ]
-                        },
-                        {
-                            id: 6,
-                            q: "閏土が去り際に「香炉（神様グッズ）」じゃなくて、「現金」を欲しがったら、「私」はどう思った？",
-                            options: [
-                                { type: 'money', label: "納得する", sub: "まあ、生活苦しいもんね", reason: "香炉だろうが現金だろうが、結局は「生きるために必要なもの」だと捉えています。形が違うだけで、根本原因は貧困です。" },
-                                { type: 'heart', label: "軽蔑する", sub: "えっ、がめついな", reason: "「私」は美しい思い出や「品格」を求めているから、生々しい現実を突きつけられると引いてしまう（心を閉ざす）と考えているからです。" }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーD：【未来】次世代の関係を予想する",
-                    icon: "users",
-                    color: "text-indigo-600",
-                    items: [
-                        {
-                            id: 7,
-                            q: "10年後、水生（閏土の子）と宏児（私の子）が再会したら、二人は仲良くなれる？",
-                            options: [
-                                { type: 'money', label: "なれない", sub: "水生が「旦那様」と呼ぶ", reason: "結局、水生は学校に行けず、宏児はエリートになるからです。親と同じ「経済格差」の道を辿る以上、同じ壁ができると考えます。" },
-                                { type: 'heart', label: "なれる", sub: "対等に話す", reason: "もし仲良くなれるなら、今の二人に壁があるのは「古い時代の教育（身分意識）」のせいだからです。新しい心を持った世代なら、壁は越えられます。" }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーE：【罪と罰】「灰の中の食器」事件をどう見る？",
-                    icon: "gavel",
-                    color: "text-slate-600",
-                    items: [
-                        {
-                            id: 8,
-                            q: "閏土が「灰の中に食器を隠した」と聞いた時、君はどう感じた？",
-                            options: [
-                                { type: 'money', label: "同情する", sub: "なりふり構わないほど苦しかった", reason: "あの行為を「盗み（悪）」ではなく「生存戦略」と捉えているからです。プライドを捨てさせるほどの貧困が原因だと考えています。" },
-                                { type: 'heart', label: "ショック", sub: "純朴な閏土は死んでしまった", reason: "貧しさそのものより、心が卑しく変わってしまったこと（道徳心の低下）に絶望を感じているからです。これは心の問題です。" }
-                            ]
-                        },
-                        {
-                            id: 9,
-                            q: "もし楊おばさんがいなくて、村がもっと平和だったら、閏土は食器を盗んだかな？",
-                            options: [
-                                { type: 'money', label: "盗まない", sub: "平和に暮らす", reason: "閏土個人が悪いのではなく、村全体を覆う「奪い合いの空気（貧困の連鎖）」が彼を追い詰めたと考えているからです。" },
-                                { type: 'heart', label: "盗む", sub: "やっぱりチャンスがあればやる", reason: "周囲の環境に関係なく、今の閏土の心はすでに麻痺し、倫理観が壊れていると捉えているからです。" }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーF：【責任の所在】悪いのは「誰」だ？",
-                    icon: "brain",
-                    color: "text-purple-600",
-                    items: [
-                        {
-                            id: 10,
-                            q: "閏土が「石像（木偶の坊）」みたいになった一番の犯人は何だと思う？",
-                            options: [
-                                { type: 'money', label: "社会システム", sub: "軍閥・重税・地主", reason: "個人の努力ではどうにもならない「社会システム（カネの搾取構造）」が人間を壊したと考えているからです。" },
-                                { type: 'heart', label: "古い慣習", sub: "伝統・迷信・教育不足", reason: "彼を縛っているのは税金だけでなく、「こう生きるしかない」という思い込みや、古い慣習（心の中の鎖）だと考えているからです。" }
-                            ]
-                        },
-                        {
-                            id: 11,
-                            q: "もし閏土が、現代の日本に生まれていたら、「私」と親友になれたかな？",
-                            options: [
-                                { type: 'money', label: "なれた", sub: "普通の友達になる", reason: "現代日本のように極端な貧困や飢餓がなければ、性格自体は合うはずだと考えているからです。邪魔をしていたのは環境（カネ）だけです。" },
-                                { type: 'heart', label: "なれない", sub: "やっぱり話が合わない", reason: "結局、進学するコースや興味関心が違えば、話は合わなくなると考えているからです。人間としての「住む世界（価値観）」の違いは埋まりません。" }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーG：【希望の行方】ラストシーンをどう読む？",
-                    icon: "arrow-right",
-                    color: "text-cyan-600",
-                    items: [
-                        {
-                            id: 12,
-                            q: "最後の「歩く人が多くなれば道になる」という希望。これを実現するために、一番必要なのは？",
-                            options: [
-                                { type: 'money', label: "豊かさ", sub: "政治が変わり経済が良くなる", reason: "貧困が解決しない限り、誰もが自分の生活で手一杯で、道を作る（新しい関係を築く）余裕なんて生まれないと捉えているからです。" },
-                                { type: 'heart', label: "意識改革", sub: "偶像（迷信）を捨てること", reason: "いくら豊かになっても、差別意識や依存心がある限り、本当の「新しい生活」は来ないと捉えているからです。革命は心の中で起きるべきものです。" }
-                            ]
-                        },
-                        {
-                            id: 13,
-                            q: "宏児と水生が、将来「厚い壁」を感じないために必要なアイテムは？",
-                            options: [
-                                { type: 'money', label: "ツール", sub: "スマホやチケット（カネ）", reason: "連絡を取り合ったり会いに行ったりする「経済的な余裕」さえあれば、関係は維持できると考えているからです。" },
-                                { type: 'heart', label: "精神力", sub: "勇気や偏見のない心", reason: "親が決めた身分や格差を飛び越えるには、強い意志（心）が必要だと考えているからです。" }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    category: "カテゴリーH：【私への疑惑】語り手を疑ってみる",
-                    icon: "help-circle",
-                    color: "text-rose-400",
-                    items: [
-                        {
-                            id: 14,
-                            q: "「私」は楊おばさんを「コンパス」、閏土を「石像」と呼んだ。このあだ名についてどう思う？",
-                            options: [
-                                { type: 'money', label: "うまい例え", sub: "特徴を捉えてるな", reason: "「私」の視点を客観的で正しいものとして受け入れています。つまり、「私」のせいではなく、客観的な事実（貧困による変化）が原因だと考えがちです。" },
-                                { type: 'heart', label: "ひどいな", sub: "見下してるな", reason: "「私」の中に、無自覚な差別意識や冷たさを感じ取っているからです。その「上から目線」こそが壁を作った犯人です。" }
-                            ]
-                        },
-                        {
-                            id: 15,
-                            q: "「私」が故郷を離れる時、「名残惜しい気はしない」と言った。これは本心？",
-                            options: [
-                                { type: 'money', label: "本心", sub: "もう未練はない", reason: "故郷はもう「生きられない場所（貧困の地）」になってしまった。現実的に生活を立て直すには、捨てるしかないという判断です。" },
-                                { type: 'heart', label: "強がり", sub: "本当は悲しい", reason: "期待していた「美しい故郷」が壊れてしまったことへの、精神的なショックを隠そうとしているからです。" }
-                            ]
-                        }
-                    ]
-                }
-            ];
-
             return (
-                <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-32">
-                    {/* Header */}
-                    <header className="bg-slate-800 text-white p-6 shadow-lg">
-                        <div className="max-w-4xl mx-auto">
-                            <div className="flex items-center gap-3 mb-2">
-                                <Icon name="book-open" className="text-yellow-400 w-8 h-8" />
-                                <h1 className="text-2xl md:text-3xl font-bold tracking-wider">『故郷』究極の質問リスト</h1>
-                            </div>
-                            <p className="text-slate-300 ml-1">
-                                君の直感は「カネ派」？「心派」？ 答えを選べば、立論の根拠が見えてくる。
-                            </p>
-                        </div>
-                    </header>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${styles[category]}`}>
+                    {labels[category]}
+                </span>
+            );
+        };
 
-                    {/* Intro Stats */}
-                    <div className="max-w-4xl mx-auto px-4 py-6">
-                        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                                <div className="bg-emerald-100 p-2 rounded-full"><Icon name="banknote" className="text-emerald-600 w-6 h-6" /></div>
-                                <div>
-                                    <span className="text-xs font-bold text-emerald-700 block">カネ（経済格差）派</span>
-                                    <span className="text-xs text-slate-500">壁の原因は「貧困・環境」</span>
-                                </div>
-                            </div>
-                            <div className="h-px w-full md:w-px md:h-12 bg-slate-200"></div>
-                            <div className="flex items-center gap-3">
-                                <div className="bg-rose-100 p-2 rounded-full"><Icon name="heart" className="text-rose-500 w-6 h-6" /></div>
-                                <div>
-                                    <span className="text-xs font-bold text-rose-700 block">心（精神格差）派</span>
-                                    <span className="text-xs text-slate-500">壁の原因は「心理・身分意識」</span>
-                                </div>
-                            </div>
-                        </div>
+        const TimelineItem = ({ event }) => (
+            <div className="flex gap-4 mb-6 animate-fade-in group">
+                <div className="flex flex-col items-center">
+                    <div className={`w-3 h-3 rounded-full mt-2 ring-4 ring-white ${event.important ? 'bg-red-500' : 'bg-slate-300'}`}></div>
+                    <div className="w-0.5 flex-1 bg-slate-100 mt-2 group-last:hidden"></div>
+                </div>
+                <div className="flex-1 glass-card p-4 rounded-xl hover:shadow-md transition-shadow border-l-4 border-l-transparent hover:border-l-blue-500">
+                    <div className="flex justify-between items-start mb-2">
+                        <span className={`font-mono font-bold text-lg ${event.important ? 'text-red-600' : 'text-slate-700'}`}>
+                            {event.displayDate}
+                        </span>
+                        <CategoryBadge category={event.category} />
                     </div>
+                    <h4 className="font-bold text-slate-800 mb-1 flex items-center">
+                        {event.important && <Icon name="Warning" className="text-red-500 mr-1" size={16} weight="fill" />}
+                        {event.title}
+                    </h4>
+                    <p className="text-sm text-slate-500 whitespace-pre-line leading-relaxed">{event.desc}</p>
+                </div>
+            </div>
+        );
 
-                    {/* Main Content */}
-                    <main className="max-w-3xl mx-auto px-4 space-y-12">
-                        {questions.map((category, idx) => (
-                            <section key={idx} className="space-y-6">
-                                <div className="flex items-center gap-3 border-b-2 border-slate-200 pb-2">
-                                    <Icon name={category.icon} className={`w-6 h-6 ${category.color}`} />
-                                    <h2 className="text-lg font-bold text-slate-700">{category.category}</h2>
-                                </div>
-                                
-                                <div className="grid gap-6">
-                                    {category.items.map((item) => {
-                                        const isAnswered = answers[item.id];
-                                        const isExpanded = expandedCards[item.id];
+        const InfoSection = ({ title, children }) => (
+            <div className="mb-8">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                    <div className="w-1 h-6 bg-blue-600 rounded-full mr-3"></div>
+                    {title}
+                </h3>
+                {children}
+            </div>
+        );
 
-                                        return (
-                                            <div key={item.id} className={`bg-white rounded-xl shadow-sm border-2 transition-all duration-300 ${isAnswered ? 'border-slate-300' : 'border-slate-100 hover:border-slate-300'}`}>
-                                                <div className="p-5">
-                                                    <div className="flex justify-between items-start gap-4 mb-4">
-                                                        <h3 className="text-md font-bold text-slate-800 leading-relaxed">
-                                                            <span className="inline-block bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded mr-2 align-middle">Q{item.id}</span>
-                                                            {item.q}
-                                                        </h3>
-                                                    </div>
+        // --- Main App Component ---
 
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                        {item.options.map((opt) => (
-                                                            <button
-                                                                key={opt.type}
-                                                                onClick={() => handleAnswer(item.id, opt.type)}
-                                                                className={`relative p-4 rounded-lg text-left transition-all duration-200 flex flex-col gap-1 border
-                                                                    ${answers[item.id] === opt.type 
-                                                                        ? (opt.type === 'money' ? 'bg-emerald-50 border-emerald-500 ring-1 ring-emerald-500' : 'bg-rose-50 border-rose-500 ring-1 ring-rose-500')
-                                                                        : 'bg-white border-slate-200 hover:bg-slate-50'
-                                                                    }
-                                                                    ${isAnswered && answers[item.id] !== opt.type ? 'opacity-50 grayscale' : ''}
-                                                                `}
-                                                            >
-                                                                <div className="flex items-center justify-between w-full">
-                                                                    <span className={`font-bold text-lg ${opt.type === 'money' ? 'text-emerald-700' : 'text-rose-700'}`}>
-                                                                        {opt.label}
-                                                                    </span>
-                                                                    {answers[item.id] === opt.type && (
-                                                                        <span className="text-xs bg-slate-800 text-white px-2 py-0.5 rounded-full">選択中</span>
-                                                                    )}
-                                                                </div>
-                                                                <span className="text-sm text-slate-600">{opt.sub}</span>
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
+        const App = () => {
+            const [activeSection, setActiveSection] = useState('dashboard');
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-                                                {/* Explanation Section */}
-                                                {isAnswered && (
-                                                    <div className={`border-t border-slate-100 bg-slate-50 overflow-hidden transition-all duration-500 ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                                                        <div className="p-5">
-                                                            <div className="flex items-start gap-3">
-                                                                <div className="mt-1 flex-shrink-0">
-                                                                    {answers[item.id] === 'money' 
-                                                                        ? <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2"></div>
-                                                                        : <div className="w-2 h-2 rounded-full bg-rose-500 mt-2"></div>
-                                                                    }
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
-                                                                        👉 あなたは 【 {answers[item.id] === 'money' ? 'カネ（経済格差）派' : '心（精神格差）派'} 】
-                                                                    </p>
-                                                                    <p className="text-sm text-slate-700 leading-relaxed">
-                                                                        <span className="font-bold text-slate-900">なぜなら：</span>
-                                                                        {item.options.find(o => o.type === answers[item.id]).reason}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                
-                                                {isAnswered && (
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); toggleExpand(item.id); }}
-                                                        className="w-full text-center py-1 text-xs text-slate-400 hover:text-slate-600 hover:bg-slate-50 border-t border-slate-100 flex items-center justify-center gap-1"
-                                                    >
-                                                        {isExpanded ? <>解説を閉じる <Icon name="chevron-up" size={12} className="inline ml-1" /></> : <>解説を見る <Icon name="chevron-down" size={12} className="inline ml-1" /></>}
-                                                    </button>
-                                                )}
+            // Filter events based on active section
+            const filteredEvents = useMemo(() => {
+                if (activeSection === 'dashboard') {
+                    // Show upcoming important events or next 5 events
+                    return EVENTS.sort((a, b) => a.date.localeCompare(b.date));
+                }
+                return EVENTS.filter(e => e.category === activeSection).sort((a, b) => a.date.localeCompare(b.date));
+            }, [activeSection]);
+
+            const renderContent = () => {
+                switch (activeSection) {
+                    case 'dashboard':
+                        return (
+                            <div className="animate-fade-in">
+                                {/* Welcome Banner */}
+                                <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-3xl p-8 text-white mb-8 shadow-xl relative overflow-hidden">
+                                    <div className="relative z-10">
+                                        <h2 className="text-2xl md:text-3xl font-bold mb-2">進路活動ダッシュボード</h2>
+                                        <p className="text-slate-300 mb-6">真龍中学校 令和7年度〜8年度版</p>
+                                        <div className="flex gap-3 flex-wrap">
+                                            <div className="bg-white/10 backdrop-blur rounded-lg px-4 py-2 flex items-center">
+                                                <Icon name="CalendarCheck" className="mr-2 text-emerald-400" />
+                                                <span className="text-sm font-medium">現在：進路決定・面談期間</span>
                                             </div>
-                                        );
-                                    })}
+                                            <div className="bg-white/10 backdrop-blur rounded-lg px-4 py-2 flex items-center">
+                                                <Icon name="Warning" className="mr-2 text-amber-400" />
+                                                <span className="text-sm font-medium">高専WEB登録 開始間近</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-10 translate-y-10">
+                                        <Icon name="RocketLaunch" size={200} weight="duotone" />
+                                    </div>
                                 </div>
-                            </section>
-                        ))}
-                    </main>
 
-                    {/* Floating Status Bar */}
-                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] p-4 z-50">
-                        <div className="max-w-3xl mx-auto">
-                            {!showResult ? (
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-                                        <span className="flex items-center gap-1"><Icon name="banknote" size={14} className="text-emerald-600"/> カネ派: {scores.money}</span>
-                                        <span>回答数: {scores.total} / 15</span>
-                                        <span className="flex items-center gap-1">心派: {scores.heart} <Icon name="heart" size={14} className="text-rose-500"/></span>
-                                    </div>
-                                    
-                                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden flex relative">
-                                        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-800 z-10 opacity-20"></div>
-                                        
-                                        <div 
-                                            className="bg-emerald-500 transition-all duration-500 flex items-center justify-end pr-2 text-[10px] text-white font-bold"
-                                            style={{ width: scores.total === 0 ? '50%' : `${(scores.money / (scores.money + scores.heart || 1)) * 100}%` }}
-                                        >
-                                        </div>
-                                        <div 
-                                            className="bg-rose-500 transition-all duration-500 flex items-center pl-2 text-[10px] text-white font-bold"
-                                            style={{ width: scores.total === 0 ? '50%' : `${(scores.heart / (scores.money + scores.heart || 1)) * 100}%` }}
-                                        >
-                                        </div>
-                                    </div>
-
-                                    {scores.total === 15 && (
-                                        <button 
-                                            onClick={() => setShowResult(true)}
-                                            className="w-full mt-2 bg-slate-800 text-white py-3 rounded-lg font-bold text-lg hover:bg-slate-700 transition-colors flex items-center justify-center gap-2 animate-bounce"
-                                        >
-                                            <Icon name="scale" className="w-5 h-5" />
-                                            診断結果を見る
-                                        </button>
-                                    )}
+                                {/* Stats/Quick Links */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                                    <StatCard label="公立入試まで" value="残り 約100日" sub="3月4日 学力検査" color="bg-blue-500" />
+                                    <StatCard label="高専推薦登録" value="11/27 開始" sub="WEB登録期間" color="bg-purple-500" />
+                                    <StatCard label="私立入試" value="2月中旬" sub="A日程/B日程" color="bg-orange-500" />
+                                    <StatCard label="校内締切" value="要確認" sub="願書下書き等" color="bg-emerald-500" />
                                 </div>
-                            ) : (
-                                <div className="animate-in slide-in-from-bottom duration-500">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 className="text-xl font-bold text-slate-800">
-                                                あなたの結論：
-                                                <span className={`ml-2 ${scores.money > scores.heart ? 'text-emerald-600' : scores.heart > scores.money ? 'text-rose-600' : 'text-slate-600'}`}>
-                                                    {scores.money > scores.heart ? '圧倒的「カネ（経済格差）」派' : scores.heart > scores.money ? '圧倒的「心（精神格差）」派' : 'バランス型（複合的要因）'}
-                                                </span>
-                                            </h3>
-                                        </div>
-                                        <button onClick={reset} className="text-slate-400 hover:text-slate-600 p-1"><Icon name="refresh-cw" size={20}/></button>
+
+                                {/* Upcoming Timeline */}
+                                <InfoSection title="今後の予定（時系列）">
+                                    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
+                                        {filteredEvents.map((event, idx) => (
+                                            <TimelineItem key={idx} event={event} />
+                                        ))}
                                     </div>
-                                    
-                                    <p className="text-sm text-slate-600 mb-4 bg-slate-50 p-3 rounded border border-slate-100">
-                                        {scores.money > scores.heart 
-                                            ? "あなたは、ルントウと「私」の壁の正体は「貧困という絶対的な暴力」だと捉えています。精神論ではなく、政治や経済が変わらなければ、希望の「道」は生まれないという現実的な視点を持っています。" 
-                                            : scores.heart > scores.money 
-                                            ? "あなたは、壁の正体は「人間の心に巣食う差別や古い慣習」だと捉えています。いくら金持ちになっても、心が自由にならなければ、真の友情は生まれないという倫理的な視点を持っています。"
-                                            : "あなたは、経済的な苦しさと精神的な隔たりが複雑に絡み合っていると捉えています。どちらか一方だけでは解決できない、根深い問題として作品を読んでいます。"}
+                                </InfoSection>
+                            </div>
+                        );
+
+                    case 'kosen':
+                        return (
+                            <div className="animate-fade-in">
+                                <div className="bg-purple-50 border border-purple-100 rounded-2xl p-6 mb-6">
+                                    <h2 className="text-xl font-bold text-purple-900 mb-2 flex items-center">
+                                        <Icon name="Cpu" className="mr-2" />
+                                        高等専門学校（高専）について
+                                    </h2>
+                                    <p className="text-purple-800 text-sm mb-4">
+                                        道内4高専（函館・苫小牧・釧路・旭川）の受験情報です。
+                                        特に「釧路高専」の選抜では学力点や学習点の扱いが公立高校と大きく異なるため、
+                                        必ず高専のホームページで最新の詳細を確認してください。
+                                    </p>
+                                    <div className="bg-white rounded-xl p-4 text-sm text-purple-900 shadow-sm">
+                                        <strong className="block mb-1">道内4高専複数校志望受験制度</strong>
+                                        道内4つの高専の最大10学科に同時に出願可能です。
+                                        合格した学科のうち、志望順位が最も上位の高専に進学できます。
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-6 mb-6">
+                                    <div className="glass-card p-6 rounded-xl border-t-4 border-purple-500">
+                                        <h3 className="font-bold text-lg mb-3">自己推薦選抜</h3>
+                                        <ul className="space-y-3 text-sm">
+                                            <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
+                                                <span className="text-slate-500">WEB事前登録</span>
+                                                <span className="font-bold">11/27(木) 〜 1/5(月) 16時</span>
+                                            </li>
+                                            <li className="text-xs text-slate-400 mt-2">
+                                                ※入学願書・写真票・受検票・自己推薦書が必要です。
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div className="glass-card p-6 rounded-xl border-t-4 border-purple-500">
+                                        <h3 className="font-bold text-lg mb-3">学力選抜</h3>
+                                        <ul className="space-y-3 text-sm">
+                                            <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
+                                                <span className="text-slate-500">WEB事前登録</span>
+                                                <span className="font-bold">11/27(木) 〜 1/23(金) 16時</span>
+                                            </li>
+                                            <li className="text-xs text-slate-400 mt-2">
+                                                ※釧路高専など、各校で日程が設定されています。
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+
+                    case 'school':
+                        return (
+                            <div className="animate-fade-in">
+                                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 mb-6">
+                                    <h2 className="text-xl font-bold text-emerald-900 mb-2 flex items-center">
+                                        <Icon name="School" className="mr-2" />
+                                        真龍中学校 校内手続き
+                                    </h2>
+                                    <p className="text-emerald-800 text-sm">
+                                        中学校を通じて行う手続きのスケジュールです。
+                                        これらの締切は、高校への提出期限より早く設定されています。遅れないように注意しましょう。
                                     </p>
                                 </div>
-                            )}
+
+                                <InfoSection title="To-Do リスト">
+                                    <div className="space-y-3">
+                                        {[
+                                            "三者面談日程の調整（担任へ連絡）",
+                                            "進路希望調査票の提出",
+                                            "入学検定料の準備（納付書の確認）",
+                                            "願書下書きの清書（誤字脱字チェック）",
+                                            "（推薦希望者）推薦書の作文作成"
+                                        ].map((todo, i) => (
+                                            <label key={i} className="flex items-center p-4 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
+                                                <input type="checkbox" className="w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500 border-gray-300 mr-3" />
+                                                <span className="text-slate-700 text-sm font-medium">{todo}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </InfoSection>
+                            </div>
+                        );
+
+                    default:
+                        return (
+                            <div className="animate-fade-in">
+                                <InfoSection title={`${SECTIONS.find(s => s.id === activeSection)?.label} タイムライン`}>
+                                    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
+                                        {filteredEvents.length > 0 ? filteredEvents.map((event, idx) => (
+                                            <TimelineItem key={idx} event={event} />
+                                        )) : (
+                                            <p className="text-center text-slate-400 py-8">表示するイベントがありません</p>
+                                        )}
+                                    </div>
+                                </InfoSection>
+                            </div>
+                        );
+                }
+            };
+
+            return (
+                <div className="flex min-h-screen bg-[#f8fafc]">
+                    {/* Sidebar (Desktop) */}
+                    <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 fixed h-full z-20">
+                        <div className="p-6 border-b border-slate-100">
+                            <h1 className="text-xl font-black text-slate-800 flex items-center tracking-tighter">
+                                <Icon name="GraduationCap" className="mr-2 text-blue-600" weight="fill" />
+                                Shinryu<span className="text-blue-600">Navi</span>
+                            </h1>
+                            <p className="text-xs text-slate-400 mt-1 ml-8">真龍中 進路サポートシステム</p>
                         </div>
+                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                            {SECTIONS.map(section => (
+                                <button
+                                    key={section.id}
+                                    onClick={() => setActiveSection(section.id)}
+                                    className={`w-full flex items-center p-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                                        activeSection === section.id 
+                                        ? 'bg-slate-100 text-blue-700 shadow-sm' 
+                                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                                    }`}
+                                >
+                                    <Icon name={section.icon} className={`mr-3 ${activeSection === section.id ? 'text-blue-600' : 'text-slate-400'}`} weight={activeSection === section.id ? "fill" : "regular"} size={20} />
+                                    {section.label}
+                                </button>
+                            ))}
+                        </nav>
+                        <div className="p-4 border-t border-slate-100">
+                            <div className="bg-blue-50 rounded-xl p-4">
+                                <p className="text-xs font-bold text-blue-800 mb-1">困ったときは</p>
+                                <p className="text-xs text-blue-600 leading-relaxed">
+                                    不明な点は必ず担任の先生に進路だより等で確認してください。
+                                </p>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Mobile Header & Nav */}
+                    <div className="md:hidden fixed top-0 left-0 w-full bg-white/90 backdrop-blur z-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center">
+                         <h1 className="text-lg font-black text-slate-800 flex items-center">
+                            <Icon name="GraduationCap" className="mr-2 text-blue-600" weight="fill" />
+                            ShinryuNavi
+                        </h1>
+                        <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-lg bg-slate-100">
+                            <Icon name={isMobileMenuOpen ? "X" : "List"} size={24} />
+                        </button>
                     </div>
+
+                    {/* Mobile Dropdown Menu */}
+                    {isMobileMenuOpen && (
+                        <div className="md:hidden fixed inset-0 z-40 bg-white pt-20 px-4">
+                             <nav className="space-y-2">
+                                {SECTIONS.map(section => (
+                                    <button
+                                        key={section.id}
+                                        onClick={() => {
+                                            setActiveSection(section.id);
+                                            setIsMobileMenuOpen(false);
+                                        }}
+                                        className={`w-full flex items-center p-4 rounded-xl text-base font-bold border ${
+                                            activeSection === section.id 
+                                            ? 'bg-blue-50 border-blue-100 text-blue-700' 
+                                            : 'bg-white border-slate-100 text-slate-600'
+                                        }`}
+                                    >
+                                        <Icon name={section.icon} className="mr-3" weight={activeSection === section.id ? "fill" : "regular"} size={24} />
+                                        {section.label}
+                                    </button>
+                                ))}
+                            </nav>
+                        </div>
+                    )}
+
+                    {/* Main Content */}
+                    <main className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 max-w-5xl mx-auto">
+                        {renderContent()}
+                    </main>
                 </div>
             );
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<HometownDiagnosis />);
+        root.render(<App />);
     </script>
 </body>
 </html>
