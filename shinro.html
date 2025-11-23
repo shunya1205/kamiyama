@@ -116,7 +116,6 @@
             // 高専
             { date: '2025-11-27', displayDate: '11/27〜1/5', title: '高専：自己推薦 WEB事前登録', category: 'kosen', desc: '自己推薦選抜のWEB登録期間。\n締切：1月5日 16時まで', important: true },
             { date: '2025-11-27', displayDate: '11/27〜1/23', title: '高専：学力選抜 WEB事前登録', category: 'kosen', desc: '学力選抜のWEB登録期間。\n締切：1月23日 16時まで', important: true },
-            // 修正箇所: 日程を確定し、オンライン面接である旨を追記
             { date: '2026-01-17', displayDate: '1/17(土)', title: '釧路高専：自己推薦選抜（面接）', category: 'kosen', desc: 'オンラインでの面接になります。\n通信環境や機器の準備を事前に行いましょう。', type: 'exam', important: true },
             { date: '2026-02-08', displayDate: '2/8(日)', title: '高専：学力検査日（全国一斉）', category: 'kosen', desc: '国立高専の学力選抜試験日です。', type: 'exam', important: true },
 
@@ -253,7 +252,7 @@
                             <div className="animate-fade-in">
                                 {/* Title & School Name */}
                                 <div className="mb-6 px-1">
-                                    <h2 className="text-2xl md:text-3xl font-bold text-slate-800">進路関係ダッシュボード</h2>
+                                    <h2 className="text-2xl md:text-3xl font-bold text-slate-800">進路活動ダッシュボード</h2>
                                     <p className="text-slate-500">令和7年度 厚岸町立真龍中学校</p>
                                 </div>
 
@@ -310,7 +309,6 @@
                                     <StatCard 
                                         label="釧路高専 入試" 
                                         value="学力: 2/8(日)" 
-                                        // 修正箇所: 日程を具体的に更新
                                         sub="推薦: 1/17(土)" 
                                         color="bg-purple-500" 
                                         onClick={() => setActiveSection('kosen')}
@@ -357,7 +355,6 @@
                                             </li>
                                              <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
                                                 <span className="text-slate-500">入試（面接）</span>
-                                                {/* 修正箇所: オンライン面接の日程を反映 */}
                                                 <span className="font-bold text-indigo-600">1月17日(土)</span>
                                             </li>
                                             <li className="text-xs text-slate-400 mt-2">
@@ -488,7 +485,7 @@
                     <div className="md:hidden fixed top-0 left-0 w-full bg-white z-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-lg">
                          <h1 className="text-lg font-black text-slate-800 flex items-center">
                             <Icon name="GraduationCap" className="mr-2 text-blue-600" weight="fill" />
-                            ShinryuNavi
+                            Shinryu<span className="text-blue-600">Navi</span>
                         </h1>
                         
                         {/* 修正されたメニューボタン: より大きく、青い背景で目立たせました */}
