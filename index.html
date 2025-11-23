@@ -47,7 +47,7 @@
             overflow-x: hidden;
         }
 
-        /* 2. Noise Texture */
+        /* 2. Noise Texture - Very subtle grain for premium feel */
         .noise-overlay {
             position: fixed;
             top: 0;
@@ -60,13 +60,13 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* 3. Bento Grid Card Style */
+        /* 3. Bento Grid Card Style - Pitch Black Theme */
         .bento-card {
-            background: rgba(10, 10, 10, 0.6);
+            background: rgba(10, 10, 10, 0.6); /* Almost pure black */
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08); /* Slightly more visible border */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8); /* Deep shadow */
             transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s;
         }
         .bento-card:hover {
@@ -119,10 +119,11 @@
 </head>
 <body class="selection:bg-accent selection:text-white">
 
-    <!-- Noise Overlay -->
+    <!-- 2. Noise Overlay -->
     <div class="noise-overlay"></div>
 
-    <!-- Huge Background Watermark -->
+    <!-- Huge Background Watermark (Fixed & Visible on Pure Black) -->
+    <!-- Opacity increased slightly for better visibility on pure black -->
     <div class="fixed inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
         <div class="flex flex-col items-center transform -rotate-12 scale-75 md:scale-100 opacity-[0.08]">
             <i class="fab fa-apple text-[12rem] md:text-[35rem] text-white mb-4 md:mb-8"></i>
@@ -542,13 +543,50 @@
                         <p class="text-sm text-subtext mb-4">鈴木祐</p>
                         <div class="space-y-3">
                             <div class="bg-black/30 p-3 rounded-lg border border-white/5">
-                                <p class="text-xs text-white leading-relaxed">「自分の価値は他者との『比較優位』で決まる」</p>
-                            </div>
-                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
                                 <p class="text-xs text-white leading-relaxed">「他人と違う『かたより』こそが価値になる」</p>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Book Card: Active Learning -->
+                    <div class="bento-card rounded-2xl p-6 hover:bg-white/5 transition">
+                        <div class="text-xs text-subtext uppercase tracking-widest mb-1">Active Learning</div>
+                        <h4 class="text-xl font-bold text-white mb-2">バカになるほど、本を読め！</h4>
+                        <p class="text-sm text-subtext mb-4">神田 昌典</p>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「目的を明確にして、必要な情報を能動的に『取りに行く』」</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「意識の高い場でのソーシャルプレッシャーが人を成長させる」</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「大勢の頭を利用する（集合知）」</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book Card: Leadership -->
+                    <div class="bento-card rounded-2xl p-6 hover:bg-white/5 transition">
+                        <div class="text-xs text-subtext uppercase tracking-widest mb-1">Leadership</div>
+                        <h4 class="text-xl font-bold text-white mb-2">1分間孫子の兵法</h4>
+                        <p class="text-sm text-subtext mb-4">齋藤 孝</p>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「彼を知り己を知らば、百戦して殆うからず（自己理解）」</p>
+                            </div>
+                             <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「主は怒りを以て軍を興こす可からず（感情制御）」</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「明日と他人は変えられないが、今日と自分は変えられる」</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「仕事は権限ではない。理解と納得である」</p>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
