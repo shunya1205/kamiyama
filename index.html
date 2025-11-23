@@ -47,7 +47,7 @@
             overflow-x: hidden;
         }
 
-        /* 2. Noise Texture - Very subtle grain for premium feel */
+        /* 2. Noise Texture */
         .noise-overlay {
             position: fixed;
             top: 0;
@@ -60,13 +60,13 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* 3. Bento Grid Card Style - Pitch Black Theme */
+        /* 3. Bento Grid Card Style */
         .bento-card {
-            background: rgba(10, 10, 10, 0.6); /* Almost pure black */
+            background: rgba(10, 10, 10, 0.6);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
-            border: 1px solid rgba(255, 255, 255, 0.08); /* Slightly more visible border */
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8); /* Deep shadow */
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
             transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s;
         }
         .bento-card:hover {
@@ -110,17 +110,20 @@
             opacity: 1;
             transform: translateY(0);
         }
+
+        /* Smooth Scroll Behavior */
+        html {
+            scroll-behavior: smooth;
+        }
     </style>
 </head>
 <body class="selection:bg-accent selection:text-white">
 
-    <!-- 2. Noise Overlay -->
+    <!-- Noise Overlay -->
     <div class="noise-overlay"></div>
 
-    <!-- Huge Background Watermark (Fixed & Visible on Pure Black) -->
-    <!-- Opacity increased slightly for better visibility on pure black -->
+    <!-- Huge Background Watermark -->
     <div class="fixed inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden">
-        <!-- スマホでのサイズ調整: scale-75, textサイズ縮小 -->
         <div class="flex flex-col items-center transform -rotate-12 scale-75 md:scale-100 opacity-[0.08]">
             <i class="fab fa-apple text-[12rem] md:text-[35rem] text-white mb-4 md:mb-8"></i>
             <span class="text-[3rem] md:text-[10rem] font-black text-white whitespace-nowrap tracking-tighter leading-none">
@@ -131,7 +134,7 @@
 
     <!-- Navigation -->
     <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-xl border-b border-white/5 h-12 flex items-center justify-between px-6 md:px-12 transition-all duration-300">
-        <div class="text-white font-semibold text-sm tracking-wide flex items-center cursor-pointer hover:opacity-80 transition">
+        <div class="text-white font-semibold text-sm tracking-wide flex items-center cursor-pointer hover:opacity-80 transition" onclick="window.scrollTo(0,0)">
             <i class="fab fa-apple text-lg mr-2"></i>
             <span class="font-bold">神山の思考</span>
         </div>
@@ -394,11 +397,8 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <section class="min-h-[80vh] flex flex-col justify-center items-center text-center px-6 py-20 relative border-t border-white/5 z-10 overflow-hidden">
-        <!-- Footer background glow -->
-        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-full h-full bg-gradient-to-t from-accent/10 to-transparent pointer-events-none"></div>
-
+    <!-- Start Update Button / Footer -->
+    <section class="min-h-[60vh] flex flex-col justify-center items-center text-center px-6 py-20 relative border-t border-white/5 z-10">
         <div class="max-w-4xl mx-auto z-10">
             <h2 class="text-6xl md:text-9xl font-bold text-white mb-8 tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
                 Be Autonomous.
@@ -413,14 +413,149 @@
                 <span class="text-base text-subtext font-normal mt-6 block tracking-widest uppercase">- 神山 -</span>
             </p>
             
-            <button class="bg-white text-black px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+            <button onclick="document.getElementById('references').scrollIntoView({behavior: 'smooth'})" class="group bg-white text-black px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center gap-2 mx-auto">
                 Start Update
+                <i class="fas fa-arrow-down group-hover:translate-y-1 transition-transform"></i>
             </button>
         </div>
-        
-        <footer class="absolute bottom-6 w-full text-center text-xs text-white/20">
-            &copy; 2025 Kamiyama Education. Designed for the Future.
-        </footer>
+    </section>
+
+    <!-- 5. Source Code / References Section -->
+    <section id="references" class="py-32 px-4 md:px-6 relative z-10 border-t border-white/5 bg-black">
+        <div class="max-w-6xl mx-auto">
+            <div class="mb-16 scroll-trigger">
+                <span class="text-subtext font-bold text-xs tracking-widest uppercase block mb-2">Source Code</span>
+                <h2 class="text-4xl md:text-6xl font-bold mb-4 text-white">OSの仕様書 / 参考文献</h2>
+                <p class="text-subtext text-xl">神山の思考を構成する、最も影響力の強いコードベース。</p>
+            </div>
+
+            <!-- Category 1 -->
+            <div class="mb-16 scroll-trigger">
+                <h3 class="text-2xl font-bold text-accent mb-6 flex items-center">
+                    <i class="fas fa-microchip mr-3"></i>マインドセットと行動の原則
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Book Card -->
+                    <div class="bento-card rounded-2xl p-6 hover:bg-white/5 transition">
+                        <div class="text-xs text-subtext uppercase tracking-widest mb-1">Mindset</div>
+                        <h4 class="text-xl font-bold text-white mb-2">運は操れる</h4>
+                        <p class="text-sm text-subtext mb-4">メンタリストDaiGo</p>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「やる気があるから行動するのではなく、行動するからやる気が出る（作業興奮）」</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「運が良い人とは『試行回数』が多い人だ」</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book Card -->
+                    <div class="bento-card rounded-2xl p-6 hover:bg-white/5 transition">
+                        <div class="text-xs text-subtext uppercase tracking-widest mb-1">Career</div>
+                        <h4 class="text-xl font-bold text-white mb-2">科学的な適職</h4>
+                        <p class="text-sm text-subtext mb-4">鈴木祐</p>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「最高のチームを作る唯一の条件は『心理的安全性』（Googleの研究）」</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「他者へ貢献することで『ヘルパーズ・ハイ』と呼ばれる幸福感を得られる」</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book Card -->
+                    <div class="bento-card rounded-2xl p-6 hover:bg-white/5 transition">
+                        <div class="text-xs text-subtext uppercase tracking-widest mb-1">Evolution</div>
+                        <h4 class="text-xl font-bold text-white mb-2">進化論マーケティング</h4>
+                        <p class="text-sm text-subtext mb-4">鈴木祐</p>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「人間には『物事を前に進めたい』という本能的な欲求（進める本能）がある」</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category 2 -->
+            <div class="mb-16 scroll-trigger">
+                <h3 class="text-2xl font-bold text-accent_green mb-6 flex items-center">
+                    <i class="fas fa-users mr-3"></i>人間関係とコミュニケーション
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Book Card -->
+                    <div class="bento-card rounded-2xl p-6 hover:bg-white/5 transition">
+                        <div class="text-xs text-subtext uppercase tracking-widest mb-1">Relation</div>
+                        <h4 class="text-xl font-bold text-white mb-2">人を動かす</h4>
+                        <p class="text-sm text-subtext mb-4">デール・カーネギー</p>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「人を動かす唯一の方法は、その人が自ら動きたくなる気持ちを起こさせること」</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「馬を水辺に連れて行くことはできても、水を飲ませることはできない」</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book Card -->
+                    <div class="bento-card rounded-2xl p-6 hover:bg-white/5 transition">
+                        <div class="text-xs text-subtext uppercase tracking-widest mb-1">Psychology</div>
+                        <h4 class="text-xl font-bold text-white mb-2">影響力の武器</h4>
+                        <p class="text-sm text-subtext mb-4">ロバート・B・チャルディーニ</p>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「人は他人から何かを与えられると、お返しをせずにはいられない（返報性の原理）」</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「挨拶とは、最初に与える『好意のプレゼント』である」</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category 3 -->
+            <div class="scroll-trigger">
+                <h3 class="text-2xl font-bold text-accent_orange mb-6 flex items-center">
+                    <i class="fas fa-chess mr-3"></i>自己管理と戦略的思考
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Book Card -->
+                    <div class="bento-card rounded-2xl p-6 hover:bg-white/5 transition">
+                        <div class="text-xs text-subtext uppercase tracking-widest mb-1">Strategy</div>
+                        <h4 class="text-xl font-bold text-white mb-2">「怠惰」なんて存在しない</h4>
+                        <p class="text-sm text-subtext mb-4">デヴォン・プライス</p>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「トレードオフ＝何かを得るためには、何かを諦めなければならない」</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Book Card -->
+                    <div class="bento-card rounded-2xl p-6 hover:bg-white/5 transition">
+                        <div class="text-xs text-subtext uppercase tracking-widest mb-1">Talent</div>
+                        <h4 class="text-xl font-bold text-white mb-2">才能の地図</h4>
+                        <p class="text-sm text-subtext mb-4">鈴木祐</p>
+                        <div class="space-y-3">
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「自分の価値は他者との『比較優位』で決まる」</p>
+                            </div>
+                            <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <p class="text-xs text-white leading-relaxed">「他人と違う『かたより』こそが価値になる」</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-20 text-center text-xs text-subtext pb-12">
+                &copy; 2025 Kamiyama Education. Source Code Loaded.
+            </div>
+        </div>
     </section>
 
     <script>
