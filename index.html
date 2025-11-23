@@ -63,12 +63,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .section-title-gradient {
-            background: linear-gradient(90deg, #fff, #86868b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
         .scroll-trigger {
             opacity: 0;
             transform: translateY(30px);
@@ -78,20 +72,19 @@
             opacity: 1;
             transform: translateY(0);
         }
-
-        /* Subtle glowing background for sections */
-        .glow-spot {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            filter: blur(100px);
-            opacity: 0.15;
-            z-index: -1;
-            border-radius: 50%;
-        }
     </style>
 </head>
-<body class="overflow-x-hidden selection:bg-accent selection:text-white">
+<body class="overflow-x-hidden selection:bg-accent selection:text-white relative">
+
+    <!-- Huge Background Watermark (Fixed) -->
+    <div class="fixed inset-0 flex items-center justify-center pointer-events-none z-0 opacity-[0.03] overflow-hidden">
+        <div class="flex flex-col items-center transform -rotate-12 scale-150 md:scale-100">
+            <i class="fab fa-apple text-[20rem] md:text-[30rem] text-white mb-8"></i>
+            <span class="text-[5rem] md:text-[8rem] font-black text-white whitespace-nowrap tracking-tighter leading-none">
+                神山の思考
+            </span>
+        </div>
+    </div>
 
     <!-- Navigation -->
     <nav class="fixed w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/10 h-12 flex items-center justify-between px-6 md:px-12">
@@ -108,7 +101,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="min-h-[90vh] flex flex-col justify-center items-center text-center px-6 relative pt-20">
+    <section class="min-h-[90vh] flex flex-col justify-center items-center text-center px-6 relative pt-20 z-10">
         <!-- Background Glow -->
         <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none"></div>
         
@@ -120,14 +113,14 @@
             </h1>
             <p class="text-xl md:text-2xl text-subtext max-w-2xl mx-auto leading-relaxed mb-12">
                 根性論ではない。<br>
-                脳科学とエビデンスに基づいた、<br>
+                脳科学とエビデンスに基づき、神山が構築した<br>
                 「自律した学習者」になるための4つのアルゴリズム。
             </p>
         </div>
     </section>
 
     <!-- Section 1: Action & Motivation Science -->
-    <section id="science" class="py-24 px-6 relative border-t border-white/5">
+    <section id="science" class="py-24 px-6 relative border-t border-white/5 z-10">
         <div class="max-w-7xl mx-auto">
             <div class="mb-16 scroll-trigger">
                 <span class="text-accent font-bold text-xs tracking-widest uppercase block mb-2">01 Science</span>
@@ -144,11 +137,11 @@
                         <div class="flex flex-col md:flex-row gap-8 items-center">
                             <div class="flex-1 space-y-4">
                                 <p class="text-subtext leading-relaxed">
-                                    「やる気があるから動く」は誤解です。動くからこそ側坐核が刺激され、ドーパミンが出る。<br>
-                                    これが脳科学的事実、<span class="text-white font-bold">「作業興奮」</span>です。
+                                    「やる気があるから動く」というのは誤解だと<span class="text-white font-bold">神山は考えます</span>。動くからこそ側坐核が刺激され、ドーパミンが出る。<br>
+                                    これが脳科学的事実、「作業興奮」です。
                                 </p>
                                 <div class="bg-white/5 rounded-lg p-4 border-l-2 border-accent">
-                                    <p class="text-sm text-white">悩み続けるより、まず「5分」「1問」動くことが全ての突破口になる。</p>
+                                    <p class="text-sm text-white">悩み続けるより、まず「5分」「1問」動くことが全ての突破口になると神山は確信しています。</p>
                                 </div>
                             </div>
                             <!-- Visual Representation -->
@@ -159,7 +152,6 @@
                                 <div class="w-16 h-16 border-2 border-accent rounded-full animate-spin border-t-transparent"></div>
                             </div>
                         </div>
-                        <p class="mt-6 text-xs text-subtext/60">Source: メンタリストDaiGo『運は操れる』, きぐち『ブログで５億円稼いだ方法』</p>
                     </div>
                 </div>
 
@@ -168,12 +160,11 @@
                     <div>
                         <h3 class="text-xl font-bold mb-3 text-white">「0」と「1」の圧倒的な差</h3>
                         <p class="text-subtext text-sm leading-relaxed mb-4">
-                            1日1分の行動でも、何もしない「0」とは天と地ほどの差があります。小さな行動（極小クエスト）が人間の「進める本能」を刺激します。
+                            1日1分の行動でも、何もしない「0」とは天と地ほどの差があります。神山はこの小さな行動（極小クエスト）こそが、人間の「進める本能」を刺激するスイッチだと捉えています。
                         </p>
                     </div>
                     <div class="flex items-end justify-between border-t border-white/10 pt-4 mt-4">
                         <span class="text-4xl font-mono font-bold text-white">0 <span class="text-subtext text-xl">vs</span> 1</span>
-                        <p class="text-xs text-subtext/60 text-right">Source:<br>鈴木祐『進化論マーケティング』</p>
                     </div>
                 </div>
 
@@ -182,9 +173,8 @@
                     <div class="flex-1">
                         <h3 class="text-xl font-bold mb-2 text-white"><i class="fas fa-fire text-accent mr-2"></i>GRIT（やり抜く力）と試行回数</h3>
                         <p class="text-subtext leading-relaxed">
-                            成功の唯一の法則は「試行回数」を増やすこと。結果ではなく「続けた事実（進捗）」に目を向けることで、モチベーションは維持されます。
+                            成功の唯一の法則は「試行回数」を増やすこと。結果ではなく「続けた事実（進捗）」に目を向けることでモチベーションは維持される、というのが神山の持論です。
                         </p>
-                        <p class="mt-4 text-xs text-subtext/60">Source: メンタリストDaiGo, 鈴木祐</p>
                     </div>
                     <!-- Bar Chart Visual -->
                     <div class="w-full md:w-1/3 h-24 flex items-end justify-between gap-2 px-4">
@@ -200,7 +190,7 @@
     </section>
 
     <!-- Section 2: Self-Control & Mindset -->
-    <section id="mindset" class="py-24 px-6 relative bg-card/30">
+    <section id="mindset" class="py-24 px-6 relative bg-card/30 z-10">
         <div class="max-w-7xl mx-auto">
             <div class="mb-16 scroll-trigger">
                 <span class="text-accent_purple font-bold text-xs tracking-widest uppercase block mb-2">02 Mindset</span>
@@ -214,9 +204,8 @@
                     <h3 class="text-2xl font-bold mb-4 text-white">脱・他責。<br><span class="text-subtext text-lg">Locus of Control</span></h3>
                     <p class="text-subtext leading-relaxed mb-4">
                         他責は「自尊心を守る防衛本能」ですが、同時に「人生のハンドルを他人に渡す行為」です。<br>
-                        自分の人生を自分でコントロールできている感覚（自己効力感）こそが、幸福の源泉です。
+                        自分の人生を自分でコントロールできている感覚（自己効力感）こそが幸福の源泉だと、神山は生徒に伝え続けます。
                     </p>
-                    <p class="text-xs text-subtext/60">Source: 橘玲, メンタリストDaiGo</p>
                 </div>
 
                 <!-- Card 2.2 -->
@@ -232,10 +221,9 @@
                         </li>
                         <li class="flex items-start">
                             <span class="w-1.5 h-1.5 bg-accent_purple rounded-full mt-2 mr-2 flex-shrink-0"></span>
-                            できていない1割ではなく、<span class="text-white font-bold ml-1">できている9割</span>を見る。
+                            <span>できていない1割ではなく、<span class="text-white font-bold">できている9割</span>を見ることを神山は推奨します。</span>
                         </li>
                     </ul>
-                    <p class="mt-6 text-xs text-subtext/60">Source: メンタリストDaiGo『究極のマインドフルネス』</p>
                 </div>
 
                 <!-- Card 2.3 -->
@@ -245,7 +233,7 @@
                             <h3 class="text-2xl font-bold mb-3 text-white">失敗の再定義（リフレーミング）</h3>
                             <p class="text-subtext leading-relaxed">
                                 失敗は「ダメなこと」ではありません。<br>
-                                それは<span class="text-white font-bold">「部分的成功」</span>であり、貴重な<span class="text-white font-bold">「データ収集」</span>です。<br>
+                                神山にとって、それは<span class="text-white font-bold">「部分的成功」</span>であり、貴重な<span class="text-white font-bold">「データ収集」</span>です。<br>
                                 過去や未来にとらわれず、「今、ここ」の積み重ねだけに集中しましょう。
                             </p>
                         </div>
@@ -254,7 +242,6 @@
                             <div class="h-2 w-full bg-white/10 rounded-full overflow-hidden">
                                 <div class="h-full bg-accent_purple w-3/4"></div>
                             </div>
-                            <p class="mt-4 text-xs text-subtext/60">Source: キャロル・ドゥエック, 鈴木祐</p>
                         </div>
                     </div>
                 </div>
@@ -263,7 +250,7 @@
     </section>
 
     <!-- Section 3: Strategic Judgment -->
-    <section id="strategy" class="py-24 px-6 relative border-t border-white/5">
+    <section id="strategy" class="py-24 px-6 relative border-t border-white/5 z-10">
         <div class="max-w-7xl mx-auto">
             <div class="mb-16 scroll-trigger">
                 <span class="text-accent_orange font-bold text-xs tracking-widest uppercase block mb-2">03 Strategy</span>
@@ -276,9 +263,8 @@
                 <div class="glass-card rounded-3xl p-8 md:col-span-1 scroll-trigger">
                     <h3 class="text-xl font-bold mb-4 text-white">人生はトレードオフ</h3>
                     <p class="text-subtext text-sm leading-relaxed mb-6">
-                        何かを得るには何かを捨てなければなりません。「何をするか」より<span class="text-white font-bold">「何をしないか（やめるか）」</span>を戦略的に決めることが重要です。
+                        何かを得るには何かを捨てなければなりません。「何をするか」より<span class="text-white font-bold">「何をしないか（やめるか）」</span>を戦略的に決めることが重要だと神山は説きます。
                     </p>
-                    <p class="text-xs text-subtext/60">Source: デヴォン・プライス『「怠惰」なんて存在しない』</p>
                 </div>
 
                 <!-- Card 3.2 -->
@@ -288,14 +274,13 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <div>
                             <h4 class="text-accent_orange font-bold text-sm mb-2">Compass</h4>
-                            <p class="text-subtext text-sm">迷った時は「何のためにやっているのか？」という原点へ。目的がコンパスとなり、感情から切り離された正しい判断を導きます。</p>
+                            <p class="text-subtext text-sm">迷った時は「何のためにやっているのか？」という原点へ。目的がコンパスとなり、感情から切り離された正しい判断を導くと神山は指導します。</p>
                         </div>
                         <div>
                             <h4 class="text-accent_orange font-bold text-sm mb-2">Visibility</h4>
                             <p class="text-subtext text-sm">タスクと期限を可視化。見通しを持つことは「進める本能」を刺激し、行動を加速させます。</p>
                         </div>
                     </div>
-                    <p class="mt-6 text-xs text-subtext/60">Source: 神田昌典</p>
                 </div>
 
                  <!-- Card 3.3 -->
@@ -303,7 +288,7 @@
                     <div>
                         <h3 class="text-xl font-bold text-white mb-2">準備と自信</h3>
                         <p class="text-subtext text-sm max-w-2xl">
-                            結果に落ち込むのは準備不足だから（無力感）。やりきった上での失敗は「納得感」に変わり、次の改善（レジリエンス）に繋がります。
+                            結果に落ち込むのは準備不足だから（無力感）。やりきった上での失敗は「納得感」に変わり、次の改善（レジリエンス）に繋がる。これが神山の経験則です。
                         </p>
                     </div>
                     <i class="fas fa-hourglass-half text-3xl text-accent_orange opacity-50"></i>
@@ -313,7 +298,7 @@
     </section>
 
     <!-- Section 4: Team Building -->
-    <section id="team" class="py-24 px-6 relative bg-card/30">
+    <section id="team" class="py-24 px-6 relative bg-card/30 z-10">
         <div class="max-w-7xl mx-auto">
             <div class="mb-16 scroll-trigger">
                 <span class="text-accent_green font-bold text-xs tracking-widest uppercase block mb-2">04 Team Building</span>
@@ -331,9 +316,8 @@
                         <h3 class="text-2xl font-bold text-white">心理的安全性</h3>
                     </div>
                     <p class="text-subtext leading-relaxed mb-4">
-                        「失敗しても馬鹿にされない」安心感が最強のチームを作ります。互いに教え合い、高め合う<span class="text-white font-bold">「ソーシャルプレッシャー」</span>を利用しましょう。受験はチーム戦です。
+                        「失敗しても馬鹿にされない」安心感が最強のチームを作ります。互いに教え合い、高め合う<span class="text-white font-bold">「ソーシャルプレッシャー」</span>を利用する。これが神山流のクラス運営です。
                     </p>
-                    <p class="text-xs text-subtext/60">Source: Googleの研究, 神田昌典</p>
                 </div>
 
                 <!-- Card 4.2 -->
@@ -347,7 +331,6 @@
                     <p class="text-subtext leading-relaxed mb-4">
                         挨拶は「あなたを受け入れる」という好意のプレゼント。誰かのために動くことは、脳科学的に自分の幸福感を高めます（ヘルパーズ・ハイ）。
                     </p>
-                    <p class="text-xs text-subtext/60">Source: ロバート・B・チャルディーニ, 西野亮廣</p>
                 </div>
 
                 <!-- Card 4.3 -->
@@ -356,18 +339,16 @@
                         <h3 class="text-xl font-bold mb-3 text-white">他者比較の無意味さ & 比較優位</h3>
                         <p class="text-subtext text-sm leading-relaxed mb-2">
                             他人と比べるのではなく、「過去の自分」と比べて成長を感じる。<br>
-                            自分だけの「かたより（強み）」で集団に貢献する。
+                            自分だけの「かたより（強み）」で集団に貢献してください。
                         </p>
-                        <p class="text-xs text-subtext/60 mt-2">Source: 鈴木祐『天才性が見つかる 才能の地図』</p>
                     </div>
                     <div class="w-px bg-white/10 hidden md:block"></div>
                     <div class="flex-1">
                         <h3 class="text-xl font-bold mb-3 text-white">他人を変えようとしない</h3>
                         <p class="text-subtext text-sm leading-relaxed mb-2">
                             「馬を水辺に連れて行くことはできても、水を飲ませることはできない」。<br>
-                            他人（変えられないもの）ではなく、自分（変えられるもの）に集中する。
+                            他人（変えられないもの）ではなく、自分（変えられるもの）に集中するべきだと神山は考えます。
                         </p>
-                        <p class="text-xs text-subtext/60 mt-2">Source: デール・カーネギー『人を動かす』</p>
                     </div>
                 </div>
             </div>
@@ -375,7 +356,7 @@
     </section>
 
     <!-- Footer -->
-    <section class="min-h-[60vh] flex flex-col justify-center items-center text-center px-6 py-20 bg-black relative border-t border-white/5">
+    <section class="min-h-[60vh] flex flex-col justify-center items-center text-center px-6 py-20 bg-black relative border-t border-white/5 z-10">
         <div class="max-w-4xl mx-auto z-10">
             <h2 class="text-5xl md:text-7xl font-bold text-white mb-8 tracking-tighter">
                 Be Autonomous.
@@ -386,7 +367,8 @@
                 たくましく人生を切り拓いていける。<br>
             </p>
             <p class="text-white font-bold text-xl mb-12">
-                この1年で、あなたのOSをアップデートしましょう。
+                この1年で、あなたのOSをアップデートしましょう。<br>
+                <span class="text-sm text-subtext font-normal mt-4 block">- 神山 -</span>
             </p>
             
             <button class="bg-white text-black px-8 py-4 rounded-full font-semibold hover:scale-105 transition transform duration-300">
@@ -404,13 +386,18 @@
             const observerOptions = {
                 root: null,
                 rootMargin: '0px',
-                threshold: 0.1
+                threshold: 0.15 // 少し多めに見えてから発火
             };
 
             const observer = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
+                    // 画面に入った時
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
+                    } 
+                    // 画面から出た時（ここでクラスを外すことで、次回またアニメーションする）
+                    else {
+                        entry.target.classList.remove('visible');
                     }
                 });
             }, observerOptions);
