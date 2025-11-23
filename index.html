@@ -115,6 +115,21 @@
         html {
             scroll-behavior: smooth;
         }
+
+        /* Mobile Menu Animation */
+        #mobile-menu {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #mobile-menu.hidden-menu {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        #mobile-menu.visible-menu {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
     </style>
 </head>
 <body class="selection:bg-accent selection:text-white">
@@ -139,13 +154,47 @@
             <i class="fab fa-apple text-lg mr-2"></i>
             <span class="font-bold">神山の思考</span>
         </div>
+        
+        <!-- PC Menu -->
         <div class="hidden md:flex space-x-6 text-xs text-subtext font-medium">
             <a href="#science" class="hover:text-white transition">Science</a>
             <a href="#mindset" class="hover:text-white transition">Mindset</a>
             <a href="#strategy" class="hover:text-white transition">Strategy</a>
             <a href="#team" class="hover:text-white transition">Team</a>
+            <a href="#references" class="hover:text-white transition">References</a>
         </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="menu-btn" class="md:hidden text-white focus:outline-none z-50 relative">
+            <i class="fas fa-bars text-lg transition-transform duration-300"></i>
+        </button>
     </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="hidden-menu fixed inset-0 z-40 bg-black/95 backdrop-blur-xl flex flex-col justify-center items-center">
+        <div class="flex flex-col space-y-8 text-center">
+            <a href="#science" class="mobile-link text-2xl font-bold text-white hover:text-accent transition transform hover:scale-105">
+                <span class="text-xs text-subtext block mb-1 uppercase tracking-widest font-normal">01</span>
+                Science
+            </a>
+            <a href="#mindset" class="mobile-link text-2xl font-bold text-white hover:text-accent_purple transition transform hover:scale-105">
+                <span class="text-xs text-subtext block mb-1 uppercase tracking-widest font-normal">02</span>
+                Mindset
+            </a>
+            <a href="#strategy" class="mobile-link text-2xl font-bold text-white hover:text-accent_orange transition transform hover:scale-105">
+                <span class="text-xs text-subtext block mb-1 uppercase tracking-widest font-normal">03</span>
+                Strategy
+            </a>
+            <a href="#team" class="mobile-link text-2xl font-bold text-white hover:text-accent_green transition transform hover:scale-105">
+                <span class="text-xs text-subtext block mb-1 uppercase tracking-widest font-normal">04</span>
+                Team
+            </a>
+            <div class="w-12 h-[1px] bg-white/10 mx-auto"></div>
+            <a href="#references" class="mobile-link text-xl font-medium text-subtext hover:text-white transition">
+                OSの仕様書 / 参考文献
+            </a>
+        </div>
+    </div>
 
     <!-- Hero Section -->
     <section class="min-h-[90vh] flex flex-col justify-center items-center text-center px-6 relative pt-20 z-10">
@@ -599,6 +648,40 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
+            // Toggle Mobile Menu
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+            const menuIcon = menuBtn.querySelector('i');
+
+            let isMenuOpen = false;
+
+            const toggleMenu = () => {
+                isMenuOpen = !isMenuOpen;
+                if(isMenuOpen) {
+                    mobileMenu.classList.remove('hidden-menu');
+                    mobileMenu.classList.add('visible-menu');
+                    menuIcon.classList.remove('fa-bars');
+                    menuIcon.classList.add('fa-times');
+                    document.body.style.overflow = 'hidden'; // Lock scroll
+                } else {
+                    mobileMenu.classList.remove('visible-menu');
+                    mobileMenu.classList.add('hidden-menu');
+                    menuIcon.classList.remove('fa-times');
+                    menuIcon.classList.add('fa-bars');
+                    document.body.style.overflow = ''; // Unlock scroll
+                }
+            };
+
+            menuBtn.addEventListener('click', toggleMenu);
+
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    toggleMenu(); // Close menu on link click
+                });
+            });
+
+
             // 1. Fade-in on scroll (Card visibility)
             const observerOptions = {
                 root: null,
