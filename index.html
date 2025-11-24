@@ -76,7 +76,7 @@
             border-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* App Icon Card Style */
+        /* App Icon Card Style - Updated for Text */
         .app-card {
             background: rgba(20, 20, 20, 0.4);
             backdrop-filter: blur(20px);
@@ -85,29 +85,32 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            aspect-ratio: 1 / 1;
-            transition: all 0.3s ease;
+            justify-content: flex-start;
+            padding: 2rem 1.5rem;
+            height: 100%;
+            min-height: 240px;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
             cursor: default;
+            text-align: center;
         }
         .app-card:hover {
             background: rgba(40, 40, 40, 0.6);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
             border-color: rgba(255, 255, 255, 0.15);
         }
         .app-icon-wrapper {
-            width: 3.5rem;
-            height: 3.5rem;
+            width: 4rem;
+            height: 4rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 0.75rem;
-            transition: transform 0.3s ease;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .app-card:hover .app-icon-wrapper {
-            transform: scale(1.1);
+            transform: scale(1.15) rotate(-5deg);
         }
 
         /* Text Reveal Animation */
@@ -488,18 +491,22 @@
                 <div class="mb-12 scroll-trigger">
                     <span class="text-blue-400 font-bold text-xs tracking-widest uppercase block mb-2">05 Tools</span>
                     <h2 class="text-4xl md:text-6xl font-bold mb-4 text-white">思考の拡張ツール</h2>
-                    <p class="text-subtext text-xl text-reveal-target">神山の脳内を外部化し、加速させるアプリケーション。</p>
+                    <p class="text-subtext text-xl text-reveal-target">神山の脳内を外部化し、加速させるアプリケーション群。</p>
                 </div>
 
                 <!-- App Grid -->
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    
                     <!-- Notion -->
                     <div class="scroll-trigger">
                         <div class="app-card group">
                             <div class="app-icon-wrapper text-white">
                                 <i class="fas fa-cube"></i>
                             </div>
-                            <span class="text-white font-medium text-sm">Notion</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-accent transition-colors">Notion</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                思考の混沌を、<br>美しい秩序ある<br>「本棚」へ。
+                            </p>
                         </div>
                     </div>
 
@@ -509,7 +516,10 @@
                             <div class="app-icon-wrapper text-purple-500">
                                 <i class="fas fa-gem"></i>
                             </div>
-                            <span class="text-white font-medium text-sm">Obsidian</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-purple-400 transition-colors">Obsidian</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                脳のニューロンを<br>模倣しリンクする、<br>第二の脳。
+                            </p>
                         </div>
                     </div>
 
@@ -519,7 +529,10 @@
                             <div class="app-icon-wrapper text-blue-400">
                                 <i class="fas fa-layer-group"></i>
                             </div>
-                            <span class="text-white font-medium text-sm">Craft</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-blue-300 transition-colors">Craft</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                単なるメモを、<br>洗練された<br>アート作品へ。
+                            </p>
                         </div>
                     </div>
 
@@ -529,7 +542,10 @@
                             <div class="app-icon-wrapper text-white">
                                 <i class="fab fa-github"></i>
                             </div>
-                            <span class="text-white font-medium text-sm">GitHub</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-gray-300 transition-colors">GitHub</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                世界とコードを共有し<br>価値を生み出す、<br>創造の拠点。
+                            </p>
                         </div>
                     </div>
 
@@ -539,7 +555,10 @@
                             <div class="app-icon-wrapper text-transparent bg-clip-text bg-gradient-to-tr from-cyan-400 to-purple-500">
                                 <i class="fas fa-palette"></i>
                             </div>
-                            <span class="text-white font-medium text-sm">Canva</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-cyan-300 transition-colors">Canva</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                脳内のイメージを<br>瞬時に視覚化する、<br>デザインの拡張。
+                            </p>
                         </div>
                     </div>
 
@@ -549,7 +568,10 @@
                             <div class="app-icon-wrapper text-blue-500">
                                 <i class="fas fa-microchip"></i>
                             </div>
-                            <span class="text-white font-medium text-sm text-center px-2">AI Studio</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-blue-400 transition-colors text-center leading-tight">AI Studio</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                次世代の知能を<br>設計・指揮する、<br>AI開発の母艦。
+                            </p>
                         </div>
                     </div>
 
@@ -559,7 +581,10 @@
                             <div class="app-icon-wrapper text-green-400">
                                 <i class="fas fa-book-open"></i>
                             </div>
-                            <span class="text-white font-medium text-sm">NotebookLM</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-green-300 transition-colors text-center leading-tight">NotebookLM</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                膨大な資料と対話する、<br>あなただけの<br>専属司書。
+                            </p>
                         </div>
                     </div>
 
@@ -569,7 +594,10 @@
                             <div class="app-icon-wrapper text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-pink-500">
                                 <i class="fas fa-star"></i>
                             </div>
-                            <span class="text-white font-medium text-sm">Gemini</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-pink-300 transition-colors">Gemini</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                あらゆる知的作業を<br>加速・即応させる、<br>敏腕秘書。
+                            </p>
                         </div>
                     </div>
 
@@ -577,9 +605,12 @@
                     <div class="scroll-trigger" style="transition-delay: 400ms;">
                         <div class="app-card group">
                             <div class="app-icon-wrapper text-orange-500">
-                                <i class="fas fa-calendar-day"></i>
+                                <i class="fas fa-calendar-check"></i>
                             </div>
-                            <span class="text-white font-medium text-sm text-center px-2">FirstSeed</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-orange-400 transition-colors text-center leading-tight">FirstSeed</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                「時間」という<br>資源を最大化する、<br>人生のコックピット。
+                            </p>
                         </div>
                     </div>
 
@@ -589,9 +620,13 @@
                             <div class="app-icon-wrapper text-gray-400">
                                 <i class="fas fa-terminal"></i>
                             </div>
-                            <span class="text-white font-medium text-sm">Terminal</span>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-white transition-colors">Terminal</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                ローカル環境で<br>知能を呼び出す、<br>働き者の相棒。
+                            </p>
                         </div>
                     </div>
+
                 </div>
             </div>
         </section>
