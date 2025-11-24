@@ -69,6 +69,7 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
             transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.4s;
             border-radius: 2rem;
+            height: 100%;
         }
         .bento-card:hover {
             transform: scale(1.01);
@@ -76,7 +77,7 @@
             border-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* App Icon Card Style - Updated for Text */
+        /* App Icon Card Style */
         .app-card {
             background: rgba(20, 20, 20, 0.4);
             backdrop-filter: blur(20px);
@@ -193,7 +194,7 @@
             <a href="#mindset" class="hover:text-white transition">Mindset</a>
             <a href="#strategy" class="hover:text-white transition">Strategy</a>
             <a href="#team" class="hover:text-white transition">Team</a>
-            <a href="#tools" class="hover:text-white transition">Tools</a>
+            <a href="#tools" class="hover:text-white transition text-blue-400">Tools</a>
             <a href="#references" class="hover:text-white transition">References</a>
         </div>
 
@@ -223,7 +224,7 @@
                 Team
             </a>
             <a href="#tools" class="mobile-link text-2xl font-bold text-white hover:text-blue-400 transition transform hover:scale-105">
-                <span class="text-xs text-subtext block mb-1 uppercase tracking-widest font-normal">05</span>
+                <span class="text-xs text-subtext block mb-1 uppercase tracking-widest font-normal">Extensions</span>
                 Tools
             </a>
             <div class="w-12 h-[1px] bg-white/10 mx-auto"></div>
@@ -269,7 +270,7 @@
                             <div class="flex flex-col md:flex-row gap-8 items-center">
                                 <div class="flex-1 space-y-4">
                                     <p class="text-2xl font-semibold leading-relaxed text-reveal-target">
-                                        「やる気があるから動く」というのは誤解だと<span class="text-white">神山は考えます</span>。動くからこそ側坐核が刺激され、ドーパミンが出る。<br>
+                                        「やる気があるから動く」というのは誤解だと<span class="text-white">神山は考えます</span>。動くからこそ<span class="text-white font-bold">脳のエンジン</span>が点火され、ドーパミンが出る。<br>
                                         これが脳科学的事実、「作業興奮」です。
                                     </p>
                                     <div class="bg-white/5 rounded-2xl p-6 border border-white/5 backdrop-blur-md">
@@ -324,13 +325,23 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Card 2.1 -->
-                    <div class="bento-card p-10 scroll-trigger">
-                        <h3 class="text-3xl font-bold mb-6 text-white">脱・他責。<br><span class="text-subtext text-xl font-normal">Locus of Control</span></h3>
-                        <p class="text-xl font-medium leading-relaxed text-reveal-target">
-                            他責は「自尊心を守る防衛本能」ですが、同時に「人生のハンドルを他人に渡す行為」です。<br><br>
-                            自分の人生を自分でコントロールできている感覚（自己効力感）こそが幸福の源泉だと、神山は生徒に伝え続けます。
-                        </p>
+                    <!-- Card 2.1 (Locus of Control) -->
+                    <div class="bento-card p-10 scroll-trigger relative overflow-hidden group">
+                        <!-- Background Effect -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-accent_purple/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <i class="fas fa-fingerprint text-9xl text-accent_purple opacity-[0.05] absolute -right-10 -bottom-10 group-hover:scale-110 transition-transform duration-700"></i>
+
+                        <div class="relative z-10">
+                            <h3 class="text-3xl font-bold mb-6 text-white flex items-center gap-3">
+                                脱・他責。
+                                <i class="fas fa-fingerprint text-2xl text-accent_purple opacity-70"></i>
+                            </h3>
+                            <span class="text-subtext text-sm font-bold uppercase tracking-widest block mb-4">Locus of Control</span>
+                            <p class="text-xl font-medium leading-relaxed text-reveal-target">
+                                他責は「自尊心を守る防衛本能」ですが、同時に「人生のハンドルを他人に渡す行為」です。<br><br>
+                                自分の人生を自分でコントロールできている感覚（自己効力感）こそが幸福の源泉だと、神山は生徒に伝え続けます。
+                            </p>
+                        </div>
                     </div>
 
                     <!-- Card 2.2 -->
@@ -360,7 +371,7 @@
                                 <h3 class="text-2xl font-bold mb-4 text-white">失敗の再定義（リフレーミング）</h3>
                                 <p class="text-xl font-medium leading-relaxed text-reveal-target">
                                     失敗は「ダメなこと」ではありません。<br>
-                                    神山にとって、それは<span class="text-white">「部分的成功」</span>であり、貴重な<span class="text-white">「データ収集」</span>です。<br>
+                                    <span class="text-white font-bold">生徒の皆さんにとって</span>、それは<span class="text-white">「部分的成功」</span>であり、貴重な<span class="text-white">「データ収集」</span>です。<br>
                                     過去や未来にとらわれず、「今、ここ」の積み重ねだけに集中しましょう。
                                 </p>
                             </div>
@@ -395,7 +406,8 @@
                             </p>
                         </div>
                         <div class="mt-8 text-center">
-                             <i class="fas fa-balance-scale text-4xl text-white/20"></i>
+                             <!-- Orange Scale Icon -->
+                             <i class="fas fa-balance-scale text-5xl text-accent_orange drop-shadow-[0_0_20px_rgba(255,159,10,0.5)]"></i>
                         </div>
                     </div>
 
@@ -447,7 +459,7 @@
                             <h3 class="text-2xl font-bold text-white">心理的安全性</h3>
                         </div>
                         <p class="text-xl font-medium leading-relaxed text-reveal-target">
-                            「失敗しても馬鹿にされない」安心感が最強のチームを作ります。互いに教え合い、高め合う<span class="text-white">「ソーシャルプレッシャー」</span>を利用する。これが神山流のクラス運営です。
+                            「失敗しても馬鹿にされない」安心感が最強のチームを作ります。互いに教え合い、高め合う<span class="text-white">「ソーシャルプレッシャー」</span>を利用する。これが神山流の<span class="text-white font-bold">学級経営</span>です。
                         </p>
                     </div>
 
@@ -464,19 +476,40 @@
                         </p>
                     </div>
 
-                    <!-- Card 4.3 -->
-                    <div class="bento-card p-10 lg:col-span-2 scroll-trigger flex flex-col md:flex-row justify-between gap-12">
-                        <div class="flex-1">
-                            <h3 class="text-xl font-bold mb-3 text-white">他者比較の無意味さ & 比較優位</h3>
-                            <p class="text-subtext text-opacity-50 text-sm leading-relaxed mb-2">
+                    <!-- Card 4.3 (Icons Added) -->
+                    <div class="bento-card p-10 lg:col-span-2 scroll-trigger flex flex-col md:flex-row justify-between gap-12 relative overflow-hidden">
+                        
+                        <!-- Left Part -->
+                        <div class="flex-1 relative group z-10">
+                             <div class="absolute -left-6 -top-6 text-7xl text-accent_green opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-white flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-accent_green/20 flex items-center justify-center text-accent_green text-sm shadow-[0_0_10px_rgba(48,209,88,0.3)]">
+                                    <i class="fas fa-chart-line"></i>
+                                </span>
+                                他者比較の無意味さ & 比較優位
+                            </h3>
+                            <p class="text-subtext text-opacity-70 text-sm leading-relaxed mb-2 pl-1">
                                 他人と比べるのではなく、「過去の自分」と比べて成長を感じる。<br>
                                 自分だけの「かたより（強み）」で集団に貢献してください。
                             </p>
                         </div>
+
                         <div class="w-px bg-white/10 hidden md:block"></div>
-                        <div class="flex-1">
-                            <h3 class="text-xl font-bold mb-3 text-white">他人を変えようとしない</h3>
-                            <p class="text-subtext text-opacity-50 text-sm leading-relaxed mb-2">
+                        
+                        <!-- Right Part -->
+                        <div class="flex-1 relative group z-10">
+                            <div class="absolute -right-6 -top-6 text-7xl text-accent_green opacity-5 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none transform -scale-x-100">
+                                <i class="fas fa-chess-knight"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-white flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-full bg-accent_green/20 flex items-center justify-center text-accent_green text-sm shadow-[0_0_10px_rgba(48,209,88,0.3)]">
+                                    <i class="fas fa-user-cog"></i>
+                                </span>
+                                他人を変えようとしない
+                            </h3>
+                            <p class="text-subtext text-opacity-70 text-sm leading-relaxed mb-2 pl-1">
                                 「馬を水辺に連れて行くことはできても、水を飲ませることはできない」。<br>
                                 他人（変えられないもの）ではなく、自分（変えられるもの）に集中するべきだと神山は考えます。
                             </p>
@@ -486,11 +519,34 @@
             </div>
         </section>
 
-        <!-- Section 5: Tools (Applications) -->
-        <section id="tools" class="py-32 px-4 md:px-6 relative border-t border-white/5 z-10">
+        <!-- Footer / Start Update (CTA) -->
+        <section class="min-h-[60vh] flex flex-col justify-center items-center text-center px-6 py-20 relative border-t border-white/5 z-10">
+            <div class="max-w-4xl mx-auto z-10">
+                <h2 class="text-6xl md:text-9xl font-bold text-white mb-8 tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+                    Be Autonomous.
+                </h2>
+                <div class="w-24 h-[1px] bg-white/20 mx-auto mb-12"></div>
+                <p class="text-subtext max-w-2xl mx-auto leading-relaxed mb-8 text-lg">
+                    予測不能な社会の中で、自分の頭で考え、他者と協働しながら、<br>
+                    たくましく人生を切り拓いていける。<br>
+                </p>
+                <p class="text-white font-bold text-2xl mb-16">
+                    この1年で、あなたのOSをアップデートしましょう。<br>
+                    <span class="text-base text-subtext font-normal mt-6 block tracking-widest uppercase">- 神山 -</span>
+                </p>
+                
+                <button onclick="document.getElementById('tools').scrollIntoView({behavior: 'smooth'})" class="group bg-white text-black px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center gap-2 mx-auto">
+                    Start Update
+                    <i class="fas fa-arrow-down group-hover:translate-y-1 transition-transform"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Section Tools (Moved here) -->
+        <section id="tools" class="py-32 px-4 md:px-6 relative border-t border-white/5 z-10 bg-gradient-to-b from-black to-gray-900">
             <div class="max-w-6xl mx-auto">
                 <div class="mb-12 scroll-trigger">
-                    <span class="text-blue-400 font-bold text-xs tracking-widest uppercase block mb-2">05 Tools</span>
+                    <span class="text-blue-400 font-bold text-xs tracking-widest uppercase block mb-2">Extensions</span>
                     <h2 class="text-4xl md:text-6xl font-bold mb-4 text-white">思考の拡張ツール</h2>
                     <p class="text-subtext text-xl text-reveal-target">神山の脳内を外部化し、加速させるアプリケーション群。</p>
                 </div>
@@ -498,21 +554,8 @@
                 <!-- App Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     
-                    <!-- 1. Notion -->
-                    <div class="scroll-trigger">
-                        <div class="app-card group">
-                            <div class="app-icon-wrapper text-white">
-                                <i class="fas fa-cube"></i>
-                            </div>
-                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-accent transition-colors">Notion</h3>
-                            <p class="text-xs text-subtext leading-relaxed">
-                                思考の混沌を、<br>美しい秩序ある<br>「本棚」へ。
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- 2. Obsidian -->
-                    <div class="scroll-trigger" style="transition-delay: 50ms;">
+                     <!-- 1. Obsidian -->
+                     <div class="scroll-trigger">
                         <div class="app-card group">
                             <div class="app-icon-wrapper text-purple-500">
                                 <i class="fas fa-gem"></i>
@@ -524,8 +567,8 @@
                         </div>
                     </div>
 
-                     <!-- 3. Gemini CLI -->
-                     <div class="scroll-trigger" style="transition-delay: 100ms;">
+                    <!-- 2. Gemini CLI -->
+                    <div class="scroll-trigger" style="transition-delay: 50ms;">
                         <div class="app-card group">
                             <div class="app-icon-wrapper text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-pink-500">
                                 <i class="fas fa-star"></i>
@@ -537,8 +580,8 @@
                         </div>
                     </div>
 
-                    <!-- 4. AI Studio -->
-                    <div class="scroll-trigger" style="transition-delay: 150ms;">
+                    <!-- 3. AI Studio -->
+                    <div class="scroll-trigger" style="transition-delay: 100ms;">
                         <div class="app-card group">
                             <div class="app-icon-wrapper text-blue-500">
                                 <i class="fas fa-microchip"></i>
@@ -546,6 +589,19 @@
                             <h3 class="text-white font-bold text-lg mb-2 group-hover:text-blue-400 transition-colors text-center leading-tight">AI Studio</h3>
                             <p class="text-xs text-subtext leading-relaxed">
                                 次世代の知能を<br>設計・指揮する、<br>AI開発の母艦。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 4. GitHub -->
+                    <div class="scroll-trigger" style="transition-delay: 150ms;">
+                        <div class="app-card group">
+                            <div class="app-icon-wrapper text-white">
+                                <i class="fab fa-github"></i>
+                            </div>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-gray-300 transition-colors">GitHub</h3>
+                            <p class="text-xs text-subtext leading-relaxed">
+                                世界とコードを共有し<br>価値を生み出す、<br>創造の拠点。
                             </p>
                         </div>
                     </div>
@@ -563,15 +619,15 @@
                         </div>
                     </div>
 
-                    <!-- 6. GWS (Google Workspace) -->
+                    <!-- 6. Notion -->
                     <div class="scroll-trigger" style="transition-delay: 250ms;">
                         <div class="app-card group">
-                            <div class="app-icon-wrapper text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-green-500 to-yellow-500">
-                                <i class="fab fa-google"></i>
+                            <div class="app-icon-wrapper text-white">
+                                <i class="fas fa-cube"></i>
                             </div>
-                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-blue-300 transition-colors text-center leading-tight">GWS</h3>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-accent transition-colors">Notion</h3>
                             <p class="text-xs text-subtext leading-relaxed">
-                                数値と論理でビジネスを<br>構造化し駆動する、<br>業務の母艦。
+                                思考の混沌を、<br>美しい秩序ある<br>「本棚」へ。
                             </p>
                         </div>
                     </div>
@@ -589,15 +645,15 @@
                         </div>
                     </div>
 
-                    <!-- 8. GitHub -->
+                    <!-- 8. GWS (Google Workspace) -->
                     <div class="scroll-trigger" style="transition-delay: 350ms;">
                         <div class="app-card group">
-                            <div class="app-icon-wrapper text-white">
-                                <i class="fab fa-github"></i>
+                            <div class="app-icon-wrapper text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-green-500 to-yellow-500">
+                                <i class="fab fa-google"></i>
                             </div>
-                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-gray-300 transition-colors">GitHub</h3>
+                            <h3 class="text-white font-bold text-lg mb-2 group-hover:text-blue-300 transition-colors text-center leading-tight">GWS</h3>
                             <p class="text-xs text-subtext leading-relaxed">
-                                世界とコードを共有し<br>価値を生み出す、<br>創造の拠点。
+                                数値と論理でビジネスを<br>構造化し駆動する、<br>業務の母艦。
                             </p>
                         </div>
                     </div>
@@ -632,29 +688,6 @@
             </div>
         </section>
 
-        <!-- Footer -->
-        <section class="min-h-[60vh] flex flex-col justify-center items-center text-center px-6 py-20 relative border-t border-white/5 z-10">
-            <div class="max-w-4xl mx-auto z-10">
-                <h2 class="text-6xl md:text-9xl font-bold text-white mb-8 tracking-tighter drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                    Be Autonomous.
-                </h2>
-                <div class="w-24 h-[1px] bg-white/20 mx-auto mb-12"></div>
-                <p class="text-subtext max-w-2xl mx-auto leading-relaxed mb-8 text-lg">
-                    予測不能な社会の中で、自分の頭で考え、他者と協働しながら、<br>
-                    たくましく人生を切り拓いていける。<br>
-                </p>
-                <p class="text-white font-bold text-2xl mb-16">
-                    この1年で、あなたのOSをアップデートしましょう。<br>
-                    <span class="text-base text-subtext font-normal mt-6 block tracking-widest uppercase">- 神山 -</span>
-                </p>
-                
-                <button onclick="document.getElementById('references').scrollIntoView({behavior: 'smooth'})" class="group bg-white text-black px-10 py-5 rounded-full font-bold text-lg hover:scale-105 transition transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.4)] flex items-center gap-2 mx-auto">
-                    Start Update
-                    <i class="fas fa-arrow-down group-hover:translate-y-1 transition-transform"></i>
-                </button>
-            </div>
-        </section>
-
         <!-- References -->
         <section id="references" class="py-32 px-4 md:px-6 relative z-10 border-t border-white/5">
             <div class="max-w-6xl mx-auto">
@@ -671,39 +704,48 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div class="bento-card p-6 hover:bg-white/5 transition">
-                            <div class="text-xs text-subtext uppercase tracking-widest mb-1">Mindset</div>
-                            <h4 class="text-xl font-bold text-white mb-2">運は操れる</h4>
-                            <p class="text-sm text-subtext mb-4">メンタリストDaiGo</p>
+                            <div class="text-xs text-subtext uppercase tracking-widest mb-1 px-2 py-0.5 bg-accent/10 text-accent inline-block rounded">Mindset</div>
+                            <h4 class="text-xl font-bold text-white mb-2 mt-3 flex items-center">
+                                <i class="fas fa-star text-accent mr-2 text-sm"></i>
+                                運は操れる
+                            </h4>
+                            <p class="text-sm text-subtext mb-4 pl-6">メンタリストDaiGo</p>
                             <div class="space-y-3">
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「やる気があるから行動するのではなく、行動するからやる気が出る（作業興奮）」</p>
                                 </div>
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「運が良い人とは『試行回数』が多い人だ」</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bento-card p-6 hover:bg-white/5 transition">
-                            <div class="text-xs text-subtext uppercase tracking-widest mb-1">Career</div>
-                            <h4 class="text-xl font-bold text-white mb-2">科学的な適職</h4>
-                            <p class="text-sm text-subtext mb-4">鈴木祐</p>
+                            <div class="text-xs text-subtext uppercase tracking-widest mb-1 px-2 py-0.5 bg-accent/10 text-accent inline-block rounded">Career</div>
+                            <h4 class="text-xl font-bold text-white mb-2 mt-3 flex items-center">
+                                <i class="fas fa-briefcase text-accent mr-2 text-sm"></i>
+                                科学的な適職
+                            </h4>
+                            <p class="text-sm text-subtext mb-4 pl-6">鈴木祐</p>
                             <div class="space-y-3">
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「最高のチームを作る唯一の条件は『心理的安全性』（Googleの研究）」</p>
                                 </div>
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「他者へ貢献することで『ヘルパーズ・ハイ』と呼ばれる幸福感を得られる」</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bento-card p-6 hover:bg-white/5 transition">
-                            <div class="text-xs text-subtext uppercase tracking-widest mb-1">Evolution</div>
-                            <h4 class="text-xl font-bold text-white mb-2">進化論マーケティング</h4>
-                            <p class="text-sm text-subtext mb-4">鈴木祐</p>
+                            <div class="text-xs text-subtext uppercase tracking-widest mb-1 px-2 py-0.5 bg-accent/10 text-accent inline-block rounded">Evolution</div>
+                            <h4 class="text-xl font-bold text-white mb-2 mt-3 flex items-center">
+                                <i class="fas fa-dna text-accent mr-2 text-sm"></i>
+                                進化論マーケティング
+                            </h4>
+                            <p class="text-sm text-subtext mb-4 pl-6">鈴木祐</p>
                             <div class="space-y-3">
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「人間には『物事を前に進めたい』という本能的な欲求（進める本能）がある」</p>
                                 </div>
                             </div>
@@ -718,28 +760,34 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bento-card p-6 hover:bg-white/5 transition">
-                            <div class="text-xs text-subtext uppercase tracking-widest mb-1">Relation</div>
-                            <h4 class="text-xl font-bold text-white mb-2">人を動かす</h4>
-                            <p class="text-sm text-subtext mb-4">デール・カーネギー</p>
+                            <div class="text-xs text-subtext uppercase tracking-widest mb-1 px-2 py-0.5 bg-accent_green/10 text-accent_green inline-block rounded">Relation</div>
+                            <h4 class="text-xl font-bold text-white mb-2 mt-3 flex items-center">
+                                <i class="fas fa-handshake text-accent_green mr-2 text-sm"></i>
+                                人を動かす
+                            </h4>
+                            <p class="text-sm text-subtext mb-4 pl-6">デール・カーネギー</p>
                             <div class="space-y-3">
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_green border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「人を動かす唯一の方法は、その人が自ら動きたくなる気持ちを起こさせること」</p>
                                 </div>
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_green border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「馬を水辺に連れて行くことはできても、水を飲ませることはできない」</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bento-card p-6 hover:bg-white/5 transition">
-                            <div class="text-xs text-subtext uppercase tracking-widest mb-1">Psychology</div>
-                            <h4 class="text-xl font-bold text-white mb-2">影響力の武器</h4>
-                            <p class="text-sm text-subtext mb-4">ロバート・B・チャルディーニ</p>
+                            <div class="text-xs text-subtext uppercase tracking-widest mb-1 px-2 py-0.5 bg-accent_green/10 text-accent_green inline-block rounded">Psychology</div>
+                            <h4 class="text-xl font-bold text-white mb-2 mt-3 flex items-center">
+                                <i class="fas fa-magnet text-accent_green mr-2 text-sm"></i>
+                                影響力の武器
+                            </h4>
+                            <p class="text-sm text-subtext mb-4 pl-6">ロバート・B・チャルディーニ</p>
                             <div class="space-y-3">
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_green border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「人は他人から何かを与えられると、お返しをせずにはいられない（返報性の原理）」</p>
                                 </div>
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_green border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「挨拶とは、最初に与える『好意のプレゼント』である」</p>
                                 </div>
                             </div>
@@ -754,59 +802,71 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bento-card p-6 hover:bg-white/5 transition">
-                            <div class="text-xs text-subtext uppercase tracking-widest mb-1">Strategy</div>
-                            <h4 class="text-xl font-bold text-white mb-2">「怠惰」なんて存在しない</h4>
-                            <p class="text-sm text-subtext mb-4">デヴォン・プライス</p>
+                            <div class="text-xs text-subtext uppercase tracking-widest mb-1 px-2 py-0.5 bg-accent_orange/10 text-accent_orange inline-block rounded">Strategy</div>
+                            <h4 class="text-xl font-bold text-white mb-2 mt-3 flex items-center">
+                                <i class="fas fa-running text-accent_orange mr-2 text-sm"></i>
+                                「怠惰」なんて存在しない
+                            </h4>
+                            <p class="text-sm text-subtext mb-4 pl-6">デヴォン・プライス</p>
                             <div class="space-y-3">
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_orange border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「トレードオフ＝何かを得るためには、何かを諦めなければならない」</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bento-card p-6 hover:bg-white/5 transition">
-                            <div class="text-xs text-subtext uppercase tracking-widest mb-1">Talent</div>
-                            <h4 class="text-xl font-bold text-white mb-2">才能の地図</h4>
-                            <p class="text-sm text-subtext mb-4">鈴木祐</p>
+                            <div class="text-xs text-subtext uppercase tracking-widest mb-1 px-2 py-0.5 bg-accent_orange/10 text-accent_orange inline-block rounded">Talent</div>
+                            <h4 class="text-xl font-bold text-white mb-2 mt-3 flex items-center">
+                                <i class="fas fa-map-marked-alt text-accent_orange mr-2 text-sm"></i>
+                                才能の地図
+                            </h4>
+                            <p class="text-sm text-subtext mb-4 pl-6">鈴木祐</p>
                             <div class="space-y-3">
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_orange border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「他人と違う『かたより』こそが価値になる」</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bento-card p-6 hover:bg-white/5 transition">
-                            <div class="text-xs text-subtext uppercase tracking-widest mb-1">Active Learning</div>
-                            <h4 class="text-xl font-bold text-white mb-2">バカになるほど、本を読め！</h4>
-                            <p class="text-sm text-subtext mb-4">神田 昌典</p>
+                            <div class="text-xs text-subtext uppercase tracking-widest mb-1 px-2 py-0.5 bg-accent_orange/10 text-accent_orange inline-block rounded">Active Learning</div>
+                            <h4 class="text-xl font-bold text-white mb-2 mt-3 flex items-center">
+                                <i class="fas fa-book-reader text-accent_orange mr-2 text-sm"></i>
+                                バカになるほど、本を読め！
+                            </h4>
+                            <p class="text-sm text-subtext mb-4 pl-6">神田 昌典</p>
                             <div class="space-y-3">
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_orange border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「目的を明確にして、必要な情報を能動的に『取りに行く』」</p>
                                 </div>
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_orange border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「意識の高い場でのソーシャルプレッシャーが人を成長させる」</p>
                                 </div>
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_orange border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「大勢の頭を利用する（集合知）」</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bento-card p-6 hover:bg-white/5 transition">
-                            <div class="text-xs text-subtext uppercase tracking-widest mb-1">Leadership</div>
-                            <h4 class="text-xl font-bold text-white mb-2">1分間孫子の兵法</h4>
-                            <p class="text-sm text-subtext mb-4">齋藤 孝</p>
+                            <div class="text-xs text-subtext uppercase tracking-widest mb-1 px-2 py-0.5 bg-accent_orange/10 text-accent_orange inline-block rounded">Leadership</div>
+                            <h4 class="text-xl font-bold text-white mb-2 mt-3 flex items-center">
+                                <i class="fas fa-dragon text-accent_orange mr-2 text-sm"></i>
+                                1分間孫子の兵法
+                            </h4>
+                            <p class="text-sm text-subtext mb-4 pl-6">齋藤 孝</p>
                             <div class="space-y-3">
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_orange border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「彼を知り己を知らば、百戦して殆うからず（自己理解）」</p>
                                 </div>
-                                 <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                 <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_orange border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「主は怒りを以て軍を興こす可からず（感情制御）」</p>
                                 </div>
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_orange border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「明日と他人は変えられないが、今日と自分は変えられる」</p>
                                 </div>
-                                <div class="bg-black/30 p-3 rounded-lg border border-white/5">
+                                <div class="bg-black/30 p-4 rounded-r-lg border-l-4 border-accent_orange border-y border-r border-white/5">
                                     <p class="text-xs text-white leading-relaxed">「仕事は権限ではない。理解と納得である」</p>
                                 </div>
                             </div>
@@ -816,7 +876,7 @@
                 </div>
 
                 <div class="mt-20 text-center text-xs text-subtext pb-12">
-                    &copy; Kamiyama Education Inc.
+                    &copy; 2025 Kamiyama Education. Source Code Loaded.
                 </div>
             </div>
         </section>
