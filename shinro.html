@@ -7,6 +7,27 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'Noto Sans JP', 'sans-serif'],
+            },
+            colors: {
+              brand: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                500: '#0ea5e9',
+                600: '#0284c7',
+                700: '#0369a1',
+                900: '#0c4a6e',
+              }
+            }
+          }
+        }
+      }
+    </script>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -16,15 +37,14 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
         body {
-            font-family: 'Inter', 'Noto Sans JP', sans-serif;
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
             color: #1e293b;
         }
         /* カスタムスクロールバー */
@@ -42,54 +62,32 @@
             background: #94a3b8;
         }
         
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-        
-        .sidebar-item.active {
-            background-color: #e0f2fe;
-            color: #0284c7;
-            border-right: 3px solid #0284c7;
-        }
-
-        .category-badge-public { background-color: #e0f2fe; color: #0369a1; }
-        .category-badge-private { background-color: #ffedd5; color: #c2410c; }
-        .category-badge-kosen { background-color: #f3e8ff; color: #7e22ce; }
-        .category-badge-school { background-color: #dcfce7; color: #15803d; }
-
         .animate-fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
+            animation: fadeIn 0.4s ease-out forwards;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* モバイルメニュー用のオーバーレイアニメーション */
-        .mobile-menu-enter {
-            animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .animate-slide-in-right {
+            animation: slideInRight 0.3s ease-out forwards;
         }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Clickable card hover effects */
-        .clickable-card {
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        .clickable-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .clickable-card:active {
-            transform: translateY(-1px);
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
         }
     </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0"
+  }
+}
+</script>
 </head>
 <body>
     <div id="root"></div>
@@ -134,34 +132,32 @@
             { date: '2026-02-18', displayDate: '2月中旬', title: '私立高校入試（B日程）', category: 'private', desc: '北海道の私立高校入試の後半日程エリア。', type: 'exam' },
         ];
 
-        // --- Icons Component ---
+        const TODOS = [
+            { id: '1', text: "三者面談日程の調整（担任へ連絡）", subText: "進路最終決定のための面談です。", category: 'student' },
+            { id: '2', text: "進路希望調査票の提出", subText: "期限を守って提出しましょう。", category: 'student' },
+            { id: '3', text: "道立：願書情報のオンライン入力", subText: "12/5〜1/22 Web入力期間内に行います。", category: 'student' },
+            { id: '4', text: "オンライン出願のアカウント確認", subText: "メールアドレス等の登録が必要な場合があります。", category: 'student' },
+            { id: '5', text: "私立・高専：Web出願登録", subText: "それぞれの学校のHPから登録が必要です。", category: 'student' },
+            { id: '6', text: "願書下書きの清書（誤字脱字チェック）", subText: "下書きをしっかり確認してから清書します。", category: 'student' },
+            { id: '7', text: "推薦書の作文作成（推薦希望者）", subText: "先生の指導を受けて作成しましょう。", category: 'student' },
+            { id: '8', text: "受験票の確認・保管", subText: "受け取ったらすぐに記載内容を確認してください。", category: 'student' },
+            { id: '9', text: "入学検定料の納付", subText: "道立は「収入証紙」を購入してください。私立・高専は各校の指示に従ってください。", category: 'guardian' },
+            { id: '10', text: "私立高校の「延納手続き」確認", subText: "道立併願の場合、入学金納入期限の延長手続きが必要か確認してください。", category: 'guardian' },
+            { id: '11', text: "合格発表後の入学金準備", subText: "合格後、速やかに納入が必要になります。", category: 'guardian' },
+        ];
+
+        // --- Components ---
+
         const Icon = ({ name, size = 24, className = "", weight = "regular" }) => {
             return <i className={`ph ph-${name.toLowerCase().replace(/([A-Z])/g, "-$1").substring(1)} ${className}`} style={{ fontSize: size, fontWeight: weight === 'bold' ? 700 : 400 }} data-weight={weight}></i>;
         };
 
-        // --- Sub Components ---
-
-        const StatCard = ({ label, value, sub, color, textColor, onClick }) => (
-            <div 
-                onClick={onClick}
-                className={`glass-card p-5 rounded-2xl relative overflow-hidden group clickable-card`}
-            >
-                <div className={`absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full opacity-10 transition-transform group-hover:scale-110 ${color}`}></div>
-                <div className="flex items-center justify-between mb-1">
-                    <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider">{label}</p>
-                    <Icon name="CaretRight" size={16} className="text-slate-300 group-hover:text-slate-500" />
-                </div>
-                <p className={`text-xl md:text-2xl font-bold mb-1 ${textColor || 'text-slate-800'}`}>{value}</p>
-                <p className="text-xs text-slate-400">{sub}</p>
-            </div>
-        );
-
         const CategoryBadge = ({ category }) => {
             const styles = {
-                public: 'category-badge-public',
-                private: 'category-badge-private',
-                kosen: 'category-badge-kosen',
-                school: 'category-badge-school'
+                public: 'bg-sky-100 text-sky-700 border-sky-200',
+                private: 'bg-orange-100 text-orange-700 border-orange-200',
+                kosen: 'bg-purple-100 text-purple-700 border-purple-200',
+                school: 'bg-emerald-100 text-emerald-700 border-emerald-200'
             };
             const labels = {
                 public: '道立高校',
@@ -170,64 +166,164 @@
                 school: '真龍中'
             };
             return (
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${styles[category]}`}>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] md:text-xs font-bold tracking-wide border ${styles[category]}`}>
                     {labels[category]}
                 </span>
             );
         };
 
+        const StatCard = ({ label, value, sub, colorClass, textClass, bgGradient, onClick }) => (
+            <div 
+                onClick={onClick}
+                className="bg-white/90 backdrop-blur-sm p-5 rounded-2xl border border-white/60 shadow-sm relative overflow-hidden group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
+            >
+                <div className={`absolute top-0 right-0 w-24 h-24 -mr-6 -mt-6 rounded-full opacity-10 transition-transform group-hover:scale-110 ${colorClass}`}></div>
+                <div className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${bgGradient} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
+                
+                <div className="flex items-center justify-between mb-2 relative z-10">
+                    <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">{label}</p>
+                    <Icon name="CaretRight" size={16} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+                </div>
+                
+                <p className={`text-xl md:text-2xl font-black mb-1 tracking-tight relative z-10 ${textClass}`}>{value}</p>
+                <p className="text-xs text-slate-400 relative z-10">{sub}</p>
+            </div>
+        );
+
         const TimelineItem = ({ event }) => (
-            <div className="flex gap-4 mb-6 animate-fade-in group">
+            <div className="flex gap-4 mb-6 last:mb-0 group animate-fade-in">
                 <div className="flex flex-col items-center">
-                    <div className={`w-3 h-3 rounded-full mt-2 ring-4 ring-white ${event.important ? 'bg-red-500' : 'bg-slate-300'}`}></div>
+                    <div className={`w-3.5 h-3.5 rounded-full mt-1.5 ring-4 ring-white shadow-sm z-10 
+                        ${event.important ? 'bg-red-500' : 
+                        event.type === 'success' ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
                     <div className="w-0.5 flex-1 bg-slate-100 mt-2 group-last:hidden"></div>
                 </div>
-                <div className="flex-1 glass-card p-4 rounded-xl hover:shadow-md transition-shadow border-l-4 border-l-transparent hover:border-l-blue-500">
-                    <div className="flex justify-between items-start mb-2">
-                        <span className={`font-mono font-bold text-lg ${event.important ? 'text-red-600' : 'text-slate-700'}`}>
+
+                <div className="flex-1 bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:bg-white hover:shadow-md hover:border-brand-100 transition-all duration-200">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
+                        <span className={`font-mono font-bold text-lg tracking-tight ${event.important ? 'text-red-600' : 'text-slate-700'}`}>
                             {event.displayDate}
                         </span>
-                        <CategoryBadge category={event.category} />
+                        <div className="self-start">
+                            <CategoryBadge category={event.category} />
+                        </div>
                     </div>
-                    <h4 className="font-bold text-slate-800 mb-1 flex items-center">
-                        {event.important && <Icon name="Warning" className="text-red-500 mr-1" size={16} weight="fill" />}
-                        {event.title}
+                    
+                    <h4 className="font-bold text-slate-800 mb-2 flex items-start gap-2">
+                        {event.important && <Icon name="Warning" className="text-red-500 shrink-0 mt-0.5" size={18} weight="fill" />}
+                        {event.type === 'success' && <Icon name="CheckCircle" className="text-emerald-500 shrink-0 mt-0.5" size={18} weight="fill" />}
+                        <span className="leading-tight">{event.title}</span>
                     </h4>
-                    <p className="text-sm text-slate-500 whitespace-pre-line leading-relaxed">{event.desc}</p>
+                    
+                    <p className="text-sm text-slate-500 whitespace-pre-line leading-relaxed pl-1">
+                        {event.desc}
+                    </p>
                 </div>
             </div>
         );
 
-        const InfoSection = ({ title, children }) => (
-            <div className="mb-8">
-                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                    <div className="w-1 h-6 bg-blue-600 rounded-full mr-3"></div>
-                    {title}
-                </h3>
-                {children}
-            </div>
-        );
+        // --- Todo List Component with Persistence ---
+        const TodoList = ({ todos, title, description, storageKey }) => {
+            // Initialize state from localStorage
+            const [checkedIds, setCheckedIds] = useState(() => {
+                try {
+                    const saved = localStorage.getItem(storageKey);
+                    return saved ? new Set(JSON.parse(saved)) : new Set();
+                } catch (e) {
+                    console.error("Failed to load todos", e);
+                    return new Set();
+                }
+            });
 
-        const TodoItem = ({ text, subText, category }) => {
-            const [checked, setChecked] = useState(false);
+            // Save to localStorage whenever checkedIds changes
+            useEffect(() => {
+                try {
+                    localStorage.setItem(storageKey, JSON.stringify([...checkedIds]));
+                } catch (e) {
+                    console.error("Failed to save todos", e);
+                }
+            }, [checkedIds, storageKey]);
+
+            const toggleCheck = (id) => {
+                const newChecked = new Set(checkedIds);
+                if (newChecked.has(id)) {
+                    newChecked.delete(id);
+                } else {
+                    newChecked.add(id);
+                }
+                setCheckedIds(newChecked);
+            };
+
+            const progress = Math.round((checkedIds.size / todos.length) * 100);
+
             return (
-                <label className="flex items-start p-4 bg-white rounded-xl border border-slate-200 shadow-sm cursor-pointer hover:bg-slate-50 transition-colors">
-                    <div className="flex items-center h-5 mt-0.5">
-                        <input 
-                            type="checkbox" 
-                            checked={checked}
-                            onChange={() => setChecked(!checked)}
-                            className="w-5 h-5 text-emerald-500 rounded focus:ring-emerald-500 border-gray-300" 
-                        />
+                <div className="mb-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-bold text-slate-800 flex items-center">
+                            <div className="w-1.5 h-6 bg-emerald-500 rounded-full mr-3"></div>
+                            {title}
+                        </h3>
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                            {checkedIds.size} / {todos.length} 完了
+                        </span>
                     </div>
-                    <div className="ml-3">
-                        <span className={`block text-sm font-medium ${checked ? 'text-slate-400 line-through' : 'text-slate-700'}`}>{text}</span>
-                        {subText && <span className="block text-xs text-slate-400 mt-1">{subText}</span>}
-                        {category === 'guardian' && (
-                            <span className="inline-block mt-2 px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] rounded font-bold">保護者</span>
-                        )}
+                    
+                    {description && (
+                        <p className="text-slate-500 text-sm mb-4 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            {description}
+                        </p>
+                    )}
+
+                    {/* Progress Bar */}
+                    <div className="w-full bg-slate-100 rounded-full h-1.5 mb-6 overflow-hidden">
+                        <div 
+                            className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500 ease-out"
+                            style={{ width: `${progress}%` }}
+                        ></div>
                     </div>
-                </label>
+
+                    <div className="grid gap-3">
+                        {todos.map((todo) => {
+                            const isChecked = checkedIds.has(todo.id);
+                            return (
+                                <label 
+                                    key={todo.id}
+                                    className={`flex items-start p-4 bg-white rounded-xl border shadow-sm cursor-pointer transition-all duration-200 group
+                                        ${isChecked ? 'border-emerald-100 bg-emerald-50/30' : 'border-slate-200 hover:border-emerald-200 hover:bg-slate-50'}
+                                    `}
+                                >
+                                    <div className="relative flex items-center justify-center h-6 w-6 mt-0.5 shrink-0">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={isChecked}
+                                            onChange={() => toggleCheck(todo.id)}
+                                            className="peer appearance-none w-5 h-5 border-2 border-slate-300 rounded-md checked:bg-emerald-500 checked:border-emerald-500 transition-colors focus:ring-2 focus:ring-emerald-200 focus:outline-none" 
+                                        />
+                                        <Icon name="Check" size={14} className="absolute text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" weight="bold" />
+                                    </div>
+                                    
+                                    <div className="ml-3 select-none">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`block text-sm font-bold transition-colors ${isChecked ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
+                                            {todo.text}
+                                            </span>
+                                            {todo.category === 'guardian' && (
+                                                <span className="px-1.5 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] rounded font-bold whitespace-nowrap">
+                                                    保護者
+                                                </span>
+                                            )}
+                                        </div>
+                                        {todo.subText && (
+                                            <span className={`block text-xs mt-1 transition-colors ${isChecked ? 'text-slate-300' : 'text-slate-500'}`}>
+                                                {todo.subText}
+                                            </span>
+                                        )}
+                                    </div>
+                                </label>
+                            );
+                        })}
+                    </div>
+                </div>
             );
         };
 
@@ -236,8 +332,14 @@
         const App = () => {
             const [activeSection, setActiveSection] = useState('dashboard');
             const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+            const [scrolled, setScrolled] = useState(false);
 
-            // Filter events
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 20);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
             const filteredEvents = useMemo(() => {
                 if (activeSection === 'dashboard') {
                     return EVENTS.sort((a, b) => a.date.localeCompare(b.date));
@@ -245,295 +347,323 @@
                 return EVENTS.filter(e => e.category === activeSection).sort((a, b) => a.date.localeCompare(b.date));
             }, [activeSection]);
 
+            const navigate = (id) => {
+                setActiveSection(id);
+                setIsMobileMenuOpen(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
             const renderContent = () => {
                 switch (activeSection) {
                     case 'dashboard':
                         return (
-                            <div className="animate-fade-in">
-                                {/* Title & School Name */}
-                                <div className="mb-6 px-1">
-                                    <h2 className="text-2xl md:text-3xl font-bold text-slate-800">進路活動ダッシュボード</h2>
-                                    <p className="text-slate-500">令和7年度 厚岸町立真龍中学校</p>
+                            <>
+                                <div className="mb-8 animate-fade-in">
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-2">進路活動ダッシュボード</h2>
+                                    <p className="text-slate-500 font-medium">直近のスケジュールとタスクを一目で確認できます。</p>
                                 </div>
 
-                                {/* Student To-Do Jump Button */}
-                                <div 
-                                    onClick={() => setActiveSection('school')}
-                                    className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl p-6 text-white mb-8 shadow-lg relative overflow-hidden cursor-pointer hover:shadow-xl hover:scale-[1.01] transition-all group"
-                                >
-                                    <div className="relative z-10 flex items-center justify-between">
-                                        <div>
-                                            <div className="flex items-center mb-2">
-                                                <span className="bg-white/20 px-2 py-0.5 rounded text-xs font-bold mr-2">Check!</span>
-                                                <h3 className="text-xl font-bold">生徒のTo Do Listを確認する</h3>
-                                            </div>
-                                            <p className="text-emerald-100 text-sm">
-                                                願書の準備や校内提出期限など、<br className="hidden md:inline"/>
-                                                あなた自身が進めるべきタスクはこちらでチェック！
-                                            </p>
-                                        </div>
-                                        <div className="bg-white/20 p-3 rounded-full group-hover:bg-white/30 transition-colors">
-                                            <Icon name="ArrowRight" size={24} weight="bold" />
-                                        </div>
-                                    </div>
-                                    <div className="absolute right-0 bottom-0 opacity-20 transform translate-x-4 translate-y-4">
-                                        <Icon name="ClipboardText" size={120} weight="duotone" />
-                                    </div>
-                                </div>
-
-                                {/* Stats/Quick Links */}
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                                     <StatCard 
                                         label="道立入試 一般" 
-                                        value="3月4日(水)" 
-                                        sub="タップで詳細へ" 
-                                        color="bg-blue-600" 
-                                        textColor="text-blue-700" 
-                                        onClick={() => setActiveSection('public')}
+                                        value="3/4(水)" 
+                                        sub="あと少し！" 
+                                        colorClass="bg-sky-500"
+                                        textClass="text-sky-700"
+                                        bgGradient="from-sky-400 to-blue-500"
+                                        onClick={() => navigate('public')}
                                     />
                                     <StatCard 
                                         label="道立入試 推薦" 
-                                        value="2月10日(火)" 
-                                        sub="タップで詳細へ" 
-                                        color="bg-indigo-600" 
-                                        textColor="text-indigo-700" 
-                                        onClick={() => setActiveSection('public')}
+                                        value="2/10(火)" 
+                                        sub="面接選抜" 
+                                        colorClass="bg-indigo-500"
+                                        textClass="text-indigo-700"
+                                        bgGradient="from-indigo-400 to-violet-500"
+                                        onClick={() => navigate('public')}
+                                    />
+                                    <StatCard 
+                                        label="高専 学力" 
+                                        value="2/8(日)" 
+                                        sub="全国一斉" 
+                                        colorClass="bg-purple-500"
+                                        textClass="text-purple-700"
+                                        bgGradient="from-purple-400 to-fuchsia-500"
+                                        onClick={() => navigate('kosen')}
                                     />
                                     <StatCard 
                                         label="私立入試" 
                                         value="2月中旬" 
-                                        sub="タップで詳細へ" 
-                                        color="bg-orange-500" 
-                                        onClick={() => setActiveSection('private')}
-                                    />
-                                    <StatCard 
-                                        label="釧路高専 入試" 
-                                        value="学力: 2/8(日)" 
-                                        sub="推薦: 1/17(土)" 
-                                        color="bg-purple-500" 
-                                        onClick={() => setActiveSection('kosen')}
+                                        sub="A・B日程" 
+                                        colorClass="bg-orange-500"
+                                        textClass="text-orange-700"
+                                        bgGradient="from-orange-400 to-amber-500"
+                                        onClick={() => navigate('private')}
                                     />
                                 </div>
 
-                                {/* Upcoming Timeline */}
-                                <InfoSection title="今後の予定（時系列）">
+                                <div 
+                                    onClick={() => navigate('school')}
+                                    className="group relative overflow-hidden rounded-3xl p-6 md:p-8 bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg mb-10 cursor-pointer transition-all hover:shadow-xl hover:scale-[1.01]"
+                                >
+                                    <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-8 translate-y-8 group-hover:scale-110 transition-transform duration-500">
+                                        <Icon name="ClipboardText" size={200} />
+                                    </div>
+                                    
+                                    <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold border border-white/30">重要</span>
+                                                <h3 className="text-xl md:text-2xl font-bold">生徒のTo Do Listを確認する</h3>
+                                            </div>
+                                            <p className="text-emerald-50 text-sm md:text-base max-w-lg leading-relaxed">
+                                                願書の準備や校内提出期限など、あなた自身が進めるべきタスクの進捗状況をここで管理しましょう。
+                                            </p>
+                                        </div>
+                                        <div className="bg-white/20 w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-white/30 transition-colors shrink-0">
+                                            <Icon name="ArrowRight" size={24} weight="bold" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="animate-fade-in">
+                                    <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                                        <div className="w-1.5 h-6 bg-brand-600 rounded-full mr-3"></div>
+                                        今後の予定（時系列）
+                                    </h3>
                                     <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
                                         {filteredEvents.map((event, idx) => (
                                             <TimelineItem key={idx} event={event} />
                                         ))}
                                     </div>
-                                </InfoSection>
-                            </div>
+                                </div>
+                            </>
                         );
                     case 'kosen':
                         return (
                              <div className="animate-fade-in">
-                                <div className="bg-purple-50 border border-purple-100 rounded-2xl p-6 mb-6">
-                                    <h2 className="text-xl font-bold text-purple-900 mb-2 flex items-center">
-                                        <Icon name="Cpu" className="mr-2" />
+                                <div className="bg-purple-50 border border-purple-100 rounded-2xl p-6 mb-8">
+                                    <h2 className="text-xl font-bold text-purple-900 mb-2 flex items-center gap-2">
+                                        <Icon name="Cpu" className="text-purple-600" size={28} />
                                         高等専門学校（高専）について
                                     </h2>
-                                    <p className="text-purple-800 text-sm mb-4">
+                                    <p className="text-purple-800 text-sm leading-relaxed mb-4">
                                         道内4高専（函館・苫小牧・釧路・旭川）の受験情報です。
                                         特に「釧路高専」の選抜では学力点や学習点の扱いが道立高校と大きく異なるため、
                                         必ず高専のホームページで最新の詳細を確認してください。
                                     </p>
-                                    <div className="bg-white rounded-xl p-4 text-sm text-purple-900 shadow-sm">
-                                        <strong className="block mb-1">道内4高専複数校志望受験制度</strong>
+                                    <div className="bg-white/80 rounded-xl p-4 text-sm text-purple-900 border border-purple-100">
+                                        <strong className="block mb-1 text-purple-700">📌 道内4高専複数校志望受験制度</strong>
                                         道内4つの高専の最大10学科に同時に出願可能です。
                                         合格した学科のうち、志望順位が最も上位の高専に進学できます。
                                     </div>
                                 </div>
 
-                                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                                    <div className="glass-card p-6 rounded-xl border-t-4 border-purple-500">
-                                        <h3 className="font-bold text-lg mb-3">自己推薦選抜</h3>
-                                        <ul className="space-y-3 text-sm">
-                                            <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
-                                                <span className="text-slate-500">WEB事前登録</span>
-                                                <span className="font-bold">11/27(木) 〜 1/5(月) 16時</span>
+                                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                                    <div className="bg-white p-6 rounded-2xl border-t-4 border-purple-500 shadow-sm">
+                                        <h3 className="font-bold text-lg mb-4 text-slate-800">自己推薦選抜</h3>
+                                        <ul className="space-y-4 text-sm">
+                                            <li className="flex justify-between items-center border-b border-dashed border-slate-100 pb-2">
+                                                <span className="text-slate-500 font-medium">WEB事前登録</span>
+                                                <span className="font-bold bg-slate-100 px-2 py-1 rounded text-slate-700">11/27 〜 1/5</span>
                                             </li>
-                                             <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
-                                                <span className="text-slate-500">入試（面接）</span>
-                                                <span className="font-bold text-indigo-600">1月17日(土)</span>
+                                             <li className="flex justify-between items-center border-b border-dashed border-slate-100 pb-2">
+                                                <span className="text-slate-500 font-medium">入試（面接）</span>
+                                                <span className="font-bold text-purple-600">1月17日(土)</span>
                                             </li>
-                                            <li className="text-xs text-slate-400 mt-2">
-                                                ※オンラインでの面接になります。
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div className="glass-card p-6 rounded-xl border-t-4 border-purple-500">
-                                        <h3 className="font-bold text-lg mb-3">学力選抜</h3>
-                                        <ul className="space-y-3 text-sm">
-                                            <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
-                                                <span className="text-slate-500">WEB事前登録</span>
-                                                <span className="font-bold">11/27(木) 〜 1/23(金) 16時</span>
-                                            </li>
-                                            <li className="flex justify-between border-b border-dashed border-slate-200 pb-2">
-                                                <span className="text-slate-500">学力検査日</span>
-                                                <span className="font-bold text-red-600">2月8日(日)</span>
-                                            </li>
-                                            <li className="text-xs text-slate-400 mt-2">
-                                                ※釧路高専など、各校で日程が設定されています。
+                                            <li className="text-xs text-slate-400 bg-slate-50 p-2 rounded">
+                                                ※オンラインでの面接になります。通信環境の確認を！
                                             </li>
                                         </ul>
                                     </div>
+                                    <div className="bg-white p-6 rounded-2xl border-t-4 border-purple-500 shadow-sm">
+                                        <h3 className="font-bold text-lg mb-4 text-slate-800">学力選抜</h3>
+                                        <ul className="space-y-4 text-sm">
+                                            <li className="flex justify-between items-center border-b border-dashed border-slate-100 pb-2">
+                                                <span className="text-slate-500 font-medium">WEB事前登録</span>
+                                                <span className="font-bold bg-slate-100 px-2 py-1 rounded text-slate-700">11/27 〜 1/23</span>
+                                            </li>
+                                            <li className="flex justify-between items-center border-b border-dashed border-slate-100 pb-2">
+                                                <span className="text-slate-500 font-medium">学力検査日</span>
+                                                <span className="font-bold text-red-500">2月8日(日)</span>
+                                            </li>
+                                            <li className="text-xs text-slate-400 bg-slate-50 p-2 rounded">
+                                                ※マークシート方式です。過去問対策を重点的に。
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                                    <div className="w-1.5 h-6 bg-brand-600 rounded-full mr-3"></div>
+                                    高専関連のスケジュール
+                                </h3>
+                                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
+                                    {filteredEvents.map((event, idx) => (
+                                        <TimelineItem key={idx} event={event} />
+                                    ))}
                                 </div>
                             </div>
                         );
                     case 'school':
                         return (
                             <div className="animate-fade-in">
-                                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 mb-6">
-                                    <h2 className="text-xl font-bold text-emerald-900 mb-2 flex items-center">
-                                        <Icon name="ClipboardText" className="mr-2" />
-                                        生徒の皆さんのTo Do List
-                                    </h2>
-                                    <p className="text-emerald-800 text-sm">
-                                        中学校を通じて行う手続きと、保護者の方にお願いする項目のリストです。
-                                        これらの締切は厳守です。遅れないように注意しましょう。
-                                    </p>
+                                <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-6 md:p-8 mb-8 relative overflow-hidden">
+                                    <div className="relative z-10">
+                                        <h2 className="text-2xl font-bold text-emerald-900 mb-2 flex items-center gap-3">
+                                            <Icon name="ClipboardText" className="text-emerald-600" size={32} />
+                                            生徒の皆さんのTo Do List
+                                        </h2>
+                                        <p className="text-emerald-800 text-sm md:text-base">
+                                            中学校を通じて行う手続きと、保護者の方にお願いする項目のリストです。<br/>
+                                            これらの締切は厳守です。完了したらチェックを入れて進捗を管理しましょう。
+                                        </p>
+                                    </div>
+                                    <div className="absolute right-0 top-0 opacity-10 transform translate-x-10 -translate-y-10">
+                                        <Icon name="ClipboardText" size={200} className="text-emerald-500" />
+                                    </div>
                                 </div>
 
-                                <InfoSection title="【生徒】やるべきこと">
-                                    <div className="space-y-3">
-                                        {[
-                                            { t: "三者面談日程の調整（担任へ連絡）", s: "進路最終決定のための面談です。" },
-                                            { t: "進路希望調査票の提出", s: "期限を守って提出しましょう。" },
-                                            { t: "道立：願書情報のオンライン入力", s: "12/5〜1/22 Web入力期間内に行います。" },
-                                            { t: "オンライン出願のアカウント確認", s: "メールアドレス等の登録が必要な場合があります。" },
-                                            { t: "私立・高専：Web出願登録", s: "それぞれの学校のHPから登録が必要です。" },
-                                            { t: "願書下書きの清書（誤字脱字チェック）", s: "下書きをしっかり確認してから清書します。" },
-                                            { t: "推薦書の作文作成（推薦希望者）", s: "先生の指導を受けて作成しましょう。" },
-                                            { t: "受験票の確認・保管", s: "受け取ったらすぐに記載内容を確認してください。" }
-                                        ].map((todo, i) => (
-                                            <TodoItem key={i} text={todo.t} subText={todo.s} />
-                                        ))}
-                                    </div>
-                                </InfoSection>
-
-                                <InfoSection title="【保護者】手続き・確認事項">
-                                    <div className="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
-                                        <div className="space-y-3">
-                                            {[
-                                                { t: "入学検定料の納付", s: "道立は「収入証紙」を購入してください（※北陽高校は現金を用意！）。私立・高専は各校の指示に従ってください。" },
-                                                { t: "私立高校の「延納手続き」確認", s: "道立併願の場合、入学金納入期限の延長手続きが必要か確認してください。" },
-                                                { t: "合格発表後の入学金準備", s: "合格後、速やかに納入が必要になります。" }
-                                            ].map((todo, i) => (
-                                                <TodoItem key={i} text={todo.t} subText={todo.s} category="guardian" />
-                                            ))}
-                                        </div>
-                                    </div>
-                                </InfoSection>
+                                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
+                                    <TodoList 
+                                        todos={TODOS.filter(t => t.category === 'student')} 
+                                        title="【生徒】やるべきこと" 
+                                        description="先生への提出物や、自分で行うWEB登録の手続きです。"
+                                        storageKey="shinryu_todos_student"
+                                    />
+                                    <div className="h-px bg-slate-100 my-8"></div>
+                                    <TodoList 
+                                        todos={TODOS.filter(t => t.category === 'guardian')} 
+                                        title="【保護者】手続き・確認事項"
+                                        description="入学検定料の納付や入学金の準備など、お金に関わる手続きが中心です。"
+                                        storageKey="shinryu_todos_guardian"
+                                    />
+                                </div>
                             </div>
                         );
                     default:
                          return (
                             <div className="animate-fade-in">
-                                <InfoSection title={`${SECTIONS.find(s => s.id === activeSection)?.label} タイムライン`}>
-                                    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
-                                        {filteredEvents.length > 0 ? filteredEvents.map((event, idx) => (
-                                            <TimelineItem key={idx} event={event} />
-                                        )) : (
-                                            <p className="text-center text-slate-400 py-8">表示するイベントがありません</p>
-                                        )}
-                                    </div>
-                                </InfoSection>
+                                <div className="mb-8">
+                                    <h2 className="text-2xl font-black text-slate-800 mb-2 flex items-center gap-2">
+                                        <Icon name={SECTIONS.find(s => s.id === activeSection)?.icon || 'Circle'} className="text-brand-600" size={32} weight="fill" />
+                                        {SECTIONS.find(s => s.id === activeSection)?.label}
+                                    </h2>
+                                    <p className="text-slate-500 font-medium">関連するスケジュール一覧</p>
+                                </div>
+                                <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
+                                    {filteredEvents.length > 0 ? filteredEvents.map((event, idx) => (
+                                        <TimelineItem key={idx} event={event} />
+                                    )) : (
+                                        <p className="text-center text-slate-400 py-8">表示するイベントがありません</p>
+                                    )}
+                                </div>
                             </div>
                         );
                 }
             };
 
             return (
-                <div className="flex min-h-screen bg-[#f8fafc]">
+                <div className="flex min-h-screen bg-[#f8fafc] font-sans text-slate-600">
                     {/* Sidebar (Desktop) */}
-                    <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 fixed h-full z-20">
-                        <div className="p-6 border-b border-slate-100">
+                    <aside className="hidden md:flex flex-col w-72 bg-white border-r border-slate-200 fixed h-full z-20">
+                        <div className="p-8 border-b border-slate-100">
                             <h1 className="text-xl font-black text-slate-800 flex items-center tracking-tighter">
-                                <Icon name="GraduationCap" className="mr-2 text-blue-600" weight="fill" />
-                                Shinryu<span className="text-blue-600">Navi</span>
+                                <Icon name="GraduationCap" className="mr-2 text-brand-600" size={28} weight="fill" />
+                                Shinryu<span className="text-brand-600">Navi</span>
                             </h1>
-                            <p className="text-xs text-slate-400 mt-1 ml-8">真龍中 進路サポートシステム</p>
+                            <p className="text-xs text-slate-400 mt-2 font-medium ml-9">令和7年度 厚岸町立真龍中学校<br/>進路サポートシステム</p>
                         </div>
-                        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                            {SECTIONS.map(section => (
-                                <button
-                                    key={section.id}
-                                    onClick={() => setActiveSection(section.id)}
-                                    className={`w-full flex items-center p-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                                        activeSection === section.id 
-                                        ? 'bg-slate-100 text-blue-700 shadow-sm' 
-                                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-                                    }`}
-                                >
-                                    <Icon name={section.icon} className={`mr-3 ${activeSection === section.id ? 'text-blue-600' : 'text-slate-400'}`} weight={activeSection === section.id ? "fill" : "regular"} size={20} />
-                                    {section.label}
-                                </button>
-                            ))}
+                        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+                            {SECTIONS.map(section => {
+                                const isActive = activeSection === section.id;
+                                return (
+                                    <button
+                                        key={section.id}
+                                        onClick={() => navigate(section.id)}
+                                        className={`w-full flex items-center p-3.5 rounded-xl text-sm font-bold transition-all duration-200 group relative
+                                        ${isActive 
+                                            ? 'bg-brand-50 text-brand-700 shadow-sm' 
+                                            : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                                        }`}
+                                    >
+                                        {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-brand-500 rounded-r-full"></div>}
+                                        <Icon 
+                                            name={section.icon} 
+                                            className={`mr-3 ${isActive ? 'text-brand-600' : 'text-slate-400 group-hover:text-slate-500'}`} 
+                                            size={20}
+                                            weight={isActive ? 'fill' : 'regular'}
+                                        />
+                                        {section.label}
+                                    </button>
+                                );
+                            })}
                         </nav>
                         <div className="p-4 border-t border-slate-100">
-                            <div className="bg-blue-50 rounded-xl p-4">
-                                <p className="text-xs font-bold text-blue-800 mb-1">困ったときは</p>
-                                <p className="text-xs text-blue-600 leading-relaxed">
+                            <div className="bg-gradient-to-br from-brand-50 to-indigo-50 rounded-2xl p-5 border border-brand-100">
+                                <p className="text-xs font-bold text-brand-800 mb-1">困ったときは</p>
+                                <p className="text-xs text-brand-600 leading-relaxed">
                                     不明な点は必ず担任の先生に進路だより等で確認してください。
                                 </p>
                             </div>
+                            <p className="text-[10px] text-slate-300 text-center mt-4">© 2025 Shinryu JHS Career Guidance</p>
                         </div>
                     </aside>
 
-                    {/* Mobile Header (Fix applied here) */}
-                    <div className="md:hidden fixed top-0 left-0 w-full bg-white z-50 border-b border-slate-200 px-4 py-3 flex justify-between items-center shadow-lg">
-                         <h1 className="text-lg font-black text-slate-800 flex items-center">
-                            <Icon name="GraduationCap" className="mr-2 text-blue-600" weight="fill" />
-                            Shinryu<span className="text-blue-600">Navi</span>
-                        </h1>
-                        
-                        {/* 修正されたメニューボタン: より大きく、青い背景で目立たせました */}
-                        <button 
-                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold shadow-lg transition-all active:scale-95 ${
-                                isMobileMenuOpen 
-                                ? 'bg-slate-800 text-white' 
-                                : 'bg-blue-600 text-white hover:bg-blue-700'
-                            }`}
-                            style={{ minWidth: '120px', justifyContent: 'center' }}
-                        >
-                            <Icon name={isMobileMenuOpen ? "X" : "List"} size={24} weight="bold" />
-                            <span className="text-base tracking-wide">{isMobileMenuOpen ? "閉じる" : "メニュー"}</span>
-                        </button>
+                    {/* Mobile Header */}
+                    <div className={`md:hidden fixed top-0 left-0 w-full z-40 px-4 py-3 transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'}`}>
+                        <div className="flex justify-between items-center">
+                            <h1 className="text-lg font-black text-slate-800 flex items-center tracking-tighter">
+                                <Icon name="GraduationCap" className="mr-2 text-brand-600" size={24} weight="fill" />
+                                Shinryu<span className="text-brand-600">Navi</span>
+                            </h1>
+                            <button 
+                                onClick={() => setIsMobileMenuOpen(true)}
+                                className="bg-white p-2.5 rounded-full shadow-sm border border-slate-200 text-slate-600 active:scale-95 transition-transform"
+                            >
+                                <Icon name="List" size={24} weight="bold" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Mobile Menu Overlay */}
                     {isMobileMenuOpen && (
-                        <div className="md:hidden fixed inset-0 z-40 bg-white/95 backdrop-blur-sm pt-24 px-4 mobile-menu-enter overflow-y-auto">
-                             <nav className="space-y-4 pb-10">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 px-1">表示したい内容を選択</p>
-                                {SECTIONS.map(section => (
-                                    <button
-                                        key={section.id}
-                                        onClick={() => {
-                                            setActiveSection(section.id);
-                                            setIsMobileMenuOpen(false);
-                                        }}
-                                        className={`w-full flex items-center p-5 rounded-2xl text-lg font-bold border-2 transition-all ${
-                                            activeSection === section.id 
-                                            ? 'bg-blue-50 border-blue-500 text-blue-700 shadow-md' 
-                                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                                        }`}
-                                    >
-                                        <div className={`mr-4 p-3 rounded-xl ${activeSection === section.id ? 'bg-white text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
-                                            <Icon name={section.icon} weight={activeSection === section.id ? "fill" : "regular"} size={28} />
-                                        </div>
-                                        {section.label}
-                                        {activeSection === section.id && <Icon name="CheckCircle" className="ml-auto text-blue-600" weight="fill" size={24} />}
+                        <div className="fixed inset-0 z-50 md:hidden flex flex-col">
+                            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+                            <div className="relative bg-white h-full w-[85%] max-w-sm shadow-2xl p-6 flex flex-col animate-slide-in-right">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h2 className="text-xl font-bold text-slate-800">Menu</h2>
+                                    <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200">
+                                        <Icon name="X" size={24} weight="bold" />
                                     </button>
-                                ))}
-                            </nav>
+                                </div>
+                                
+                                <nav className="flex-1 space-y-3">
+                                    {SECTIONS.map(section => (
+                                        <button
+                                            key={section.id}
+                                            onClick={() => navigate(section.id)}
+                                            className={`w-full flex items-center p-4 rounded-xl text-left font-bold transition-all
+                                            ${activeSection === section.id 
+                                                ? 'bg-brand-50 text-brand-600 border border-brand-100' 
+                                                : 'text-slate-600 hover:bg-slate-50'
+                                            }`}
+                                        >
+                                            <Icon name={section.icon} className={`mr-4 ${activeSection === section.id ? 'text-brand-500' : 'text-slate-400'}`} size={24} weight={activeSection === section.id ? 'fill' : 'regular'} />
+                                            {section.label}
+                                        </button>
+                                    ))}
+                                </nav>
+
+                                <div className="mt-auto pt-6 border-t border-slate-100">
+                                    <p className="text-xs text-center text-slate-400">Shinryu JHS 2026</p>
+                                </div>
+                            </div>
                         </div>
                     )}
 
                     {/* Main Content */}
-                    <main className="flex-1 md:ml-64 p-4 md:p-8 pt-24 md:pt-8 max-w-5xl mx-auto">
+                    <main className="flex-1 md:ml-72 p-4 md:p-10 pt-20 md:pt-10 max-w-6xl mx-auto w-full">
                         {renderContent()}
                     </main>
                 </div>
