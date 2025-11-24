@@ -137,7 +137,7 @@
             {
                 category: "カテゴリーA：【もしも…】",
                 subtitle: "お金の条件を変えて本心を探る",
-                icon: "banknote", color: "text-emerald-600", bg: "bg-emerald-50",
+                icon: "banknote", color: "text-emerald-700", bg: "bg-emerald-100", border: "border-emerald-200",
                 items: [
                     { 
                         id: 1, 
@@ -160,7 +160,7 @@
             {
                 category: "カテゴリーB：【場面転換】",
                 subtitle: "場所や状況を変えてみる",
-                icon: "message-circle", color: "text-blue-600", bg: "bg-blue-50",
+                icon: "message-circle", color: "text-blue-700", bg: "bg-blue-100", border: "border-blue-200",
                 items: [
                     { 
                         id: 3, 
@@ -183,7 +183,7 @@
             {
                 category: "カテゴリーC：【変化の正体】",
                 subtitle: "見た目と中身のギャップ",
-                icon: "eye", color: "text-amber-600", bg: "bg-amber-50",
+                icon: "eye", color: "text-amber-700", bg: "bg-amber-100", border: "border-amber-200",
                 items: [
                     { 
                         id: 5, 
@@ -206,7 +206,7 @@
             {
                 category: "カテゴリーD：【未来予測】",
                 subtitle: "次世代（水生と宏児）の関係",
-                icon: "users", color: "text-indigo-600", bg: "bg-indigo-50",
+                icon: "users", color: "text-indigo-700", bg: "bg-indigo-100", border: "border-indigo-200",
                 items: [
                     { 
                         id: 7, 
@@ -221,7 +221,7 @@
             {
                 category: "カテゴリーE：【罪と罰】",
                 subtitle: "「灰の中の食器」事件",
-                icon: "gavel", color: "text-slate-600", bg: "bg-slate-100",
+                icon: "gavel", color: "text-orange-700", bg: "bg-orange-100", border: "border-orange-200",
                 items: [
                     { 
                         id: 8, 
@@ -244,7 +244,7 @@
             {
                 category: "カテゴリーF：【責任の所在】",
                 subtitle: "悪いのは誰だ？",
-                icon: "brain", color: "text-purple-600", bg: "bg-purple-50",
+                icon: "brain", color: "text-purple-700", bg: "bg-purple-100", border: "border-purple-200",
                 items: [
                     { 
                         id: 10, 
@@ -267,7 +267,7 @@
             {
                 category: "カテゴリーG：【希望の行方】",
                 subtitle: "ラストシーンの解釈",
-                icon: "arrow-right", color: "text-cyan-600", bg: "bg-cyan-50",
+                icon: "arrow-right", color: "text-cyan-700", bg: "bg-cyan-100", border: "border-cyan-200",
                 items: [
                     { 
                         id: 12, 
@@ -290,7 +290,7 @@
             {
                 category: "カテゴリーH：【私への疑惑】",
                 subtitle: "「私」の視点を疑う",
-                icon: "help-circle", color: "text-rose-400", bg: "bg-rose-50",
+                icon: "help-circle", color: "text-rose-700", bg: "bg-rose-100", border: "border-rose-200",
                 items: [
                     { 
                         id: 14, 
@@ -320,27 +320,29 @@
 
             const handleLocalAnswer = (qId, type) => {
                 onAnswer(qId, type);
+                // Automatically open explanation
                 if (!expandedCards[qId]) {
                     setExpandedCards(prev => ({ ...prev, [qId]: true }));
                 }
             };
 
             return (
-                <div className="animate-slide-up pb-12">
-                    <div className="space-y-10">
+                <div className="pb-40 slide-in">
+                    <div className="space-y-12">
                         {questions.map((category, idx) => (
-                            <section key={idx}>
-                                <div className="flex items-center gap-4 mb-6 px-1">
-                                    <div className={`p-3 rounded-2xl shadow-sm ${category.bg} ${category.color} flex items-center justify-center`}>
-                                        <DynamicIcon name={category.icon} size={24} />
+                            <section key={idx} className="relative">
+                                {/* Category Header */}
+                                <div className={`flex items-center gap-4 mb-6 px-4 py-6 rounded-3xl shadow-sm border ${category.bg} ${category.border}`}>
+                                    <div className="bg-white/60 p-3 rounded-2xl shadow-sm backdrop-blur-sm shrink-0">
+                                        <DynamicIcon name={category.icon} className={category.color} size={28} />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-xl text-primary">{category.category}</h3>
-                                        <p className="text-secondary text-sm font-medium">{category.subtitle}</p>
+                                        <h3 className={`font-black text-xl md:text-2xl ${category.color} tracking-tight`}>{category.category}</h3>
+                                        <p className={`${category.color} text-sm font-bold opacity-80 mt-1`}>{category.subtitle}</p>
                                     </div>
                                 </div>
 
-                                <div className="grid gap-6">
+                                <div className="grid gap-6 px-1">
                                     {category.items.map((item) => {
                                         const isAnswered = answers[item.id] !== undefined;
                                         const isExpanded = expandedCards[item.id];
@@ -350,7 +352,7 @@
                                             <div key={item.id} className={`bg-white rounded-3xl shadow-apple hover:shadow-apple-hover transition-all duration-300 border ${isAnswered ? 'border-slate-300' : 'border-white'}`}>
                                                 <div className="p-6 md:p-8">
                                                     <div className="flex gap-3 mb-6">
-                                                        <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full h-fit font-serif tracking-widest">Q{item.id}</span>
+                                                        <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full h-fit font-serif tracking-widest shrink-0">Q{item.id}</span>
                                                         <p className="font-bold text-lg md:text-xl text-primary leading-relaxed">{item.q}</p>
                                                     </div>
                                                     
@@ -490,7 +492,7 @@
                             <div className="flex items-center gap-4 mb-6 border-b border-slate-50 pb-4">
                                 <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shadow-sm"><DynamicIcon name="clock" size={24}/></div>
                                 <div>
-                                    <h2 className="text-xl font-bold font-serif text-primary">資料A：【歴史】激動の30年史</h2>
+                                    <h2 className="text-xl font-bold font-serif text-indigo-800">資料A：【歴史】激動の30年史</h2>
                                     <p className="text-sm text-secondary font-bold mt-1">〜「革命」はなぜ民衆を救えなかったのか？〜</p>
                                 </div>
                             </div>
@@ -524,7 +526,7 @@
                             <div className="flex items-center gap-4 mb-6 border-b border-slate-50 pb-4">
                                 <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm"><DynamicIcon name="file-text" size={24}/></div>
                                 <div>
-                                    <h2 className="text-xl font-bold font-serif text-primary">資料B：【重税】軍閥からの過酷な税金の徴収</h2>
+                                    <h2 className="text-xl font-bold font-serif text-emerald-800">資料B：【重税】軍閥からの過酷な税金の徴収</h2>
                                     <p className="text-sm text-secondary font-bold mt-1">〜30年先の未来まで奪うシステム〜</p>
                                 </div>
                             </div>
@@ -550,7 +552,7 @@
                             <div className="flex items-center gap-4 mb-6 border-b border-slate-50 pb-4">
                                 <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shadow-sm"><DynamicIcon name="coins" size={24}/></div>
                                 <div>
-                                    <h2 className="text-xl font-bold font-serif text-primary">資料C：【通貨】貨幣経済の罠</h2>
+                                    <h2 className="text-xl font-bold font-serif text-amber-800">資料C：【通貨】貨幣経済の罠</h2>
                                     <p className="text-sm text-secondary font-bold mt-1">〜働けば働くほど貧しくなる交換レート〜</p>
                                 </div>
                             </div>
@@ -581,7 +583,7 @@
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><DynamicIcon name="book-open" size={24}/></div>
                                 <div>
-                                    <h2 className="text-xl font-bold font-serif text-primary">資料D：【教育】「私」と「閏土」の時代・立場による常識の変化</h2>
+                                    <h2 className="text-xl font-bold font-serif text-blue-800">資料D：【教育】「私」と「閏土」の時代・立場による常識の変化</h2>
                                     <p className="text-sm text-secondary font-bold">〜1%のエリート vs 99%の農民〜</p>
                                 </div>
                             </div>
@@ -609,7 +611,7 @@
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center"><DynamicIcon name="skull" size={24}/></div>
                                 <div>
-                                    <h2 className="text-xl font-bold font-serif text-primary">資料E：【生存】極限の生存環境</h2>
+                                    <h2 className="text-xl font-bold font-serif text-rose-800">資料E：【生存】極限の生存環境</h2>
                                     <p className="text-sm text-secondary font-bold">〜生きるか死ぬかの限界状態〜</p>
                                 </div>
                             </div>
@@ -629,7 +631,7 @@
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center"><DynamicIcon name="brain" size={24}/></div>
                                 <div>
-                                    <h2 className="text-xl font-bold font-serif text-primary">資料F：【心理】なぜ「木偶の坊」になったのか</h2>
+                                    <h2 className="text-xl font-bold font-serif text-purple-800">資料F：【心理】なぜ「木偶の坊」になったのか</h2>
                                     <p className="text-sm text-secondary font-bold">〜心理学的アプローチ〜</p>
                                 </div>
                             </div>
@@ -649,7 +651,7 @@
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center"><DynamicIcon name="scissors" size={24}/></div>
                                 <div>
-                                    <h2 className="text-xl font-bold font-serif text-primary">資料G：【外見】一目でわかる「違い」</h2>
+                                    <h2 className="text-xl font-bold font-serif text-slate-800">資料G：【外見】一目でわかる「違い」</h2>
                                     <p className="text-sm text-secondary font-bold">〜辮髪（べんぱつ）が意味するもの〜</p>
                                 </div>
                             </div>
@@ -673,14 +675,14 @@
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-12 h-12 bg-slate-800 text-white rounded-2xl flex items-center justify-center"><DynamicIcon name="lightbulb" size={24}/></div>
                                 <div>
-                                    <h2 className="text-xl font-bold font-serif text-primary">資料H：【哲学】希望と偶像</h2>
+                                    <h2 className="text-xl font-bold font-serif text-slate-900">資料H：【哲学】希望と偶像</h2>
                                     <p className="text-sm text-secondary font-bold">〜ラストシーンの解釈〜</p>
                                 </div>
                             </div>
                             <div className="space-y-4">
                                 <div className="bg-amber-50 p-5 rounded-2xl border border-amber-100">
                                     <h3 className="font-bold text-amber-800 mb-2 flex items-center gap-2 text-sm"><DynamicIcon name="flame" size={16}/> 偶像</h3>
-                                    <p className="text-xs text-slate-700 leading-relaxed">対象：閏土の「香炉・燭台」。<br/>「私」はこれを迷信だと笑ったが、直後に「私の抱く希望も手製の偶像ではないか」と自問する。形は違っても「すがるもの」を求めている点は同じ。</p>
+                                    <p className="text-xs text-slate-700 leading-relaxed">対象：閏土の「香炉・燭台」。<br/>「私」はこれを迷信だと笑ったが、直後に「私の抱く希望も手製の偶像ではないか」と自問する。形は違っても、二人とも「すがるもの」を求めている。</p>
                                 </div>
                                 <div className="bg-indigo-50 p-5 rounded-2xl border border-indigo-100">
                                     <h3 className="font-bold text-indigo-800 mb-2 flex items-center gap-2 text-sm"><DynamicIcon name="footprints" size={16}/> 地上の道</h3>
@@ -702,9 +704,9 @@
             const [mode, setMode] = useState('diagnosis');
             const [answers, setAnswers] = useState({});
             
-            // Scroll persistence ref target (The Main Content Div)
-            const mainScrollRef = useRef(null);
+            // Scroll Persistence State
             const [scrollPositions, setScrollPositions] = useState({ diagnosis: 0, reference: 0 });
+            const mainScrollRef = useRef(null);
 
             // Load answers from LocalStorage on mount
             useEffect(() => {
@@ -740,7 +742,7 @@
             const switchMode = (newMode) => {
                 if (mode === newMode) return;
                 
-                // Save current scroll position of the main container
+                // Save current scroll position
                 if (mainScrollRef.current) {
                     const currentScroll = mainScrollRef.current.scrollTop;
                     setScrollPositions(prev => ({ ...prev, [mode]: currentScroll }));
@@ -757,10 +759,8 @@
             }, [mode]);
 
             return (
-                // FLEXBOX APP SHELL STRUCTURE: 100dvh container
                 <div className="flex flex-col h-[100dvh] w-full bg-slate-50 text-slate-800 font-sans overflow-hidden">
-                    
-                    {/* 1. Header (Fixed at top) */}
+                    {/* Header */}
                     <header className="flex-none bg-slate-900 text-white pt-10 pb-6 shadow-lg relative overflow-hidden z-30">
                         <div className="max-w-4xl mx-auto px-4 relative z-10">
                             <div className="flex flex-col justify-center items-start gap-4 mb-2">
@@ -773,7 +773,7 @@
                                             ・「精神的格差（心）」か。
                                         </span>
                                     </h1>
-                                    <p className="text-slate-400 text-sm mt-2 max-w-lg">直感的な「診断」と、客観的な「データ」。二つのアプローチで物語の真実に迫る。</p>
+                                    <p className="text-slate-400 text-sm mt-2 max-w-lg">直感的な「診断」と、客観的な「データ」。<br/>二つのアプローチで物語の真実に迫る。</p>
                                 </div>
                             </div>
                         </div>
@@ -782,7 +782,7 @@
                         <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
                     </header>
 
-                    {/* 2. Main Content (Scrollable Area) */}
+                    {/* Main Content Area */}
                     <main 
                         ref={mainScrollRef}
                         className="flex-1 overflow-y-auto overflow-x-hidden scroll-container relative z-10 bg-slate-50"
@@ -796,7 +796,7 @@
                         </div>
                     </main>
 
-                    {/* 3. Footer Navigation (Fixed at bottom of Flex container) */}
+                    {/* Fixed Footer Navigation & Meter */}
                     <div className="flex-none z-50 w-full glass-panel border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] safe-area-pb">
                         
                         {/* Meter Section */}
