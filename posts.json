@@ -1,5 +1,11 @@
 [
   {
+    "content": "Testing auth post",
+    "username": "testuser",
+    "id": "1764288783486",
+    "createdAt": "2025-11-28T00:13:03.486Z"
+  },
+  {
     "content": "こんにちは！",
     "id": "1764288557908",
     "createdAt": "2025-11-28T00:09:17.908Z"

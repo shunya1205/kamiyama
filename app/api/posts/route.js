@@ -13,6 +13,6 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
-    const newPost = await addPost(body);
+    const newPost = await addPost({ content: body.content, username: body.username });
     return NextResponse.json(newPost);
 }
