@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>安田さん 2025 - 激務と人徳のレビュー</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+JP:wght@300;400;500;700;900&display=swap');
+      
+      body {
+        font-family: "SF Pro JP", "SF Pro Text", "SF Pro Display", "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Meiryo", sans-serif;
+        background-color: #000000;
+        color: #f5f5f7;
+        overflow-x: hidden;
+      }
+      
+      /* Hide scrollbar */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* Gradient Text Utility */
+      .text-gradient {
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    </style>
+
+    <!-- React & Babel Standalone -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+  }
+}
+</script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Icons (Inline SVGs) ---
+        const IconWrapper = ({ children, className, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+                {children}
+            </svg>
+        );
+
+        const Apple = (props) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className={props.className} {...props}>
+                <path d="M17.05 12.56c.1-1.7 1.4-2.5 1.5-2.6-.8-1.1-2-1.3-2.5-1.3-1-.1-2 .6-2.5 .6-.5 0-1.3-.6-2.2-.6-1.1 0-2.2 .7-2.8 1.7-1.2 2.1-.3 5.1 .8 6.8 .6 .8 1.2 1.7 2.1 1.7 .8 0 1.1-.6 2.1-.6 1 0 1.3 .6 2.1 .6 .9 0 1.5-.8 2-1.7 .6-1.3 .9-2.5 .9-2.6-.1-.1-1.6-.6-1.5-1.4zM14.65 8.36c.5-.6 .8-1.4 .7-2.2-.7 0-1.6 .5-2.1 1.1-.5 .6-.9 1.3-.8 2.1 .8 .1 1.7-.4 2.2-1z"/>
+            </svg>
+        );
+
+        const Activity = (props) => <IconWrapper {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></IconWrapper>;
+        const AlertTriangle = (props) => <IconWrapper {...props}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></IconWrapper>;
+        const FileSpreadsheet = (props) => <IconWrapper {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M8 13h2" /><path d="M8 17h2" /><path d="M14 13h2" /><path d="M14 17h2" /></IconWrapper>;
+        const Database = (props) => <IconWrapper {...props}><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></IconWrapper>;
+        const CheckCircle = (props) => <IconWrapper {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></IconWrapper>;
+        const PenTool = (props) => <IconWrapper {...props}><path d="m12 19 7-7 3 3-7 7-3-3z" /><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" /><path d="m2 2 7.586 7.586" /><circle cx="11" cy="11" r="2" /></IconWrapper>;
+        const Users = (props) => <IconWrapper {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></IconWrapper>;
+        const Shield = (props) => <IconWrapper {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /></IconWrapper>;
+        const Sparkles = (props) => <IconWrapper {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></IconWrapper>;
+        const Cpu = (props) => <IconWrapper {...props}><rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></IconWrapper>;
+        const Mic = (props) => <IconWrapper {...props}><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="22" /><line x1="8" y1="22" x2="16" y2="22" /></IconWrapper>;
+
+        // --- FadeIn Component ---
+        const FadeIn = ({ children, delay = 0, className = '' }) => {
+            const [isVisible, setIsVisible] = useState(false);
+            const domRef = useRef(null);
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            setIsVisible(true);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                const currentRef = domRef.current;
+                if (currentRef) {
+                    observer.observe(currentRef);
+                }
+
+                return () => {
+                    if (currentRef) {
+                        observer.unobserve(currentRef);
+                    }
+                };
+            }, []);
+
+            return (
+                <div
+                    ref={domRef}
+                    className={`transition-all duration-1000 ease-out transform ${
+                        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    } ${className}`}
+                    style={{ transitionDelay: `${delay}ms` }}
+                >
+                    {children}
+                </div>
+            );
+        };
+
+        // --- Navbar Component ---
+        const Navbar = () => {
+            const [scrolled, setScrolled] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setScrolled(window.scrollY > 20);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            return (
+                <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+                    scrolled ? 'bg-black/80 backdrop-blur-md border-b border-white/10' : 'bg-transparent'
+                }`}>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-12">
+                            <div className="flex items-center space-x-4">
+                                <Apple className="text-white h-5 w-5" />
+                                <span className="text-sm font-semibold tracking-wide text-gray-200">YASUDA 2025</span>
+                            </div>
+                            <div className="hidden md:flex items-center space-x-6 text-xs font-light text-gray-300">
+                                <a href="#endurance" className="hover:text-white transition-colors">激務</a>
+                                <a href="#analysis" className="hover:text-white transition-colors">調査</a>
+                                <a href="#character" className="hover:text-white transition-colors">安田という才能</a>
+                                <a href="#relation" className="hover:text-white transition-colors">人間関係</a>
+                                <button className="bg-[#0071e3] text-white px-3 py-1 rounded-full text-xs hover:bg-[#0077ed] transition-colors">
+                                    次回参加
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            );
+        };
+
+        // --- Hero Component ---
+        const Hero = () => {
+            return (
+                <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden bg-black">
+                    <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-[#1a1a1a] via-[#000000] to-[#000000] opacity-50"></div>
+                    
+                    <div className="z-10 text-center px-4 max-w-4xl mx-auto">
+                        <FadeIn delay={0}>
+                            <h2 className="text-[#f5f5f7] font-semibold text-2xl md:text-3xl mb-4 tracking-wide">
+                                安田さん。
+                            </h2>
+                        </FadeIn>
+                        
+                        <FadeIn delay={300}>
+                            <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500 mb-6">
+                                プロ級の耐久性。<br />
+                                規格外の<br className="md:hidden" />言語センス。
+                            </h1>
+                        </FadeIn>
+                        
+                        <FadeIn delay={600}>
+                            <p className="text-xl md:text-2xl text-gray-400 font-normal tracking-tight max-w-2xl mx-auto">
+                                オンライン飲み会 2025.10.2 <br />
+                                人的行政事務の限界と、愛される理由。
+                            </p>
+                        </FadeIn>
+                    </div>
+
+                    <FadeIn delay={1000} className="absolute bottom-10 animate-bounce">
+                        <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                    </FadeIn>
+                </section>
+            );
+        };
+
+        // --- EnduranceSection Component (Original) ---
+        const EnduranceSection = () => {
+            const [meterWidth, setMeterWidth] = useState(0);
+            const meterRef = useRef(null);
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            setTimeout(() => {
+                                setMeterWidth(95);
+                            }, 500);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                if (meterRef.current) {
+                    observer.observe(meterRef.current);
+                }
+
+                return () => {
+                    if (meterRef.current) {
+                        observer.unobserve(meterRef.current);
+                    }
+                };
+            }, []);
+
+            return (
+                <section id="endurance" className="bg-black py-32 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="mb-20 text-center">
+                            <FadeIn>
+                                <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 text-white">
+                                    パワフル。<br className="md:hidden" /> <span className="text-gray-500">限界点まで。</span>
+                                </h2>
+                            </FadeIn>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <FadeIn delay={200} className="col-span-1 md:col-span-2 bg-[#1d1d1f] rounded-3xl p-10 md:p-16 flex flex-col items-center justify-center overflow-hidden relative group">
+                                <div className="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                                <p className="text-gray-400 font-semibold mb-2 uppercase tracking-widest text-sm">連続稼働時間</p>
+                                <div className="text-[8rem] md:text-[12rem] font-bold leading-none text-white tracking-tighter">
+                                    47<span className="text-4xl md:text-6xl text-gray-500 ml-2">h</span>
+                                </div>
+                                <p className="text-gray-300 text-lg md:text-xl mt-8 max-w-xl text-center">
+                                    47時間連続勤務という、圧倒的な処理能力。
+                                    ゴールデンウィーク前の繁忙期における最大スループット。
+                                </p>
+                            </FadeIn>
+
+                            <FadeIn delay={400} className="bg-[#1d1d1f] rounded-3xl p-10 min-h-[400px] flex flex-col justify-between relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-8 opacity-20">
+                                    <Activity size={200} />
+                                </div>
+                                <div>
+                                    <h3 className="text-3xl font-bold text-white mb-4">フィジカル・フィードバック</h3>
+                                    <p className="text-gray-400 text-lg">
+                                        激しいストレスは身体に現れる。<br />
+                                        歯を食いしばりすぎて、奥歯が欠損するほどの構造的負荷。
+                                    </p>
+                                </div>
+                                <div className="mt-8">
+                                    <div className="flex items-center space-x-3 text-red-500 mb-2">
+                                        <AlertTriangle size={24} />
+                                        <span className="font-semibold text-lg">ストレス負荷</span>
+                                    </div>
+                                    
+                                    <div ref={meterRef} className="w-full bg-gray-800 h-6 rounded-full overflow-hidden relative shadow-inner">
+                                        {/* Background Grid Lines */}
+                                        <div className="absolute inset-0 flex justify-between px-2 z-10">
+                                            {[...Array(9)].map((_, i) => (
+                                                <div key={i} className="w-[1px] h-full bg-black/30"></div>
+                                            ))}
+                                        </div>
+                                        
+                                        {/* Animated Bar */}
+                                        <div 
+                                            className="h-full bg-gradient-to-r from-orange-600 via-red-500 to-red-600 shadow-[0_0_15px_rgba(239,68,68,0.5)] relative z-0 transition-all duration-[2000ms] ease-out"
+                                            style={{ 
+                                                width: `${meterWidth}%`,
+                                                transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)' 
+                                            }}
+                                        >
+                                            <div className="absolute top-0 right-0 h-full w-[2px] bg-white/50 shadow-[0_0_10px_white]"></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-between text-xs text-gray-500 mt-2 font-mono uppercase tracking-wider">
+                                        <span>Normal</span>
+                                        <span className="text-red-400 font-bold">Critical (Tooth Break)</span>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            <FadeIn delay={600} className="bg-[#1d1d1f] rounded-3xl p-10 min-h-[400px] flex flex-col justify-center items-center text-center relative overflow-hidden">
+                                <img 
+                                    src="https://picsum.photos/800/800?grayscale" 
+                                    alt="Abstract Stress" 
+                                    className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-overlay"
+                                />
+                                <div className="z-10">
+                                    <h3 className="text-3xl font-bold text-white mb-4">「血のしょんべん」級の強度</h3>
+                                    <p className="text-gray-400 text-lg max-w-sm mx-auto">
+                                        身体が悲鳴を上げるほどの業務密度を表す、安田氏独自の指標。
+                                        特に年度末に発揮されるピークパフォーマンス。
+                                    </p>
+                                </div>
+                            </FadeIn>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- AnalysisSection Component ---
+        const AnalysisSection = () => {
+            return (
+                <section id="analysis" className="bg-[#f5f5f7] text-black py-32 px-4 sm:px-6 lg:px-8">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="mb-16">
+                            <FadeIn>
+                                <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+                                    調査業務。<br />
+                                    <span className="text-gray-500">全てのセルに、精密さを。</span>
+                                </h2>
+                                <p className="text-xl md:text-2xl text-gray-600 max-w-3xl font-medium">
+                                    文科省・道教委からのシビアなデータ要求。
+                                    1つのミスも許されない、極限のデータ処理。
+                                </p>
+                            </FadeIn>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <FadeIn delay={200} className="col-span-1 lg:col-span-2 bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-8">
+                                <div className="flex-1">
+                                    <h3 className="text-3xl font-bold mb-2">130校</h3>
+                                    <h4 className="text-xl text-gray-500 mb-6">管轄（十勝）エリア</h4>
+                                    <p className="text-gray-600 mb-6">
+                                        各学校から送られる膨大なエクセルデータを精査。「昨年度からの継続不登校者が報告されていない」等の微細な不整合を特定。
+                                    </p>
+                                    <div className="flex space-x-8">
+                                        <div className="flex flex-col">
+                                            <span className="text-4xl font-bold">7<span className="text-lg">回</span></span>
+                                            <span className="text-xs text-gray-500 uppercase">いじめ調査 / 年</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-4xl font-bold">10<span className="text-lg">分</span></span>
+                                            <span className="text-xs text-gray-500 uppercase">処理待機時間</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="w-full md:w-64 h-48 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center relative overflow-hidden">
+                                    <FileSpreadsheet className="text-green-600 w-32 h-32 opacity-20 absolute -right-4 -bottom-4" />
+                                    <div className="z-10 bg-white p-4 rounded-lg shadow-lg border border-gray-100">
+                                        <div className="flex items-center space-x-2 mb-2">
+                                            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                            <span className="text-xs font-mono text-gray-500">不備検知</span>
+                                        </div>
+                                        <div className="h-2 w-32 bg-gray-100 rounded mb-1"></div>
+                                        <div className="h-2 w-24 bg-gray-100 rounded"></div>
+                                        <div className="absolute bottom-2 right-2 text-[10px] font-bold text-red-500 animate-pulse">RE-INPUT REQ.</div>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            <FadeIn delay={400} className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col justify-between">
+                                <div>
+                                    <Database className="w-10 h-10 text-blue-600 mb-4" />
+                                    <h3 className="text-2xl font-bold mb-2">集約システム</h3>
+                                    <p className="text-gray-600 text-sm">
+                                        重厚なレガシーインフラ。「ガタガタ」と音を立てるようにデータを投入し、10分待機。ズレがあれば原因を特定し、再投入。忍耐力が試される。
+                                    </p>
+                                </div>
+                                <div className="mt-8 space-y-3">
+                                    <div className="flex items-center text-sm text-gray-500">
+                                        <CheckCircle className="w-4 h-4 mr-2 text-blue-500" />
+                                        エクセル不備チェック
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-500">
+                                        <CheckCircle className="w-4 h-4 mr-2 text-blue-500" />
+                                        整合性確認
+                                    </div>
+                                    <div className="flex items-center text-sm text-gray-500">
+                                        <CheckCircle className="w-4 h-4 mr-2 text-blue-500" />
+                                        システム投入（10分）
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            <FadeIn delay={600} className="col-span-1 lg:col-span-3 bg-black text-white rounded-3xl p-10 md:p-16 overflow-hidden relative">
+                                <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                                    <div>
+                                        <h3 className="text-3xl md:text-5xl font-bold mb-6">行政文書という、<br/>芸術。</h3>
+                                        <p className="text-gray-400 text-lg mb-6">
+                                            現場からの質のばらつきがある報告書を、完璧な行政文書へと昇華させる。
+                                            時には体裁を保つため、「捏造に近い形での修正」という創造的再構築を行い、各課（義務教育課・生徒指導課）の要求を満たす。
+                                        </p>
+                                        <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
+                                            <PenTool className="w-4 h-4 mr-2" />
+                                            <span className="text-sm font-medium">職業病：「入力」という言葉を日常会話で使用</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-[#1d1d1f] p-6 rounded-xl border border-white/10 font-serif text-gray-300 italic text-xl leading-relaxed opacity-80">
+                                        「なお、道徳教育の実施においては、地域の実情を鑑み、包括的な理解を促進するよう努めるものとし……」
+                                    </div>
+                                </div>
+                            </FadeIn>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- CharacterSection (NEW) ---
+        const CharacterSection = () => {
+            return (
+                <section id="character" className="bg-[#1d1d1f] py-32 px-4 sm:px-6 lg:px-8">
+                     <div className="max-w-7xl mx-auto">
+                        <FadeIn className="text-center mb-24">
+                            <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 text-white">
+                                安田という、<br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">ジャンル。</span>
+                            </h2>
+                            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+                                悲壮感をユーモアに変える言語センス。カオスを総括する俯瞰力。
+                                人間味あふれるスペックの全貌。
+                            </p>
+                        </FadeIn>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Card 1: Linguistic Sense */}
+                            <FadeIn delay={100} className="col-span-1 md:col-span-2 bg-black rounded-3xl p-10 border border-gray-800 relative overflow-hidden group">
+                                <div className="absolute -right-10 -top-10 bg-purple-900/20 w-64 h-64 rounded-full blur-3xl group-hover:bg-purple-800/30 transition-all duration-700"></div>
+                                <div className="relative z-10">
+                                    <div className="flex items-center space-x-2 mb-6">
+                                        <Sparkles className="text-yellow-500" />
+                                        <span className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Power Words</span>
+                                    </div>
+                                    <h3 className="text-3xl font-bold text-white mb-6">圧倒的表現力。</h3>
+                                    <div className="space-y-4">
+                                        <div className="bg-[#2d2d2f] p-4 rounded-xl border-l-4 border-purple-500">
+                                            <p className="text-lg text-white font-medium">「血のしょんべんが出るぐらい働く」</p>
+                                            <p className="text-sm text-gray-400 mt-1">—— 繁忙期の壮絶さを一瞬で伝える比喩。</p>
+                                        </div>
+                                        <div className="bg-[#2d2d2f] p-4 rounded-xl border-l-4 border-pink-500">
+                                            <p className="text-lg text-white font-medium">「捏造に近い形で作り直す」</p>
+                                            <p className="text-sm text-gray-400 mt-1">—— 際どい修正作業を笑いに変えるユーモア。</p>
+                                        </div>
+                                        <div className="bg-[#2d2d2f] p-4 rounded-xl border-l-4 border-blue-500">
+                                            <p className="text-lg text-white font-medium">「ガタガタってエクセルを入れたら」</p>
+                                            <p className="text-sm text-gray-400 mt-1">—— 複雑なシステム処理を擬音で表現する勢い。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            {/* Card 2: Summary Ability */}
+                            <FadeIn delay={300} className="col-span-1 bg-white text-black rounded-3xl p-10 border border-gray-200 flex flex-col justify-between">
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-6">
+                                        <Cpu className="text-black" />
+                                        <span className="text-sm font-semibold text-gray-500 uppercase tracking-widest">Totalization Core</span>
+                                    </div>
+                                    <h3 className="text-3xl font-bold mb-4">無意識の総括。</h3>
+                                    <p className="text-gray-600 mb-6">
+                                        カオスな現場にいても、状況を客観的に一言でまとめる「指導主事OS」が常駐。飲み会ですら話を総括してしまう。
+                                    </p>
+                                </div>
+                                <div className="space-y-2 font-mono text-sm bg-gray-100 p-4 rounded-lg">
+                                    <div className="flex justify-between">
+                                        <span>Status:</span>
+                                        <span className="font-bold">ROBOT_MODE</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Type:</span>
+                                        <span className="font-bold">SOLDIER</span>
+                                    </div>
+                                    <div className="flex justify-between text-red-500">
+                                        <span>Rule:</span>
+                                        <span className="font-bold">DEADLINE_FIRST</span>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            {/* Card 3: Humanity & Charm */}
+                            <FadeIn delay={500} className="col-span-1 md:col-span-3 bg-gradient-to-br from-gray-900 to-black rounded-3xl p-10 border border-gray-800 text-center relative overflow-hidden">
+                                <div className="relative z-10 max-w-3xl mx-auto">
+                                     <div className="inline-block p-3 bg-white/10 rounded-full mb-6">
+                                        <Mic className="text-white w-6 h-6" />
+                                     </div>
+                                     <h3 className="text-4xl font-bold text-white mb-6">愛すべき、<br className="md:hidden" />人間臭さ。</h3>
+                                     <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+                                        完璧な仕事ぶりの裏にある、天然な一面。
+                                        日常会話で「入力（情報を入れること）」と言ってしまい主幹に突っ込まれる職業病。
+                                        そして、上層部に文句を言いながらも結局は「気に入られてしまう」不思議な人徳。
+                                     </p>
+                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                                         <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm">
+                                             <h4 className="text-white font-bold mb-2">深夜2時の喧嘩</h4>
+                                             <p className="text-gray-400 text-sm">温厚な彼が極限状態で同期と「お前の方じゃねえのか」と言い争う。その人間らしさが、逆に信頼を生む。</p>
+                                         </div>
+                                         <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm">
+                                             <h4 className="text-white font-bold mb-2">本庁ホットライン</h4>
+                                             <p className="text-gray-400 text-sm">「兵隊向き」と自嘲しながらも、異動後も本庁幹部にサシ飲みに誘われるほどの愛され力。</p>
+                                         </div>
+                                     </div>
+                                </div>
+                            </FadeIn>
+                        </div>
+                     </div>
+                </section>
+            );
+        };
+
+        // --- RelationSection Component (Updated) ---
+        const RelationSection = () => {
+            return (
+                <section id="relation" className="bg-black py-32 px-4 sm:px-6 lg:px-8 pb-48">
+                    <div className="max-w-7xl mx-auto">
+                        
+                        <FadeIn className="text-center mb-20">
+                            <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
+                                炎の中で、<br className="md:hidden" />鍛えられた絆。
+                            </h2>
+                            <p className="text-xl text-gray-400">苦楽を共にし、築き上げられた人間関係。</p>
+                        </FadeIn>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+                            <FadeIn delay={200} className="space-y-8">
+                                <div className="relative h-[500px] rounded-3xl overflow-hidden group">
+                                    <img 
+                                        src="https://picsum.photos/600/800?grayscale" 
+                                        alt="Comrades" 
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-10">
+                                        <h3 className="text-3xl font-bold text-white mb-2">高橋さんとの3年間</h3>
+                                        <p className="text-gray-300 leading-relaxed">
+                                            有能な同期と過ごした濃密な時間。<br/>
+                                            深夜2時の仕事の押し付け合いによる喧嘩を経て、二人は戦友へ。<br/>
+                                            今でも月1で飲みに行く、かけがえのない関係。
+                                        </p>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            <FadeIn delay={400} className="space-y-6 md:pt-20">
+                                <div className="bg-[#1d1d1f] p-8 rounded-3xl border border-white/5">
+                                    <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
+                                        <Shield className="text-blue-500 w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">「兵隊」適性</h3>
+                                    <p className="text-gray-400">
+                                        上層部に好まれる性格。従順、強靭、そして有能。<br/>
+                                        文句を言いながらも業務を完遂する責任感が、幹部たちを惹きつける。
+                                    </p>
+                                </div>
+
+                                <div className="bg-[#1d1d1f] p-8 rounded-3xl border border-white/5">
+                                    <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mb-4">
+                                        <Users className="text-purple-500 w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-white mb-2">ロボット時代</h3>
+                                    <p className="text-gray-400">
+                                        自己の完全機械化。効率のために感情を抑制し、ひたすら業務を遂行した時期。
+                                        「締め切り至上主義」の中で生き残るための進化。
+                                    </p>
+                                </div>
+                            </FadeIn>
+                        </div>
+                        
+                        <FadeIn delay={800} className="mt-32 text-center border-t border-gray-800 pt-16">
+                            <p className="text-3xl md:text-5xl font-semibold text-gray-500">
+                                「地獄だった。」<br />
+                                <span className="text-white">しかし、<br className="md:hidden" />充実感はそこにあった。</span>
+                            </p>
+                        </FadeIn>
+
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            return (
+                <div className="bg-black text-white min-h-screen selection:bg-blue-500 selection:text-white font-sans antialiased">
+                    <Navbar />
+                    <main>
+                        <Hero />
+                        <EnduranceSection />
+                        <AnalysisSection />
+                        <CharacterSection />
+                        <RelationSection />
+                    </main>
+                    
+                    <footer className="bg-[#1d1d1f] text-gray-500 py-12 text-xs text-center border-t border-gray-800">
+                        <div className="max-w-5xl mx-auto px-4">
+                            <p className="mb-4">
+                                1. 47時間連続勤務は一般的な健康管理上推奨されません。行政マラソンに挑戦する際は医師にご相談ください。<br />
+                                2. 「血のしょんべん」は安田氏による比喩表現であり、医学的な診断結果ではありません。<br />
+                                3. 本サイトは安田氏へのリスペクトを込めて作成された、オンライン飲み会のレビューページです。
+                            </p>
+                            <div className="border-t border-gray-700 my-4"></div>
+                            <p>Copyright © 2025 Yasuda-san Online Nomikai. All rights reserved.</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
