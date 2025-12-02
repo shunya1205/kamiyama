@@ -73,9 +73,11 @@
         const PenTool = (props) => <IconWrapper {...props}><path d="m12 19 7-7 3 3-7 7-3-3z" /><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" /><path d="m2 2 7.586 7.586" /><circle cx="11" cy="11" r="2" /></IconWrapper>;
         const Users = (props) => <IconWrapper {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></IconWrapper>;
         const Shield = (props) => <IconWrapper {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /></IconWrapper>;
-        const Sparkles = (props) => <IconWrapper {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></IconWrapper>;
+        const Sparkles = (props) => <IconWrapper {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z" /></IconWrapper>;
         const Cpu = (props) => <IconWrapper {...props}><rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></IconWrapper>;
         const Mic = (props) => <IconWrapper {...props}><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="22" /><line x1="8" y1="22" x2="16" y2="22" /></IconWrapper>;
+        const Menu = (props) => <IconWrapper {...props}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></IconWrapper>;
+        const X = (props) => <IconWrapper {...props}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconWrapper>;
 
         // --- FadeIn Component ---
         const FadeIn = ({ children, delay = 0, className = '' }) => {
@@ -119,6 +121,7 @@
         // --- Navbar Component ---
         const Navbar = () => {
             const [scrolled, setScrolled] = useState(false);
+            const [isOpen, setIsOpen] = useState(false);
 
             useEffect(() => {
                 const handleScroll = () => {
@@ -128,25 +131,74 @@
                 return () => window.removeEventListener('scroll', handleScroll);
             }, []);
 
+            const toggleMenu = () => {
+                setIsOpen(!isOpen);
+            };
+
+            const closeMenu = () => {
+                setIsOpen(false);
+            };
+
+            const menuItems = [
+                { href: "#endurance", label: "激務" },
+                { href: "#analysis", label: "調査" },
+                { href: "#character", label: "安田という才能" },
+                { href: "#relation", label: "人間関係" },
+            ];
+
             return (
                 <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-                    scrolled ? 'bg-black/80 backdrop-blur-md border-b border-white/10' : 'bg-transparent'
+                    scrolled || isOpen ? 'bg-black border-b border-white/10' : 'bg-transparent'
                 }`}>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="flex justify-between items-center h-12">
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-4 z-50">
                                 <Apple className="text-white h-5 w-5" />
                                 <span className="text-sm font-semibold tracking-wide text-gray-200">YASUDA 2025</span>
                             </div>
+
+                            {/* Desktop Menu */}
                             <div className="hidden md:flex items-center space-x-6 text-xs font-light text-gray-300">
-                                <a href="#endurance" className="hover:text-white transition-colors">激務</a>
-                                <a href="#analysis" className="hover:text-white transition-colors">調査</a>
-                                <a href="#character" className="hover:text-white transition-colors">安田という才能</a>
-                                <a href="#relation" className="hover:text-white transition-colors">人間関係</a>
-                                <button className="bg-[#0071e3] text-white px-3 py-1 rounded-full text-xs hover:bg-[#0077ed] transition-colors">
-                                    次回参加
+                                {menuItems.map((item) => (
+                                    <a 
+                                        key={item.label}
+                                        href={item.href} 
+                                        className="hover:text-white transition-colors"
+                                    >
+                                        {item.label}
+                                    </a>
+                                ))}
+                            </div>
+
+                            {/* Mobile Hamburger Button */}
+                            <div className="md:hidden flex items-center z-50">
+                                <button 
+                                    onClick={toggleMenu} 
+                                    className="text-gray-300 hover:text-white focus:outline-none p-2"
+                                >
+                                    {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile Menu Overlay - Slide from Right, Solid Black Background */}
+                    <div 
+                        className={`fixed inset-0 bg-black z-40 transition-transform duration-300 ease-in-out md:hidden flex flex-col pt-24 px-8 ${
+                            isOpen ? 'translate-x-0' : 'translate-x-full'
+                        }`}
+                    >
+                        <div className="flex flex-col space-y-6 text-2xl font-semibold text-gray-200 mt-8">
+                            {menuItems.map((item, index) => (
+                                <a 
+                                    key={item.label}
+                                    href={item.href} 
+                                    className="border-b border-gray-800 pb-4 hover:text-white transition-colors"
+                                    onClick={closeMenu}
+                                >
+                                    {item.label}
+                                </a>
+                            ))}
                         </div>
                     </div>
                 </nav>
@@ -176,7 +228,7 @@
                         <FadeIn delay={600}>
                             <p className="text-xl md:text-2xl text-gray-400 font-normal tracking-tight max-w-2xl mx-auto">
                                 オンライン飲み会 2025.10.2 <br />
-                                人的行政事務の限界と、愛される理由。
+                                安田さんによる人的行政事務の限界と、愛される理由。
                             </p>
                         </FadeIn>
                     </div>
@@ -236,7 +288,7 @@
                                     47<span className="text-4xl md:text-6xl text-gray-500 ml-2">h</span>
                                 </div>
                                 <p className="text-gray-300 text-lg md:text-xl mt-8 max-w-xl text-center">
-                                    47時間連続勤務という、圧倒的な処理能力。
+                                    安田さんが叩き出す、47時間連続勤務という圧倒的な処理能力。
                                     ゴールデンウィーク前の繁忙期における最大スループット。
                                 </p>
                             </FadeIn>
@@ -248,14 +300,14 @@
                                 <div>
                                     <h3 className="text-3xl font-bold text-white mb-4">フィジカル・フィードバック</h3>
                                     <p className="text-gray-400 text-lg">
-                                        激しいストレスは身体に現れる。<br />
+                                        激しいストレスは安田ボディに現れる。<br />
                                         歯を食いしばりすぎて、奥歯が欠損するほどの構造的負荷。
                                     </p>
                                 </div>
                                 <div className="mt-8">
                                     <div className="flex items-center space-x-3 text-red-500 mb-2">
                                         <AlertTriangle size={24} />
-                                        <span className="font-semibold text-lg">ストレス負荷</span>
+                                        <span className="font-semibold text-lg">安田式ストレス負荷</span>
                                     </div>
                                     
                                     <div ref={meterRef} className="w-full bg-gray-800 h-6 rounded-full overflow-hidden relative shadow-inner">
@@ -294,7 +346,7 @@
                                 <div className="z-10">
                                     <h3 className="text-3xl font-bold text-white mb-4">「血のしょんべん」級の強度</h3>
                                     <p className="text-gray-400 text-lg max-w-sm mx-auto">
-                                        身体が悲鳴を上げるほどの業務密度を表す、安田氏独自の指標。
+                                        安田さんの身体が悲鳴を上げるほどの業務密度を表す、独自の指標。
                                         特に年度末に発揮されるピークパフォーマンス。
                                     </p>
                                 </div>
@@ -314,10 +366,10 @@
                             <FadeIn>
                                 <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
                                     調査業務。<br />
-                                    <span className="text-gray-500">全てのセルに、精密さを。</span>
+                                    <span className="text-gray-500">全てのセルに、<br className="md:hidden" />精密さを。</span>
                                 </h2>
                                 <p className="text-xl md:text-2xl text-gray-600 max-w-3xl font-medium">
-                                    文科省・道教委からのシビアなデータ要求。
+                                    安田さんを襲う、文科省・道教委からのシビアなデータ要求。
                                     1つのミスも許されない、極限のデータ処理。
                                 </p>
                             </FadeIn>
@@ -327,9 +379,9 @@
                             <FadeIn delay={200} className="col-span-1 lg:col-span-2 bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-8">
                                 <div className="flex-1">
                                     <h3 className="text-3xl font-bold mb-2">130校</h3>
-                                    <h4 className="text-xl text-gray-500 mb-6">管轄（十勝）エリア</h4>
+                                    <h4 className="text-xl text-gray-500 mb-6">安田さんの管轄（十勝）エリア</h4>
                                     <p className="text-gray-600 mb-6">
-                                        各学校から送られる膨大なエクセルデータを精査。「昨年度からの継続不登校者が報告されていない」等の微細な不整合を特定。
+                                        各学校から安田さんの元へ送られる膨大なエクセルデータを精査。「昨年度からの継続不登校者が報告されていない」等の微細な不整合を特定。
                                     </p>
                                     <div className="flex space-x-8">
                                         <div className="flex flex-col">
@@ -361,7 +413,7 @@
                                     <Database className="w-10 h-10 text-blue-600 mb-4" />
                                     <h3 className="text-2xl font-bold mb-2">集約システム</h3>
                                     <p className="text-gray-600 text-sm">
-                                        重厚なレガシーインフラ。「ガタガタ」と音を立てるようにデータを投入し、10分待機。ズレがあれば原因を特定し、再投入。忍耐力が試される。
+                                        安田さんを待ち受ける、重厚なレガシーインフラ。「ガタガタ」と音を立てるようにデータを投入し、10分待機。ズレがあれば原因を特定し、再投入。忍耐力が試される。
                                     </p>
                                 </div>
                                 <div className="mt-8 space-y-3">
@@ -385,7 +437,7 @@
                                     <div>
                                         <h3 className="text-3xl md:text-5xl font-bold mb-6">行政文書という、<br/>芸術。</h3>
                                         <p className="text-gray-400 text-lg mb-6">
-                                            現場からの質のばらつきがある報告書を、完璧な行政文書へと昇華させる。
+                                            現場からの質のばらつきがある報告書を、安田フィルターを通して完璧な行政文書へと昇華させる。
                                             時には体裁を保つため、「捏造に近い形での修正」という創造的再構築を行い、各課（義務教育課・生徒指導課）の要求を満たす。
                                         </p>
                                         <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
@@ -394,7 +446,7 @@
                                         </div>
                                     </div>
                                     <div className="bg-[#1d1d1f] p-6 rounded-xl border border-white/10 font-serif text-gray-300 italic text-xl leading-relaxed opacity-80">
-                                        「なお、道徳教育の実施においては、地域の実情を鑑み、包括的な理解を促進するよう努めるものとし……」
+                                        「なお、安田教育の実施においては、地域の実情を鑑み、包括的な理解を促進するよう努めるものとし……」
                                     </div>
                                 </div>
                             </FadeIn>
@@ -415,7 +467,7 @@
                             </h2>
                             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
                                 悲壮感をユーモアに変える言語センス。カオスを総括する俯瞰力。
-                                人間味あふれるスペックの全貌。
+                                安田さんならではの人間味あふれるスペック。
                             </p>
                         </FadeIn>
 
@@ -432,11 +484,11 @@
                                     <div className="space-y-4">
                                         <div className="bg-[#2d2d2f] p-4 rounded-xl border-l-4 border-purple-500">
                                             <p className="text-lg text-white font-medium">「血のしょんべんが出るぐらい働く」</p>
-                                            <p className="text-sm text-gray-400 mt-1">—— 繁忙期の壮絶さを一瞬で伝える比喩。</p>
+                                            <p className="text-sm text-gray-400 mt-1">—— 安田さんが繁忙期の壮絶さを一瞬で伝える比喩。</p>
                                         </div>
                                         <div className="bg-[#2d2d2f] p-4 rounded-xl border-l-4 border-pink-500">
                                             <p className="text-lg text-white font-medium">「捏造に近い形で作り直す」</p>
-                                            <p className="text-sm text-gray-400 mt-1">—— 際どい修正作業を笑いに変えるユーモア。</p>
+                                            <p className="text-sm text-gray-400 mt-1">—— 際どい修正作業を笑いに変える、安田流ユーモア。</p>
                                         </div>
                                         <div className="bg-[#2d2d2f] p-4 rounded-xl border-l-4 border-blue-500">
                                             <p className="text-lg text-white font-medium">「ガタガタってエクセルを入れたら」</p>
@@ -455,13 +507,13 @@
                                     </div>
                                     <h3 className="text-3xl font-bold mb-4">無意識の総括。</h3>
                                     <p className="text-gray-600 mb-6">
-                                        カオスな現場にいても、状況を客観的に一言でまとめる「指導主事OS」が常駐。飲み会ですら話を総括してしまう。
+                                        カオスな現場にいても、状況を客観的に一言でまとめる「安田指導主事OS」が常駐。飲み会ですら話を総括してしまう。
                                     </p>
                                 </div>
                                 <div className="space-y-2 font-mono text-sm bg-gray-100 p-4 rounded-lg">
                                     <div className="flex justify-between">
                                         <span>Status:</span>
-                                        <span className="font-bold">ROBOT_MODE</span>
+                                        <span className="font-bold">YASUDA_MODE</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span>Type:</span>
@@ -482,14 +534,14 @@
                                      </div>
                                      <h3 className="text-4xl font-bold text-white mb-6">愛すべき、<br className="md:hidden" />人間臭さ。</h3>
                                      <p className="text-xl text-gray-300 mb-8 leading-relaxed">
-                                        完璧な仕事ぶりの裏にある、天然な一面。
+                                        完璧な仕事ぶりの裏にある、安田さんの天然な一面。
                                         日常会話で「入力（情報を入れること）」と言ってしまい主幹に突っ込まれる職業病。
-                                        そして、上層部に文句を言いながらも結局は「気に入られてしまう」不思議な人徳。
+                                        そして、上層部に文句を言いながらも結局は「気に入られてしまう」安田さんの人徳。
                                      </p>
                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                                          <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm">
                                              <h4 className="text-white font-bold mb-2">深夜2時の喧嘩</h4>
-                                             <p className="text-gray-400 text-sm">温厚な彼が極限状態で同期と「お前の方じゃねえのか」と言い争う。その人間らしさが、逆に信頼を生む。</p>
+                                             <p className="text-gray-400 text-sm">温厚な安田さんが極限状態で同期と「お前の方じゃねえのか」と言い争う。その人間らしさが、逆に信頼を生む。</p>
                                          </div>
                                          <div className="bg-white/5 p-4 rounded-xl backdrop-blur-sm">
                                              <h4 className="text-white font-bold mb-2">本庁ホットライン</h4>
@@ -514,7 +566,7 @@
                             <h2 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
                                 炎の中で、<br className="md:hidden" />鍛えられた絆。
                             </h2>
-                            <p className="text-xl text-gray-400">苦楽を共にし、築き上げられた人間関係。</p>
+                            <p className="text-xl text-gray-400">苦楽を共にし、築き上げられた安田さんの人間関係。</p>
                         </FadeIn>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
@@ -526,7 +578,7 @@
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-10">
-                                        <h3 className="text-3xl font-bold text-white mb-2">高橋さんとの3年間</h3>
+                                        <h3 className="text-3xl font-bold text-white mb-2">安田さんと高橋さん。</h3>
                                         <p className="text-gray-300 leading-relaxed">
                                             有能な同期と過ごした濃密な時間。<br/>
                                             深夜2時の仕事の押し付け合いによる喧嘩を経て、二人は戦友へ。<br/>
@@ -541,7 +593,7 @@
                                     <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
                                         <Shield className="text-blue-500 w-6 h-6" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white mb-2">「兵隊」適性</h3>
+                                    <h3 className="text-2xl font-bold text-white mb-2">安田式「兵隊」適性</h3>
                                     <p className="text-gray-400">
                                         上層部に好まれる性格。従順、強靭、そして有能。<br/>
                                         文句を言いながらも業務を完遂する責任感が、幹部たちを惹きつける。
@@ -552,10 +604,10 @@
                                     <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mb-4">
                                         <Users className="text-purple-500 w-6 h-6" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white mb-2">ロボット時代</h3>
+                                    <h3 className="text-2xl font-bold text-white mb-2">安田ロボット時代</h3>
                                     <p className="text-gray-400">
                                         自己の完全機械化。効率のために感情を抑制し、ひたすら業務を遂行した時期。
-                                        「締め切り至上主義」の中で生き残るための進化。
+                                        「締め切り至上主義」の中で生き残るための安田的進化。
                                     </p>
                                 </div>
                             </FadeIn>
@@ -590,8 +642,8 @@
                         <div className="max-w-5xl mx-auto px-4">
                             <p className="mb-4">
                                 1. 47時間連続勤務は一般的な健康管理上推奨されません。行政マラソンに挑戦する際は医師にご相談ください。<br />
-                                2. 「血のしょんべん」は安田氏による比喩表現であり、医学的な診断結果ではありません。<br />
-                                3. 本サイトは安田氏へのリスペクトを込めて作成された、オンライン飲み会のレビューページです。
+                                2. 「血のしょんべん」は安田さんによる比喩表現であり、医学的な診断結果ではありません。<br />
+                                3. 本サイトは安田さんへのリスペクトを込めて作成された、オンライン飲み会のレビューページです。
                             </p>
                             <div className="border-t border-gray-700 my-4"></div>
                             <p>Copyright © 2025 Yasuda-san Online Nomikai. All rights reserved.</p>
