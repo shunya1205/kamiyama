@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philosophy | 神山の思考</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Serif+Display&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Zen+Old+Mincho:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['"Abril Fatface"', '"DM Serif Display"', 'serif'],
+                        'serif': ['"Zen Old Mincho"', 'serif'],
+                        'mono': ['"Space Mono"', 'monospace'],
+                    },
+                    colors: {
+                        'vinyl-black': '#1a1a1a',
+                        'paper-cream': '#f4f1ea',
+                        'mod-red': '#e74c3c',
+                        'mod-blue': '#2980b9',
+                        'submarine-yellow': '#f1c40f',
+                        'british-green': '#27ae60',
+                    },
+                    boxShadow: {
+                        'retro': '8px 8px 0px 0px rgba(0,0,0,1)',
+                        'retro-sm': '4px 4px 0px 0px rgba(0,0,0,1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f4f1ea;
+            color: #1a1a1a;
+            font-family: 'Zen Old Mincho', serif;
+            overflow-x: hidden;
+            background-image: radial-gradient(#d1d1d1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Smooth Scroll */
+        html { scroll-behavior: smooth; }
+
+        .album-cover-text {
+            font-family: 'Abril Fatface', serif;
+            letter-spacing: -0.05em;
+            line-height: 0.9;
+        }
+
+        .track-listing {
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Retro Borders */
+        .retro-border {
+            border: 3px solid #1a1a1a;
+            background: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .retro-border:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0px 0px rgba(0,0,0,1);
+        }
+        
+        /* Specific static shadow for cards that don't need hover movement */
+        .retro-card {
+            border: 3px solid #1a1a1a;
+            background: #fff;
+            box-shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+        }
+
+        /* Vinyl Record Animation */
+        .vinyl-spin {
+            animation: spin 10s linear infinite;
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Grain texture overlay */
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Typography sizing for huge impact */
+        .huge-text {
+            font-size: clamp(3rem, 10vw, 8rem);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f4f1ea;
+            border-left: 3px solid #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1a1a1a;
+            border: 2px solid #f4f1ea;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e74c3c;
+        }
+    </style>
+</head>
+<body class="selection:bg-mod-red selection:text-white">
+
+    <div class="grain"></div>
+
+    <!-- Navigation (Ticket Stub Style) -->
+    <nav class="fixed w-full z-40 top-0 left-0 p-4 pointer-events-none">
+        <div class="max-w-7xl mx-auto flex justify-between items-start">
+            <div class="pointer-events-auto bg-vinyl-black text-paper-cream px-6 py-3 font-display text-xl tracking-wide shadow-retro rotate-[-2deg] hover:rotate-0 transition-transform cursor-pointer border-2 border-transparent hover:border-paper-cream" onclick="window.scrollTo(0,0)">
+                THE KAMIYAMA
+            </div>
+
+            <!-- PC Menu -->
+            <div class="hidden md:flex pointer-events-auto bg-white border-2 border-black shadow-retro p-2 gap-4 font-mono text-sm font-bold rotate-[1deg]">
+                <a href="#science" class="hover:bg-mod-red hover:text-white px-3 py-1 transition-colors uppercase">Science</a>
+                <a href="#mindset" class="hover:bg-mod-blue hover:text-white px-3 py-1 transition-colors uppercase">Mindset</a>
+                <a href="#strategy" class="hover:bg-submarine-yellow hover:text-black px-3 py-1 transition-colors uppercase">Strategy</a>
+                <a href="#team" class="hover:bg-british-green hover:text-white px-3 py-1 transition-colors uppercase">Team</a>
+                <a href="#tools" class="hover:bg-black hover:text-white px-3 py-1 transition-colors uppercase">Tools</a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="menu-btn" class="md:hidden pointer-events-auto bg-white border-2 border-black shadow-retro p-3 text-black focus:outline-none">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="hidden fixed inset-0 z-30 bg-paper-cream flex-col justify-center items-center font-display text-4xl space-y-8 border-8 border-black m-4">
+        <a href="#science" class="mobile-link text-mod-red hover:underline decoration-4">Science</a>
+        <a href="#mindset" class="mobile-link text-mod-blue hover:underline decoration-4">Mindset</a>
+        <a href="#strategy" class="mobile-link text-submarine-yellow hover:underline decoration-4">Strategy</a>
+        <a href="#team" class="mobile-link text-british-green hover:underline decoration-4">Team</a>
+        <a href="#tools" class="mobile-link text-black hover:underline decoration-4">Tools</a>
+        <button id="close-menu-btn" class="absolute top-8 right-8 text-2xl"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="pt-32 pb-20 px-4 overflow-hidden">
+        
+        <!-- Hero Section: Album Cover Style -->
+        <section class="min-h-[90vh] flex flex-col justify-center items-center relative mb-20">
+            <div class="max-w-6xl w-full mx-auto relative">
+                <!-- Decorative Elements -->
+                <div class="absolute -top-20 -left-20 text-mod-red opacity-10 text-[20rem] font-display select-none -z-10 rotate-[-10deg]">A</div>
+                <div class="absolute bottom-0 right-0 text-mod-blue opacity-10 text-[20rem] font-display select-none -z-10 rotate-[10deg]">Z</div>
+
+                <div class="border-y-4 border-black py-12 md:py-20 text-center bg-white relative shadow-[20px_20px_0px_0px_rgba(231,76,60,0.2)]">
+                    <div class="font-mono text-sm tracking-widest mb-4 text-gray-500 uppercase">Stereo | Mono | 33 ⅓ RPM</div>
+                    <h1 class="huge-text album-cover-text text-vinyl-black mb-6">
+                        思考のOS。
+                    </h1>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 text-3xl md:text-5xl font-display italic text-mod-red">
+                        <span>一生モノの</span>
+                        <span class="bg-black text-white px-4 py-1 rotate-2 inline-block shadow-retro-sm">基盤を。</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 max-w-3xl mx-auto bg-paper-cream border-2 border-black p-8 rotate-[-1deg] shadow-retro relative">
+                    <!-- Pin Icon -->
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-red-800 border-2 border-white shadow-lg z-10"></div>
+                    
+                    <p class="font-serif text-lg md:text-xl leading-loose text-justify text-gray-800">
+                        <span class="font-bold text-3xl float-left mr-2 mt-[-10px] font-display">"</span>
+                        根性論ではない。脳科学とエビデンスに基づき、神山が構築した「自律した学習者」になるための4つのアルゴリズム。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Science (Side A, Track 1) -->
+        <section id="science" class="py-24 relative">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex items-center gap-6 mb-16">
+                    <div class="w-16 h-16 md:w-24 md:h-24 bg-black rounded-full flex items-center justify-center text-white font-display text-2xl md:text-4xl border-4 border-paper-cream shadow-retro animate-[spin_10s_linear_infinite]">
+                        01
+                    </div>
+                    <div>
+                        <h2 class="text-5xl md:text-7xl font-display text-mod-red leading-none">Science</h2>
+                        <span class="font-mono text-lg bg-mod-red text-white px-2">行動とモチベーション</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+                    <!-- Main Article -->
+                    <div class="md:col-span-8 retro-border p-8 md:p-12 bg-white relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-submarine-yellow text-xs font-bold px-3 py-1 border-l-2 border-b-2 border-black font-mono">HIT SINGLE</div>
+                        <h3 class="text-3xl md:text-4xl font-bold mb-6 font-display border-b-4 border-mod-red inline-block">行動が先、やる気は後。</h3>
+                        <div class="prose prose-lg font-serif">
+                            <p class="mb-6">
+                                「やる気があるから動く」というのは誤解だと<span class="font-bold bg-yellow-100 px-1">神山は考えます</span>。動くからこそ<span class="text-mod-red font-bold">脳のエンジン</span>が点火され、ドーパミンが出る。<br>
+                                これが脳科学的事実、「作業興奮」です。
+                            </p>
+                            <blockquote class="border-l-4 border-black pl-4 italic font-mono text-gray-600 my-6 bg-gray-50 p-4">
+                                >> 悩み続けるより、まず「5分」「1問」動くことが全ての突破口になる。
+                            </blockquote>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar / B-Side -->
+                    <div class="md:col-span-4 space-y-8">
+                        <div class="retro-card p-6 bg-mod-blue text-white rotate-2">
+                            <h3 class="text-2xl font-bold mb-2 font-display">「0」と「1」の差</h3>
+                            <p class="text-sm font-mono leading-relaxed opacity-90">
+                                1日1分の行動でも、何もしない「0」とは天と地ほどの差があります。小さな行動（極小クエスト）こそがスイッチです。
+                            </p>
+                            <div class="mt-4 text-4xl font-bold font-display text-center border-2 border-white py-2">0 <span class="text-sm align-middle">vs</span> 1</div>
+                        </div>
+
+                        <div class="retro-card p-6 bg-white">
+                             <h3 class="text-xl font-bold mb-3 font-display border-b-2 border-black inline-block">GRITと試行回数</h3>
+                             <p class="text-sm text-gray-700 leading-relaxed font-serif">
+                                成功の唯一の法則は「試行回数」を増やすこと。結果ではなく「続けた事実（進捗）」に目を向けることでモチベーションは維持されます。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Mindset (Side A, Track 2) -->
+        <section id="mindset" class="py-24 bg-white border-y-4 border-black relative">
+            <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 0, transparent 50%); background-size: 20px 20px;"></div>
+            
+            <div class="max-w-6xl mx-auto relative z-10">
+                <div class="flex items-center justify-end gap-6 mb-16 text-right">
+                    <div>
+                        <h2 class="text-5xl md:text-7xl font-display text-mod-blue leading-none">Mindset</h2>
+                        <span class="font-mono text-lg bg-mod-blue text-white px-2">自己コントロール</span>
+                    </div>
+                    <div class="w-16 h-16 md:w-24 md:h-24 bg-black rounded-full flex items-center justify-center text-white font-display text-2xl md:text-4xl border-4 border-paper-cream shadow-retro animate-[spin_12s_linear_infinite_reverse]">
+                        02
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <!-- Feature Card -->
+                    <div class="retro-card p-8 md:p-12 bg-paper-cream rotate-[-1deg]">
+                        <div class="flex items-center gap-4 mb-6">
+                            <i class="fas fa-fingerprint text-4xl text-mod-blue"></i>
+                            <h3 class="text-4xl font-display font-bold">脱・他責。</h3>
+                        </div>
+                        <div class="font-serif text-lg leading-relaxed">
+                            <p class="mb-4">他責は「自尊心を守る防衛本能」ですが、同時に「人生のハンドルを他人に渡す行為」です。</p>
+                            <p class="font-bold border-b-2 border-mod-blue inline-block">自分の人生を自分でコントロールできている感覚（自己効力感）こそが幸福の源泉です。</p>
+                        </div>
+                    </div>
+
+                    <!-- List Style -->
+                    <div class="space-y-6">
+                        <div class="border-2 border-black p-6 bg-white hover:bg-mod-blue hover:text-white transition-colors group cursor-default">
+                            <h3 class="text-2xl font-bold font-display mb-2 flex items-center gap-2"><i class="fas fa-ban text-mod-red group-hover:text-white"></i> 完璧主義を捨てる</h3>
+                            <ul class="font-mono text-sm space-y-2 list-disc pl-5">
+                                <li>「0か100か」思考はメンタルを病む原因。</li>
+                                <li>できていない1割ではなく、<span class="bg-yellow-200 text-black px-1 group-hover:bg-white">できている9割</span>を見る。</li>
+                            </ul>
+                        </div>
+
+                        <div class="border-2 border-black p-6 bg-white hover:bg-mod-red hover:text-white transition-colors group cursor-default">
+                             <h3 class="text-2xl font-bold font-display mb-2">失敗の再定義 <span class="text-xs font-mono border border-black px-1 rounded group-hover:border-white">RE-FRAMING</span></h3>
+                             <p class="font-serif">
+                                失敗は「ダメなこと」ではありません。それは「部分的成功」であり、貴重な「データ収集」です。
+                             </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Strategy (Side B, Track 1) -->
+        <section id="strategy" class="py-24 relative">
+             <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16">
+                    <span class="block font-display text-8xl text-submarine-yellow opacity-20 absolute left-0 right-0 mx-auto -mt-10 select-none">STRATEGY</span>
+                    <h2 class="text-5xl md:text-7xl font-display text-black relative z-10">Strategy</h2>
+                    <span class="font-mono text-lg bg-submarine-yellow text-black px-4 py-1 border-2 border-black inline-block mt-2 shadow-retro-sm">戦略的判断</span>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-8">
+                    <!-- Column 1 -->
+                    <div class="flex-1 retro-border p-8 bg-white">
+                        <div class="text-center mb-6">
+                            <i class="fas fa-balance-scale text-6xl text-gray-200"></i>
+                        </div>
+                        <h3 class="text-3xl font-display font-bold mb-4 text-center">トレードオフ</h3>
+                        <p class="font-serif leading-relaxed text-justify">
+                            何かを得るには何かを捨てなければなりません。「何をするか」より<span class="bg-submarine-yellow font-bold px-1">「何をしないか」</span>を戦略的に決めることが重要です。
+                        </p>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div class="flex-1 space-y-8 mt-8 md:mt-0">
+                        <div class="bg-black text-white p-6 shadow-retro rotate-1">
+                            <h3 class="text-xl font-mono uppercase border-b border-white/30 pb-2 mb-2">>> Compass</h3>
+                            <p class="font-serif text-sm">「何のために？」という原点が、感情から切り離された正しい判断を導きます。</p>
+                        </div>
+                        <div class="bg-submarine-yellow text-black p-6 shadow-retro rotate-[-1deg] border-2 border-black">
+                            <h3 class="text-xl font-mono uppercase border-b border-black/30 pb-2 mb-2">>> Visibility</h3>
+                            <p class="font-serif text-sm">タスクと期限を可視化。見通しを持つことは「進める本能」を刺激します。</p>
+                        </div>
+                    </div>
+                     <!-- Column 3 -->
+                     <div class="flex-1 retro-border p-8 bg-white flex flex-col justify-center items-center text-center">
+                        <h3 class="text-2xl font-bold font-display mb-4">準備と自信</h3>
+                         <p class="font-serif text-sm leading-relaxed mb-4">
+                            結果に落ち込むのは準備不足だから。やりきった上での失敗は「納得感」に変わり、次の改善に繋がります。
+                        </p>
+                        <i class="fas fa-hourglass-half text-4xl text-mod-red animate-pulse"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Team (Side B, Track 2) -->
+        <section id="team" class="py-24 bg-british-green text-white relative border-y-4 border-black">
+             <div class="max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row items-baseline gap-6 mb-16 border-b-2 border-white/30 pb-6">
+                    <h2 class="text-5xl md:text-7xl font-display">Team</h2>
+                    <span class="font-mono text-xl text-green-200">/ 組織論</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div class="bg-white text-black p-8 shadow-[10px_10px_0px_0px_rgba(0,0,0,0.5)]">
+                        <h3 class="text-3xl font-display font-bold mb-4 flex items-center gap-3">
+                            <i class="fas fa-shield-alt text-british-green"></i> 心理的安全性
+                        </h3>
+                        <p class="font-serif leading-relaxed">
+                            「失敗しても馬鹿にされない」安心感が最強のチームを作ります。互いに教え合い、高め合う<span class="font-bold border-b-2 border-british-green">「ソーシャルプレッシャー」</span>を利用する。
+                        </p>
+                    </div>
+
+                    <div class="bg-black text-white p-8 shadow-[10px_10px_0px_0px_rgba(255,255,255,0.2)]">
+                        <h3 class="text-3xl font-display font-bold mb-4 flex items-center gap-3">
+                            <i class="fas fa-gift text-submarine-yellow"></i> 返報性と他者貢献
+                        </h3>
+                        <p class="font-serif leading-relaxed">
+                            挨拶は「あなたを受け入れる」という好意のプレゼント。誰かのために動くことは、脳科学的に自分の幸福感を高めます（ヘルパーズ・ハイ）。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 font-mono text-sm border-t border-white/20 pt-8">
+                     <div>
+                        <h4 class="font-bold text-lg mb-2"><i class="fas fa-chart-line"></i> 他者比較の無意味さ</h4>
+                        <p class="opacity-80">他他人と比べるのではなく、「過去の自分」と比べて成長を感じる。自分だけの「かたより（強み）」で集団に貢献してください。</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2"><i class="fas fa-user-cog"></i> 他人を変えようとしない</h4>
+                        <p class="opacity-80">「馬を水辺に連れて行くことはできても、水を飲ませることはできない」。他人ではなく、自分（変えられるもの）に集中するべきです。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tools Section -->
+        <section id="tools" class="py-24 px-4 bg-paper-cream">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16">
+                    <h2 class="text-5xl font-display text-black mb-2">The Tools</h2>
+                    <p class="font-mono text-gray-500">KAMIYAMA'S STUDIO GEAR</p>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-4">
+                    <!-- Tool Tag Style -->
+                    <div class="bg-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fas fa-gem text-purple-600 text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">Obsidian</div>
+                            <div class="text-xs font-mono text-gray-500">第二の脳</div>
+                        </div>
+                    </div>
+                     <div class="bg-black text-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fas fa-terminal text-cyan-400 text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">Gemini CLI</div>
+                            <div class="text-xs font-mono text-gray-400">敏腕秘書</div>
+                        </div>
+                    </div>
+                     <div class="bg-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fas fa-microchip text-blue-600 text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">AI Studio</div>
+                            <div class="text-xs font-mono text-gray-500">AI開発の母艦</div>
+                        </div>
+                    </div>
+                     <div class="bg-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fab fa-github text-black text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">GitHub</div>
+                            <div class="text-xs font-mono text-gray-500">創造の拠点</div>
+                        </div>
+                    </div>
+                     <div class="bg-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fas fa-book-open text-british-green text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">NotebookLM</div>
+                            <div class="text-xs font-mono text-gray-500">専属司書</div>
+                        </div>
+                    </div>
+                     <div class="bg-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fas fa-cube text-gray-600 text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">Notion</div>
+                            <div class="text-xs font-mono text-gray-500">思考の本棚</div>
+                        </div>
+                    </div>
+                     <div class="bg-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fas fa-terminal text-gray-800 text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">Terminal</div>
+                            <div class="text-xs font-mono text-gray-500">相棒</div>
+                        </div>
+                    </div>
+                     <div class="bg-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fab fa-google text-submarine-yellow text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">GWS</div>
+                            <div class="text-xs font-mono text-gray-500">業務の母艦</div>
+                        </div>
+                    </div>
+                     <div class="bg-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fas fa-palette text-mod-blue text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">Canva</div>
+                            <div class="text-xs font-mono text-gray-500">視覚化</div>
+                        </div>
+                    </div>
+                     <div class="bg-white border-2 border-black px-6 py-4 flex items-center gap-3 shadow-retro-sm hover:-translate-y-1 hover:shadow-retro transition-all cursor-default">
+                        <i class="fas fa-calendar-check text-mod-red text-xl"></i>
+                        <div>
+                            <div class="font-bold font-display">FirstSeed</div>
+                            <div class="text-xs font-mono text-gray-500">時間管理</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- References Section (Liner Notes Style) -->
+        <section id="references" class="py-24 border-t-4 border-black bg-white">
+            <div class="max-w-4xl mx-auto px-4">
+                <h2 class="text-5xl font-display text-center mb-12">Liner Notes / <span class="text-2xl font-serif italic text-gray-500">References</span></h2>
+                
+                <div class="font-serif leading-relaxed text-sm md:text-base space-y-12 columns-1 md:columns-2 gap-8">
+                    
+                    <div class="break-inside-avoid mb-8">
+                        <h4 class="font-bold font-display text-xl mb-2 text-mod-red uppercase">Mindset Module</h4>
+                        <div class="mb-4">
+                            <p class="font-bold">運は操れる</p>
+                            <p class="text-xs font-mono text-gray-500">著: メンタリストDaiGo</p>
+                            <p class="mt-1 text-gray-700">「やる気があるから行動するのではなく、行動するからやる気が出る（作業興奮）」「運が良い人とは『試行回数』が多い人だ」</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">科学的な適職</p>
+                            <p class="text-xs font-mono text-gray-500">著: 鈴木祐</p>
+                            <p class="mt-1 text-gray-700">「最高のチームを作る唯一の条件は『心理的安全性』」「他者へ貢献することで『ヘルパーズ・ハイ』と呼ばれる幸福感を得られる」</p>
+                        </div>
+                         <div class="mb-4">
+                            <p class="font-bold">進化論マーケティング</p>
+                            <p class="text-xs font-mono text-gray-500">著: 鈴木祐</p>
+                            <p class="mt-1 text-gray-700">「人間には『物事を前に進めたい』という本能的な欲求（進める本能）がある」</p>
+                        </div>
+                    </div>
+
+                    <div class="break-inside-avoid mb-8">
+                        <h4 class="font-bold font-display text-xl mb-2 text-british-green uppercase">Relation Module</h4>
+                        <div class="mb-4">
+                            <p class="font-bold">人を動かす</p>
+                            <p class="text-xs font-mono text-gray-500">著: デール・カーネギー</p>
+                            <p class="mt-1 text-gray-700">「人を動かす唯一の方法は、その人が自ら動きたくなる気持ちを起こさせること」「馬を水辺に連れて行くことはできても、水を飲ませることはできない」</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">影響力の武器</p>
+                            <p class="text-xs font-mono text-gray-500">著: ロバート・B・チャルディーニ</p>
+                            <p class="mt-1 text-gray-700">「人は他人から何かを与えられると、お返しをせずにはいられない（返報性の原理）」「挨拶とは、最初に与える『好意のプレゼント』である」</p>
+                        </div>
+                    </div>
+
+                    <div class="break-inside-avoid mb-8">
+                        <h4 class="font-bold font-display text-xl mb-2 text-submarine-yellow uppercase">Strategy Module</h4>
+                         <div class="mb-4">
+                            <p class="font-bold">「怠惰」なんて存在しない</p>
+                            <p class="text-xs font-mono text-gray-500">著: デヴォン・プライス</p>
+                            <p class="mt-1 text-gray-700">「トレードオフ＝何かを得るためには、何かを諦めなければならない」</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">才能の地図</p>
+                            <p class="text-xs font-mono text-gray-500">著: 鈴木祐</p>
+                            <p class="mt-1 text-gray-700">「他人と違う『かたより』こそが価値になる」</p>
+                        </div>
+                         <div class="mb-4">
+                            <p class="font-bold">バカになるほど、本を読め！</p>
+                            <p class="text-xs font-mono text-gray-500">著: 神田 昌典</p>
+                            <p class="mt-1 text-gray-700">「目的を明確にして、必要な情報を能動的に『取りに行く』」「意識の高い場でのソーシャルプレッシャーが人を成長させる」</p>
+                        </div>
+                        <div class="mb-4">
+                            <p class="font-bold">1分間孫子の兵法</p>
+                            <p class="text-xs font-mono text-gray-500">著: 齋藤 孝</p>
+                            <p class="mt-1 text-gray-700">「彼を知り己を知らば、百戦して殆うからず」「明日と他人は変えられないが、今日と自分は変えられる」</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-vinyl-black text-paper-cream py-20 text-center relative overflow-hidden">
+             <!-- Vinyl Record Decorative -->
+             <div class="absolute -bottom-1/2 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full border-[50px] border-gray-900 opacity-20 pointer-events-none"></div>
+
+            <div class="max-w-4xl mx-auto relative z-10 px-4">
+                <h2 class="text-6xl md:text-8xl font-display mb-8">
+                    BE <span class="text-mod-red">AUTONOMOUS</span>.
+                </h2>
+                <p class="font-serif text-lg md:text-xl leading-relaxed mb-12 opacity-80">
+                    予測不能な社会の中で、自分の頭で考え、<br>たくましく人生を切り拓いていける。<br>
+                    この1年で、あなたのOSをアップデートしましょう。
+                </p>
+                
+                <button onclick="document.getElementById('tools').scrollIntoView({behavior: 'smooth'})" class="bg-paper-cream text-black font-display text-xl px-12 py-4 shadow-retro hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-widest border-2 border-transparent hover:border-paper-cream hover:bg-black hover:text-white">
+                    Initialize Update
+                </button>
+
+                <div class="mt-20 font-mono text-xs opacity-40">
+                    &copy; 2025 KAMIYAMA_OS | PRODUCED BY GEMINI
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('menu-btn');
+            const closeMenuBtn = document.getElementById('close-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+            
+            function toggleMenu() {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenu.classList.toggle('flex');
+            }
+
+            menuBtn.addEventListener('click', toggleMenu);
+            closeMenuBtn.addEventListener('click', toggleMenu);
+
+             mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenu.classList.remove('flex');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
