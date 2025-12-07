@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>間取り配置シミュレーター</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 全体のスタイル定義 */
+        body {
+            font-family: 'Noto Sans JP', "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 1.5rem;
+            color: #444;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* コントロールエリア */
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 90vw;
+            max-width: 1000px;
+            box-sizing: border-box;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button, .file-upload-btn {
+            padding: 8px 16px;
+            cursor: pointer;
+            background-color: #fff;
+            color: #555;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        button:hover, .file-upload-btn:hover {
+            background-color: #f9f9f9;
+            border-color: #ccc;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .material-icons-round { font-size: 1.2rem; }
+
+        .btn-primary { background-color: #4a90e2; color: white; border: none; }
+        .btn-primary:hover { background-color: #357abd; }
+
+        .btn-danger { color: #d9534f; border-color: #f5c6cb; background-color: #fff; }
+        .btn-danger:hover { background-color: #f8d7da; }
+
+        .add-furniture-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background-color: #f9f9f9;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .add-furniture-form input {
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: inherit;
+            width: 70px;
+        }
+        .add-furniture-form input[type="text"] { width: 120px; }
+
+        .scale-control {
+            background-color: #f9f9f9;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        input[type="range"] { cursor: pointer; }
+
+        #workspace {
+            position: relative;
+            width: 90vw;
+            height: 75vh;
+            background-color: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+            background-size: 25px 25px;
+            transition: border-color 0.3s;
+        }
+
+        #bg-image {
+            position: absolute;
+            max-width: 100%;
+            max-height: 100%;
+            pointer-events: none;
+            opacity: 0.85;
+            z-index: 0;
+        }
+
+        .furniture {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.3);
+            border-radius: 4px;
+            transition: box-shadow 0.2s, transform 0.1s, border-color 0.2s;
+            touch-action: none;
+            word-break: break-word;
+            padding: 4px;
+            box-sizing: border-box;
+            z-index: 10;
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.1) 100%);
+        }
+        .furniture small {
+            display: block;
+            font-size: 0.85em;
+            font-weight: normal;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+        .furniture:active {
+            cursor: grabbing;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            transform: scale(1.02);
+            z-index: 3000 !important; /* ゴミ箱(2000)より手前に来るように変更 */
+        }
+        
+        #drop-zone-text {
+            position: absolute;
+            color: #999;
+            pointer-events: none;
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        #drop-zone-text::before {
+            content: 'image';
+            font-family: 'Material Icons Round';
+            font-size: 48px;
+            color: #ccc;
+        }
+
+        #status-msg {
+            font-size: 0.9rem;
+            color: #4a90e2;
+            background-color: #eaf4ff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        #status-msg::before {
+            content: 'check_circle';
+            font-family: 'Material Icons Round';
+            font-size: 1.1rem;
+        }
+
+        #trash-zone {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+            z-index: 2000;
+            color: #777;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0.9;
+        }
+        #trash-zone .material-icons-round {
+            font-size: 32px;
+            transition: color 0.3s;
+        }
+        #trash-label {
+            font-size: 10px;
+            margin-top: -2px;
+            font-weight: bold;
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        #trash-zone.drag-over {
+            transform: scale(1.15);
+            border-color: #e57373;
+            background-color: #ffebee;
+            color: #e53935;
+            box-shadow: 0 10px 24px rgba(229, 57, 53, 0.3);
+        }
+        #trash-zone.drag-over .material-icons-round { color: #e53935; }
+        #trash-zone.drag-over #trash-label { opacity: 1; height: auto; margin-top: 2px; }
+
+    </style>
+</head>
+<body>
+
+    <h1>
+        <span class="material-icons-round" style="font-size: 1.8rem; color: #555;">view_quilt</span>
+        間取り配置シミュレーター
+        <span id="status-msg">保存しました</span>
+    </h1>
+
+    <div class="controls">
+        <div class="control-group">
+            <button onclick="document.getElementById('fileInput').click()" class="btn-primary">
+                <span class="material-icons-round">add_photo_alternate</span> 背景画像を選択
+            </button>
+            <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+            
+            <div class="scale-control">
+                <span class="material-icons-round">straighten</span>
+                <label>縮尺 (1m = <span id="px-val">50</span>px)</label>
+                <input type="range" id="scaleSlider" min="10" max="200" value="50">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <button onclick="resetAllData()" class="btn-danger">
+                <span class="material-icons-round">restart_alt</span> 全リセット
+            </button>
+        </div>
+
+        <div class="add-furniture-form">
+            <input type="text" id="newItemName" placeholder="家具の名前">
+            <input type="number" id="newItemW" placeholder="幅cm" min="1">
+            <span style="color:#999;">x</span>
+            <input type="number" id="newItemH" placeholder="奥行cm" min="1">
+            <button onclick="addNewFurniture()">
+                <span class="material-icons-round">add</span> 追加
+            </button>
+        </div>
+    </div>
+
+    <div id="workspace" ondrop="handleDrop(event)" ondragover="allowDrop(event)">
+        <span id="drop-zone-text">ここに間取り図画像を<br>ドラッグ＆ドロップ</span>
+        <img id="bg-image" src="" alt="">
+    </div>
+
+    <div id="trash-zone">
+        <span class="material-icons-round">delete</span>
+        <span id="trash-label">離して削除</span>
+    </div>
+
+<script>
+    const defaultFurnitureData = [
+        { name: "ダイニングテーブル", w: 165, h: 80, color: "#8d6e63" },
+        { name: "ベンチ", w: 160, h: 40, color: "#bcaaa4" },
+        { name: "ゆりなデスク", w: 120, h: 60, color: "#f06292" },
+        { name: "しゅんやデスク", w: 160, h: 70, color: "#5c6bc0" },
+        { name: "ダンベル(台含)", w: 90, h: 62, color: "#78909c" },
+        { name: "トレベンチ", w: 122, h: 61, color: "#bdbdbd" },
+        { name: "布団", w: 203, h: 191, color: "#a5d6a7" },
+        { name: "冷蔵庫", w: 64, h: 70, color: "#80deea" },
+        { name: "洗濯機", w: 60.4, h: 73, color: "#ce93d8" },
+        { name: "冷凍庫", w: 50, h: 60, color: "#b2ebf2" },
+        { name: "食器棚", w: 62, h: 40, color: "#d7ccc8" },
+        { name: "タオル置き", w: 62, h: 30, color: "#fff59d" }
+    ];
+
+    let pixelsPerMeter = 50; 
+
+    const workspace = document.getElementById('workspace');
+    const scaleSlider = document.getElementById('scaleSlider');
+    const pxVal = document.getElementById('px-val');
+    const statusMsg = document.getElementById('status-msg');
+    const trashZone = document.getElementById('trash-zone');
+
+    function init() {
+        if (!loadLayout()) {
+            defaultFurnitureData.forEach((item, index) => {
+                createFurnitureElement(item, index);
+            });
+            updateScale();
+        }
+        workspace.style.backgroundSize = `${pixelsPerMeter/2}px ${pixelsPerMeter/2}px`;
+    }
+
+    function saveLayout() {
+        const furnitureStates = [];
+        document.querySelectorAll('.furniture').forEach(el => {
+            furnitureStates.push({
+                realName: el.querySelector('div').innerText,
+                w: parseFloat(el.dataset.cmW),
+                h: parseFloat(el.dataset.cmH),
+                color: el.dataset.baseColor,
+                rotation: parseInt(el.dataset.rotation) || 0,
+                left: el.style.left,
+                top: el.style.top
+            });
+        });
+
+        const bgImg = document.getElementById('bg-image');
+        let bgSrc = "";
+        if (bgImg.src && bgImg.src.startsWith('data:image')) {
+            bgSrc = bgImg.src;
+        }
+
+        const saveData = {
+            furniture: furnitureStates,
+            scale: scaleSlider.value,
+            bgImage: bgSrc
+        };
+
+        try {
+            localStorage.setItem('layout_data_v3', JSON.stringify(saveData));
+            showStatus("保存しました");
+        } catch (e) {
+            console.error("保存失敗", e);
+            saveData.bgImage = "";
+            try {
+                localStorage.setItem('layout_data_v3', JSON.stringify(saveData));
+                showStatus("家具配置のみ保存(画像容量過大)");
+            } catch (e2) {
+                showStatus("保存できませんでした");
+            }
+        }
+    }
+
+    function loadLayout() {
+        const json = localStorage.getItem('layout_data_v3');
+        if (!json) return false;
+
+        try {
+            const data = JSON.parse(json);
+            if (data.scale) {
+                scaleSlider.value = data.scale;
+                pixelsPerMeter = parseInt(data.scale);
+                pxVal.innerText = pixelsPerMeter;
+                workspace.style.backgroundSize = `${pixelsPerMeter/2}px ${pixelsPerMeter/2}px`;
+            }
+            if (data.bgImage) {
+                document.getElementById('bg-image').src = data.bgImage;
+                document.getElementById('drop-zone-text').style.display = 'none';
+            }
+            if (data.furniture && Array.isArray(data.furniture)) {
+                data.furniture.forEach((item, index) => {
+                    const div = createFurnitureElement({
+                        name: item.realName,
+                        w: item.w,
+                        h: item.h,
+                        color: item.color
+                    }, index);
+                    div.style.left = item.left;
+                    div.style.top = item.top;
+                    div.dataset.rotation = item.rotation;
+                    updateSize(div);
+                });
+                return true;
+            }
+        } catch (e) {
+            console.error("読み込みエラー", e);
+            return false;
+        }
+        return false;
+    }
+
+    function showStatus(msg) {
+        // childNodes参照エラーを修正
+        if (statusMsg) {
+            statusMsg.textContent = msg;
+            statusMsg.style.opacity = 1;
+            setTimeout(() => { statusMsg.style.opacity = 0; }, 2000);
+        }
+    }
+
+    function addNewFurniture() {
+        const nameInput = document.getElementById('newItemName');
+        const wInput = document.getElementById('newItemW');
+        const hInput = document.getElementById('newItemH');
+        const name = nameInput.value.trim();
+        const w = parseFloat(wInput.value);
+        const h = parseFloat(hInput.value);
+
+        if (!name || isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
+            alert("正しい名前とサイズ(cm)を入力してください。");
+            return;
+        }
+
+        const hue = Math.floor(Math.random() * 360);
+        const randomColor = `hsl(${hue}, 40%, 65%)`;
+        
+        const newItem = { name, w, h, color: randomColor };
+        const index = document.querySelectorAll('.furniture').length;
+        const div = createFurnitureElement(newItem, index);
+        
+        div.style.left = (workspace.clientWidth / 2 - 50) + 'px';
+        div.style.top = (workspace.clientHeight / 2 - 50) + 'px';
+        updateSize(div);
+
+        nameInput.value = ''; wInput.value = ''; hInput.value = '';
+        saveLayout();
+    }
+
+    function createFurnitureElement(item, index) {
+        const div = document.createElement('div');
+        div.className = 'furniture';
+        div.id = 'f-' + index + '-' + Date.now();
+        
+        div.dataset.baseColor = item.color;
+        div.style.backgroundColor = item.color;
+        
+        div.dataset.cmW = item.w;
+        div.dataset.cmH = item.h;
+        div.dataset.rotation = 0;
+
+        div.innerHTML = `<div>${item.name}</div><small>${item.w}x${item.h}</small>`;
+        
+        if (!div.style.left) {
+            const cols = 4;
+            div.style.left = (30 + (index % cols) * 200) + 'px';
+            div.style.top = (60 + Math.floor(index / cols) * 120) + 'px';
+        }
+
+        setupDragAndClick(div);
+
+        workspace.appendChild(div);
+        return div;
+    }
+
+    function updateScale() {
+        pixelsPerMeter = parseInt(scaleSlider.value);
+        pxVal.innerText = pixelsPerMeter;
+        workspace.style.backgroundSize = `${pixelsPerMeter/2}px ${pixelsPerMeter/2}px`;
+        document.querySelectorAll('.furniture').forEach(div => updateSize(div));
+    }
+    scaleSlider.addEventListener('change', saveLayout);
+    scaleSlider.addEventListener('input', updateScale);
+
+    function updateSize(div) {
+        const cmW = parseFloat(div.dataset.cmW);
+        const cmH = parseFloat(div.dataset.cmH);
+        const rot = parseInt(div.dataset.rotation);
+        const pxW = (cmW / 100) * pixelsPerMeter;
+        const pxH = (cmH / 100) * pixelsPerMeter;
+
+        if (rot % 180 === 90) {
+            div.style.width = pxH + 'px';
+            div.style.height = pxW + 'px';
+        } else {
+            div.style.width = pxW + 'px';
+            div.style.height = pxH + 'px';
+        }
+    }
+
+    function allowDrop(ev) { ev.preventDefault(); }
+    function handleDrop(ev) { ev.preventDefault(); loadImage(ev.dataTransfer.files[0]); }
+    function handleFileSelect(ev) { loadImage(ev.target.files[0]); }
+
+    function loadImage(file) {
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('bg-image').src = e.target.result;
+                document.getElementById('drop-zone-text').style.display = 'none';
+                saveLayout();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // ==========================================
+    // ドラッグ & ゴミ箱削除ロジック (改良版)
+    // ==========================================
+    function setupDragAndClick(el) {
+        let isDraggingState = false;
+        let startX, startY, initialLeft, initialTop;
+        let dragThreshold = 5;
+
+        const startHandler = (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+
+            isDraggingState = false;
+            
+            const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            
+            startX = clientX;
+            startY = clientY;
+            initialLeft = el.offsetLeft;
+            initialTop = el.offsetTop;
+            
+            el.style.zIndex = 3000; // 最前面へ
+            e.preventDefault();
+        };
+
+        const moveHandler = (e) => {
+            if (e.type.includes('mouse') && e.buttons === 0) return;
+
+            const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+
+            if (!isDraggingState && Math.sqrt(dx*dx + dy*dy) > dragThreshold) {
+                isDraggingState = true;
+            }
+
+            if (isDraggingState) {
+                el.style.left = (initialLeft + dx) + 'px';
+                el.style.top = (initialTop + dy) + 'px';
+
+                // 改良: 要素とゴミ箱の矩形衝突判定
+                checkTrashOverlap(el); 
+            }
+        };
+
+        const endHandler = (e) => {
+            el.style.zIndex = '';
+            
+            // ドロップ時にゴミ箱と重なっていたら削除
+            if (isDraggingState && trashZone.classList.contains('drag-over')) {
+                trashZone.classList.remove('drag-over');
+                const furnitureName = el.querySelector('div').innerText;
+                
+                if(confirm(`「${furnitureName}」を削除しますか？`)) {
+                    el.remove();
+                    saveLayout();
+                    return;
+                }
+            }
+            trashZone.classList.remove('drag-over');
+
+            if (isDraggingState) {
+                saveLayout();
+            }
+            isDraggingState = false;
+        };
+
+        el.addEventListener('dblclick', (e) => {
+             rotateFurniture(el);
+        });
+
+        el.addEventListener('mousedown', startHandler);
+        document.addEventListener('mousemove', moveHandler);
+        document.addEventListener('mouseup', endHandler);
+
+        el.addEventListener('touchstart', startHandler, {passive: false});
+        document.addEventListener('touchmove', moveHandler, {passive: false});
+        document.addEventListener('touchend', endHandler);
+    }
+
+    // 要素同士の重なり判定 (Rectangle Intersection)
+    function checkTrashOverlap(furnitureEl) {
+        const fRect = furnitureEl.getBoundingClientRect();
+        const tRect = trashZone.getBoundingClientRect();
+
+        // 矩形の交差判定
+        const overlap = !(fRect.right < tRect.left || 
+                          fRect.left > tRect.right || 
+                          fRect.bottom < tRect.top || 
+                          fRect.top > tRect.bottom);
+
+        if (overlap) {
+            trashZone.classList.add('drag-over');
+        } else {
+            trashZone.classList.remove('drag-over');
+        }
+    }
+
+    function rotateFurniture(el) {
+        let rot = parseInt(el.dataset.rotation) || 0;
+        rot = (rot + 90) % 360;
+        el.dataset.rotation = rot;
+        updateSize(el);
+        saveLayout();
+    }
+
+    function resetAllData() {
+        if(!confirm("【警告】\n現在の配置と保存データをすべて完全に消去して、初期状態に戻しますか？\nこの操作は取り消せません。")) return;
+        
+        localStorage.removeItem('layout_data_v3');
+
+        workspace.innerHTML = '<span id="drop-zone-text">ここに間取り図画像を<br>ドラッグ＆ドロップ</span><img id="bg-image" src="" alt="">';
+        document.getElementById('drop-zone-text').style.display = 'flex';
+        
+        scaleSlider.value = 50;
+        updateScale();
+
+        defaultFurnitureData.forEach((item, index) => {
+            createFurnitureElement(item, index);
+        });
+    }
+
+    init();
+</script>
+</body>
+</html>
