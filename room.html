@@ -535,24 +535,9 @@
         let startX, startY, initialLeft, initialTop;
         let dragThreshold = 5;
 
-        const startHandler = (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-
-            isDraggingState = false;
-            
-            const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-            const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-            
-            startX = clientX;
-            startY = clientY;
-            initialLeft = el.offsetLeft;
-            initialTop = el.offsetTop;
-            
-            el.style.zIndex = 3000; // 最前面へ
-            e.preventDefault();
-        };
-
+        // ハンドラ関数定義（クロージャ変数を利用）
         const moveHandler = (e) => {
+            // マウス操作でボタンが押されていなければ無視
             if (e.type.includes('mouse') && e.buttons === 0) return;
 
             const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
@@ -560,6 +545,7 @@
             const dx = clientX - startX;
             const dy = clientY - startY;
 
+            // 一定距離動いたらドラッグ開始とみなす
             if (!isDraggingState && Math.sqrt(dx*dx + dy*dy) > dragThreshold) {
                 isDraggingState = true;
             }
@@ -567,8 +553,7 @@
             if (isDraggingState) {
                 el.style.left = (initialLeft + dx) + 'px';
                 el.style.top = (initialTop + dy) + 'px';
-
-                // 改良: 要素とゴミ箱の矩形衝突判定
+                // 要素とゴミ箱の矩形衝突判定
                 checkTrashOverlap(el); 
             }
         };
@@ -584,6 +569,8 @@
                 if(confirm(`「${furnitureName}」を削除しますか？`)) {
                     el.remove();
                     saveLayout();
+                    // 削除時はリスナーを解除して終了
+                    removeListeners();
                     return;
                 }
             }
@@ -593,19 +580,48 @@
                 saveLayout();
             }
             isDraggingState = false;
+            
+            // ドラッグ終了時にリスナーを解除
+            removeListeners();
+        };
+
+        const removeListeners = () => {
+            document.removeEventListener('mousemove', moveHandler);
+            document.removeEventListener('mouseup', endHandler);
+            document.removeEventListener('touchmove', moveHandler);
+            document.removeEventListener('touchend', endHandler);
+        };
+
+        const startHandler = (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+
+            isDraggingState = false;
+            
+            const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            
+            startX = clientX;
+            startY = clientY;
+            initialLeft = el.offsetLeft;
+            initialTop = el.offsetTop;
+            
+            el.style.zIndex = 3000; // 最前面へ
+            e.preventDefault(); // デフォルト動作無効化
+
+            // ドラッグ中のみ document 全体でイベントを監視
+            document.addEventListener('mousemove', moveHandler);
+            document.addEventListener('mouseup', endHandler);
+            document.addEventListener('touchmove', moveHandler, {passive: false});
+            document.addEventListener('touchend', endHandler);
         };
 
         el.addEventListener('dblclick', (e) => {
              rotateFurniture(el);
         });
 
+        // 開始イベントのみ常駐させる
         el.addEventListener('mousedown', startHandler);
-        document.addEventListener('mousemove', moveHandler);
-        document.addEventListener('mouseup', endHandler);
-
         el.addEventListener('touchstart', startHandler, {passive: false});
-        document.addEventListener('touchmove', moveHandler, {passive: false});
-        document.addEventListener('touchend', endHandler);
     }
 
     // 要素同士の重なり判定 (Rectangle Intersection)
