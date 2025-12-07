@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>安田さん 2025 - 激務と人徳のレビュー</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            cyan: '#00f3ff',
+                            pink: '#ff00ff',
+                            yellow: '#fcee0a',
+                            black: '#020205',
+                            dark: '#0a0a12',
+                            grid: 'rgba(0, 243, 255, 0.1)'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Orbitron', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                        body: ['Rajdhani', 'sans-serif']
+                    },
+                    backgroundImage: {
+                        'cyber-grid': "linear-gradient(rgba(0, 243, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 243, 255, 0.05) 1px, transparent 1px)"
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap');
+      
+      body {
+        font-family: "Rajdhani", sans-serif;
+        color: #e0e0e0;
+        overflow-x: hidden;
+        min-height: 100vh;
+      }
+      
+      /* Cyber Scrollbar */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #000; }
+      ::-webkit-scrollbar-thumb { background: #00f3ff; border-radius: 0; }
+
+      /* Glitch Effect Utility */
+      .glitch {
+        position: relative;
+        color: #fff;
+      }
+      .glitch::before, .glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #020205;
+      }
+      .glitch::before {
+        left: 2px;
+        text-shadow: -1px 0 #ff00ff;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim 5s infinite linear alternate-reverse;
+      }
+      .glitch::after {
+        left: -2px;
+        text-shadow: -1px 0 #00f3ff;
+        clip: rect(44px, 450px, 56px, 0);
+        animation: glitch-anim2 5s infinite linear alternate-reverse;
+      }
+
+      @keyframes glitch-anim {
+        0% { clip: rect(30px, 9999px, 10px, 0); }
+        5% { clip: rect(80px, 9999px, 5px, 0); }
+        100% { clip: rect(60px, 9999px, 80px, 0); }
+      }
+      @keyframes glitch-anim2 {
+        0% { clip: rect(10px, 9999px, 90px, 0); }
+        5% { clip: rect(50px, 9999px, 20px, 0); }
+        100% { clip: rect(20px, 9999px, 40px, 0); }
+      }
+
+      /* Cyber Border & Electric Effect */
+      .cyber-border {
+        position: relative;
+        background: rgba(10, 10, 18, 0.7);
+        border: 1px solid rgba(0, 243, 255, 0.2);
+        box-shadow: 0 0 15px rgba(0, 243, 255, 0.05);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
+      }
+      .cyber-border::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        border: 1px solid transparent;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #00f3ff, transparent, transparent, #ff00ff, transparent) border-box; 
+        -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: destination-out;
+        mask-composite: exclude;
+        background-size: 200% 100%;
+        animation: electric-border 3s linear infinite;
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      .cyber-border::after {
+        content: '';
+        position: absolute;
+        bottom: -1px; right: -1px;
+        width: 20px; height: 20px;
+        border-bottom: 2px solid #00f3ff;
+        border-right: 2px solid #00f3ff;
+        box-shadow: 2px 2px 5px rgba(0, 243, 255, 0.8);
+      }
+
+      @keyframes electric-border {
+        0% { background-position: 100% 0; }
+        100% { background-position: -100% 0; }
+      }
+
+      /* Neon Glow Strong */
+      .text-neon-cyan {
+        color: #00f3ff;
+        text-shadow: 0 0 5px rgba(0, 243, 255, 0.8), 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3);
+        animation: neon-pulse 2s infinite alternate;
+      }
+      .text-neon-pink {
+        color: #ff00ff;
+        text-shadow: 0 0 5px rgba(255, 0, 255, 0.8), 0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3);
+        animation: neon-pulse-pink 2s infinite alternate;
+      }
+
+      @keyframes neon-pulse {
+        0% { text-shadow: 0 0 5px rgba(0, 243, 255, 0.8), 0 0 10px rgba(0, 243, 255, 0.5); opacity: 1; }
+        100% { text-shadow: 0 0 10px rgba(0, 243, 255, 1), 0 0 20px rgba(0, 243, 255, 0.8), 0 0 30px rgba(0, 243, 255, 0.5); opacity: 0.9; }
+      }
+      @keyframes neon-pulse-pink {
+        0% { text-shadow: 0 0 5px rgba(255, 0, 255, 0.8), 0 0 10px rgba(255, 0, 255, 0.5); opacity: 1; }
+        100% { text-shadow: 0 0 10px rgba(255, 0, 255, 1), 0 0 20px rgba(255, 0, 255, 0.8), 0 0 30px rgba(255, 0, 255, 0.5); opacity: 0.9; }
+      }
+
+      /* Particle Canvas */
+      #particle-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        pointer-events: none;
+      }
+    </style>
+
+    <!-- React & Babel Standalone -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+      }
+    }
+    </script>
+</head>
+<body class="bg-[#020205] text-gray-300">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Cosmic Background Component (Warp Speed Space) ---
+        const CosmicBackground = () => {
+            const canvasRef = useRef(null);
+
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                let animationFrameId;
+                
+                let width, height;
+                let stars = [];
+                let shootingStars = [];
+                let nebulas = [];
+
+                // Configuration
+                const STAR_COUNT = 800;
+                const STAR_SPEED_BASE = 2;
+                const SHOOTING_STAR_CHANCE = 0.01;
+
+                const resize = () => {
+                    width = canvas.width = window.innerWidth;
+                    height = canvas.height = window.innerHeight;
+                    initStars();
+                    initNebulas();
+                };
+
+                class Star {
+                    constructor() {
+                        this.x = (Math.random() - 0.5) * width * 2; // Wide spread
+                        this.y = (Math.random() - 0.5) * height * 2;
+                        this.z = Math.random() * width; // Depth
+                        this.pz = this.z; // Previous Z for trails
+                    }
+
+                    update() {
+                        this.z -= STAR_SPEED_BASE; // Move towards viewer
+                        if (this.z <= 0) {
+                            this.z = width;
+                            this.x = (Math.random() - 0.5) * width * 2;
+                            this.y = (Math.random() - 0.5) * height * 2;
+                            this.pz = this.z;
+                        }
+                    }
+
+                    draw() {
+                        const x = width / 2 + (this.x / this.z) * width;
+                        const y = height / 2 + (this.y / this.z) * width;
+                        
+                        // Previous position for "warp streak" effect
+                        // To make streaks longer, use a z slightly further back
+                        const streakZ = this.z + 15; 
+                        const px = width / 2 + (this.x / streakZ) * width;
+                        const py = height / 2 + (this.y / streakZ) * width;
+
+                        const size = (1 - this.z / width) * 2;
+                        const alpha = (1 - this.z / width);
+
+                        if (x >= 0 && x <= width && y >= 0 && y <= height) {
+                            ctx.beginPath();
+                            ctx.lineWidth = size;
+                            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                            ctx.moveTo(px, py); // Trail tail
+                            ctx.lineTo(x, y);   // Current head
+                            ctx.stroke();
+                            
+                            // Glowing head
+                            ctx.beginPath();
+                            ctx.arc(x, y, size * 0.8, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(200, 220, 255, ${alpha})`;
+                            ctx.fill();
+                        }
+                    }
+                }
+
+                class ShootingStar {
+                    constructor() {
+                        this.x = Math.random() * width;
+                        this.y = Math.random() * height * 0.5; // Mostly upper half
+                        this.len = Math.random() * 80 + 10;
+                        this.speed = Math.random() * 10 + 10;
+                        this.size = Math.random() * 1 + 0.5;
+                        this.angle = Math.PI / 4 + (Math.random() * 0.2 - 0.1); // Diagonal down-right roughly
+                        this.life = 1.0;
+                        this.decay = 0.01 + Math.random() * 0.02;
+                    }
+
+                    update() {
+                        this.x += Math.cos(this.angle) * this.speed;
+                        this.y += Math.sin(this.angle) * this.speed;
+                        this.life -= this.decay;
+                    }
+
+                    draw() {
+                        const tailX = this.x - Math.cos(this.angle) * this.len;
+                        const tailY = this.y - Math.sin(this.angle) * this.len;
+
+                        const grad = ctx.createLinearGradient(this.x, this.y, tailX, tailY);
+                        grad.addColorStop(0, `rgba(255, 255, 255, ${this.life})`);
+                        grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
+
+                        ctx.beginPath();
+                        ctx.lineWidth = this.size;
+                        ctx.strokeStyle = grad;
+                        ctx.moveTo(this.x, this.y);
+                        ctx.lineTo(tailX, tailY);
+                        ctx.stroke();
+                    }
+                }
+
+                class Nebula {
+                    constructor() {
+                        this.x = Math.random() * width;
+                        this.y = Math.random() * height;
+                        this.radius = Math.random() * 300 + 200;
+                        this.color = Math.random() > 0.5 ? 'rgba(76, 29, 149, 0.15)' : 'rgba(30, 58, 138, 0.15)'; // Deep purple/blue
+                        this.vx = (Math.random() - 0.5) * 0.2;
+                        this.vy = (Math.random() - 0.5) * 0.2;
+                    }
+                    
+                    update() {
+                        this.x += this.vx;
+                        this.y += this.vy;
+                        // Wrap around
+                        if (this.x < -this.radius) this.x = width + this.radius;
+                        if (this.x > width + this.radius) this.x = -this.radius;
+                        if (this.y < -this.radius) this.y = height + this.radius;
+                        if (this.y > height + this.radius) this.y = -this.radius;
+                    }
+
+                    draw() {
+                        ctx.beginPath();
+                        const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+                        grad.addColorStop(0, this.color);
+                        grad.addColorStop(1, 'rgba(0,0,0,0)');
+                        ctx.fillStyle = grad;
+                        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                const initStars = () => {
+                    stars = Array.from({ length: STAR_COUNT }, () => new Star());
+                };
+
+                const initNebulas = () => {
+                    nebulas = Array.from({ length: 5 }, () => new Nebula());
+                }
+
+                const animate = () => {
+                    // Clear background (Deep Space Black)
+                    ctx.fillStyle = '#020205';
+                    ctx.fillRect(0, 0, width, height);
+
+                    // Draw Nebulas (Background layer)
+                    nebulas.forEach(n => {
+                        n.update();
+                        n.draw();
+                    });
+
+                    // Draw Stars
+                    stars.forEach(s => {
+                        s.update();
+                        s.draw();
+                    });
+
+                    // Spawn Shooting Stars
+                    if (Math.random() < SHOOTING_STAR_CHANCE) {
+                        shootingStars.push(new ShootingStar());
+                    }
+
+                    // Update and Draw Shooting Stars
+                    for (let i = shootingStars.length - 1; i >= 0; i--) {
+                        const ss = shootingStars[i];
+                        ss.update();
+                        ss.draw();
+                        if (ss.life <= 0) {
+                            shootingStars.splice(i, 1);
+                        }
+                    }
+                    
+                    // Draw Subtle Cyber Grid (Floor only)
+                    // To keep the "Cyber" feel user liked before but more "Space" focus
+                    drawCyberGrid();
+
+                    animationFrameId = requestAnimationFrame(animate);
+                };
+
+                // Separate simple grid function
+                let gridOffset = 0;
+                const drawCyberGrid = () => {
+                    const horizon = height * 0.6;
+                    const perspective = width * 0.8;
+                    
+                    gridOffset = (gridOffset + 0.5) % 40;
+                    
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(0, horizon, width, height - horizon);
+                    ctx.clip(); // Only draw in bottom part
+
+                    ctx.strokeStyle = '#00f3ff';
+                    ctx.lineWidth = 1;
+                    
+                    // Vertical fan
+                    for (let i = -20; i <= 20; i++) {
+                        const x = width/2 + i * 150;
+                        // Draw line from center vanishing point (width/2, horizon) to bottom
+                        // Simple fake perspective
+                        ctx.beginPath();
+                        ctx.moveTo(width/2, horizon);
+                        ctx.lineTo(width/2 + (i * 200), height);
+                        ctx.globalAlpha = 0.05; // Very faint
+                        ctx.stroke();
+                    }
+
+                    // Horizontal moving lines
+                    for (let z = 0; z < 1000; z+=40) {
+                        let currentZ = z - gridOffset;
+                        if (currentZ < 0) currentZ += 1000;
+                        
+                        // Project Z to Y
+                        // Simple exp scale
+                        const scale = 200 / (currentZ + 100);
+                        const y = horizon + scale * 200;
+                        
+                        if (y > height) continue;
+
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(width, y);
+                        ctx.globalAlpha = Math.max(0, (1 - y/height) * 0.1); // Fade out at bottom
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                };
+
+                window.addEventListener('resize', resize);
+                resize();
+                animate();
+
+                return () => {
+                    window.removeEventListener('resize', resize);
+                    cancelAnimationFrame(animationFrameId);
+                };
+            }, []);
+
+            return <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full -z-10" />;
+        };
+
+        // --- Icons (Inline SVGs) ---
+        const IconWrapper = ({ children, className, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+                {children}
+            </svg>
+        );
+
+        const Activity = (props) => <IconWrapper {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></IconWrapper>;
+        const AlertTriangle = (props) => <IconWrapper {...props}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></IconWrapper>;
+        const FileSpreadsheet = (props) => <IconWrapper {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M8 13h2" /><path d="M8 17h2" /><path d="M14 13h2" /><path d="M14 17h2" /></IconWrapper>;
+        const Database = (props) => <IconWrapper {...props}><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></IconWrapper>;
+        const CheckCircle = (props) => <IconWrapper {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></IconWrapper>;
+        const PenTool = (props) => <IconWrapper {...props}><path d="m12 19 7-7 3 3-7 7-3-3z" /><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" /><path d="m2 2 7.586 7.586" /><circle cx="11" cy="11" r="2" /></IconWrapper>;
+        const Users = (props) => <IconWrapper {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></IconWrapper>;
+        const Shield = (props) => <IconWrapper {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" /></IconWrapper>;
+        const Sparkles = (props) => <IconWrapper {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L12 3Z" /></IconWrapper>;
+        const Cpu = (props) => <IconWrapper {...props}><rect width="16" height="16" x="4" y="4" rx="2" /><rect width="6" height="6" x="9" y="9" rx="1" /><path d="M15 2v2" /><path d="M15 20v2" /><path d="M2 15h2" /><path d="M2 9h2" /><path d="M20 15h2" /><path d="M20 9h2" /><path d="M9 2v2" /><path d="M9 20v2" /></IconWrapper>;
+        const Mic = (props) => <IconWrapper {...props}><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="22" /><line x1="8" y1="22" x2="16" y2="22" /></IconWrapper>;
+        const Menu = (props) => <IconWrapper {...props}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></IconWrapper>;
+        const X = (props) => <IconWrapper {...props}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconWrapper>;
+        const Terminal = (props) => <IconWrapper {...props}><polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" /></IconWrapper>;
+
+        // --- FadeIn Component (Cyber Style) ---
+        const FadeIn = ({ children, delay = 0, className = '' }) => {
+            const [isVisible, setIsVisible] = useState(false);
+            const domRef = useRef(null);
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            setIsVisible(true);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                const currentRef = domRef.current;
+                if (currentRef) {
+                    observer.observe(currentRef);
+                }
+
+                return () => {
+                    if (currentRef) {
+                        observer.unobserve(currentRef);
+                    }
+                };
+            }, []);
+
+            return (
+                <div
+                    ref={domRef}
+                    className={`transition-all duration-700 ease-in-out transform ${
+                        isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+                    } ${className}`}
+                    style={{ transitionDelay: `${delay}ms` }}
+                >
+                    {children}
+                </div>
+            );
+        };
+
+        // --- Navbar Component ---
+        const Navbar = () => {
+            const [scrolled, setScrolled] = useState(false);
+            const [isOpen, setIsOpen] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setScrolled(window.scrollY > 20);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const toggleMenu = () => {
+                setIsOpen(!isOpen);
+            };
+
+            const closeMenu = () => {
+                setIsOpen(false);
+            };
+
+            const menuItems = [
+                { href: "#endurance", label: "激務" },
+                { href: "#analysis", label: "調査" },
+                { href: "#character", label: "スペック" },
+                { href: "#relation", label: "ネットワーク" },
+            ];
+
+            return (
+                <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b border-cyber-cyan/30 backdrop-blur-md ${
+                    scrolled || isOpen ? 'bg-black/80' : 'bg-transparent'
+                }`}>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between items-center h-16">
+                            <div className="flex items-center space-x-3 z-50">
+                                <Terminal className="text-cyber-cyan h-6 w-6" />
+                                <span className="font-display font-bold text-xl tracking-widest text-white glitch" data-text="YASUDA 2025">YASUDA 2025</span>
+                            </div>
+
+                            {/* Desktop Menu */}
+                            <div className="hidden md:flex items-center space-x-8">
+                                {menuItems.map((item) => (
+                                    <a 
+                                        key={item.label}
+                                        href={item.href} 
+                                        className="font-mono text-sm text-cyber-cyan hover:text-cyber-pink transition-colors relative group text-neon-cyan hover:text-neon-pink"
+                                    >
+                                        <span className="opacity-0 group-hover:opacity-100 absolute -left-3 text-cyber-pink">&gt;</span>
+                                        {item.label}
+                                    </a>
+                                ))}
+                            </div>
+
+                            {/* Mobile Hamburger Button */}
+                            <div className="md:hidden flex items-center z-50">
+                                <button 
+                                    onClick={toggleMenu} 
+                                    className="text-cyber-cyan hover:text-white focus:outline-none p-2"
+                                >
+                                    {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile Menu Overlay */}
+                    <div 
+                        className={`fixed inset-0 bg-black/95 z-40 transition-transform duration-300 ease-in-out md:hidden flex flex-col pt-24 px-8 border-r border-cyber-cyan/50 ${
+                            isOpen ? 'translate-x-0' : 'translate-x-full'
+                        }`}
+                    >
+                        <div className="flex flex-col space-y-6 font-display text-2xl font-bold text-white mt-8">
+                            {menuItems.map((item, index) => (
+                                <a 
+                                    key={item.label}
+                                    href={item.href} 
+                                    className="border-b border-gray-800 pb-4 hover:text-cyber-cyan transition-colors"
+                                    onClick={closeMenu}
+                                >
+                                    <span className="text-cyber-pink text-sm font-mono mr-2">0{index + 1}.</span>
+                                    {item.label}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </nav>
+            );
+        };
+
+        // --- Hero Component ---
+        const Hero = () => {
+            return (
+                <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden">
+                    {/* Background is handled by global ParticleNetwork */}
+                    
+                    <div className="z-10 text-center px-4 max-w-5xl mx-auto">
+                        <FadeIn delay={0}>
+                            <h2 className="font-display font-semibold text-2xl md:text-3xl mb-4 tracking-wide text-cyber-cyan text-neon-cyan">
+                                安田さん。
+                            </h2>
+                        </FadeIn>
+                        
+                        <FadeIn delay={300}>
+                            <h1 className="text-5xl md:text-8xl font-display font-bold tracking-tighter text-white mb-6 leading-none text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan to-cyber-pink text-neon-cyan">
+                                プロ級の耐久性。<br />
+                                規格外の<br className="md:hidden" />言語センス。
+                            </h1>
+                        </FadeIn>
+                        
+                        <FadeIn delay={600}>
+                            <p className="text-xl md:text-2xl text-gray-400 font-mono tracking-wide max-w-3xl mx-auto border-l-2 border-cyber-pink pl-6 text-left backdrop-blur-sm bg-black/30 p-4">
+                                <span className="text-cyber-pink">&gt;</span> オンライン飲み会 2025.10.2<br/>
+                                <span className="text-cyber-pink">&gt;</span> 安田さんによる人的行政事務の限界と、愛される理由。
+                            </p>
+                        </FadeIn>
+                    </div>
+
+                    <FadeIn delay={1000} className="absolute bottom-10 animate-bounce">
+                        <div className="flex flex-col items-center gap-2">
+                            <svg className="w-6 h-6 text-cyber-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
+                        </div>
+                    </FadeIn>
+                </section>
+            );
+        };
+
+        // --- EnduranceSection Component ---
+        const EnduranceSection = () => {
+            const [meterWidth, setMeterWidth] = useState(0);
+            const meterRef = useRef(null);
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            setTimeout(() => {
+                                setMeterWidth(95);
+                            }, 500);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                if (meterRef.current) {
+                    observer.observe(meterRef.current);
+                }
+
+                return () => {
+                    if (meterRef.current) {
+                        observer.unobserve(meterRef.current);
+                    }
+                };
+            }, []);
+
+            return (
+                <section id="endurance" className="bg-black/20 backdrop-blur-sm py-32 px-4 sm:px-6 lg:px-8 border-t border-cyber-cyan/10">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="mb-20">
+                            <FadeIn>
+                                <div className="flex items-end gap-4 mb-4">
+                                                                    <h2 className="text-5xl md:text-7xl font-display font-bold text-white leading-none">
+                                                                        パワフル。<br className="md:hidden" /> <span className="text-cyber-cyan text-neon-cyan">限界点まで。</span>
+                                                                    </h2>                                </div>
+                            </FadeIn>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <FadeIn delay={200} className="col-span-1 md:col-span-2 cyber-border p-10 md:p-16 flex flex-col items-center justify-center overflow-hidden group">
+                                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(0,243,255,0.05)_50%,transparent_75%)] bg-[length:250%_250%] animate-[gradient_15s_ease_infinite]"></div>
+                                <p className="text-cyber-cyan font-mono mb-2 uppercase tracking-widest text-sm border border-cyber-cyan px-2 py-1">連続稼働時間</p>
+                                <div className="text-[8rem] md:text-[12rem] font-display font-bold leading-none text-white tracking-tighter text-shadow-neon">
+                                    47<span className="text-4xl md:text-6xl text-gray-500 ml-2 font-mono">h</span>
+                                </div>
+                                <p className="text-gray-400 text-lg md:text-xl mt-8 max-w-xl text-center font-mono">
+                                    安田さんが叩き出す、47時間連続勤務という圧倒的な処理能力。<br/>
+                                    ゴールデンウィーク前の繁忙期における最大スループット。
+                                </p>
+                            </FadeIn>
+
+                            <FadeIn delay={400} className="cyber-border p-10 min-h-[400px] flex flex-col justify-between relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-8 opacity-20 text-cyber-pink">
+                                    <Activity size={200} strokeWidth={1} />
+                                </div>
+                                <div>
+                                    <h3 className="text-3xl font-display font-bold text-white mb-4">フィジカル・フィードバック</h3>
+                                    <p className="text-gray-400 font-mono">
+                                        激しいストレスは安田ボディに現れる。<br />
+                                        歯を食いしばりすぎて、奥歯が欠損するほどの構造的負荷。
+                                    </p>
+                                </div>
+                                <div className="mt-8">
+                                    <div className="flex items-center space-x-3 text-cyber-pink mb-2 font-mono">
+                                        <AlertTriangle size={24} />
+                                        <span className="font-bold text-lg">安田式ストレス負荷</span>
+                                    </div>
+                                    
+                                    <div ref={meterRef} className="w-full bg-black h-8 border border-gray-700 relative">
+                                        {/* Background Grid Lines */}
+                                        <div className="absolute inset-0 flex justify-between px-1 z-10">
+                                            {[...Array(20)].map((_, i) => (
+                                                <div key={i} className="w-[1px] h-full bg-cyber-cyan/20"></div>
+                                            ))}
+                                        </div>
+                                        
+                                        {/* Animated Bar */}
+                                        <div 
+                                            className="h-full bg-gradient-to-r from-yellow-600 via-red-500 to-cyber-pink opacity-80 relative z-0"
+                                            style={{ 
+                                                width: `${meterWidth}%`,
+                                                transition: 'width 2s cubic-bezier(0.22, 1, 0.36, 1)' 
+                                            }}
+                                        >
+                                            <div className="absolute top-0 right-0 h-full w-full bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.5)_50%,transparent_100%)] animate-pulse"></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-between text-xs text-cyber-cyan mt-2 font-mono uppercase tracking-wider">
+                                        <span>通常</span>
+                                        <span className="text-cyber-pink font-bold blink">臨界点（奥歯欠損）</span>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            <FadeIn delay={600} className="cyber-border p-10 min-h-[400px] flex flex-col justify-center items-center text-center relative overflow-hidden">
+                                <img 
+                                    src="https://picsum.photos/800/800?grayscale" 
+                                    alt="Abstract Stress" 
+                                    className="absolute inset-0 w-full h-full object-cover opacity-20 mix-blend-hard-light filter contrast-150 brightness-50"
+                                />
+                                <div className="absolute inset-0 bg-cyber-grid opacity-30"></div>
+                                <div className="z-10 bg-black/80 p-6 border border-cyber-pink/30 backdrop-blur-sm">
+                                    <h3 className="text-3xl font-display font-bold text-white mb-4 glitch" data-text="血のしょんべん級の強度">「血のしょんべん」級の強度</h3>
+                                    <p className="text-gray-300 font-mono text-sm max-w-sm mx-auto">
+                                        安田さんの身体が悲鳴を上げるほどの業務密度を表す、独自の指標。<br/>
+                                        特に年度末に発揮されるピークパフォーマンス。
+                                    </p>
+                                </div>
+                            </FadeIn>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- AnalysisSection Component ---
+        const AnalysisSection = () => {
+            return (
+                <section id="analysis" className="bg-black/20 backdrop-blur-sm text-white py-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyber-cyan to-transparent opacity-50"></div>
+                    
+                    <div className="max-w-7xl mx-auto relative z-10">
+                        <div className="mb-16">
+                            <FadeIn>
+                                <h2 className="text-5xl md:text-7xl font-display font-bold tracking-tight mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
+                                    調査業務。<br />
+                                    <span className="text-cyber-cyan">全てのセルに、<br className="md:hidden" />精密さを。</span>
+                                </h2>
+                                <p className="text-xl md:text-2xl text-gray-400 max-w-3xl font-mono border-l-4 border-cyber-cyan pl-6">
+                                    安田さんを襲う、文科省・道教委からのシビアなデータ要求。<br/>
+                                    1つのミスも許されない、極限のデータ処理。
+                                </p>
+                            </FadeIn>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <FadeIn delay={200} className="col-span-1 lg:col-span-2 bg-cyber-dark/50 cyber-border p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
+                                <div className="flex-1">
+                                    <h3 className="text-6xl font-display font-bold mb-2 text-cyber-cyan">130<span className="text-2xl text-gray-500">校</span></h3>
+                                    <h4 className="text-xl text-gray-400 mb-6 font-mono">安田さんの管轄（十勝）エリア</h4>
+                                    <p className="text-gray-500 mb-6 font-mono text-sm">
+                                        各学校から安田さんの元へ送られる膨大なエクセルデータを精査。「昨年度からの継続不登校者が報告されていない」等の微細な不整合を特定。
+                                    </p>
+                                    <div className="flex space-x-8">
+                                        <div className="flex flex-col">
+                                            <span className="text-4xl font-mono font-bold text-white">7<span className="text-lg">回</span></span>
+                                            <span className="text-xs text-cyber-cyan uppercase">いじめ調査 / 年</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-4xl font-mono font-bold text-white">10<span className="text-lg">分</span></span>
+                                            <span className="text-xs text-cyber-cyan uppercase">処理待機時間</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="w-full md:w-64 h-48 bg-black border border-cyber-cyan/30 flex items-center justify-center relative overflow-hidden shadow-[0_0_15px_rgba(0,243,255,0.1)]">
+                                    <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,243,255,0.1)_1px,transparent_1px)] bg-[size:100%_20px] animate-[scan_2s_linear_infinite]"></div>
+                                    <FileSpreadsheet className="text-cyber-cyan w-32 h-32 opacity-20 absolute -right-4 -bottom-4" />
+                                    <div className="z-10 bg-cyber-dark p-4 border border-cyber-pink shadow-lg">
+                                        <div className="flex items-center space-x-2 mb-2">
+                                            <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                                            <span className="text-xs font-mono text-red-500">不備検知</span>
+                                        </div>
+                                        <div className="h-1 w-32 bg-gray-800 mb-1"></div>
+                                        <div className="h-1 w-24 bg-gray-800"></div>
+                                        <div className="absolute bottom-2 right-2 text-[10px] font-mono font-bold text-red-500 animate-pulse">RE-INPUT REQ.</div>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            <FadeIn delay={400} className="bg-cyber-dark/50 cyber-border p-8 flex flex-col justify-between">
+                                <div>
+                                    <Database className="w-10 h-10 text-cyber-cyan mb-4" />
+                                    <h3 className="text-2xl font-display font-bold mb-2">集約システム</h3>
+                                    <p className="text-gray-500 text-xs font-mono leading-relaxed">
+                                        安田さんを待ち受ける、重厚なレガシーインフラ。<br/>
+                                        「ガタガタ」と音を立てるようにデータを投入し、10分待機。<br/>
+                                        ズレがあれば原因を特定し、再投入。忍耐力が試される。
+                                    </p>
+                                </div>
+                                <div className="mt-8 space-y-3">
+                                    <div className="flex items-center text-xs text-cyber-cyan font-mono bg-cyber-cyan/5 p-2 border-l-2 border-cyber-cyan">
+                                        <CheckCircle className="w-3 h-3 mr-2" />
+                                        エクセル不備チェック
+                                    </div>
+                                    <div className="flex items-center text-xs text-cyber-cyan font-mono bg-cyber-cyan/5 p-2 border-l-2 border-cyber-cyan">
+                                        <CheckCircle className="w-3 h-3 mr-2" />
+                                        整合性確認
+                                    </div>
+                                    <div className="flex items-center text-xs text-white font-mono bg-cyber-pink/10 p-2 border-l-2 border-cyber-pink animate-pulse">
+                                        <div className="w-3 h-3 mr-2 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                                        システム投入（10分）
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            <FadeIn delay={600} className="col-span-1 lg:col-span-3 bg-cyber-dark border border-gray-800 p-10 md:p-16 overflow-hidden relative">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-cyber-cyan/5 rounded-full blur-3xl"></div>
+                                <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                                    <div>
+                                        <h3 className="text-3xl md:text-5xl font-display font-bold mb-6">行政文書という、<br/>芸術。</h3>
+                                        <p className="text-gray-400 text-lg mb-6 font-mono">
+                                            現場からの質のばらつきがある報告書を、安田フィルターを通して完璧な行政文書へと昇華させる。<br/>
+                                            時には体裁を保つため、「捏造に近い形での修正」という<span className="text-cyber-pink">創造的再構築</span>を行い、各課（義務教育課・生徒指導課）の要求を満たす。
+                                        </p>
+                                        <div className="inline-flex items-center px-4 py-2 bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan">
+                                            <PenTool className="w-4 h-4 mr-2" />
+                                            <span className="text-xs font-mono font-bold">職業病：「入力」という言葉を日常会話で使用</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-black p-6 border-l-4 border-cyber-cyan font-mono text-gray-400 text-sm leading-relaxed opacity-80">
+                                        &gt; echo "なお、安田教育の実施においては、"<br/>
+                                        &gt; processing 地域の実情を鑑み...<br/>
+                                        &gt; optimizing for 包括的な理解を促進...<br/>
+                                        &gt; <span className="text-cyber-cyan">完了。</span>
+                                    </div>
+                                </div>
+                            </FadeIn>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- CharacterSection (NEW) ---
+        const CharacterSection = () => {
+            return (
+                <section id="character" className="bg-black/20 backdrop-blur-sm py-32 px-4 sm:px-6 lg:px-8 border-t border-cyber-cyan/10">
+                     <div className="max-w-7xl mx-auto">
+                        <FadeIn className="text-center mb-24">
+                            <h2 className="text-5xl md:text-7xl font-display font-bold tracking-tight mb-4 text-white">
+                                安田という、<br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan to-cyber-pink">ジャンル。</span>
+                            </h2>
+                            <p className="text-xl text-gray-500 max-w-2xl mx-auto font-mono">
+                                悲壮感をユーモアに変える言語センス。カオスを総括する俯瞰力。<br/>
+                                安田さんならではの人間味あふれるスペック。
+                            </p>
+                        </FadeIn>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* Card 1: Linguistic Sense */}
+                            <FadeIn delay={100} className="col-span-1 md:col-span-2 bg-cyber-dark cyber-border p-10 relative overflow-hidden group">
+                                <div className="absolute -right-10 -top-10 bg-cyber-pink/20 w-64 h-64 rounded-full blur-3xl group-hover:bg-cyber-pink/30 transition-all duration-700"></div>
+                                <div className="relative z-10">
+                                    <div className="flex items-center space-x-2 mb-6">
+                                        <Sparkles className="text-cyber-yellow" />
+                                        <span className="text-xs font-mono font-semibold text-gray-500 uppercase tracking-widest">Power Words</span>
+                                    </div>
+                                    <h3 className="text-3xl font-display font-bold text-white mb-6">圧倒的表現力。</h3>
+                                    <div className="space-y-4">
+                                        <div className="bg-black/50 p-4 border-l-2 border-cyber-cyan">
+                                            <p className="text-lg text-cyber-cyan font-medium font-mono">「血のしょんべんが出るぐらい働く」</p>
+                                            <p className="text-xs text-gray-500 mt-1 font-mono">―― 安田さんが繁忙期の壮絶さを一瞬で伝える比喩。</p>
+                                        </div>
+                                        <div className="bg-black/50 p-4 border-l-2 border-cyber-pink">
+                                            <p className="text-lg text-cyber-pink font-medium font-mono">「捏造に近い形で作り直す」</p>
+                                            <p className="text-xs text-gray-500 mt-1 font-mono">―― 際どい修正作業を笑いに変える、安田流ユーモア。</p>
+                                        </div>
+                                        <div className="bg-black/50 p-4 border-l-2 border-blue-500">
+                                            <p className="text-lg text-cyber-cyan font-medium font-mono">「ガタガタってエクセルを入れたら」</p>
+                                            <p className="text-xs text-gray-500 mt-1 font-mono">―― 複雑なシステム処理を擬音で表現する勢い。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            {/* Card 2: Summary Ability */}
+                            <FadeIn delay={300} className="col-span-1 bg-cyber-dark cyber-border p-10 flex flex-col justify-between">
+                                <div>
+                                    <div className="flex items-center space-x-2 mb-6">
+                                        <Cpu className="text-cyber-cyan" />
+                                        <span className="text-xs font-mono font-semibold text-gray-500 uppercase tracking-widest">Totalization Core</span>
+                                    </div>
+                                    <h3 className="text-3xl font-display font-bold text-white mb-4">無意識の総括。</h3>
+                                    <p className="text-gray-400 mb-6 text-sm font-mono">
+                                        カオスな現場にいても、状況を客観的に一言でまとめる「安田指導主事OS」が常駐。<br/>
+                                        飲み会ですら話を総括してしまう。
+                                    </p>
+                                </div>
+                                <div className="space-y-2 font-mono text-xs text-green-400 bg-black p-4 border border-green-900/50">
+                                    <div className="flex justify-between">
+                                        <span>Status:</span>
+                                        <span className="font-bold">YASUDA_MODE</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Type:</span>
+                                        <span className="font-bold">SOLDIER</span>
+                                    </div>
+                                    <div className="flex justify-between text-red-500">
+                                        <span>Rule:</span>
+                                        <span className="font-bold">DEADLINE_FIRST</span>
+                                    </div>
+                                </div>
+                            </FadeIn>
+
+                            {/* Card 3: Humanity & Charm */}
+                            <FadeIn delay={500} className="col-span-1 md:col-span-3 bg-gradient-to-r from-cyber-dark to-black cyber-border p-10 text-center relative overflow-hidden">
+                                <div className="relative z-10 max-w-4xl mx-auto">
+                                     <div className="inline-block p-3 border border-cyber-cyan rounded-full mb-6 shadow-[0_0_15px_rgba(0,243,255,0.3)]">
+                                        <Mic className="text-cyber-cyan w-6 h-6" />
+                                     </div>
+                                     <h3 className="text-4xl font-display font-bold text-white mb-6">愛すべき、<br className="md:hidden" />人間臭さ。</h3>
+                                     <p className="text-xl text-gray-400 mb-8 font-mono">
+                                        完璧な仕事ぶりの裏にある、安田さんの天然な一面。<br/>
+                                        日常会話で「入力（情報を入れること）」と言ってしまい主幹に突っ込まれる職業病。<br/>
+                                        そして、上層部に文句を言いながらも結局は「気に入られてしまう」安田さんの人徳。
+                                     </p>
+                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                                         <div className="bg-cyber-cyan/5 p-4 border border-cyber-cyan/20">
+                                             <h4 className="text-cyber-cyan font-bold mb-2 font-display">深夜2時の喧嘩</h4>
+                                             <p className="text-gray-400 text-xs font-mono">温厚な安田さんが極限状態で同期と「お前の方じゃねえのか」と言い争う。その人間らしさが、逆に信頼を生む。</p>
+                                         </div>
+                                         <div className="bg-cyber-pink/5 p-4 border border-cyber-pink/20">
+                                             <h4 className="text-cyber-pink font-bold mb-2 font-display">本庁ホットライン</h4>
+                                             <p className="text-gray-400 text-xs font-mono">「兵隊向き」と自嘲しながらも、異動後も本庁幹部にサシ飲みに誘われるほどの愛され力。</p>
+                                         </div>
+                                     </div>
+                                </div>
+                            </FadeIn>
+                        </div>
+                     </div>
+                </section>
+            );
+        };
+
+        // --- RelationSection Component (Updated) ---
+        const RelationSection = () => {
+            return (
+                <section id="relation" className="bg-black/20 backdrop-blur-sm py-32 px-4 sm:px-6 lg:px-8 pb-48 relative">
+                    <div className="max-w-7xl mx-auto relative z-10">
+                        
+                        <FadeIn className="text-center mb-20">
+                            <h2 className="text-5xl md:text-7xl font-display font-bold tracking-tight mb-4 text-white">
+                                炎の中で、<br className="md:hidden" /><span className="text-cyber-pink">鍛えられた絆。</span>
+                            </h2>
+                            <p className="text-xl text-gray-400">苦楽を共にし、築き上げられた安田さんの人間関係。</p>
+                        </FadeIn>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+                            <FadeIn delay={200} className="space-y-8">
+                                <div className="relative h-[500px] border border-gray-800 p-2 group">
+                                    <div className="absolute inset-0 bg-cyber-grid opacity-20 z-20 pointer-events-none"></div>
+                                    <img 
+                                        src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&auto=format&fit=crop&q=60" 
+                                        alt="Comrades" 
+                                        className="w-full h-full object-cover filter grayscale contrast-125 brightness-75 group-hover:brightness-100 transition-all duration-500"
+                                    />
+                                    <div className="absolute bottom-4 left-4 right-4 bg-black/90 border border-cyber-cyan p-6 z-30">
+                                                                            <h3 className="text-2xl font-display font-bold text-cyber-cyan mb-2">安田さんと高橋さん。</h3>
+                                                                            <p className="text-gray-400 text-sm font-mono">
+                                                                                有能な同期と過ごした濃密な時間。<br/>
+                                                                                深夜2時の仕事の押し付け合いによる喧嘩を経て、二人は戦友へ。<br/>
+                                                                                今でも月1で飲みに行く、かけがえのない関係。
+                                                                            </p>                                    </div>
+                                    
+                                    {/* Corner Accents */}
+                                    <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyber-cyan z-30"></div>
+                                    <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyber-cyan z-30"></div>
+                                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-cyber-cyan z-30"></div>
+                                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-cyber-cyan z-30"></div>
+                                </div>
+                            </FadeIn>
+
+                            <FadeIn delay={400} className="space-y-6 md:pt-20">
+                                <div className="bg-cyber-dark p-8 border-l-4 border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <Shield className="text-blue-500 w-6 h-6" />
+                                        <h3 className="text-2xl font-display font-bold text-white">安田式「兵隊」適性</h3>
+                                    </div>
+                                    <p className="text-gray-400 font-mono text-sm">
+                                        上層部に好まれる性格。従順、強靭、そして有能。<br/>
+                                        文句を言いながらも業務を完遂する責任感が、幹部たちを惹きつける。
+                                    </p>
+                                </div>
+
+                                <div className="bg-cyber-dark p-8 border-l-4 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.1)]">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <Users className="text-purple-500 w-6 h-6" />
+                                        <h3 className="text-2xl font-display font-bold text-white">安田ロボット時代</h3>
+                                    </div>
+                                    <p className="text-gray-400 font-mono text-sm">
+                                        自己の完全機械化。効率のために感情を抑制し、ひたすら業務を遂行した時期。<br/>
+                                        「締め切り至上主義」の中で生き残るための安田的進化。
+                                    </p>
+                                </div>
+                            </FadeIn>
+                        </div>
+                        
+                        <FadeIn delay={800} className="mt-32 text-center border-t border-gray-800 pt-16">
+                            <p className="text-3xl md:text-5xl font-display font-bold text-gray-600">
+                                「地獄だった。」<br />
+                                <span className="text-white text-shadow-neon">しかし、<br className="md:hidden" />充実感はそこにあった。</span>
+                            </p>
+                        </FadeIn>
+
+                    </div>
+                </section>
+            );
+        };
+
+        // --- Main App Component ---
+        const App = () => {
+            return (
+                <div className="bg-transparent min-h-screen selection:bg-cyber-pink selection:text-white font-body antialiased text-gray-300 relative">
+                    <CosmicBackground />
+                    <Navbar />
+                    <main>
+                        <Hero />
+                        <EnduranceSection />
+                        <AnalysisSection />
+                        <CharacterSection />
+                        <RelationSection />
+                    </main>
+                    
+                    <footer className="bg-[#020205] text-gray-600 py-12 text-xs text-center border-t border-cyber-cyan/20">
+                        <div className="max-w-5xl mx-auto px-4 font-mono">
+                            <p className="mb-4">
+                                1. 47時間連続勤務は一般的な健康管理上推奨されません。行政マラソンに挑戦する際は医師にご相談ください。<br />
+                                2. 「血のしょんべん」は安田さんによる比喩表現であり、医学的な診断結果ではありません。<br />
+                                3. 本サイトは安田さんへのリスペクトを込めて作成された、オンライン飲み会のレビューページです。
+                            </p>
+                            <div className="border-t border-gray-800 my-4 w-1/2 mx-auto"></div>
+                            <p className="text-cyber-cyan">Copyright © 2025 Yasuda-san Online Nomikai. All rights reserved.</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
