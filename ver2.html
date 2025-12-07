@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philosophy | 神山の思考</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Rajdhani"', '"Noto Sans JP"', 'sans-serif'],
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                    },
+                    colors: {
+                        dark: '#020617', /* Deep Slate */
+                        panel: 'rgba(10, 15, 30, 0.4)',
+                        cyan: '#00f0ff',
+                        magenta: '#ff00ff',
+                        yellow: '#fcee0a',
+                        text: '#e2e8f0',
+                        subtext: '#94a3b8',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'spin-slow': 'spin 20s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --primary: #00f0ff;
+            --bg: #000205;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #e2e8f0;
+            font-family: 'Rajdhani', 'Noto Sans JP', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* Neural Background */
+        #neural-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Cyberpunk Panel (Interactive Spotlight) */
+        .cyber-panel {
+            background: rgba(10, 15, 30, 0.6);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            clip-path: polygon(
+                20px 0, 100% 0, 
+                100% calc(100% - 20px), calc(100% - 20px) 100%, 
+                0 100%, 0 20px
+            );
+            overflow: hidden;
+        }
+
+        /* Spotlight Glow Effect */
+        .cyber-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: radial-gradient(
+                800px circle at var(--x, 50%) var(--y, 50%),
+                rgba(0, 240, 255, 0.4),
+                transparent 40%
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .cyber-panel:hover::before {
+            opacity: 1;
+        }
+
+        .cyber-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0, 240, 255, 0.3);
+        }
+        
+        /* Corner Accents - Static */
+        .cyber-panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 10px;
+            height: 10px;
+            border-bottom: 2px solid var(--primary);
+            border-right: 2px solid var(--primary);
+            opacity: 0.5;
+        }
+
+        /* Refined Glitch Text Effect */
+        .glitch {
+            position: relative;
+            color: white;
+        }
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.8;
+        }
+        .glitch::before {
+            color: #00f0ff;
+            z-index: -1;
+            animation: glitch-anim-1 3s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            color: #ff00ff;
+            z-index: -2;
+            animation: glitch-anim-2 2.5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
+            20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+            40% { clip-path: inset(40% 0 50% 0); transform: translate(-2px, 2px); }
+            60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+            80% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 1px); }
+            100% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(10% 0 60% 0); transform: translate(2px, -1px); }
+            20% { clip-path: inset(80% 0 5% 0); transform: translate(-2px, 2px); }
+            40% { clip-path: inset(30% 0 20% 0); transform: translate(2px, 1px); }
+            60% { clip-path: inset(15% 0 80% 0); transform: translate(-1px, -2px); }
+            80% { clip-path: inset(55% 0 10% 0); transform: translate(1px, 2px); }
+            100% { clip-path: inset(40% 0 30% 0); transform: translate(-2px, 1px); }
+        }
+        /* Pause glitch when not hovering/active to be subtle */
+        .glitch:not(:hover)::before, .glitch:not(:hover)::after {
+            animation-play-state: paused;
+            display: none;
+        }
+        .glitch:hover::before, .glitch:hover::after {
+            display: block;
+            animation-play-state: running;
+        }
+
+        /* Scanline - Subtler */
+        .scanline {
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+        }
+
+        /* Smooth Scroll */
+        html { scroll-behavior: smooth; }
+        
+        /* Mobile Menu */
+        #mobile-menu.hidden-menu { display: none; }
+        #mobile-menu.visible-menu { display: flex; }
+
+        /* App Card Refinements */
+        .app-card {
+            background: rgba(10, 15, 30, 0.4);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem 1.5rem;
+            height: 100%;
+            min-height: 200px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .app-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: radial-gradient(
+                600px circle at var(--x, 50%) var(--y, 50%),
+                rgba(0, 240, 255, 0.4),
+                transparent 40%
+            );
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .app-card:hover::before { opacity: 1; }
+        .app-card:hover {
+            background: rgba(15, 25, 40, 0.6);
+            transform: translateY(-5px);
+        }
+
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+</head>
+<body class="selection:bg-cyan selection:text-black">
+
+    <!-- Neural Network Canvas Background -->
+    <canvas id="neural-canvas"></canvas>
+    
+    <!-- Scanlines -->
+    <div class="scanline"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-[#020617]/80 backdrop-blur-md border-b border-white/5 h-16 flex items-center justify-between px-6 md:px-12">
+        <div class="text-cyan font-bold text-xl tracking-widest flex items-center cursor-pointer hover:text-white transition" onclick="window.scrollTo(0,0)">
+            <i class="fas fa-brain text-2xl mr-3 animate-pulse text-magenta"></i>
+            <span class="uppercase font-mono">KAMIYAMA_OS <span class="text-xs align-top opacity-50">v2.1</span></span>
+        </div>
+        
+        <!-- PC Menu -->
+        <div class="hidden md:flex space-x-8 text-sm text-subtext font-mono uppercase tracking-widest">
+            <a href="#science" class="hover:text-cyan transition hover:shadow-[0_0_10px_#00f0ff] px-2">Science</a>
+            <a href="#mindset" class="hover:text-magenta transition hover:shadow-[0_0_10px_#ff00ff] px-2">Mindset</a>
+            <a href="#strategy" class="hover:text-yellow transition hover:shadow-[0_0_10px_#fcee0a] px-2">Strategy</a>
+            <a href="#team" class="hover:text-green-400 transition hover:shadow-[0_0_10px_#4ade80] px-2">Team</a>
+            <a href="#tools" class="hover:text-white transition px-2 border border-transparent hover:border-white/30">Tools</a>
+            <a href="#references" class="hover:text-white transition px-2">Source</a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="menu-btn" class="md:hidden text-cyan focus:outline-none z-50">
+            <i class="fas fa-bars text-2xl"></i>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="hidden-menu fixed inset-0 z-40 bg-[#020617]/95 backdrop-blur-xl flex-col justify-center items-center">
+        <div class="flex flex-col space-y-8 text-center font-mono text-xl">
+            <a href="#science" class="mobile-link text-cyan uppercase">Science</a>
+            <a href="#mindset" class="mobile-link text-magenta uppercase">Mindset</a>
+            <a href="#strategy" class="mobile-link text-yellow uppercase">Strategy</a>
+            <a href="#team" class="mobile-link text-green-400 uppercase">Team</a>
+            <a href="#tools" class="mobile-link text-white uppercase">Tools</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="min-h-screen flex flex-col justify-center items-center text-center px-6 relative z-10 pt-20">
+            <div class="max-w-5xl mx-auto z-10">
+                <div class="text-cyan font-mono text-sm md:text-base tracking-[0.5em] mb-6 animate-pulse uppercase border-b border-cyan/30 inline-block pb-2">
+                    System Boot: Philosophy 2.1
+                </div>
+                <h1 class="text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter mb-8 leading-none text-white drop-shadow-[0_0_30px_rgba(0,240,255,0.3)] glitch" data-text="思考のOS。">
+                    思考のOS。<br>
+                    一生モノの<br>基盤を。
+                </h1>
+                <p class="text-xl md:text-2xl text-subtext max-w-2xl mx-auto leading-relaxed mb-12 font-mono border-l-2 border-magenta pl-6 text-left bg-black/20 backdrop-blur-sm p-4">
+                    // 根性論ではない。<br>
+                    // 脳科学とエビデンスに基づき、<br>
+                    // 神山が構築した「自律した学習者」になるための<br>
+                    // 4つのアルゴリズム。
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 1: Science -->
+        <section id="science" class="py-32 px-4 md:px-6 relative z-10">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-16 border-b border-cyan/20 pb-4 flex items-end justify-between">
+                    <div>
+                        <span class="text-cyan font-mono text-xs tracking-widest uppercase block mb-1">Module 01</span>
+                        <h2 class="text-4xl md:text-6xl font-bold text-white">Science <span class="text-lg text-subtext font-normal font-mono">/ 行動とモチベーション</span></h2>
+                    </div>
+                    <div class="hidden md:block text-cyan/50 font-mono text-xs">
+                        STATUS: ACTIVE<br>LOAD: 25%
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Card 1.1 -->
+                    <div class="cyber-panel p-8 lg:col-span-2 group">
+                        <h3 class="text-3xl font-bold mb-6 text-white group-hover:text-cyan transition-colors">行動が先、やる気は後。</h3>
+                        <div class="flex flex-col md:flex-row gap-8 items-center">
+                            <div class="flex-1 space-y-4">
+                                <p class="text-xl text-subtext leading-relaxed font-light">
+                                    「やる気があるから動く」というのは誤解だと<span class="text-white font-bold border-b border-cyan">神山は考えます</span>。動くからこそ<span class="text-cyan font-bold">脳のエンジン</span>が点火され、ドーパミンが出る。<br>
+                                    これが脳科学的事実、「作業興奮」です。
+                                </p>
+                                <div class="bg-cyan/5 p-4 border-l-4 border-cyan">
+                                    <p class="text-sm text-cyan font-mono">>> 悩み続けるより、まず「5分」「1問」動くことが全ての突破口になる。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 1.2 -->
+                    <div class="cyber-panel p-8 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-3 text-white">「0」と「1」の差</h3>
+                            <p class="text-subtext text-sm leading-relaxed mb-4">
+                                1日1分の行動でも、何もしない「0」とは天と地ほどの差があります。小さな行動（極小クエスト）こそがスイッチです。
+                            </p>
+                        </div>
+                        <div class="flex items-end justify-between border-t border-white/10 pt-4 mt-4">
+                            <span class="text-5xl font-mono font-bold text-white tracking-tighter">0 <span class="text-cyan text-xl">vs</span> 1</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 1.3 -->
+                    <div class="cyber-panel p-8 lg:col-span-3 flex flex-col md:flex-row items-center gap-12">
+                        <div class="flex-1">
+                            <h3 class="text-2xl font-bold mb-2 text-white flex items-center"><i class="fas fa-fire text-cyan mr-3"></i>GRITと試行回数</h3>
+                            <p class="text-xl text-subtext leading-relaxed">
+                                成功の唯一の法則は「試行回数」を増やすこと。結果ではなく「続けた事実（進捗）」に目を向けることでモチベーションは維持されます。
+                            </p>
+                        </div>
+                        <!-- Bar Chart Visual -->
+                        <div class="w-full md:w-1/3 h-32 flex items-end justify-between gap-2 px-4 border-b border-l border-white/20 pb-2 pl-2">
+                            <div class="w-full bg-cyan/20 h-[20%]"></div>
+                            <div class="w-full bg-cyan/40 h-[40%]"></div>
+                            <div class="w-full bg-cyan/60 h-[60%]"></div>
+                            <div class="w-full bg-cyan h-[90%] shadow-[0_0_15px_#00f0ff]"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Mindset -->
+        <section id="mindset" class="py-32 px-4 md:px-6 relative z-10">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-16 border-b border-magenta/20 pb-4 flex items-end justify-between">
+                    <div>
+                        <span class="text-magenta font-mono text-xs tracking-widest uppercase block mb-1">Module 02</span>
+                        <h2 class="text-4xl md:text-6xl font-bold text-white">Mindset <span class="text-lg text-subtext font-normal font-mono">/ 自己コントロール</span></h2>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Card 2.1 -->
+                    <div class="cyber-panel p-10 relative overflow-hidden group">
+                        <div class="relative z-10">
+                            <h3 class="text-3xl font-bold mb-6 text-white flex items-center gap-3">
+                                脱・他責。
+                                <i class="fas fa-fingerprint text-2xl text-magenta opacity-70"></i>
+                            </h3>
+                            <span class="text-magenta text-xs font-mono border border-magenta px-2 py-1 mb-4 inline-block">LOCUS OF CONTROL</span>
+                            <p class="text-xl text-subtext leading-relaxed">
+                                他責は「自尊心を守る防衛本能」ですが、同時に「人生のハンドルを他人に渡す行為」です。<br><br>
+                                自分の人生を自分でコントロールできている感覚（自己効力感）こそが幸福の源泉です。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card 2.2 -->
+                    <div class="cyber-panel p-10 flex flex-col justify-center">
+                        <h3 class="text-2xl font-bold text-white mb-6 flex items-center"><i class="fas fa-ban text-magenta mr-3"></i>完璧主義を捨てる</h3>
+                        <ul class="space-y-6 font-mono text-sm">
+                            <li class="flex items-start">
+                                <span class="text-magenta mr-4">></span>
+                                <span class="text-subtext">「0か100か」思考はメンタルを病む原因。</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-magenta mr-4">></span>
+                                <span class="text-white">できていない1割ではなく、<span class="text-magenta border-b border-magenta">できている9割</span>を見る。</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 2.3 -->
+                    <div class="cyber-panel p-10 md:col-span-2">
+                        <div class="flex flex-col md:flex-row gap-12 items-center">
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold mb-4 text-white">失敗の再定義 <span class="text-sm font-mono text-subtext">RE-FRAMING</span></h3>
+                                <p class="text-xl text-subtext leading-relaxed">
+                                    失敗は「ダメなこと」ではありません。<br>
+                                    それは<span class="text-white">「部分的成功」</span>であり、貴重な<span class="text-white">「データ収集」</span>です。<br>
+                                    過去や未来にとらわれず、「今、ここ」の積み重ねだけに集中しましょう。
+                                </p>
+                            </div>
+                            <div class="flex-1 w-full">
+                                <div class="text-xs font-bold text-magenta font-mono uppercase mb-2">Growth_Progress</div>
+                                <div class="h-2 w-full bg-white/5">
+                                    <div class="h-full bg-gradient-to-r from-magenta to-purple-600 w-3/4 shadow-[0_0_10px_#ff00ff]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Strategy -->
+        <section id="strategy" class="py-32 px-4 md:px-6 relative z-10">
+             <div class="max-w-7xl mx-auto">
+                <div class="mb-16 border-b border-yellow/20 pb-4 flex items-end justify-between">
+                    <div>
+                        <span class="text-yellow font-mono text-xs tracking-widest uppercase block mb-1">Module 03</span>
+                        <h2 class="text-4xl md:text-6xl font-bold text-white">Strategy <span class="text-lg text-subtext font-normal font-mono">/ 戦略的判断</span></h2>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Card 3.1 -->
+                    <div class="cyber-panel p-8 md:col-span-1 flex flex-col justify-between">
+                        <div>
+                             <h3 class="text-2xl font-bold mb-4 text-white">トレードオフ</h3>
+                             <p class="text-subtext text-sm leading-relaxed">
+                                何かを得るには何かを捨てなければなりません。「何をするか」より<span class="text-yellow border-b border-yellow text-white">「何をしないか」</span>を戦略的に決めることが重要です。
+                            </p>
+                        </div>
+                        <div class="mt-8 text-center">
+                             <i class="fas fa-balance-scale text-5xl text-yellow opacity-50"></i>
+                        </div>
+                    </div>
+
+                    <!-- Card 3.2 -->
+                    <div class="cyber-panel p-8 md:col-span-2 flex flex-col justify-center">
+                        <h3 class="text-3xl font-bold mb-6 text-white">目的 & ロードマップ</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                            <div class="bg-yellow/5 p-6 border border-yellow/20">
+                                <h4 class="text-yellow font-mono text-sm mb-2 uppercase">> Compass</h4>
+                                <p class="text-subtext text-sm">「何のために？」という原点が、感情から切り離された正しい判断を導きます。</p>
+                            </div>
+                            <div class="bg-yellow/5 p-6 border border-yellow/20">
+                                <h4 class="text-yellow font-mono text-sm mb-2 uppercase">> Visibility</h4>
+                                <p class="text-subtext text-sm">タスクと期限を可視化。見通しを持つことは「進める本能」を刺激します。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                     <!-- Card 3.3 -->
+                     <div class="cyber-panel p-8 md:col-span-3 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-2xl font-bold text-white mb-2">準備と自信</h3>
+                            <p class="text-xl max-w-3xl text-subtext">
+                                結果に落ち込むのは準備不足だから。やりきった上での失敗は「納得感」に変わり、次の改善に繋がります。
+                            </p>
+                        </div>
+                        <i class="fas fa-hourglass-half text-4xl text-yellow opacity-60 animate-pulse"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Team -->
+        <section id="team" class="py-32 px-4 md:px-6 relative z-10">
+            <div class="max-w-7xl mx-auto">
+                 <div class="mb-16 border-b border-green-400/20 pb-4 flex items-end justify-between">
+                    <div>
+                        <span class="text-green-400 font-mono text-xs tracking-widest uppercase block mb-1">Module 04</span>
+                        <h2 class="text-4xl md:text-6xl font-bold text-white">Team <span class="text-lg text-subtext font-normal font-mono">/ 組織論</span></h2>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Card 4.1 -->
+                    <div class="cyber-panel p-10">
+                        <div class="flex items-center gap-4 mb-6">
+                            <i class="fas fa-shield-alt text-3xl text-green-400"></i>
+                            <h3 class="text-2xl font-bold text-white">心理的安全性</h3>
+                        </div>
+                        <p class="text-xl text-subtext leading-relaxed">
+                            「失敗しても馬鹿にされない」安心感が最強のチームを作ります。互いに教え合い、高め合う<span class="text-white">「ソーシャルプレッシャー」</span>を利用する。
+                        </p>
+                    </div>
+
+                    <!-- Card 4.2 -->
+                    <div class="cyber-panel p-10">
+                        <div class="flex items-center gap-4 mb-6">
+                            <i class="fas fa-gift text-3xl text-green-400"></i>
+                            <h3 class="text-2xl font-bold text-white">返報性と他者貢献</h3>
+                        </div>
+                        <p class="text-xl text-subtext leading-relaxed">
+                            挨拶は「あなたを受け入れる」という好意のプレゼント。誰かのために動くことは、脳科学的に自分の幸福感を高めます（ヘルパーズ・ハイ）。
+                        </p>
+                    </div>
+
+                    <!-- Card 4.3 -->
+                    <div class="cyber-panel p-10 lg:col-span-2 flex flex-col md:flex-row justify-between gap-12">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-3 text-white flex items-center gap-3">
+                                <i class="fas fa-chart-line text-green-400"></i> 他者比較の無意味さ
+                            </h3>
+                            <p class="text-subtext text-sm leading-relaxed mb-2 pl-1">
+                                他人と比べるのではなく、「過去の自分」と比べて成長を感じる。<br>
+                                自分だけの「かたより（強み）」で集団に貢献してください。
+                            </p>
+                        </div>
+                        <div class="w-px bg-green-400/20 hidden md:block"></div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold mb-3 text-white flex items-center gap-3">
+                                <i class="fas fa-user-cog text-green-400"></i> 他人を変えようとしない
+                            </h3>
+                            <p class="text-subtext text-sm leading-relaxed mb-2 pl-1">
+                                「馬を水辺に連れて行くことはできても、水を飲ませることはできない」。<br>
+                                他人ではなく、自分（変えられるもの）に集中するべきです。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <section class="min-h-[50vh] flex flex-col justify-center items-center text-center px-6 py-20 relative z-10 bg-gradient-to-t from-cyan/5 to-transparent">
+            <div class="max-w-4xl mx-auto z-10">
+                <h2 class="text-5xl md:text-8xl font-bold text-white mb-8 tracking-tighter font-mono">
+                    BE <span class="text-cyan">AUTONOMOUS</span>.
+                </h2>
+                <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-cyan to-transparent mb-12"></div>
+                <p class="text-subtext max-w-2xl mx-auto leading-relaxed mb-16 text-lg">
+                    予測不能な社会の中で、自分の頭で考え、<br>たくましく人生を切り拓いていける。<br>
+                    この1年で、あなたのOSをアップデートしましょう。
+                </p>
+                
+                <button onclick="document.getElementById('tools').scrollIntoView({behavior: 'smooth'})" class="group bg-transparent border border-cyan text-cyan px-12 py-4 font-mono text-lg hover:bg-cyan hover:text-black transition-all duration-300 relative overflow-hidden">
+                    <span class="relative z-10">INITIALIZE UPDATE</span>
+                    <div class="absolute inset-0 bg-cyan/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- Section Tools -->
+        <section id="tools" class="py-32 px-4 md:px-6 relative z-10 border-t border-white/5 bg-[#020617]">
+            <div class="max-w-7xl mx-auto">
+                 <div class="mb-12">
+                    <span class="text-blue-400 font-mono text-xs tracking-widest uppercase block mb-2">Extensions</span>
+                    <h2 class="text-4xl md:text-6xl font-bold mb-4 text-white">思考の拡張ツール</h2>
+                </div>
+
+                <!-- App Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                     <!-- Repeated App Card Structure with Cyber Style -->
+                     <!-- 1. Obsidian -->
+                    <div class="app-card group">
+                        <div class="app-icon-wrapper text-purple-500"><i class="fas fa-gem"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">Obsidian</h3>
+                        <p class="text-xs text-subtext">第二の脳。</p>
+                    </div>
+                    <!-- 2. Gemini CLI -->
+                    <div class="app-card group border-cyan/50">
+                        <div class="app-icon-wrapper text-cyan"><i class="fas fa-terminal"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">Gemini CLI</h3>
+                        <p class="text-xs text-subtext">敏腕秘書。</p>
+                    </div>
+                    <!-- 3. AI Studio -->
+                    <div class="app-card group">
+                        <div class="app-icon-wrapper text-blue-500"><i class="fas fa-microchip"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">AI Studio</h3>
+                        <p class="text-xs text-subtext">AI開発の母艦。</p>
+                    </div>
+                    <!-- 4. GitHub -->
+                    <div class="app-card group">
+                        <div class="app-icon-wrapper text-white"><i class="fab fa-github"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">GitHub</h3>
+                        <p class="text-xs text-subtext">創造の拠点。</p>
+                    </div>
+                    <!-- 5. NotebookLM -->
+                    <div class="app-card group">
+                        <div class="app-icon-wrapper text-green-400"><i class="fas fa-book-open"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">NotebookLM</h3>
+                        <p class="text-xs text-subtext">専属司書。</p>
+                    </div>
+                    <!-- 6. Notion -->
+                    <div class="app-card group">
+                        <div class="app-icon-wrapper text-white"><i class="fas fa-cube"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">Notion</h3>
+                        <p class="text-xs text-subtext">思考の本棚。</p>
+                    </div>
+                    <!-- 7. Terminal -->
+                    <div class="app-card group">
+                        <div class="app-icon-wrapper text-gray-400"><i class="fas fa-terminal"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">Terminal</h3>
+                        <p class="text-xs text-subtext">相棒。</p>
+                    </div>
+                    <!-- 8. GWS -->
+                    <div class="app-card group">
+                        <div class="app-icon-wrapper text-yellow"><i class="fab fa-google"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">GWS</h3>
+                        <p class="text-xs text-subtext">業務の母艦。</p>
+                    </div>
+                    <!-- 9. Canva -->
+                    <div class="app-card group">
+                        <div class="app-icon-wrapper text-cyan"><i class="fas fa-palette"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">Canva</h3>
+                        <p class="text-xs text-subtext">視覚化。</p>
+                    </div>
+                    <!-- 10. FirstSeed -->
+                    <div class="app-card group">
+                        <div class="app-icon-wrapper text-orange-500"><i class="fas fa-calendar-check"></i></div>
+                        <h3 class="text-white font-bold text-lg mb-2 font-mono">FirstSeed</h3>
+                        <p class="text-xs text-subtext">時間管理。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- References -->
+        <section id="references" class="py-32 px-4 md:px-6 relative z-10 border-t border-white/5">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-16">
+                    <span class="text-subtext font-mono text-xs tracking-widest uppercase block mb-2">KERNEL SOURCE</span>
+                    <h2 class="text-4xl md:text-6xl font-bold mb-4 text-white">参考文献 <span class="text-lg text-subtext font-mono">/ SOURCE CODE</span></h2>
+                </div>
+
+                <!-- MINDSET -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold text-cyan mb-6 font-mono border-b border-cyan/20 pb-2 inline-block">>> MINDSET_MODULE</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- 運は操れる -->
+                        <div class="cyber-panel p-6 h-full">
+                            <div class="text-xs font-mono text-cyan border border-cyan px-2 py-0.5 inline-block mb-3">Mindset</div>
+                            <h4 class="text-xl font-bold text-white mb-1">運は操れる</h4>
+                            <p class="text-sm text-subtext mb-4 font-mono">著: メンタリストDaiGo</p>
+                            <div class="space-y-3 text-sm text-subtext">
+                                <p class="border-l-2 border-cyan pl-3 bg-cyan/5 p-2">「やる気があるから行動するのではなく、行動するからやる気が出る（作業興奮）」</p>
+                                <p class="border-l-2 border-cyan pl-3 bg-cyan/5 p-2">「運が良い人とは『試行回数』が多い人だ」</p>
+                            </div>
+                        </div>
+                        <!-- 科学的な適職 -->
+                        <div class="cyber-panel p-6 h-full">
+                            <div class="text-xs font-mono text-cyan border border-cyan px-2 py-0.5 inline-block mb-3">Career</div>
+                            <h4 class="text-xl font-bold text-white mb-1">科学的な適職</h4>
+                            <p class="text-sm text-subtext mb-4 font-mono">著: 鈴木祐</p>
+                            <div class="space-y-3 text-sm text-subtext">
+                                <p class="border-l-2 border-cyan pl-3 bg-cyan/5 p-2">「最高のチームを作る唯一の条件は『心理的安全性』」</p>
+                                <p class="border-l-2 border-cyan pl-3 bg-cyan/5 p-2">「他者へ貢献することで『ヘルパーズ・ハイ』と呼ばれる幸福感を得られる」</p>
+                            </div>
+                        </div>
+                        <!-- 進化論マーケティング -->
+                        <div class="cyber-panel p-6 h-full">
+                            <div class="text-xs font-mono text-cyan border border-cyan px-2 py-0.5 inline-block mb-3">Evolution</div>
+                            <h4 class="text-xl font-bold text-white mb-1">進化論マーケティング</h4>
+                            <p class="text-sm text-subtext mb-4 font-mono">著: 鈴木祐</p>
+                            <div class="space-y-3 text-sm text-subtext">
+                                <p class="border-l-2 border-cyan pl-3 bg-cyan/5 p-2">「人間には『物事を前に進めたい』という本能的な欲求（進める本能）がある」</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RELATION -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold text-green-400 mb-6 font-mono border-b border-green-400/20 pb-2 inline-block">>> RELATION_MODULE</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- 人を動かす -->
+                        <div class="cyber-panel p-6 h-full" style="border-color: rgba(74, 222, 128, 0.3);">
+                            <div class="text-xs font-mono text-green-400 border border-green-400 px-2 py-0.5 inline-block mb-3">Communication</div>
+                            <h4 class="text-xl font-bold text-white mb-1">人を動かす</h4>
+                            <p class="text-sm text-subtext mb-4 font-mono">著: デール・カーネギー</p>
+                            <div class="space-y-3 text-sm text-subtext">
+                                <p class="border-l-2 border-green-400 pl-3 bg-green-400/5 p-2">「人を動かす唯一の方法は、その人が自ら動きたくなる気持ちを起こさせること」</p>
+                                <p class="border-l-2 border-green-400 pl-3 bg-green-400/5 p-2">「馬を水辺に連れて行くことはできても、水を飲ませることはできない」</p>
+                            </div>
+                        </div>
+                        <!-- 影響力の武器 -->
+                        <div class="cyber-panel p-6 h-full" style="border-color: rgba(74, 222, 128, 0.3);">
+                            <div class="text-xs font-mono text-green-400 border border-green-400 px-2 py-0.5 inline-block mb-3">Psychology</div>
+                            <h4 class="text-xl font-bold text-white mb-1">影響力の武器</h4>
+                            <p class="text-sm text-subtext mb-4 font-mono">著: ロバート・B・チャルディーニ</p>
+                            <div class="space-y-3 text-sm text-subtext">
+                                <p class="border-l-2 border-green-400 pl-3 bg-green-400/5 p-2">「人は他人から何かを与えられると、お返しをせずにはいられない（返報性の原理）」</p>
+                                <p class="border-l-2 border-green-400 pl-3 bg-green-400/5 p-2">「挨拶とは、最初に与える『好意のプレゼント』である」</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STRATEGY -->
+                <div class="mb-12">
+                    <h3 class="text-2xl font-bold text-yellow mb-6 font-mono border-b border-yellow/20 pb-2 inline-block">>> STRATEGY_MODULE</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                        <!-- 怠惰なんて存在しない -->
+                        <div class="cyber-panel p-6 h-full" style="border-color: rgba(252, 238, 10, 0.3);">
+                            <div class="text-xs font-mono text-yellow border border-yellow px-2 py-0.5 inline-block mb-3">Productivity</div>
+                            <h4 class="text-xl font-bold text-white mb-1">「怠惰」なんて存在しない</h4>
+                            <p class="text-sm text-subtext mb-4 font-mono">著: デヴォン・プライス</p>
+                            <div class="space-y-3 text-sm text-subtext">
+                                <p class="border-l-2 border-yellow pl-3 bg-yellow/5 p-2">「トレードオフ＝何かを得るためには、何かを諦めなければならない」</p>
+                            </div>
+                        </div>
+                        <!-- 才能の地図 -->
+                        <div class="cyber-panel p-6 h-full" style="border-color: rgba(252, 238, 10, 0.3);">
+                            <div class="text-xs font-mono text-yellow border border-yellow px-2 py-0.5 inline-block mb-3">Talent</div>
+                            <h4 class="text-xl font-bold text-white mb-1">才能の地図</h4>
+                            <p class="text-sm text-subtext mb-4 font-mono">著: 鈴木祐</p>
+                            <div class="space-y-3 text-sm text-subtext">
+                                <p class="border-l-2 border-yellow pl-3 bg-yellow/5 p-2">「他人と違う『かたより』こそが価値になる」</p>
+                            </div>
+                        </div>
+                        <!-- バカになるほど、本を読め！ -->
+                        <div class="cyber-panel p-6 h-full" style="border-color: rgba(252, 238, 10, 0.3);">
+                            <div class="text-xs font-mono text-yellow border border-yellow px-2 py-0.5 inline-block mb-3">Learning</div>
+                            <h4 class="text-xl font-bold text-white mb-1">バカになるほど、本を読め！</h4>
+                            <p class="text-sm text-subtext mb-4 font-mono">著: 神田 昌典</p>
+                            <div class="space-y-3 text-sm text-subtext">
+                                <p class="border-l-2 border-yellow pl-3 bg-yellow/5 p-2">「目的を明確にして、必要な情報を能動的に『取りに行く』」</p>
+                                <p class="border-l-2 border-yellow pl-3 bg-yellow/5 p-2">「意識の高い場でのソーシャルプレッシャーが人を成長させる」</p>
+                            </div>
+                        </div>
+                        <!-- 1分間孫子の兵法 -->
+                        <div class="cyber-panel p-6 h-full" style="border-color: rgba(252, 238, 10, 0.3);">
+                            <div class="text-xs font-mono text-yellow border border-yellow px-2 py-0.5 inline-block mb-3">Leadership</div>
+                            <h4 class="text-xl font-bold text-white mb-1">1分間孫子の兵法</h4>
+                            <p class="text-sm text-subtext mb-4 font-mono">著: 齋藤 孝</p>
+                            <div class="space-y-3 text-sm text-subtext">
+                                <p class="border-l-2 border-yellow pl-3 bg-yellow/5 p-2">「彼を知り己を知らば、百戦して殆うからず」</p>
+                                <p class="border-l-2 border-yellow pl-3 bg-yellow/5 p-2">「明日と他人は変えられないが、今日と自分は変えられる」</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-20 text-center text-xs text-subtext font-mono pb-12 opacity-50">
+                    SYSTEM STATUS: ONLINE // COPY_RIGHT: 2025 KAMIYAMA_OS
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+            
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden-menu');
+                mobileMenu.classList.toggle('visible-menu');
+            });
+
+             mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden-menu');
+                    mobileMenu.classList.remove('visible-menu');
+                });
+            });
+
+            // Neural Network Animation
+            const canvas = document.getElementById('neural-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let nodes = [];
+            const nodeCount = 60;
+            const connectionDistance = 150;
+            const mouseDistance = 200;
+
+            // Resize
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Mouse tracking
+            const mouse = { x: null, y: null };
+            window.addEventListener('mousemove', (e) => {
+                mouse.x = e.x;
+                mouse.y = e.y;
+
+                // Update CSS Variables for Cards
+                document.querySelectorAll('.cyber-panel, .app-card').forEach(card => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--x', `${x}px`);
+                    card.style.setProperty('--y', `${y}px`);
+                });
+            });
+            
+            window.addEventListener('mouseout', () => {
+                mouse.x = null;
+                mouse.y = null;
+            });
+
+            // Node Class
+            class Node {
+                constructor() {
+                    this.x = Math.random() * width;
+                    this.y = Math.random() * height;
+                    this.vx = (Math.random() - 0.5) * 0.5;
+                    this.vy = (Math.random() - 0.5) * 0.5;
+                    this.size = Math.random() * 2 + 1;
+                    this.color = Math.random() > 0.5 ? '#00f0ff' : '#ff00ff'; // Cyan or Magenta
+                }
+
+                update() {
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    // Bounce edges
+                    if (this.x < 0 || this.x > width) this.vx *= -1;
+                    if (this.y < 0 || this.y > height) this.vy *= -1;
+                    
+                    // Mouse Interaction
+                    if (mouse.x != null) {
+                        let dx = mouse.x - this.x;
+                        let dy = mouse.y - this.y;
+                        let distance = Math.sqrt(dx*dx + dy*dy);
+                        if (distance < mouseDistance) {
+                            const forceDirectionX = dx / distance;
+                            const forceDirectionY = dy / distance;
+                            const force = (mouseDistance - distance) / mouseDistance;
+                            // Gently push away
+                            const directionX = forceDirectionX * force * 0.5;
+                            const directionY = forceDirectionY * force * 0.5;
+                            this.vx -= directionX * 0.05;
+                            this.vy -= directionY * 0.05;
+                        }
+                    }
+                }
+
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                }
+            }
+
+            // Initialize Nodes
+            for (let i = 0; i < nodeCount; i++) {
+                nodes.push(new Node());
+            }
+
+            // Animation Loop
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                
+                // Update and Draw Nodes
+                nodes.forEach(node => {
+                    node.update();
+                    node.draw();
+                });
+
+                // Draw Connections
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i; j < nodes.length; j++) {
+                        let dx = nodes[i].x - nodes[j].x;
+                        let dy = nodes[i].y - nodes[j].y;
+                        let distance = Math.sqrt(dx*dx + dy*dy);
+
+                        if (distance < connectionDistance) {
+                            ctx.beginPath();
+                            let opacity = 1 - (distance / connectionDistance);
+                            ctx.strokeStyle = `rgba(0, 240, 255, ${opacity * 0.2})`;
+                            ctx.lineWidth = 1;
+                            ctx.moveTo(nodes[i].x, nodes[i].y);
+                            ctx.lineTo(nodes[j].x, nodes[j].y);
+                            ctx.stroke();
+                        }
+                    }
+                    
+                    // Connect to Mouse
+                    if (mouse.x != null) {
+                        let dx = nodes[i].x - mouse.x;
+                        let dy = nodes[i].y - mouse.y;
+                        let distance = Math.sqrt(dx*dx + dy*dy);
+                        if (distance < connectionDistance) {
+                             ctx.beginPath();
+                            let opacity = 1 - (distance / connectionDistance);
+                            ctx.strokeStyle = `rgba(255, 0, 255, ${opacity * 0.4})`; // Magenta connection to mouse
+                            ctx.lineWidth = 1;
+                            ctx.moveTo(nodes[i].x, nodes[i].y);
+                            ctx.lineTo(mouse.x, mouse.y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        });
+    </script>
+</body>
+</html>
