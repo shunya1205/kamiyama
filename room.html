@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>間取り配置シミュレーター</title>
+    <!-- Google Fonts: アイコンとフォント -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 全体のスタイル定義 */
+        /* --- 全体のスタイル --- */
         body {
             font-family: 'Noto Sans JP', "Helvetica Neue", Arial, sans-serif;
             margin: 0;
@@ -19,10 +20,12 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+            user-select: none; /* テキスト選択防止 */
+            -webkit-user-select: none;
         }
 
         h1 {
-            margin: 0 0 20px 0;
+            margin: 0 0 10px 0;
             font-size: 1.5rem;
             color: #444;
             display: flex;
@@ -30,9 +33,52 @@
             gap: 10px;
         }
 
-        /* コントロールエリア */
+        /* --- プロジェクト管理バー --- */
+        .project-bar {
+            width: 95vw;
+            max-width: 1000px;
+            background-color: #fff;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-sizing: border-box;
+            border-left: 5px solid #4a90e2;
+        }
+
+        .project-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .project-name-input {
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            background: transparent;
+            color: #333;
+            transition: all 0.2s;
+            width: 100%;
+            max-width: 400px;
+        }
+        .project-name-input:hover, .project-name-input:focus {
+            background: #f0f2f5;
+            border-color: #ccc;
+            outline: none;
+        }
+
+        /* --- コントロールエリア --- */
         .controls {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             padding: 15px;
             background-color: #fff;
             border-radius: 12px;
@@ -42,7 +88,7 @@
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            width: 90vw;
+            width: 95vw;
             max-width: 1000px;
             box-sizing: border-box;
         }
@@ -53,6 +99,7 @@
             align-items: center;
         }
 
+        /* --- ボタン共通スタイル --- */
         button, .file-upload-btn {
             padding: 8px 16px;
             cursor: pointer;
@@ -68,28 +115,32 @@
             transition: all 0.2s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        button:hover, .file-upload-btn:hover {
+        button:hover {
             background-color: #f9f9f9;
-            border-color: #ccc;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         button:active {
             transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         .material-icons-round { font-size: 1.2rem; }
 
+        /* ボタンバリエーション */
         .btn-primary { background-color: #4a90e2; color: white; border: none; }
         .btn-primary:hover { background-color: #357abd; }
 
         .btn-danger { color: #d9534f; border-color: #f5c6cb; background-color: #fff; }
         .btn-danger:hover { background-color: #f8d7da; }
+        
+        .btn-success { background-color: #66bb6a; color: white; border: none; }
+        .btn-success:hover { background-color: #4caf50; }
 
+        /* --- 家具追加フォーム --- */
         .add-furniture-form {
             display: flex;
-            gap: 8px;
+            gap: 5px;
             align-items: center;
             background-color: #f9f9f9;
             padding: 8px;
@@ -97,14 +148,15 @@
             border: 1px solid #eee;
         }
         .add-furniture-form input {
-            padding: 6px 10px;
+            padding: 6px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-family: inherit;
-            width: 70px;
+            width: 60px;
         }
-        .add-furniture-form input[type="text"] { width: 120px; }
+        .add-furniture-form input[type="text"] { width: 100px; }
 
+        /* --- 縮尺スライダー --- */
         .scale-control {
             background-color: #f9f9f9;
             padding: 8px 12px;
@@ -117,10 +169,11 @@
         }
         input[type="range"] { cursor: pointer; }
 
+        /* --- キャンバスエリア --- */
         #workspace {
             position: relative;
-            width: 90vw;
-            height: 75vh;
+            width: 95vw;
+            height: 70vh;
             background-color: #fff;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
@@ -129,10 +182,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            /* 方眼紙背景 */
             background-image: 
                 linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
                 linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
-            background-size: 25px 25px;
+            background-size: 25px 25px; /* JSで更新 */
             transition: border-color 0.3s;
         }
 
@@ -145,6 +199,7 @@
             z-index: 0;
         }
 
+        /* --- 家具スタイル --- */
         .furniture {
             position: absolute;
             display: flex;
@@ -156,11 +211,9 @@
             color: rgba(255,255,255,0.95);
             text-shadow: 0 1px 2px rgba(0,0,0,0.4);
             cursor: grab;
-            user-select: none;
+            touch-action: none; /* スマホ操作用 */
             box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 0 0 1px rgba(255,255,255,0.3);
             border-radius: 4px;
-            transition: box-shadow 0.2s, transform 0.1s, border-color 0.2s;
-            touch-action: none;
             word-break: break-word;
             padding: 4px;
             box-sizing: border-box;
@@ -174,11 +227,12 @@
             opacity: 0.9;
             margin-top: 2px;
         }
-        .furniture:active {
+        .furniture.dragging {
             cursor: grabbing;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            transform: scale(1.02);
-            z-index: 3000 !important; /* ゴミ箱(2000)より手前に来るように変更 */
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            transform: scale(1.05);
+            z-index: 5000 !important;
+            opacity: 0.9;
         }
         
         #drop-zone-text {
@@ -192,12 +246,13 @@
             gap: 10px;
         }
         #drop-zone-text::before {
-            content: 'image';
+            content: 'add_photo_alternate';
             font-family: 'Material Icons Round';
             font-size: 48px;
             color: #ccc;
         }
 
+        /* --- 通知 --- */
         #status-msg {
             font-size: 0.9rem;
             color: #4a90e2;
@@ -210,54 +265,135 @@
             align-items: center;
             gap: 4px;
         }
-        #status-msg::before {
-            content: 'check_circle';
-            font-family: 'Material Icons Round';
-            font-size: 1.1rem;
-        }
 
+        /* --- ゴミ箱ゾーン --- */
         #trash-zone {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 70px;
-            height: 70px;
+            bottom: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
             background-color: #fff;
-            border: 2px solid #ddd;
+            border: 4px solid #ddd; /* 枠線を太く */
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-            z-index: 2000;
-            color: #777;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0.9;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            z-index: 4000; /* 家具より下だが手前 */
+            color: #999;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         #trash-zone .material-icons-round {
-            font-size: 32px;
-            transition: color 0.3s;
+            font-size: 36px;
+            transition: color 0.2s;
         }
         #trash-label {
             font-size: 10px;
-            margin-top: -2px;
             font-weight: bold;
             opacity: 0;
             height: 0;
             overflow: hidden;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
         
+        /* ドラッグ中にゴミ箱の上にきた時 */
         #trash-zone.drag-over {
-            transform: scale(1.15);
-            border-color: #e57373;
+            transform: scale(1.2);
+            border-color: #e53935;
             background-color: #ffebee;
             color: #e53935;
-            box-shadow: 0 10px 24px rgba(229, 57, 53, 0.3);
+            box-shadow: 0 10px 30px rgba(229, 57, 53, 0.4);
         }
         #trash-zone.drag-over .material-icons-round { color: #e53935; }
-        #trash-zone.drag-over #trash-label { opacity: 1; height: auto; margin-top: 2px; }
+        #trash-zone.drag-over #trash-label { opacity: 1; height: auto; margin-top: 4px; }
+
+        /* --- 物件リストモーダル --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 6000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .modal-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .project-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .project-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 10px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 8px;
+            margin-bottom: 4px;
+        }
+        .project-list li:hover { background-color: #f5f5f5; }
+        .project-list li.active {
+            background-color: #e3f2fd;
+            border-left: 4px solid #4a90e2;
+        }
+        
+        .project-name-area {
+            flex-grow: 1;
+            font-weight: 500;
+            padding-left: 8px;
+        }
+        
+        .delete-btn-sm {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: #777;
+            background: #fff;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .delete-btn-sm:hover {
+            color: #d9534f;
+            background-color: #ffebee;
+            border-color: #ffcdd2;
+        }
 
     </style>
 </head>
@@ -269,48 +405,87 @@
         <span id="status-msg">保存しました</span>
     </h1>
 
+    <!-- プロジェクト管理バー -->
+    <div class="project-bar">
+        <div class="project-info">
+            <span class="material-icons-round" style="color:#4a90e2;">home</span>
+            <input type="text" id="projectNameInput" class="project-name-input" placeholder="物件名を入力">
+        </div>
+        <div class="project-actions">
+            <button onclick="openProjectModal()" class="btn-primary">
+                <span class="material-icons-round">folder_open</span> 物件リスト
+            </button>
+        </div>
+    </div>
+
     <div class="controls">
+        <!-- ファイル系 -->
         <div class="control-group">
             <button onclick="document.getElementById('fileInput').click()" class="btn-primary">
-                <span class="material-icons-round">add_photo_alternate</span> 背景画像を選択
+                <span class="material-icons-round">add_photo_alternate</span> 背景画像
             </button>
             <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
             
             <div class="scale-control">
                 <span class="material-icons-round">straighten</span>
-                <label>縮尺 (1m = <span id="px-val">50</span>px)</label>
+                <label>縮尺 (1m=<span id="px-val">50</span>px)</label>
                 <input type="range" id="scaleSlider" min="10" max="200" value="50">
             </div>
         </div>
 
+        <!-- 編集系 -->
         <div class="control-group">
-            <button onclick="resetAllData()" class="btn-danger">
-                <span class="material-icons-round">restart_alt</span> 全リセット
+            <button onclick="resetAllDataButton()" class="btn-danger">
+                <span class="material-icons-round">restart_alt</span> 配置リセット
             </button>
         </div>
 
+        <!-- 追加フォーム -->
         <div class="add-furniture-form">
-            <input type="text" id="newItemName" placeholder="家具の名前">
-            <input type="number" id="newItemW" placeholder="幅cm" min="1">
+            <input type="text" id="newItemName" placeholder="名前">
+            <input type="number" id="newItemW" placeholder="幅" min="1">
             <span style="color:#999;">x</span>
-            <input type="number" id="newItemH" placeholder="奥行cm" min="1">
+            <input type="number" id="newItemH" placeholder="奥" min="1">
             <button onclick="addNewFurniture()">
                 <span class="material-icons-round">add</span> 追加
             </button>
         </div>
     </div>
 
+    <!-- ワークスペース -->
     <div id="workspace" ondrop="handleDrop(event)" ondragover="allowDrop(event)">
         <span id="drop-zone-text">ここに間取り図画像を<br>ドラッグ＆ドロップ</span>
         <img id="bg-image" src="" alt="">
     </div>
 
+    <!-- ゴミ箱 -->
     <div id="trash-zone">
         <span class="material-icons-round">delete</span>
         <span id="trash-label">離して削除</span>
     </div>
 
+    <!-- 物件リストモーダル -->
+    <div id="projectModal" class="modal-overlay" onclick="handleModalClick(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>物件リスト管理</span>
+                <button onclick="closeModal()" style="border:none; background:none; padding:5px; cursor:pointer;">
+                    <span class="material-icons-round" style="font-size:1.5rem;">close</span>
+                </button>
+            </div>
+            <ul id="projectList" class="project-list">
+                <!-- JSで描画 -->
+            </ul>
+            <div style="margin-top:auto; padding-top:10px; border-top:1px solid #eee;">
+                <button onclick="createNewProject()" class="btn-success" style="width:100%; justify-content:center; padding:12px;">
+                    <span class="material-icons-round">add_circle</span> 新しい物件を作成
+                </button>
+            </div>
+        </div>
+    </div>
+
 <script>
+    // --- 初期データ ---
     const defaultFurnitureData = [
         { name: "ダイニングテーブル", w: 165, h: 80, color: "#8d6e63" },
         { name: "ベンチ", w: 160, h: 40, color: "#bcaaa4" },
@@ -326,25 +501,212 @@
         { name: "タオル置き", w: 62, h: 30, color: "#fff59d" }
     ];
 
+    // --- グローバル変数 ---
     let pixelsPerMeter = 50; 
+    let projects = []; 
+    let currentProjectId = null;
 
+    // DOM要素取得
     const workspace = document.getElementById('workspace');
     const scaleSlider = document.getElementById('scaleSlider');
     const pxVal = document.getElementById('px-val');
     const statusMsg = document.getElementById('status-msg');
     const trashZone = document.getElementById('trash-zone');
+    const projectNameInput = document.getElementById('projectNameInput');
+    const projectModal = document.getElementById('projectModal');
+    const projectList = document.getElementById('projectList');
 
+    // --- 初期化処理 ---
     function init() {
-        if (!loadLayout()) {
-            defaultFurnitureData.forEach((item, index) => {
-                createFurnitureElement(item, index);
-            });
-            updateScale();
+        loadAllProjects();
+        
+        // データが無い場合は新規作成
+        if (projects.length === 0) {
+            // 旧データの移行トライ
+            const oldDataV3 = localStorage.getItem('layout_data_v3');
+            if (oldDataV3) {
+                try {
+                    const parsed = JSON.parse(oldDataV3);
+                    const newId = Date.now().toString();
+                    projects.push({
+                        id: newId,
+                        name: "以前の保存データ",
+                        data: parsed
+                    });
+                    currentProjectId = newId;
+                } catch(e) {
+                    createNewProject(true);
+                }
+            } else {
+                createNewProject(true);
+            }
+        } else {
+            // 前回のIDがあればそれを、なければ先頭
+            currentProjectId = projects[0].id;
         }
+        
+        loadCurrentProject();
+        writeToStorage(); // 整合性確保のために保存
         workspace.style.backgroundSize = `${pixelsPerMeter/2}px ${pixelsPerMeter/2}px`;
+        
+        // イベントリスナー設定
+        projectNameInput.addEventListener('change', saveAllProjects);
+        scaleSlider.addEventListener('change', saveAllProjects);
+        scaleSlider.addEventListener('input', updateScale);
     }
 
-    function saveLayout() {
+    // ==========================================
+    // プロジェクト管理ロジック
+    // ==========================================
+
+    function loadAllProjects() {
+        const json = localStorage.getItem('layout_app_v1');
+        if (json) {
+            try { projects = JSON.parse(json); } catch (e) { projects = []; }
+        }
+    }
+
+    function saveAllProjects() {
+        if (!currentProjectId) return;
+        
+        const projectIndex = projects.findIndex(p => p.id === currentProjectId);
+        if (projectIndex !== -1) {
+            projects[projectIndex].name = projectNameInput.value || "名称未設定";
+            projects[projectIndex].data = getCurrentStateData();
+        }
+        writeToStorage();
+    }
+
+    function writeToStorage() {
+        try {
+            localStorage.setItem('layout_app_v1', JSON.stringify(projects));
+            showStatus("保存しました");
+        } catch (e) {
+            console.error("保存失敗", e);
+            // 画像データ過大時のフォールバック処理
+            if (currentProjectId) {
+                const idx = projects.findIndex(p => p.id === currentProjectId);
+                if (idx !== -1) projects[idx].data.bgImage = "";
+            }
+            try {
+                localStorage.setItem('layout_app_v1', JSON.stringify(projects));
+                showStatus("注意: 画像が大きすぎるため配置のみ保存しました");
+            } catch (e2) {
+                showStatus("保存エラー: 容量オーバー");
+            }
+        }
+    }
+
+    function createNewProject(skipSave = false) {
+        if (!skipSave) saveAllProjects();
+
+        const newId = Date.now().toString();
+        const newProject = {
+            id: newId,
+            name: "新規物件 " + new Date().toLocaleDateString(),
+            data: { furniture: [], scale: 50, bgImage: "" }
+        };
+        projects.push(newProject);
+        currentProjectId = newId;
+        
+        // 画面を初期化してデフォルト家具を配置
+        clearWorkspaceUI();
+        defaultFurnitureData.forEach((item, index) => {
+            createFurnitureElement(item, index);
+        });
+        
+        projectNameInput.value = newProject.name;
+        scaleSlider.value = 50;
+        updateScale();
+        
+        writeToStorage();
+        closeModal();
+        showStatus("新規作成しました");
+    }
+
+    function switchProject(id) {
+        saveAllProjects(); 
+        currentProjectId = id;
+        loadCurrentProject();
+        closeModal();
+        showStatus("切り替えました");
+    }
+
+    // ★★★ 物件削除処理（修正版） ★★★
+    // windowオブジェクトに割り当ててHTMLから確実に呼べるようにする
+    window.deleteProject = function(id) {
+        if (projects.length <= 1) {
+            alert("物件が1つしかないため削除できません。\n（リセット機能を使ってください）");
+            return;
+        }
+
+        const projectToDelete = projects.find(p => p.id === id);
+        if (!projectToDelete) return;
+
+        if (!confirm(`物件「${projectToDelete.name}」を完全に削除しますか？`)) return;
+
+        // 配列から削除
+        projects = projects.filter(p => p.id !== id);
+
+        // もし「現在開いている物件」を削除した場合、先頭に切り替える
+        if (currentProjectId === id) {
+            currentProjectId = projects[0].id;
+            loadCurrentProject();
+        }
+        
+        // 状態保存とリスト再描画
+        writeToStorage();
+        renderProjectList(); 
+        showStatus("物件を削除しました");
+    };
+
+    function loadCurrentProject() {
+        const project = projects.find(p => p.id === currentProjectId);
+        if (!project) return;
+
+        projectNameInput.value = project.name;
+        const data = project.data;
+        
+        clearWorkspaceUI();
+
+        // 背景
+        const bgImg = document.getElementById('bg-image');
+        const dropText = document.getElementById('drop-zone-text');
+        if (data.bgImage) {
+            bgImg.src = data.bgImage;
+            dropText.style.display = 'none';
+        } else {
+            bgImg.src = "";
+            dropText.style.display = 'flex';
+        }
+
+        // 縮尺
+        if (data.scale) scaleSlider.value = data.scale;
+        else scaleSlider.value = 50;
+        updateScale();
+
+        // 家具配置
+        if (data.furniture && Array.isArray(data.furniture)) {
+            data.furniture.forEach((item, index) => {
+                const div = createFurnitureElement({
+                    name: item.realName,
+                    w: item.w,
+                    h: item.h,
+                    color: item.color
+                }, index);
+                div.style.left = item.left;
+                div.style.top = item.top;
+                div.dataset.rotation = item.rotation;
+                updateSize(div);
+            });
+        } else {
+             defaultFurnitureData.forEach((item, index) => {
+                createFurnitureElement(item, index);
+            });
+        }
+    }
+
+    function getCurrentStateData() {
         const furnitureStates = [];
         document.querySelectorAll('.furniture').forEach(el => {
             furnitureStates.push({
@@ -364,67 +726,61 @@
             bgSrc = bgImg.src;
         }
 
-        const saveData = {
+        return {
             furniture: furnitureStates,
             scale: scaleSlider.value,
             bgImage: bgSrc
         };
-
-        try {
-            localStorage.setItem('layout_data_v3', JSON.stringify(saveData));
-            showStatus("保存しました");
-        } catch (e) {
-            console.error("保存失敗", e);
-            saveData.bgImage = "";
-            try {
-                localStorage.setItem('layout_data_v3', JSON.stringify(saveData));
-                showStatus("家具配置のみ保存(画像容量過大)");
-            } catch (e2) {
-                showStatus("保存できませんでした");
-            }
-        }
     }
 
-    function loadLayout() {
-        const json = localStorage.getItem('layout_data_v3');
-        if (!json) return false;
-
-        try {
-            const data = JSON.parse(json);
-            if (data.scale) {
-                scaleSlider.value = data.scale;
-                pixelsPerMeter = parseInt(data.scale);
-                pxVal.innerText = pixelsPerMeter;
-                workspace.style.backgroundSize = `${pixelsPerMeter/2}px ${pixelsPerMeter/2}px`;
-            }
-            if (data.bgImage) {
-                document.getElementById('bg-image').src = data.bgImage;
-                document.getElementById('drop-zone-text').style.display = 'none';
-            }
-            if (data.furniture && Array.isArray(data.furniture)) {
-                data.furniture.forEach((item, index) => {
-                    const div = createFurnitureElement({
-                        name: item.realName,
-                        w: item.w,
-                        h: item.h,
-                        color: item.color
-                    }, index);
-                    div.style.left = item.left;
-                    div.style.top = item.top;
-                    div.dataset.rotation = item.rotation;
-                    updateSize(div);
-                });
-                return true;
-            }
-        } catch (e) {
-            console.error("読み込みエラー", e);
-            return false;
-        }
-        return false;
+    // --- モーダル制御 ---
+    function openProjectModal() {
+        saveAllProjects(); 
+        renderProjectList();
+        projectModal.classList.add('active');
     }
+    function closeModal() {
+        projectModal.classList.remove('active');
+    }
+    function handleModalClick(e) {
+        if (e.target === projectModal) closeModal();
+    }
+
+    function renderProjectList() {
+        projectList.innerHTML = '';
+        projects.forEach(p => {
+            const li = document.createElement('li');
+            if (p.id === currentProjectId) li.classList.add('active');
+            
+            // 左側：名前エリア（クリックで切り替え）
+            const nameArea = document.createElement('div');
+            nameArea.className = 'project-name-area';
+            nameArea.textContent = p.name;
+            nameArea.onclick = () => switchProject(p.id);
+            
+            // 右側：削除ボタン
+            const delBtn = document.createElement('button');
+            delBtn.className = 'delete-btn-sm';
+            delBtn.innerHTML = '<span class="material-icons-round">delete</span>';
+            delBtn.title = "この物件を削除";
+            
+            // 重要: onclickで直接 window.deleteProject を呼ぶ
+            delBtn.onclick = (e) => {
+                e.stopPropagation(); // リスト選択の発火防止
+                deleteProject(p.id);
+            };
+
+            li.appendChild(nameArea);
+            li.appendChild(delBtn);
+            projectList.appendChild(li);
+        });
+    }
+
+    // ==========================================
+    // 基本機能・家具操作
+    // ==========================================
 
     function showStatus(msg) {
-        // childNodes参照エラーを修正
         if (statusMsg) {
             statusMsg.textContent = msg;
             statusMsg.style.opacity = 1;
@@ -432,15 +788,36 @@
         }
     }
 
-    function addNewFurniture() {
-        const nameInput = document.getElementById('newItemName');
-        const wInput = document.getElementById('newItemW');
-        const hInput = document.getElementById('newItemH');
-        const name = nameInput.value.trim();
-        const w = parseFloat(wInput.value);
-        const h = parseFloat(hInput.value);
+    function clearWorkspaceUI() {
+        // 家具DOMと背景リセット
+        workspace.innerHTML = '<span id="drop-zone-text">ここに間取り図画像を<br>ドラッグ＆ドロップ</span><img id="bg-image" src="" alt="">';
+        document.getElementById('drop-zone-text').style.display = 'flex';
+    }
 
-        if (!name || isNaN(w) || isNaN(h) || w <= 0 || h <= 0) {
+    // ★★★ リセット機能（修正版） ★★★
+    window.resetAllDataButton = function() {
+        if(!confirm("現在の家具配置を初期状態に戻しますか？\n（家具がリセットされます）")) return;
+        
+        clearWorkspaceUI();
+        
+        defaultFurnitureData.forEach((item, index) => {
+            createFurnitureElement(item, index);
+        });
+        
+        // 縮尺もリセット
+        scaleSlider.value = 50;
+        updateScale();
+        
+        saveAllProjects();
+        showStatus("リセットしました");
+    };
+
+    function addNewFurniture() {
+        const nameVal = document.getElementById('newItemName').value.trim();
+        const wVal = parseFloat(document.getElementById('newItemW').value);
+        const hVal = parseFloat(document.getElementById('newItemH').value);
+
+        if (!nameVal || isNaN(wVal) || isNaN(hVal) || wVal <= 0 || hVal <= 0) {
             alert("正しい名前とサイズ(cm)を入力してください。");
             return;
         }
@@ -448,40 +825,45 @@
         const hue = Math.floor(Math.random() * 360);
         const randomColor = `hsl(${hue}, 40%, 65%)`;
         
-        const newItem = { name, w, h, color: randomColor };
-        const index = document.querySelectorAll('.furniture').length;
-        const div = createFurnitureElement(newItem, index);
+        const div = createFurnitureElement({ 
+            name: nameVal, w: wVal, h: hVal, color: randomColor 
+        }, 999);
         
-        div.style.left = (workspace.clientWidth / 2 - 50) + 'px';
-        div.style.top = (workspace.clientHeight / 2 - 50) + 'px';
+        // 中央に配置
+        div.style.left = (workspace.clientWidth/2 - 50) + 'px';
+        div.style.top = (workspace.clientHeight/2 - 50) + 'px';
         updateSize(div);
 
-        nameInput.value = ''; wInput.value = ''; hInput.value = '';
-        saveLayout();
+        // 入力クリア
+        document.getElementById('newItemName').value = '';
+        document.getElementById('newItemW').value = '';
+        document.getElementById('newItemH').value = '';
+        
+        saveAllProjects();
     }
 
     function createFurnitureElement(item, index) {
         const div = document.createElement('div');
         div.className = 'furniture';
-        div.id = 'f-' + index + '-' + Date.now();
+        div.id = 'f-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
         
         div.dataset.baseColor = item.color;
         div.style.backgroundColor = item.color;
         
         div.dataset.cmW = item.w;
         div.dataset.cmH = item.h;
-        div.dataset.rotation = 0;
+        div.dataset.rotation = item.rotation || 0;
 
         div.innerHTML = `<div>${item.name}</div><small>${item.w}x${item.h}</small>`;
         
+        // 初期配置（データ読込時に上書きされるので仮置き）
         if (!div.style.left) {
             const cols = 4;
             div.style.left = (30 + (index % cols) * 200) + 'px';
             div.style.top = (60 + Math.floor(index / cols) * 120) + 'px';
         }
 
-        setupDragAndClick(div);
-
+        setupDrag(div);
         workspace.appendChild(div);
         return div;
     }
@@ -492,13 +874,14 @@
         workspace.style.backgroundSize = `${pixelsPerMeter/2}px ${pixelsPerMeter/2}px`;
         document.querySelectorAll('.furniture').forEach(div => updateSize(div));
     }
-    scaleSlider.addEventListener('change', saveLayout);
-    scaleSlider.addEventListener('input', updateScale);
 
     function updateSize(div) {
         const cmW = parseFloat(div.dataset.cmW);
         const cmH = parseFloat(div.dataset.cmH);
         const rot = parseInt(div.dataset.rotation);
+        
+        // 1m = 100cm. pixelsPerMeterは1mあたりのピクセル数
+        // cm -> px : (cm / 100) * pixelsPerMeter
         const pxW = (cmW / 100) * pixelsPerMeter;
         const pxH = (cmH / 100) * pixelsPerMeter;
 
@@ -511,6 +894,7 @@
         }
     }
 
+    // --- ファイルD&D ---
     function allowDrop(ev) { ev.preventDefault(); }
     function handleDrop(ev) { ev.preventDefault(); loadImage(ev.dataTransfer.files[0]); }
     function handleFileSelect(ev) { loadImage(ev.target.files[0]); }
@@ -521,82 +905,46 @@
             reader.onload = function(e) {
                 document.getElementById('bg-image').src = e.target.result;
                 document.getElementById('drop-zone-text').style.display = 'none';
-                saveLayout();
+                saveAllProjects();
             };
             reader.readAsDataURL(file);
         }
     }
 
     // ==========================================
-    // ドラッグ & ゴミ箱削除ロジック (改良版)
+    // ★★★ ドラッグ&ドロップ・ゴミ箱ロジック (決定版) ★★★
     // ==========================================
-    function setupDragAndClick(el) {
-        let isDraggingState = false;
+    
+    // ゴミ箱との距離判定 (シンプルかつ確実)
+    function checkTrashDistance(el) {
+        const fRect = el.getBoundingClientRect();
+        const tRect = trashZone.getBoundingClientRect();
+        
+        // 家具の中心
+        const fCx = fRect.left + fRect.width/2;
+        const fCy = fRect.top + fRect.height/2;
+        // ゴミ箱の中心
+        const tCx = tRect.left + tRect.width/2;
+        const tCy = tRect.top + tRect.height/2;
+        
+        // 距離
+        const dist = Math.hypot(fCx - tCx, fCy - tCy);
+        
+        // 半径80px以内ならヒットとする
+        return dist < 80;
+    }
+
+    function setupDrag(el) {
+        let isDragging = false;
         let startX, startY, initialLeft, initialTop;
-        let dragThreshold = 5;
+        let dragThreshold = 5; // ピクセル
 
-        // ハンドラ関数定義（クロージャ変数を利用）
-        const moveHandler = (e) => {
-            // マウス操作でボタンが押されていなければ無視
-            if (e.type.includes('mouse') && e.buttons === 0) return;
-
-            const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-            const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
-            const dx = clientX - startX;
-            const dy = clientY - startY;
-
-            // 一定距離動いたらドラッグ開始とみなす
-            if (!isDraggingState && Math.sqrt(dx*dx + dy*dy) > dragThreshold) {
-                isDraggingState = true;
-            }
-
-            if (isDraggingState) {
-                el.style.left = (initialLeft + dx) + 'px';
-                el.style.top = (initialTop + dy) + 'px';
-                // 要素とゴミ箱の矩形衝突判定
-                checkTrashOverlap(el); 
-            }
-        };
-
-        const endHandler = (e) => {
-            el.style.zIndex = '';
-            
-            // ドロップ時にゴミ箱と重なっていたら削除
-            if (isDraggingState && trashZone.classList.contains('drag-over')) {
-                trashZone.classList.remove('drag-over');
-                const furnitureName = el.querySelector('div').innerText;
-                
-                if(confirm(`「${furnitureName}」を削除しますか？`)) {
-                    el.remove();
-                    saveLayout();
-                    // 削除時はリスナーを解除して終了
-                    removeListeners();
-                    return;
-                }
-            }
-            trashZone.classList.remove('drag-over');
-
-            if (isDraggingState) {
-                saveLayout();
-            }
-            isDraggingState = false;
-            
-            // ドラッグ終了時にリスナーを解除
-            removeListeners();
-        };
-
-        const removeListeners = () => {
-            document.removeEventListener('mousemove', moveHandler);
-            document.removeEventListener('mouseup', endHandler);
-            document.removeEventListener('touchmove', moveHandler);
-            document.removeEventListener('touchend', endHandler);
-        };
-
-        const startHandler = (e) => {
+        const onDown = (e) => {
+            // テキスト選択などを防ぐ
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-
-            isDraggingState = false;
             
+            isDragging = false;
+            // マウス/タッチ座標取得
             const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
             const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
             
@@ -605,68 +953,97 @@
             initialLeft = el.offsetLeft;
             initialTop = el.offsetTop;
             
-            el.style.zIndex = 3000; // 最前面へ
-            e.preventDefault(); // デフォルト動作無効化
-
-            // ドラッグ中のみ document 全体でイベントを監視
-            document.addEventListener('mousemove', moveHandler);
-            document.addEventListener('mouseup', endHandler);
-            document.addEventListener('touchmove', moveHandler, {passive: false});
-            document.addEventListener('touchend', endHandler);
+            // 最前面へ
+            el.style.zIndex = 5000;
+            
+            // イベント登録 (document全体で追跡)
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('mouseup', onUp);
+            document.addEventListener('touchmove', onMove, {passive: false});
+            document.addEventListener('touchend', onUp);
         };
 
-        el.addEventListener('dblclick', (e) => {
-             rotateFurniture(el);
+        const onMove = (e) => {
+            const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+            
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+
+            // 閾値を超えたらドラッグ開始
+            if (!isDragging && Math.hypot(dx, dy) > dragThreshold) {
+                isDragging = true;
+                el.classList.add('dragging');
+                el.style.pointerEvents = 'none'; // 重要: これにより下の要素(ゴミ箱)を検出可能にする
+            }
+
+            if (isDragging) {
+                e.preventDefault(); // スクロール防止
+                el.style.left = (initialLeft + dx) + 'px';
+                el.style.top = (initialTop + dy) + 'px';
+                
+                // ゴミ箱判定
+                if (checkTrashDistance(el)) {
+                    trashZone.classList.add('drag-over');
+                } else {
+                    trashZone.classList.remove('drag-over');
+                }
+            }
+        };
+
+        const onUp = (e) => {
+            // クリーンアップ
+            document.removeEventListener('mousemove', onMove);
+            document.removeEventListener('mouseup', onUp);
+            document.removeEventListener('touchmove', onMove);
+            document.removeEventListener('touchend', onUp);
+            
+            el.classList.remove('dragging');
+            el.style.pointerEvents = 'auto'; // 元に戻す
+            el.style.zIndex = '';
+
+            // ドラッグ終了時の処理
+            if (isDragging) {
+                // ゴミ箱の上で離したか？
+                if (checkTrashDistance(el)) {
+                    const fName = el.querySelector('div').innerText;
+                    // setTimeoutで処理を遅らせてUIの整合性を保つ
+                    setTimeout(() => {
+                        if (confirm(`家具「${fName}」を削除しますか？`)) {
+                            el.remove();
+                            saveAllProjects();
+                            showStatus("削除しました");
+                        }
+                        trashZone.classList.remove('drag-over');
+                    }, 10);
+                } else {
+                    // 通常移動終了
+                    trashZone.classList.remove('drag-over');
+                    saveAllProjects();
+                }
+            } else {
+                // ドラッグじゃなかった（クリック）場合 -> 何もしない
+                // ダブルクリックイベントなどは別途発火する
+            }
+            isDragging = false;
+        };
+
+        // ダブルクリックで回転
+        el.addEventListener('dblclick', () => {
+            let rot = parseInt(el.dataset.rotation) || 0;
+            rot = (rot + 90) % 360;
+            el.dataset.rotation = rot;
+            updateSize(el);
+            saveAllProjects();
         });
 
-        // 開始イベントのみ常駐させる
-        el.addEventListener('mousedown', startHandler);
-        el.addEventListener('touchstart', startHandler, {passive: false});
+        el.addEventListener('mousedown', onDown);
+        el.addEventListener('touchstart', onDown, {passive: false});
     }
 
-    // 要素同士の重なり判定 (Rectangle Intersection)
-    function checkTrashOverlap(furnitureEl) {
-        const fRect = furnitureEl.getBoundingClientRect();
-        const tRect = trashZone.getBoundingClientRect();
-
-        // 矩形の交差判定
-        const overlap = !(fRect.right < tRect.left || 
-                          fRect.left > tRect.right || 
-                          fRect.bottom < tRect.top || 
-                          fRect.top > tRect.bottom);
-
-        if (overlap) {
-            trashZone.classList.add('drag-over');
-        } else {
-            trashZone.classList.remove('drag-over');
-        }
-    }
-
-    function rotateFurniture(el) {
-        let rot = parseInt(el.dataset.rotation) || 0;
-        rot = (rot + 90) % 360;
-        el.dataset.rotation = rot;
-        updateSize(el);
-        saveLayout();
-    }
-
-    function resetAllData() {
-        if(!confirm("【警告】\n現在の配置と保存データをすべて完全に消去して、初期状態に戻しますか？\nこの操作は取り消せません。")) return;
-        
-        localStorage.removeItem('layout_data_v3');
-
-        workspace.innerHTML = '<span id="drop-zone-text">ここに間取り図画像を<br>ドラッグ＆ドロップ</span><img id="bg-image" src="" alt="">';
-        document.getElementById('drop-zone-text').style.display = 'flex';
-        
-        scaleSlider.value = 50;
-        updateScale();
-
-        defaultFurnitureData.forEach((item, index) => {
-            createFurnitureElement(item, index);
-        });
-    }
-
+    // 初期化実行
     init();
+
 </script>
 </body>
 </html>
