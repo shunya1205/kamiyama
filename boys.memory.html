@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>少年の日の思い出 - 分析と鑑賞</title>
+    <!-- Tailwind CSS (スタイリング用フレームワーク) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (可読性の高いフォント) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* カスタムスタイリング */
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f3f4f6; /* 背景色を少し明るく */
+            color: #1f2937;
+        }
+        
+        /* 小説本文用の明朝体設定 */
+        .font-serif-jp {
+            font-family: 'Noto Serif JP', serif;
+            line-height: 2.2; /* 行間を広げて読みやすく */
+            text-align: justify;
+        }
+
+        /* アコーディオンのトランジション */
+        .accordion-content {
+            transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.active {
+            max-height: 2000px; /* 情報量増加に対応 */
+            opacity: 1;
+        }
+
+        /* 本文中のハイライト（注釈あり） */
+        .text-highlight {
+            border-bottom: 2px solid #f59e0b; /* アンダーライン色を少し濃く */
+            background-color: rgba(251, 191, 36, 0.15);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 2px;
+            padding: 0 2px;
+            font-weight: 500;
+        }
+        .text-highlight:hover {
+            background-color: rgba(251, 191, 36, 0.5);
+            color: #000;
+        }
+
+        /* 選択中のタブスタイル */
+        .tab-active {
+            border-bottom: 3px solid #0d9488; /* ティール色 */
+            color: #0d9488;
+            font-weight: 700;
+        }
+
+        /* 引用ブロックのスタイル */
+        .quote-box {
+            position: relative;
+            background-color: #f8fafc;
+            border-left: 4px solid #cbd5e1;
+            padding: 0.75rem 1rem;
+            margin-top: 0.5rem;
+            font-style: italic;
+            color: #475569;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- 1. グローバルヘッダー (固定表示) -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-gray-200">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between py-3">
+                <!-- タイトルエリア -->
+                <div class="mb-2 md:mb-0 text-center md:text-left">
+                    <h1 id="header-title" class="text-lg font-bold text-gray-800"></h1>
+                    <p id="header-author" class="text-xs text-gray-500"></p>
+                </div>
+                <!-- ナビゲーションメニュー -->
+                <nav class="flex justify-center space-x-2 md:space-x-4 text-sm overflow-x-auto whitespace-nowrap pb-1 md:pb-0">
+                    <button onclick="app.switchView('structure')" id="nav-structure" class="px-3 py-2 hover:text-teal-700 transition-colors rounded hover:bg-gray-50">物語の内容</button>
+                    <button onclick="app.switchView('characters')" id="nav-characters" class="px-3 py-2 hover:text-teal-700 transition-colors rounded hover:bg-gray-50">人物・要素</button>
+                    <button onclick="app.switchView('keywords')" id="nav-keywords" class="px-3 py-2 hover:text-teal-700 transition-colors rounded hover:bg-gray-50">キーワード</button>
+                    <button onclick="app.switchView('read')" id="nav-read" class="px-3 py-2 hover:text-teal-700 transition-colors rounded hover:bg-gray-50 font-bold text-teal-800">本文を読む</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
+
+        <!-- 2. コンテンツビュー: 物語の内容 -->
+        <div id="view-structure" class="hidden space-y-6 animate-fade-in">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h2 class="text-2xl font-bold mb-2 text-teal-800 border-l-4 border-teal-600 pl-3">物語の内容と構成</h2>
+                <p class="text-gray-600 mb-6 text-sm">この物語は、大人の「私」が過去を振り返る「回想（かいそう）」の形をとっています。</p>
+                <div id="structure-list" class="space-y-4">
+                    <!-- JSで生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. コンテンツビュー: 登場人物・要素 -->
+        <div id="view-characters" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-2xl font-bold mb-4 text-teal-800 border-l-4 border-teal-600 pl-3">登場人物の分析</h2>
+            <p class="text-gray-600 mb-4">主人公とエーミールの「対比（たいひ）」に注目してみましょう。</p>
+            <div id="characters-list" class="grid grid-cols-1 gap-6">
+                <!-- JSで生成 -->
+            </div>
+        </div>
+
+        <!-- 4. コンテンツビュー: キーワード -->
+        <div id="view-keywords" class="hidden space-y-6 animate-fade-in">
+            <h2 class="text-2xl font-bold mb-4 text-teal-800 border-l-4 border-teal-600 pl-3">重要なキーワードと象徴</h2>
+            <div id="keywords-list" class="space-y-4">
+                <!-- JSで生成 -->
+            </div>
+        </div>
+
+        <!-- 5. コンテンツビュー: 本文を読む -->
+        <div id="view-read" class="hidden animate-fade-in relative">
+            <div class="bg-white p-6 md:p-12 rounded-xl shadow-lg border border-gray-100">
+                <div class="mb-10 text-center border-b pb-6">
+                    <h2 id="read-title" class="text-3xl md:text-4xl font-serif font-bold mb-3 text-gray-900"></h2>
+                    <p id="read-author" class="text-gray-600 font-serif"></p>
+                    <p class="text-xs text-gray-400 mt-4">※黄色のマーカー部分をタップすると解説が表示されます</p>
+                </div>
+                <!-- 本文表示エリア -->
+                <div id="text-content" class="font-serif-jp text-lg md:text-xl text-gray-800 leading-relaxed space-y-8">
+                    <!-- JSで生成 -->
+                </div>
+            </div>
+            
+            <!-- 注釈表示用のフローティングパネル -->
+            <div id="annotation-panel" class="fixed bottom-6 left-4 right-4 md:left-auto md:right-8 md:w-96 bg-slate-900/95 backdrop-blur text-white p-5 rounded-xl shadow-2xl transform translate-y-[120%] opacity-0 transition-all duration-300 pointer-events-none z-50 border border-slate-700">
+                <div class="flex justify-between items-start mb-2">
+                    <h4 id="anno-word" class="font-bold text-yellow-400 text-xl"></h4>
+                    <button onclick="app.hideAnnotation()" class="text-gray-400 hover:text-white p-1 bg-white/10 rounded-full w-8 h-8 flex items-center justify-center">✕</button>
+                </div>
+                <p id="anno-desc" class="text-base leading-7 text-gray-100"></p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-gray-100 border-t border-gray-200 mt-auto">
+        <div class="max-w-4xl mx-auto px-4 py-8 text-center text-gray-500 text-sm">
+            <p>文学作品学習用インタラクティブ・アーカイブ</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript ロジック -->
+    <script>
+        /** * ==========================================
+         * 1. 作品データ管理エリア (CONTENT_DATA)
+         * ==========================================
+         */
+        const CONTENT_DATA = {
+            meta: {
+                title: "少年の日の思い出",
+                author: "ヘルマン・ヘッセ / 高橋 健二 訳",
+            },
+            // 解説データ: 構成 (より詳細に、物語の展開に合わせて分割)
+            structure: [
+                {
+                    title: "1. プロローグ（現在）",
+                    summary: "客（友人）が「私」の収集を見て、過去を語り始める。",
+                    tags: ["導入", "現在", "書斎"],
+                    detail: "夕方の薄暗い書斎での会話。「私」が蝶のコレクションを見せると、友人は「思い出を汚してしまった」と言い、少年時代のつらい記憶を語り始めます。<br>外の景色が「闇に沈む」描写は、これから語られる話が暗く悲しいものであることを暗示しています。"
+                },
+                {
+                    title: "2. 少年時代の熱中（過去）",
+                    summary: "蝶集めに夢中だった少年時代の回想。",
+                    tags: ["回想", "熱情", "無邪気"],
+                    detail: "主人公は8、9歳の頃から蝶集めを始め、10歳には「遊戯のとりこ」になるほど熱中していました。<br>食事や時間を忘れて没頭する「緊張と歓喜」。蝶の美しさに魅了される少年の純粋な心が描かれていますが、この激しすぎる情熱が後の事件の引き金となります。"
+                },
+                {
+                    title: "3. コムラサキ事件（対比）",
+                    summary: "隣人エーミールに自慢の蝶を見せるが、批判される。",
+                    tags: ["ライバル", "劣等感", "屈辱"],
+                    detail: "主人公は珍しい「コムラサキ」を捕まえ、隣の優等生エーミールに見せに行きます。<br>しかし、エーミールは蝶の美しさを褒めるのではなく、展翅（標本の作り方）の欠点を冷たく指摘して値踏みしました。主人公の誇らしい気持ちは傷つけられ、彼に対して「妬み」と「憎しみ」を抱くようになります。"
+                },
+                {
+                    title: "4. ヤママユガの事件（過ち）",
+                    summary: "憧れの蝶を盗もうとして、壊してしまう。",
+                    tags: ["クライマックス", "欲望", "罪"],
+                    detail: "エーミールが珍しい「ヤママユガ」を羽化させたことを知り、主人公は見たいという欲望を抑えきれず、留守の部屋に侵入します。<br>一度は盗み出しましたが、誰かが来る気配に慌ててポケットに隠し、その結果、美しい蝶を無惨に潰してしまいます。盗みよりも「美しいものを壊してしまった」ことが彼の心を苦しめます。"
+                },
+                {
+                    title: "5. つぐないと拒絶（断罪）",
+                    summary: "母に促されて謝罪に行くが、冷たく軽蔑される。",
+                    tags: ["告白", "冷淡", "決定的な断絶"],
+                    detail: "母にすべてを打ち明け、謝りに行きます。しかしエーミールは怒鳴ることもなく、「そうか、そうか、つまり君はそんなやつなんだな」と冷笑するだけでした。<br>おもちゃを渡すという申し出も拒否され、主人公は自分が許されない「悪漢」であることを悟ります。心のつながりが完全に断たれた瞬間です。"
+                },
+                {
+                    title: "6. エピローグ（決別）",
+                    summary: "自らのコレクションを破壊し、少年時代と決別する。",
+                    tags: ["結末", "喪失", "成長"],
+                    detail: "帰宅した主人公は、あれほど大切にしていた自分の蝶のコレクションを、一つ一つ指で押し潰します。<br>それは、取り返しのつかない過ちへの罰であり、熱中していた少年時代との悲しいお別れの儀式でした。"
+                }
+            ],
+            // 解説データ: 登場人物
+            characters: [
+                {
+                    name: "私（僕）",
+                    role: "主人公 / 語り手",
+                    detail: "感受性が強く、一度夢中になると周りが見えなくなる熱情的な性格。<br>良心の呵責（かしゃく）に苦しむ繊細さを持っています。エーミールへの劣等感と、ヤママユガへの激しい欲望の板挟みになり、取り返しのつかない過ちを犯してしまいます。",
+                    quotes: [
+                        "緊張と歓喜ときたら、なかった。",
+                        "僕は悪漢だということに決まってしまい...",
+                        "すんでのところであいつの喉笛に飛びかかるところだった。"
+                    ]
+                },
+                {
+                    name: "エーミール",
+                    role: "隣人の少年 / ライバル",
+                    detail: "先生の息子で、すべてにおいて完璧な「模範少年」。<br>標本作りも正確で技術が高いですが、他人の欠点を厳しく指摘する冷徹さを持っています。主人公の感情的な謝罪に対しても、怒りではなく「軽蔑」で返し、精神的に追い詰めました。",
+                    quotes: [
+                        "展翅の仕方が悪いとか、右の触角が曲がっているとか...",
+                        "そうか、そうか、つまり君はそんなやつなんだな。",
+                        "けっこうだよ。僕は君の集めたやつはもう知っている。"
+                    ]
+                },
+                {
+                    name: "母",
+                    role: "導き手 / 許し",
+                    detail: "主人公の罪を受け止め、逃げずに謝罪するように諭す厳しさと優しさを持つ存在。<br>主人公がエーミールから拒絶されて帰ってきたときも、何も聞かずにキスをして寝かしつけました。最後の救いとなる存在です。",
+                    quotes: [
+                        "おまえは、エーミールのところに行かねばなりません。",
+                        "今日のうちでなければなりません。さあ、行きなさい！"
+                    ]
+                }
+            ],
+            // 解説データ: キーワード (10個に増量)
+            keywords: [
+                {
+                    word: "ヤママユガ（蛾）",
+                    def: "物語の中心となる、茶色く大きな蛾",
+                    context: "主人公にとっての「憧れ」と「欲望」の象徴です。手に入れたいという激しい思いが、彼を盗みという行動に走らせました。最終的にボロボロになったこの蛾は、主人公の傷ついた心の姿とも重なります。",
+                    linkId: "keyword-yamamayuga"
+                },
+                {
+                    word: "非の打ち所がないという悪徳",
+                    def: "欠点がなさすぎることが、かえって悪いことのように感じられること",
+                    context: "エーミールの完璧さを表す言葉。子供らしくない冷たい完璧さが、主人公には「気味悪い」と感じられ、劣等感と嫌悪感の原因となっていました。",
+                    linkId: "keyword-vice"
+                },
+                {
+                    word: "つぐない（償い）",
+                    def: "犯した罪や過ちの埋め合わせをすること",
+                    context: "主人公はおもちゃをあげることで償おうとしましたが、エーミールに拒絶されます。「一度起きたことは、もう償いのできないものだ」という悟りが、この物語の重いテーマです。",
+                    linkId: "keyword-atonement"
+                },
+                {
+                    word: "ワモンキシタバ",
+                    def: "物語の冒頭で大人の「私」が客に見せた珍しい蝶",
+                    context: "過去の回想を始めるきっかけとなった蝶。これを見たことで、客は「思い出を汚してしまった」というつらい記憶を語り始めます。",
+                    linkId: "keyword-wamon"
+                },
+                {
+                    word: "とび色（鳶色）",
+                    def: "ヤママユガや触角の、濃い茶色っぽい色",
+                    context: "華やかさはないが、深く魅力的な色として描写されます。最後に粉々に押し潰される厚紙の箱も「とび色」であり、物語を包む少し暗く落ち着いた色彩イメージです。",
+                    linkId: "keyword-tobi"
+                },
+                {
+                    word: "展翅（てんし）",
+                    def: "標本を作るために蝶の羽を広げて固定すること",
+                    context: "エーミールの「展翅」は完璧ですが、主人公はそれを批判されました。技術の差が劣等感を生み、エーミールの冷徹な性格を際立たせる要素です。",
+                    linkId: "keyword-tenshi"
+                },
+                {
+                    word: "悪漢（あっかん）",
+                    def: "悪者。極悪人。",
+                    context: "エーミールに冷笑された時、主人公は自分が「悪漢」になってしまったと感じました。単なるいたずらではなく、取り返しのつかない罪を背負ったという自己否定の言葉です。",
+                    linkId: "keyword-akkan"
+                },
+                {
+                    word: "二十ペニヒ",
+                    def: "コムラサキにつけられた値段",
+                    context: "主人公にとって「宝物」だった蝶を、エーミールはわずかな金額で「値踏み」しました。感動や美しさよりも、市場価値や欠点を見るエーミールの現実的で冷たい視点を表しています。",
+                    linkId: "keyword-money"
+                },
+                {
+                    word: "粉（鱗粉）",
+                    def: "蝶の羽についている粉",
+                    context: "ヤママユガを潰してしまった時、指に「微妙なとび色がかった羽の粉」がつきます。それは消えない罪の痕跡のように、主人公の心を苦しめました。",
+                    linkId: "keyword-powder"
+                },
+                {
+                    word: "収集（コレクション）",
+                    def: "集めること。また集めたもの。",
+                    context: "少年の熱情の結晶でしたが、最後には自らの手で破壊されます。過去の自分（少年の日）との決別を意味する重要なアイテムです。",
+                    linkId: "keyword-collection"
+                }
+            ],
+            // 注釈データ
+            annotations: [
+                { target: "書斎", note: "しょさい。本を読んだり書き物をしたりするための部屋。" },
+                { target: "縁取られて", note: "ふちどられて。輪郭がはっきりと見える様子。" },
+                { target: "不透明", note: "透き通っていないこと。ここでは夜の暗さで外が見えなくなった様子。" },
+                { target: "ワモンキシタバ", note: "蛾の一種。羽に輪のような模様がある。" },
+                { target: "熱情", note: "ねつじょう。ある物事に激しく打ち込む気持ち。" },
+                { target: "すっぽかして", note: "やるべきことを放り出して。無視して。" },
+                { target: "胴乱", note: "どうらん。植物や昆虫を採集するときに入れる、肩から下げる金属製の箱。" },
+                { target: "キアゲハ", note: "黄色と黒の模様が美しい、大型のチョウ。" },
+                { target: "とび色", note: "トビ（鳥）の羽のような、茶色っぽい色。" },
+                { target: "設備", note: "ここでは、チョウを保存しておくための道具や箱のこと。" },
+                { target: "コムラサキ", note: "羽が紫色に光る美しいチョウ。" },
+                { target: "展翅", note: "てんし。標本を作る際、チョウの羽を広げて形を整える作業。" },
+                { target: "非のうちどころがない", note: "欠点がひとつもない。完璧であること。" },
+                { target: "悪徳", note: "あくとく。道徳に反する悪い性質。ここでは皮肉として使われている。" },
+                { target: "気味悪い", note: "なんとなく恐ろしい。不気味だ。" },
+                { target: "嘆賞", note: "たんしょう。感心してほめること。" },
+                { target: "鑑定", note: "かんてい。物の良し悪しや価値を見分けること。" },
+                { target: "値踏み", note: "ねぶみ。値段をつけること。価値を評価すること。" },
+                { target: "二十ペニヒ", note: "昔のドイツのお金。子供にとってはそれなりの大金。" },
+                { target: "難癖", note: "なんくせ。ささいな欠点を見つけて文句を言うこと。" },
+                { target: "サナギ", note: "幼虫が成虫（チョウやガ）になる前の、殻に閉じこもった状態。" },
+                { target: "マルク", note: "昔のドイツのお金の単位。百万マルクは莫大な金額。" },
+                { target: "リヴィウス", note: "古代ローマの歴史家。失われた貴重な本の例え。" },
+                { target: "挿絵", note: "さしえ。本の中に描かれた説明用の絵。" },
+                { target: "呈する", note: "ていする。ある様子を見せること。" },
+                { target: "展翅板", note: "てんしばん。チョウの標本を作るときに使う、溝のある板。" },
+                { target: "ビロード", note: "表面に細かい毛羽がある、なめらかで光沢のある織物。" },
+                { target: "誘惑", note: "ゆうわく。心を迷わせて、悪い道へ誘い込むこと。" },
+                { target: "良心は目覚めた", note: "悪いことをしてしまったという、正しい心の働きが急に戻ってきたこと。" },
+                { target: "下劣", note: "げれつ。品性が低く、卑しいこと。" },
+                { target: "大それた", note: "普通では考えられないほど、とんでもない。" },
+                { target: "模範少年", note: "行いが立派で、手本となるような少年。" },
+                { target: "繕う", note: "つくろう。直すこと。ここでは壊れた羽を修理しようとしたこと。" },
+                { target: "激したり", note: "げきしたり。激しく怒って興奮すること。" },
+                { target: "冷淡", note: "れいたん。思いやりがなく、冷たい態度。" },
+                { target: "喉笛", note: "のどぶえ。のどの気管の部分。急所。" },
+                { target: "悪漢", note: "あっかん。悪者。極悪人。" },
+                { target: "おきて", note: "守るべき決まり。ルール。" },
+                { target: "冷然", note: "れいぜん。感情を動かさず、ひややかな様子。" },
+                { target: "侮る", note: "あなどる。相手を軽く見て、馬鹿にする。" },
+            ],
+            // 本文データ (ユーザー提供のテキストをそのまま使用)
+            textBody: `
+　客は夕方の散歩から帰って、私の書斎で私のそばに腰かけていた。昼間の明るさは消えうせようとしていた。窓の外には、色あせた湖が、丘の多い岸に鋭く縁取られて、遠くかなたまで広がっていた。ちょうど、私の末の男の子が、おやすみを言ったところだったので、私たちは子どもや幼い日の思い出について話し合った。
+「子どもができてから、自分の幼年時代のいろいろの習慣や楽しみごとがまたよみがえってきたよ。それどころか、一年前から、僕はまた、チョウチョ集めをやっているよ。お目にかけようか。」と私は言った。
+　彼が見せてほしいと言ったので、私は収集の入っている軽い厚紙の箱を取りに行った。最初の箱を開けてみて、初めて、もうすっかり暗くなっているのに気づき、私はランプを取ってマッチを擦った。すると、たちまち外の景色は闇に沈んでしまい、窓いっぱいに不透明な青い夜色に閉ざされてしまった。
+　私のチョウチョは、明るいランプの光を受けて、箱の中から、きらびやかに光り輝いた。私たちはその上に体をかがめて、美しい形や濃いみごとな色を眺め、チョウの名前を言った。
+「これはワモンキシタバで、ラテン名はフルミネア。ここらではごく珍しいやつだ。」と私は言った。
+　友人は一つのチョウを、ピンの付いたまま、箱の中から用心深く取り出し、羽の裏側を見た。
+「妙なものだ。チョウチョを見るくらい、幼年時代の思い出を強くそそられるものはない。僕は小さい少年の頃熱情的な収集家だったものだ。」と彼は言った。
+　そしてチョウチョをまたもとの場所に刺し、箱の蓋を閉じて、「もう、けっこう。」と言った。
+　その思い出が不愉快ででもあるかのように、彼は口早にそう言った。その直後、私が箱をしまって戻ってくると、彼は微笑して、巻きたばこを私に求めた。
+「悪く思わないでくれたまえ。」と、それから彼は言った。「君の収集をよく見なかったけれど。僕も子どもの時、むろん、収集していたのだが、残念ながら、自分でその思い出を汚してしまった。実際話すのも恥ずかしいことだが、ひとつ聞いてもらおう。」
+　彼はランプのほやの上でたばこに火をつけ、緑色のかさをランプに載せた。すると、私たちの顔は、快い薄暗がりの中に沈んだ。彼が開いた窓の縁に腰かけると、彼の姿は、外の闇からほとんど見分けがつかなかった。私は葉巻を吸った。外では、カエルが遠くからかん高く、闇一面に鳴いていた。友人はその間に次のように語った。
+
+　僕は、八つか九つの時、チョウチョ集めを始めた。初めは特別熱心でもなく、ただはやりだったので、やっていたまでだった。ところが、十歳ぐらいになった二度めの夏には、僕は全くこの遊戯のとりこになり、ひどく心を打ち込んでしまい、そのため他のことはすっかりすっぽかしてしまったので、みんなは何度も、僕にそれをやめさせなければなるまい、と考えたほどだった。チョウを採りに出かけると、学校の時間だろうが、お昼ご飯だろうが、もう塔の時計が鳴るのなんか、耳に入らなかった。休暇になると、パンを一きれ胴乱に入れて、朝早くから夜まで、食事になんか帰らないで、駆け歩くことがたびたびあった。
+　今でも美しいチョウチョを見ると、おりおりあの熱情が身にしみて感じられる。そういう場合、僕はしばしの間、子どもだけが感じることのできる、あのなんともいえぬ、貪るような、うっとりした感じに襲われる。少年の頃、初めてキアゲハに忍び寄った、あの時味わった気持ちだ。また、そういう場合、僕はすぐに幼い日の無数の瞬間を思い浮かべるのだ。強くにおう乾いた荒野の焼きつくような昼下がり、庭の中の涼しい朝、神秘的な森の外れの夕方、僕はまるで宝を探す人のように、網を持って待ち伏せていたものだ。そして美しいチョウを見つけると、特別に珍しいのでなくったってかまわない、日なたの花に止まって、色のついた羽を呼吸とともに上げ下げしているのを見つけると、捕らえる喜びに息もつまりそうになり、しだいに忍び寄って、輝いている色の斑点の一つ一つ、透きとおった羽の脈の一つ一つ、触角の細いとび色の毛の一つ一つが見えてくると、その緊張と歓喜ときたら、なかった。そうした微妙な喜びと、激しい欲望との入り交じった気持ちは、その後、そうたびたび感じたことはなかった。
+　僕の両親は立派な道具なんかくれなかったから、僕は自分の収集を、古い潰れたボール紙の箱にしまっておかねばならなかった。びんの栓から切り抜いた丸いキルクを底に貼り付け、ピンをそれに留めた。こうした箱の潰れた壁の間に、僕は自分の宝物をしまっていた。初めのうち、僕は自分の収集を喜んでたびたび仲間に見せたが、他の者はガラスの蓋のある木箱や、緑色のガーゼを貼った飼育箱や、その他ぜいたくなものを持っていたので、自分の幼稚な設備を自慢することなんかできなかった。それどころか、重大で、評判になるような発見物や獲物があっても、ないしょにし、自分の妹たちだけに見せる習慣になった。
+　ある時、僕は、僕らのところでは珍しい青いコムラサキを捕らえた。それを展翅し、乾いた時に、得意のあまり、せめて隣の子どもにだけは見せよう、という気になった。それは、中庭の向こうに住んでいる先生の息子だった。この少年は、非のうちどころがないという悪徳をもっていた。それは子どもとしては二倍も気味悪い性質だった。彼の収集は小さく貧弱だったが、こぎれいなのと、手入れの正確な点で一つの宝石のようなものになっていた。彼はそのうえ、傷んだり壊れたりしたチョウの羽を、にかわで継ぎ合わすという、非常に難しい珍しい技術を心得ていた。とにかく、あらゆる点で、模範少年だった。そのため、僕は妬み、嘆賞しながら彼を憎んでいた。
+　この少年にコムラサキを見せた。彼は専門家らしくそれを鑑定し、その珍しいことを認め、二十ペニヒぐらいの現金の値打ちはある、と値踏みした。しかしそれから、彼は難癖をつけ始め、展翅の仕方が悪いとか、右の触角が曲がっているとか、左の触角が伸びているとか言い、そのうえ、足が二本欠けているという、もっともな欠陥を発見した。僕はその欠点をたいしたものとは考えなかったが、こっぴどい批評家のため、自分の獲物に対する喜びはかなり傷つけられた。それで僕は二度と彼に獲物を見せなかった。
+　二年たって、僕たちは、もう大きな少年になっていたが、僕の熱情はまだ絶頂にあった。その頃、あのエーミールがヤママユガをサナギからかえしたという噂が広まった。今日、僕の知人の一人が、百万マルクを受け継いだとか、歴史家リヴィウスのなくなった本が発見されたとかいうことを聞いたとしても、その時ほど僕は興奮しないだろう。僕たちの仲間で、ヤママユガを捕らえた者はまだなかった。僕は自分の持っていた古いチョウの本の挿絵で見たことがあるだけだった。名前を知っていながら自分の箱にまだないチョウの中で、ヤママユガほど僕が熱烈に欲しがっていたものはなかった。幾度となく僕は本の中のあの挿絵を眺めた。一人の友達は僕にこう語った。「とび色のこのチョウが、木の幹や岩に止まっているところを、鳥や他の敵が攻撃しようとすると、チョウは畳んでいる黒みがかった前羽を広げ、美しい後ろ羽を見せるだけだが、その大きな光る斑点は非常に不思議な思いがけぬ外観を呈するので、鳥は恐れをなして、手出しをやめてしまう。」と。
+　エーミールがこの不思議なチョウを持っているということを聞くと、僕はすっかり興奮してしまって、それが見られる時の来るのが待ちきれなくなった。食後、外出ができるようになると、すぐ僕は中庭を越えて、隣の家の四階に上っていった。そこに例の先生の息子は、小さいながら自分だけの部屋を持っていた。それが僕にはどのくらい羨ましかったかわからない。途中で僕は、誰にも会わなかった。上にたどり着いて、部屋の戸をノックしたが、返事がなかった。エーミールはいなかったのだ。ドアのハンドルを回してみると、入り口は開いていることがわかった。
+　せめて例のチョウを見たいと、僕は中に入った。そしてすぐに、エーミールが収集をしまっている二つの大きな箱を手に取った。どちらの箱にも見つからなかったが、やがて、そのチョウはまだ展翅板に載っているかもしれないと思いついた。はたしてそこにあった。とび色のビロードの羽を細長い紙きれに張り伸ばされて、ヤママユガは展翅板に留められていた。僕はその上にかがんで、毛の生えた赤茶色の触角や、優雅で、果てしなく微妙な色をした羽の縁や、下羽の内側の縁にある細い羊毛のような毛などを、残らず間近から眺めた。あいにく、あの有名な斑点だけは見られなかった。細長い紙きれの下になっていたのだ。
+　胸をどきどきさせながら、僕は紙きれを取りのけたい誘惑に負けて、針を抜いた。すると、四つの大きな不思議な斑点が、挿絵のよりはずっと美しく、ずっとすばらしく、僕を見つめた。それを見ると、この宝を手に入れたいという逆らいがたい欲望を感じて、僕は生まれて初めて盗みを犯した。僕はピンをそっと引っぱった。チョウはもう乾いていたので、形は崩れなかった。僕はそれをてのひらに載せて、エーミールの部屋から持ち出した。その時、さしずめ僕は、大きな満足感のほか何も感じていなかった。
+　チョウを右手に隠して、僕は階段を下りた。その時だ。下の方から誰か僕の方に上がってくるのが聞こえた。その瞬間に僕の良心は目覚めた。僕は突然、自分は盗みをした、下劣なやつだということを悟った。同時に、見つかりはしないかという恐ろしい不安に襲われて、僕は本能的に、獲物を隠していた手を、上着のポケットに突っ込んだ。ゆっくりと僕は歩き続けたが、大それた恥ずべきことをしたという、冷たい気持ちに震えていた。上がってきたお手伝いさんと、びくびくしながらすれ違ってから、僕は胸をどきどきさせ、額に汗をかき、落ち着きを失い、自分自身におびえながら、家の入り口に立ち止まった。
+　すぐに僕は、このチョウを持っていることはできない、持っていてはならない、もとに返して、できるならなにごともなかったようにしておかねばならない、と悟った。そこで、人に出くわして見つかりはしないか、ということを極度に恐れながらも、急いで引き返し、階段を駆け上がり、一分の後にはまたエーミールの部屋の中に立っていた。僕はポケットから手を出し、チョウを机の上に置いた。それをよく見ないうちに、僕はもうどんな不幸が起こったかということを知った。そして泣かんばかりだった。ヤママユガは潰れてしまったのだ。前羽が一つと触角が一本なくなっていた。ちぎれた羽を用心深くポケットから引き出そうとすると、羽はばらばらになっていて、繕うことなんか、もう思いもよらなかった。
+　盗みをしたという気持ちより、自分が潰してしまった美しい珍しいチョウを見ているほうが、僕の心を苦しめた。微妙なとび色がかった羽の粉が、自分の指にくっついているのを、僕は見た。また、ばらばらになった羽がそこに転がっているのを見た。それをすっかりもとどおりにすることができたら、僕はどんな持ち物でも楽しみでも、喜んで投げ出したろう。
+　悲しい気持ちで僕は家に帰り、夕方までうちの小さい庭の中に腰かけていたが、ついに一切を母にうち明ける勇気を起こした。母は驚き悲しんだが、すでにこの告白が、どんな罰を忍ぶことより、僕にとってつらいことだったということを感じたらしかった。
+「おまえは、エーミールのところに行かねばなりません。」と母はきっぱりと言った。「そして、自分でそう言わなくてはなりません。それよりほかに、どうしようもありません。おまえの持っている物のうちから、どれかを埋め合わせにより抜いてもらうように、申し出るのです。そして許してもらうように頼まねばなりません。」
+　あの模範少年でなくて、他の友達だったら、すぐにそうする気になれただろう。彼が僕の言うことをわかってくれないし、おそらく全然信じようともしないだろうということを、僕は前もって、はっきり感じていた。かれこれ夜になってしまったが、僕は出かける気になれなかった。母は僕が中庭にいるのを見つけて、「今日のうちでなければなりません。さあ、行きなさい！」と小声で言った。それで僕は出かけていき、エーミールは、と尋ねた。彼は出てきて、すぐに、誰かがヤママユガをだいなしにしてしまった。悪いやつがやったのか、あるいはネコがやったのかわからない、と語った。僕はそのチョウを見せてくれと頼んだ。二人は上に上がっていった。彼はろうそくをつけた。僕はだいなしになったチョウが展翅板の上に載っているのを見た。エーミールがそれを繕うために努力した跡が認められた。壊れた羽は丹念に広げられ、ぬれた吸い取り紙の上に置かれてあった。しかしそれは直すよしもなかった。触角もやはりなくなっていた。そこで、それは僕がやったのだと言い、詳しく話し、説明しようと試みた。
+　すると、エーミールは激したり、僕をどなりつけたりなどはしないで、低く、ちえっと舌を鳴らし、しばらくじっと僕を見つめていたが、それから「そうか、そうか、つまり君はそんなやつなんだな。」と言った。
+　僕は彼に、僕のおもちゃをみんなやると言った。それでも彼は冷淡にかまえ、依然僕をただ軽蔑的に見つめていたので、僕は自分のチョウの収集を全部やると言った。しかし彼は、「けっこうだよ。僕は君の集めたやつはもう知っている。そのうえ、今日また、君がチョウをどんなに取り扱っているか、ということを見ることができたさ。」と言った。
+　その瞬間、僕はすんでのところであいつの喉笛に飛びかかるところだった。もうどうにもしようがなかった。僕は悪漢だということに決まってしまい、エーミールはまるで世界のおきてを代表でもするかのように、冷然と、正義をたてに、侮るように、僕の前に立っていた。彼は罵りさえしなかった。ただ僕を眺めて、軽蔑していた。
+　その時初めて僕は、一度起きたことは、もう償いのできないものだということを悟った。僕は立ち去った。母が根ほり葉ほりきこうとしないで、僕にキスだけして、かまわずにおいてくれたことをうれしく思った。僕は、床にお入り、と言われた。僕にとってはもう遅い時刻だった。だが、その前に僕は、そっと食堂に行って、大きなとび色の厚紙の箱を取ってき、それを寝台の上に載せ、闇の中で開いた。そしてチョウチョを一つ一つ取り出し、指でこなごなに押し潰してしまった。
+            `
+        };
+
+        /**
+         * ==========================================
+         * 2. アプリケーションロジック
+         * ==========================================
+         */
+        const app = {
+            currentView: 'structure',
+            scrollTimer: null,
+            STORAGE_KEY: 'book_scroll_position_v1',
+
+            init() {
+                // 初期データセット
+                document.getElementById('header-title').textContent = CONTENT_DATA.meta.title;
+                document.getElementById('header-author').textContent = CONTENT_DATA.meta.author;
+                document.getElementById('read-title').textContent = CONTENT_DATA.meta.title;
+                document.getElementById('read-author').textContent = CONTENT_DATA.meta.author;
+
+                // 各ビューの描画
+                this.renderStructure();
+                this.renderCharacters();
+                this.renderKeywords();
+                this.renderText();
+
+                // 初期ビューの表示
+                this.switchView('structure');
+
+                // スクロールイベントの登録（読書位置保存用）
+                window.addEventListener('scroll', () => {
+                    if (this.currentView === 'read') {
+                        // 負荷軽減のためデバウンス処理
+                        if (this.scrollTimer) clearTimeout(this.scrollTimer);
+                        this.scrollTimer = setTimeout(() => {
+                            this.saveScrollPosition();
+                        }, 200);
+                    }
+                });
+            },
+
+            // ビュー切り替え処理
+            switchView(viewId) {
+                // 1. 現在が「読む」ビューなら位置を保存してから切り替え
+                if (this.currentView === 'read') {
+                    this.saveScrollPosition();
+                }
+
+                // 2. すべてのビューを隠す
+                document.querySelectorAll('main > div').forEach(div => {
+                    div.classList.add('hidden');
+                });
+                document.querySelectorAll('nav button').forEach(btn => {
+                    btn.classList.remove('tab-active');
+                    btn.classList.remove('bg-teal-50'); // リセット追加
+                });
+
+                // 3. 指定されたビューを表示
+                document.getElementById(`view-${viewId}`).classList.remove('hidden');
+                const activeBtn = document.getElementById(`nav-${viewId}`);
+                activeBtn.classList.add('tab-active');
+                activeBtn.classList.add('bg-teal-50'); // 背景色追加
+                
+                this.currentView = viewId;
+
+                // 4. 「読む」ビューに入った場合、位置を復元
+                if (viewId === 'read') {
+                    // 少し遅延させないと描画と競合する場合がある
+                    setTimeout(() => {
+                        this.restoreScrollPosition();
+                    }, 50);
+                } else {
+                    // 他のビューはトップへ
+                    window.scrollTo(0, 0);
+                }
+            },
+
+            // ------------------------------------------
+            // 2. 読書位置の記憶ロジック (LocalStorage)
+            // ------------------------------------------
+            saveScrollPosition() {
+                const y = window.scrollY;
+                localStorage.setItem(this.STORAGE_KEY, y);
+                // console.log('Saved Position:', y);
+            },
+
+            restoreScrollPosition() {
+                const y = localStorage.getItem(this.STORAGE_KEY);
+                if (y) {
+                    window.scrollTo({
+                        top: parseInt(y),
+                        behavior: 'auto'
+                    });
+                    // console.log('Restored Position:', y);
+                }
+            },
+
+            // ------------------------------------------
+            // レンダリング関数群
+            // ------------------------------------------
+
+            // 構成リストの生成
+            renderStructure() {
+                const container = document.getElementById('structure-list');
+                CONTENT_DATA.structure.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm';
+                    div.innerHTML = `
+                        <button onclick="app.toggleAccordion('str-${index}')" class="w-full text-left px-5 py-4 bg-gray-50 hover:bg-white flex justify-between items-center transition-all group">
+                            <span class="font-bold text-gray-800 text-lg">${item.title}</span>
+                            <span class="text-teal-600 text-sm group-hover:text-teal-800 flex items-center gap-1">
+                                解説を見る 
+                                <span class="transform transition-transform group-hover:translate-y-1">▼</span>
+                            </span>
+                        </button>
+                        <div id="str-${index}" class="accordion-content px-5">
+                            <div class="py-5 space-y-4">
+                                <div>
+                                    <p class="font-bold text-xs text-teal-600 uppercase tracking-wider mb-1">STORY</p>
+                                    <p class="text-gray-900 font-medium text-lg leading-relaxed">${item.summary}</p>
+                                </div>
+                                <div class="bg-teal-50/50 p-4 rounded-lg">
+                                    <p class="font-bold text-xs text-teal-600 uppercase tracking-wider mb-2">DEEP DIVE</p>
+                                    <p class="text-gray-700 leading-relaxed">${item.detail}</p>
+                                </div>
+                                <div class="flex flex-wrap gap-2 pt-2">
+                                    ${item.tags.map(tag => `<span class="px-3 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded-full border border-gray-200">#${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            // 登場人物リストの生成
+            renderCharacters() {
+                const container = document.getElementById('characters-list');
+                CONTENT_DATA.characters.forEach((char, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all cursor-pointer group';
+                    div.onclick = () => app.toggleAccordion(`char-${index}`);
+                    
+                    // 引用リストの生成
+                    const quotesHtml = char.quotes ? char.quotes.map(q => 
+                        `<div class="quote-box">"${q}"</div>`
+                    ).join('') : '';
+
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-800 group-hover:text-teal-800 transition-colors">${char.name}</h3>
+                                <span class="text-sm font-bold text-teal-600 bg-teal-50 px-2 py-1 rounded mt-1 inline-block">${char.role}</span>
+                            </div>
+                            <span class="text-gray-300 group-hover:text-teal-500 text-2xl">＋</span>
+                        </div>
+                        <div id="char-${index}" class="accordion-content active" style="max-height: 2000px; opacity: 1;">
+                            <p class="text-gray-700 leading-relaxed mb-4">${char.detail}</p>
+                            <div class="space-y-2">
+                                <p class="text-xs text-gray-400 font-bold uppercase">Key Quotes</p>
+                                ${quotesHtml}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            // キーワードリストの生成
+            renderKeywords() {
+                const container = document.getElementById('keywords-list');
+                CONTENT_DATA.keywords.forEach((kw, index) => {
+                    const div = document.createElement('div');
+                    div.id = kw.linkId || `kw-${index}`;
+                    div.className = 'bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm';
+                    div.innerHTML = `
+                        <button onclick="app.toggleAccordion('kw-detail-${index}')" class="w-full text-left px-6 py-5 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+                            <span class="w-3 h-3 rounded-full bg-teal-500 shrink-0 shadow-sm shadow-teal-200"></span>
+                            <span class="font-bold text-xl text-teal-900">${kw.word}</span>
+                        </button>
+                        <div id="kw-detail-${index}" class="accordion-content px-6 bg-gray-50">
+                            <div class="py-6 space-y-4">
+                                <div>
+                                    <p class="font-bold text-xs text-teal-600 uppercase tracking-wider mb-1">MEANING</p>
+                                    <p class="text-lg font-medium text-gray-900">${kw.def}</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-gray-100">
+                                    <p class="font-bold text-xs text-teal-600 uppercase tracking-wider mb-2">CONTEXT</p>
+                                    <p class="text-gray-700 leading-relaxed">${kw.context}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            // 本文の生成（ハイライト処理含む）
+            renderText() {
+                const container = document.getElementById('text-content');
+                // テキストを段落で分割
+                const paragraphs = CONTENT_DATA.textBody.split(/\n/);
+                
+                let html = '';
+                // 注釈データを長い順にソート（短い単語が長い単語の一部に含まれる場合の誤置換防止）
+                // 例: "展翅" と "展翅板" がある場合、先に "展翅板" を置換しないと "展翅"板 になってしまう
+                const sortedAnnotations = [...CONTENT_DATA.annotations].sort((a, b) => b.target.length - a.target.length);
+
+                paragraphs.forEach(p => {
+                    const trimmed = p.trim();
+                    if (trimmed === '') return; // 空行スキップ
+                    
+                    // 注釈ハイライト処理
+                    // 単純置換だと、既に置換したHTMLタグの中身まで再置換するリスクがあるため、
+                    // 本来はトークナイズが必要だが、今回は簡易実装としてプレースホルダー方式をとるか、
+                    // 単純に注意してデータを作る運用とする。
+                    // ここでは「一度置換された箇所はタグで囲まれる」ことを利用し、
+                    // テキストノードのみを対象にするのが難しいので、単純な replaceAll で実装する。
+                    // ※データの重複に注意（例：短い単語が長い単語に含まれないようにする）
+                    
+                    let p_html = trimmed;
+                    
+                    sortedAnnotations.forEach((anno, idx) => {
+                        // 既にタグの中にある文字列は置換しないようにする正規表現は複雑になるため、
+                        // 簡易的に「まだタグ付けされていない」場合のみ置換するような工夫が必要だが、
+                        // ここではデータセット側で被りを回避している前提で進める。
+                        // 一意なID付きのスパンに置き換える
+                        const regex = new RegExp(anno.target, 'g');
+                        // 既にHTMLタグの一部になっている場合は避ける（簡易チェック）
+                        // 本当はDOM操作でやるべきだが、単一ファイル・軽量化のため文字列操作で行う
+                        // 誤爆を防ぐため、既にclass="text-highlight"で囲まれているものは除外したいが、
+                        // replaceAllは一括でやるため、順序依存。
+                        
+                        // 今回は単純なreplaceAllとし、データ側で包含関係（展翅と展翅板など）に気をつける
+                        // sortedAnnotationsで長い順にしているので概ね大丈夫
+                        
+                        // 一時的なプレースホルダーを使うと安全だが、コードが複雑になるため
+                        // 既に置換済みのタグを含まないようにチェックしながら置換
+                         if (p_html.includes(anno.target)) {
+                            // 既にリンク化されている部分を除外するのは難しいので、
+                            // 「タグの内部（<...>）」以外を置換対象にするロジックを入れるか、
+                            // 単純に被らないワードを選定する。
+                            
+                            // 簡易的な回避策: 一度置換したらその部分は触らない
+                            // -> splitして結合するアプローチ
+                            const parts = p_html.split(anno.target);
+                            if (parts.length > 1) {
+                                // ただし、partsの中に既にHTMLタグが含まれている可能性がある
+                                // 既存の <span ...> ... </span> を壊さないようにするのは難しい
+                                // よって、今回は「解説データに重複（包含関係）がない」あるいは
+                                // 「長い順に置換すれば概ねOK」という前提で実装する。
+                                
+                                // 修正: 既に置換されたHTMLタグ内の文字を再置換しないようにする
+                                // これを防ぐため、UUIDなどのプレースホルダーに一度置き換えるのが確実
+                                // しかしそこまでやるとコードが長くなるので、
+                                // HTMLタグの記号 < > を含まない場合のみ置換するように正規表現を書くのは困難
+                                
+                                // 実用的な解: split/join で置換する際、既にタグの中にあるかを判定するのはコストが高い。
+                                // 今回はユーザー要望で「語句を増やして」とのことなので、
+                                // 単純置換で進める（表示崩れが起きたらデータ側で調整）
+                                
+                                // const highlightTag = `<span class="text-highlight" onclick="event.stopPropagation(); app.showAnnotation(${CONTENT_DATA.annotations.indexOf(anno)})">${anno.target}</span>`;
+                                // p_html = p_html.replaceAll(anno.target, highlightTag);
+                                
+                                // 上記だと、先に置換したタグの中の文字（class名などには含まれないが、title属性などには入らない）
+                                // コンテンツテキスト内の再置換を防ぐため、
+                                // 一意のハッシュキーに置換 → 最後にHTMLに戻す という手順を踏む
+                            }
+                        }
+                    });
+                    
+                    // 安全な置換ロジック:
+                    // 1. 全ての注釈位置を特定する
+                    // 2. テキストを再構築する
+                    // これは複雑なので、今回は「長い順に置換」で、
+                    // かつ「置換後の文字列（HTMLタグ）に含まれる単語は注釈語句に含めない」運用とする。
+                    // (例: "span", "class", "onclick" などを注釈語句にしない)
+                    
+                    sortedAnnotations.forEach((anno) => {
+                        // オリジナルのインデックスを探す（sortしてしまったため）
+                        const originalIndex = CONTENT_DATA.annotations.indexOf(anno);
+                        const tag = `<span class="text-highlight" onclick="event.stopPropagation(); app.showAnnotation(${originalIndex})">${anno.target}</span>`;
+                        
+                        // 誤爆防止: 既にタグの一部になっている場合は置換しない
+                        // 単純な文字列置換の弱点を補うため、正規表現で「タグの外側」を狙うのは難しいので
+                        // split -> join を使うが、既に置換されたタグの中身（>...<の間）はさらに置換されてしまうリスクがある。
+                        // 例: "A"を置換して <span>A</span> になった後、"A"を含む"AB"が来ると...
+                        // 長い順にソートしているので、"AB"が先に来るため "A" の置換時には "AB" はもう存在しない（タグになってる）
+                        // しかし、タグの中の "A" (<span>A</span>) は "A" としてマッチしてしまう。
+                        
+                        // これを防ぐため、一時的なトークンに置き換える
+                         const token = `__ANNO_${originalIndex}__`;
+                         // p_html内の anno.target を token に置換するが、
+                         // 既に __ANNO_...__ になっている部分は対象外なので大丈夫
+                         // ただし、短い単語が長い単語の一部だった場合、長い単語は既にトークン化されているのでマッチしない
+                         // これで安全！
+                         
+                         p_html = p_html.replaceAll(anno.target, token);
+                    });
+                    
+                    // トークンをHTMLタグに戻す
+                    sortedAnnotations.forEach((anno) => {
+                        const originalIndex = CONTENT_DATA.annotations.indexOf(anno);
+                        const token = `__ANNO_${originalIndex}__`;
+                        const tag = `<span class="text-highlight" onclick="event.stopPropagation(); app.showAnnotation(${originalIndex})">${anno.target}</span>`;
+                        p_html = p_html.replaceAll(token, tag);
+                    });
+
+                    // インデント（全角スペース）の処理
+                    const isIndent = p.startsWith('　');
+                    // スマートフォンでの可読性のため、text-align: justify を適用しつつ、
+                    // 段落間のマージンを適切に取る
+                    html += `<p class="mb-6 ${isIndent ? 'pl-[1em] indent-[-1em]' : ''}">${p_html}</p>`;
+                });
+                container.innerHTML = html;
+                
+                // 画面クリックで注釈閉じる
+                document.getElementById('view-read').addEventListener('click', () => {
+                    this.hideAnnotation();
+                });
+            },
+
+            // アコーディオン開閉
+            toggleAccordion(id) {
+                const el = document.getElementById(id);
+                if (el.classList.contains('active')) {
+                    el.classList.remove('active');
+                } else {
+                    el.classList.add('active');
+                }
+            },
+
+            // 注釈表示
+            showAnnotation(index) {
+                const data = CONTENT_DATA.annotations[index];
+                const panel = document.getElementById('annotation-panel');
+                document.getElementById('anno-word').textContent = data.target;
+                document.getElementById('anno-desc').textContent = data.note;
+                
+                panel.classList.remove('translate-y-[120%]', 'opacity-0', 'pointer-events-none');
+            },
+
+            // 注釈非表示
+            hideAnnotation() {
+                const panel = document.getElementById('annotation-panel');
+                panel.classList.add('translate-y-[120%]', 'opacity-0', 'pointer-events-none');
+            }
+        };
+
+        // アプリ起動
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
