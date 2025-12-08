@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>走れメロス - 学習アプリ</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (JSX変換用) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .font-serif {
+            font-family: 'Shippori Mincho', serif;
+        }
+        
+        /* マーカー風スタイル（赤色） */
+        .interactive-word {
+            background: linear-gradient(transparent 60%, #ffe4e6 60%);
+            color: #9f1239;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        .interactive-word:hover {
+            background: linear-gradient(transparent 0%, #fecdd3 0%);
+            color: #881337;
+        }
+
+        /* スクロールバーのスタイル調整（あらすじ・人物詳細など） */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 3px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        // --- アイコンコンポーネント (Lucide風SVG) ---
+        const IconBase = ({ children, size = 24, className = "" }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
+            >
+                {children}
+            </svg>
+        );
+
+        const BookOpen = (props) => (
+            <IconBase {...props}>
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </IconBase>
+        );
+        const ListIcon = (props) => (
+            <IconBase {...props}>
+                <line x1="8" y1="6" x2="21" y2="6" />
+                <line x1="8" y1="12" x2="21" y2="12" />
+                <line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" />
+                <line x1="3" y1="12" x2="3.01" y2="12" />
+                <line x1="3" y1="18" x2="3.01" y2="18" />
+            </IconBase>
+        );
+        const Users = (props) => (
+            <IconBase {...props}>
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </IconBase>
+        );
+        const XIcon = (props) => (
+            <IconBase {...props}>
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </IconBase>
+        );
+        const Info = (props) => (
+            <IconBase {...props}>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+            </IconBase>
+        );
+        const Clock = (props) => (
+            <IconBase {...props}>
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+            </IconBase>
+        );
+        const Quote = (props) => (
+            <IconBase {...props}>
+                <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
+                <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
+            </IconBase>
+        );
+        const ChevronDown = (props) => (
+            <IconBase {...props}>
+                <polyline points="6 9 12 15 18 9" />
+            </IconBase>
+        );
+        const ChevronUp = (props) => (
+            <IconBase {...props}>
+                <polyline points="18 15 12 9 6 15" />
+            </IconBase>
+        );
+        const Key = (props) => (
+            <IconBase {...props}>
+                <path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4" />
+            </IconBase>
+        );
+        const ScrollText = (props) => (
+            <IconBase {...props}>
+                <path d="M15 12h-5" />
+                <path d="M15 8h-5" />
+                <path d="M19 17V5a2 2 0 0 0-2-2H4" />
+                <path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3" />
+            </IconBase>
+        );
+
+        // --- データ定義 ---
+
+        // 語句解説リスト
+        const vocabulary = {
+            "邪知暴虐": { yomi: "じゃち ぼうぎゃく", mean: "ものすごく悪い知恵を使って、ひどく乱暴なこと。" },
+            "牧人": { yomi: "ぼくじん", mean: "羊飼い（ひつじかい）。" },
+            "未明": { yomi: "みめい", mean: "夜明け前の、まだ暗い時間。" },
+            "十里": { yomi: "じゅうり", mean: "約40km。フルマラソンと同じくらいの距離。" },
+            "律儀": { yomi: "りちぎ", mean: "まじめで、義理堅いこと。" },
+            "祝宴": { yomi: "しゅくえん", mean: "お祝いのパーティー。" },
+            "竹馬の友": { yomi: "ちくばのとも", mean: "幼なじみの大親友。" },
+            "老爺": { yomi: "ろうや", mean: "おじいさん。" },
+            "語勢": { yomi: "ごせい", mean: "言葉のいきおい。" },
+            "悪心": { yomi: "あくしん", mean: "悪い心。" },
+            "賢臣": { yomi: "けんしん", mean: "頭が良くて立派な家来。" },
+            "乱心": { yomi: "らんしん", mean: "気が狂ってしまうこと。" },
+            "巡邏": { yomi: "じゅんら", mean: "見回り（パトロール）。" },
+            "捕縛": { yomi: "ほばく", mean: "捕まえてしばられること。" },
+            "懐中": { yomi: "かいちゅう", mean: "着物の胸ポケット（ふところ）の中。" },
+            "蒼白": { yomi: "そうはく", mean: "顔色が真っ青なこと。" },
+            "憫笑": { yomi: "びんしょう", mean: "「かわいそうに」と相手を見下して笑うこと。" },
+            "嘲笑": { yomi: "ちょうしょう", mean: "バカにして笑うこと。" },
+            "下賤": { yomi: "げせん", mean: "身分が低いこと。" },
+            "日限": { yomi: "にちげん", mean: "締め切り（期限）の日。" },
+            "無二": { yomi: "むに", mean: "二つとないほど大切なこと。" },
+            "ほくそ笑む": { yomi: "ほくそえむ", mean: "うまくいったと思って、こっそり笑う（ニヤリとする）。" },
+            "疲労困憊": { yomi: "ひろう こんぱい", mean: "クタクタに疲れ果てること。" },
+            "支度": { yomi: "したく", mean: "準備。" },
+            "喜色": { yomi: "きしょく", mean: "嬉しそうな顔つき。" },
+            "未練": { yomi: "みれん", mean: "心残りで、あきらめきれない気持ち。" },
+            "薄明": { yomi: "はくめい", mean: "薄暗い、夜明けごろ。" },
+            "刻限": { yomi: "こくげん", mean: "決められた時間。タイムリミット。" },
+            "信実": { yomi: "しんじつ", mean: "まじめで嘘をつかない誠実さ。" },
+            "氾濫": { yomi: "はんらん", mean: "大雨などで川の水があふれること。" },
+            "哀願": { yomi: "あいがん", mean: "「お願いします！」と必死に頼むこと。" },
+            "獅子奮迅": { yomi: "しし ふんじん", mean: "ライオンのようにものすごい勢いで活動すること。" },
+            "憐愍": { yomi: "れんびん", mean: "かわいそうに思うこと。" },
+            "一刻": { yomi: "いっこく", mean: "ほんの少しの時間。" },
+            "韋駄天": { yomi: "いだてん", mean: "足がものすごく速い神様（転じて、足の速い人）。" },
+            "路傍": { yomi: "ろぼう", mean: "道ばた。" },
+            "不信の徒": { yomi: "ふしんの と", mean: "信じられない人たち。裏切り者たち。" },
+            "定法": { yomi: "ていほう", mean: "決まっている法則。お決まりのルール。" },
+            "やんぬるかな": { yomi: "やんぬるかな", mean: "「もうダメだ」「どうにもならない」。絶望した時の言葉。" },
+            "四肢": { yomi: "しし", mean: "両手と両足。" },
+            "潺々": { yomi: "せんせん", mean: "水がサラサラと流れる音。" },
+            "滾々": { yomi: "こんこん", mean: "水が次々とわき出る様子。" },
+            "斜陽": { yomi: "しゃよう", mean: "夕日。沈みかけている太陽。" },
+            "塔楼": { yomi: "とうろう", mean: "お城などの高い見張り台。" },
+            "歔欷": { yomi: "きょき", mean: "すすり泣くこと（おえつ）。" },
+            "緋のマント": { yomi: "ひの まんと", mean: "濃い赤色のマント。" },
+            "猛勢一挙": { yomi: "もうせい いっきょ", mean: "ものすごい勢いで、一度に。" },
+            "報いた": { yomi: "むくいた", mean: "言い返した。仕返しをした。" },
+            "反駁": { yomi: "はんばく", mean: "相手の意見に反対して言い返すこと。" },
+            "妹婿様": { yomi: "いもうとむこさま", mean: "妹の夫となる人。" },
+            "威厳": { yomi: "いげん", mean: "近寄りがたいような、堂々とした立派さ。" },
+            "悪徳": { yomi: "あくとく", mean: "人の道に外れた悪い行い。" },
+            "石工": { yomi: "いしく", mean: "石を加工して、建物や墓などを作る職人。" },
+            "残虐": { yomi: "ざんぎゃく", mean: "むごたらしく、残酷なこと。" },
+            "日没": { yomi: "にちぼつ", mean: "太陽が沈むこと。" },
+            "相会うた": { yomi: "あいおうた", mean: "出会った。「相（あい）」は言葉の調子を整える接頭語。" },
+            "面前": { yomi: "めんぜん", mean: "目の前。顔の前。" },
+            "祭壇": { yomi: "さいだん", mean: "神様や仏様をまつるための壇。" },
+            "宣誓": { yomi: "せんせい", mean: "多くの人の前で、誓いの言葉を言うこと。" },
+            "刻一刻": { yomi: "こくいっこく", mean: "時間が少しずつ過ぎていく様子。" },
+            "棍棒": { yomi: "こんぼう", mean: "殴るための太い棒。" },
+            "猛然一撃": { yomi: "もうぜん いちげき", mean: "激しい勢いで、一発殴ること。" },
+            // 追加分
+            "希代": { yomi: "きだい", mean: "世にもまれなこと。めったにないこと。" },
+            "萎えて": { yomi: "なえて", mean: "体力がなくなってぐったりすること。気力がなくなること。" },
+            "中途": { yomi: "ちゅうと", mean: "物事の途中。やりかけ。" },
+            "五臓": { yomi: "ごぞう", mean: "体の内臓全体のこと。心身のすべて。" },
+            "酒宴": { yomi: "しゅえん", mean: "酒を飲んで楽しむ宴会。" },
+            "宴席": { yomi: "えんせき", mean: "宴会の席。パーティーの会場。" },
+            "刑場": { yomi: "けいじょう", mean: "処刑を行う場所。" },
+            "刑吏": { yomi: "けいり", mean: "処刑を行う役人。" },
+            "口惜しい": { yomi: "くちおしい", mean: "残念だ。腹立たしい。" }
+        };
+
+        const storyText = `　メロスは激怒した。必ず、かの邪知暴虐の王を除かなければならぬと決意した。メロスには政治がわからぬ。メロスは、村の牧人である。笛を吹き、羊と遊んで暮らしてきた。けれども邪悪に対しては、人一倍に敏感であった。今日未明メロスは村を出発し、野を越え山越え、十里離れたこのシラクスの町にやってきた。メロスには父も、母もない。女房もない。十六の、内気な妹と二人暮らしだ。この妹は、村のある律儀な一牧人を、近々、花婿として迎えることになっていた。結婚式も間近なのである。メロスは、それゆえ、花嫁の衣装やら祝宴のごちそうやらを買いに、はるばる町にやってきたのだ。まず、その品々を買い集め、それから都の大路をぶらぶら歩いた。メロスには竹馬の友があった。セリヌンティウスである。今はこのシラクスの町で、石工をしている。その友を、これから訪ねてみるつもりなのだ。久しく会わなかったのだから、訪ねていくのが楽しみである。歩いているうちにメロスは、町の様子を怪しく思った。ひっそりしている。もうすでに日も落ちて、町の暗いのはあたりまえだが、けれども、なんだか、夜のせいばかりではなく、町全体が、やけに寂しい。のんきなメロスも、だんだん不安になってきた。道で会った若い衆をつかまえて、何かあったのか、二年前にこの町に来た時は、夜でも皆が歌を歌って、町はにぎやかであったはずだが、と質問した。若い衆は、首を振って答えなかった。しばらく歩いて老爺に会い、今度はもっと、語勢を強くして質問した。老爺は答えなかった。メロスは両手で老爺の体を揺すぶって質問を重ねた。老爺は、辺りをはばかる低声で、わずか答えた。
+「王様は、人を殺します。」
+「なぜ殺すのだ。」
+「悪心を抱いている、というのですが、誰もそんな、悪心をもってはおりませぬ。」
+「たくさんの人を殺したのか。」
+「はい、初めは王様の妹婿様を。それから、ご自身のお世継ぎを。それから、妹様を。それから、妹様のお子様を。それから、皇后様を。それから、賢臣のアレキス様を。」
+「驚いた。国王は乱心か。」
+「いいえ、乱心ではございませぬ。人を、信ずることができぬ、と言うのです。この頃は、臣下の心をも、お疑いになり、少しくはでな暮らしをしている者には、人質一人ずつ差し出すことを命じております。ご命令を拒めば十字架にかけられて、殺されます。今日は、六人殺されました。」
+　聞いて、メロスは激怒した。「あきれた王だ。生かしておけぬ。」
+　メロスは、単純な男であった。買い物を、背負ったままで、のそのそ王城に入っていった。たちまち彼は、巡邏の警吏に捕縛された。調べられて、メロスの懐中からは短剣が出てきたので、騒ぎが大きくなってしまった。メロスは、王の前に引き出された。
+「この短刀で何をするつもりであったか。言え！」暴君ディオニスは静かに、けれども威厳をもって問いつめた。その王の顔は蒼白で、眉間のしわは、刻み込まれたように深かった。
+「町を暴君の手から救うのだ。」とメロスは悪びれずに答えた。
+「おまえがか？」王は、憫笑した。「しかたのないやつじゃ。おまえには、わしの孤独がわからぬ。」
+「言うな！」とメロスは、いきりたって反駁した。「人の心を疑うのは、最も恥ずべき悪徳だ。王は、民の忠誠をさえ疑っておられる。」
+「疑うのが、正当の心がまえなのだと、わしに教えてくれたのは、おまえたちだ。人の心は、あてにならない。人間は、もともと私欲の塊さ。信じては、ならぬ。」暴君は落ち着いてつぶやき、ほっとため息をついた。「わしだって、平和を望んでいるのだが。」
+「なんのための平和だ。自分の地位を守るためか。」今度はメロスが嘲笑した。「罪のない人を殺して、何が平和だ。」
+「黙れ、下賤の者。」王は、さっと顔を上げて報いた。「口では、どんな清らかなことでも言える。わしには、人のはらわたの奥底が見え透いてならぬ。おまえだって、いまに、はりつけになってから、泣いてわびたって聞かぬぞ。」
+「ああ、王はりこうだ。うぬぼれているがよい。私は、ちゃんと死ぬる覚悟でいるのに。命乞いなど決してしない。ただ、──」と言いかけて、メロスは足もとに視線を落とし瞬時ためらい、「ただ、私に情けをかけたいつもりなら、処刑までに三日間の日限を与えてください。たった一人の妹に、亭主をもたせてやりたいのです。三日のうちに、私は村で結婚式を挙げさせ、必ず、ここへ帰ってきます。」
+「ばかな。」と暴君は、しわがれた声で低く笑った。「とんでもないうそを言うわい。逃がした小鳥が帰ってくるというのか。」
+「そうです。帰ってくるのです。」メロスは必死で言いはった。「私は約束を守ります。私を、三日間だけ許してください。妹が、私の帰りを待っているのだ。そんなに私を信じられないならば、よろしい、この町にセリヌンティウスという石工がいます。私の無二の友人だ。あれを、人質としてここに置いていこう。私が逃げてしまって、三日めの日暮れまで、ここに帰ってこなかったら、あの友人を締め殺してください。頼む。そうしてください。」
+　それを聞いて王は、残虐な気持ちで、そっとほくそ笑んだ。生意気なことを言うわい。どうせ帰ってこないにきまっている。このうそつきにだまされたふりして、放してやるのもおもしろい。そうして身代わりの男を、三日めに殺してやるのも気味がいい。人は、これだから信じられぬと、わしは悲しい顔して、その身代わりの男を磔刑に処してやるのだ。世の中の、正直者とかいうやつばらにうんと見せつけてやりたいものさ。
+「願いを、聞いた。その身代わりを呼ぶがよい。三日めには日没までに帰ってこい。遅れたら、その身代わりを、きっと殺すぞ。ちょっと遅れてくるがいい。おまえの罪は、永遠に許してやろうぞ。」
+「なに、何をおっしゃる。」
+「はは。命が大事だったら、遅れてこい。おまえの心は、わかっているぞ。」
+　メロスは口惜しく、じだんだ踏んだ。ものも言いたくなくなった。
+　竹馬の友、セリヌンティウスは、深夜、王城に召された。暴君ディオニスの面前で、よき友とよき友は、二年ぶりで相会うた。メロスは、友に一切の事情を語った。セリヌンティウスは無言でうなずき、メロスをひしと抱きしめた。友と友の間は、それでよかった。セリヌンティウスは、縄打たれた。メロスは、すぐに出発した。初夏、満天の星である。
+　メロスはその夜、一睡もせず十里の道を急ぎに急いで、村へ到着したのは、明くる日の午前、日はすでに高く昇って、村人たちは野に出て仕事を始めていた。メロスの十六の妹も、今日は兄の代わりに羊群の番をしていた。よろめいて歩いてくる兄の、疲労困憊の姿を見つけて驚いた。そうして、うるさく兄に質問を浴びせた。
+「なんでもない。」メロスは無理に笑おうと努めた。「町に用事を残してきた。またすぐ町に行かなければならぬ。明日、おまえの結婚式を挙げる。早いほうがよかろう。」
+　妹は頬を赤らめた。
+「うれしいか。きれいな衣装も買ってきた。さあ、これから行って、村の人たちに知らせてこい。結婚式は、明日だと。」
+　メロスは、また、よろよろと歩きだし、家へ帰って神々の祭壇を飾り、祝宴の席を調え、まもなく床に倒れ伏し、呼吸もせぬくらいの深い眠りに落ちてしまった。
+　目が覚めたのは夜だった。メロスは起きてすぐ、花婿の家を訪れた。そうして、少し事情があるから、結婚式を明日にしてくれ、と頼んだ。婿の牧人は驚き、それはいけない、こちらにはまだなんの支度もできていない、ぶどうの季節まで待ってくれ、と答えた。メロスは、待つことはできぬ、どうか明日にしてくれたまえ、とさらにおして頼んだ。婿の牧人も頑強であった。なかなか承諾してくれない。夜明けまで議論を続けて、やっと、どうにか婿をなだめ、すかして、説き伏せた。結婚式は、真昼に行われた。新郎新婦の、神々への宣誓が済んだ頃、黒雲が空を覆い、ぽつりぽつり雨が降りだし、やがて車軸を流すような大雨となった。祝宴に列席していた村人たちは、何か不吉なものを感じたが、それでも、めいめい気持ちを引き立て、狭い家の中で、むんむん蒸し暑いのもこらえ、陽気に歌を歌い、手を打った。メロスも、満面に喜色をたたえ、しばらくは、王とのあの約束をさえ忘れていた。祝宴は、夜に入っていよいよ乱れ華やかになり、人々は、外の豪雨を全く気にしなくなった。メロスは、一生このままここにいたい、と思った。このよい人たちと生涯暮らしていきたいと願ったが、今は、自分の体で、自分のものではない。ままならぬことである。メロスは、わが身にむち打ち、ついに出発を決意した。明日の日没までには、まだ十分の時がある。ちょっとひと眠りして、それからすぐに出発しよう、と考えた。その頃には、雨も小降りになっていよう。少しでも長くこの家にぐずぐずとどまっていたかった。メロスほどの男にも、やはり未練の情というものはある。今宵呆然、歓喜に酔っているらしい花嫁に近寄り、
+「おめでとう。私は疲れてしまったから、ちょっとごめんこうむって眠りたい。目が覚めたら、すぐに町に出かける。大切な用事があるのだ。私がいなくても、もうおまえには優しい亭主があるのだから、決して寂しいことはない。おまえの兄の、いちばん嫌いなものは、人を疑うことと、それから、うそをつくことだ。おまえも、それは、知っているね。亭主との間に、どんな秘密でもつくってはならぬ。おまえに言いたいのは、それだけだ。おまえの兄は、たぶん偉い男なのだから、おまえもその誇りをもっていろ。」
+　花嫁は、夢見心地でうなずいた。メロスは、それから花婿の肩をたたいて、
+「支度のないのはお互いさまさ。私の家にも、宝といっては、妹と羊だけだ。ほかには、何もない。全部あげよう。もう一つ、メロスの弟になったことを誇ってくれ。」
+　花婿はもみ手して、てれていた。メロスは笑って村人たちにも会釈して、宴席から立ち去り、羊小屋に潜り込んで、死んだように深く眠った。
+　目が覚めたのは明くる日の薄明の頃である。メロスは跳ね起き、南無三、寝過ごしたか、いや、まだまだだいじょうぶ、これからすぐに出発すれば、約束の刻限までには十分まにあう。今日はぜひとも、あの王に、人の信実の存するところを見せてやろう。そうして笑ってはりつけの台に登ってやる。メロスは、悠々と身支度を始めた。雨も、幾分小降りになっている様子である。身支度はできた。さて、メロスは、ぶるんと両腕を大きく振って、雨中、矢のごとく走り出た。
+　私は、今宵、殺される。殺されるために走るのだ。身代わりの友を救うために走るのだ。王の奸佞邪知を打ち破るために走るのだ。走らなければならぬ。そうして、私は殺される。若い時から名誉を守れ。さらば、ふるさと。若いメロスは、つらかった。幾度か、立ち止まりそうになった。えい、えいと大声あげて自身を叱りながら走った。村を出て、野を横切り、森をくぐり抜け、隣村に着いた頃には、雨もやみ、日は高く昇って、そろそろ暑くなってきた。メロスは額の汗を拳で払い、ここまで来ればだいじょうぶ、もはや故郷への未練はない。妹たちは、きっとよい夫婦になるだろう。私には、今、なんの気がかりもないはずだ。まっすぐに王城に行き着けば、それでよいのだ。そんなに急ぐ必要もない。ゆっくり歩こう、と持ちまえののんきさを取り返し、好きな小歌をいい声で歌いだした。ぶらぶら歩いて二里行き三里行き、そろそろ全里程の半ばに到達した頃、降ってわいた災難、メロスの足は、はたと、止まった。見よ、前方の川を。昨日の豪雨で山の水源地は氾濫し、濁流とうとうと下流に集まり、猛勢一挙に橋を破壊し、どうどうと響きをあげる激流が、こっぱみじんに橋げたを跳ね飛ばしていた。彼は茫然と、立ちすくんだ。あちこちと眺め回し、また、声を限りに呼びたててみたが、繋舟は残らず波にさらわれて影なく、渡し守の姿も見えない。流れはいよいよ、膨れ上がり、海のようになっている。メロスは川岸にうずくまり、男泣きに泣きながらゼウスに手を挙げて哀願した。「ああ、鎮めたまえ、荒れ狂う流れを！　時は刻々に過ぎていきます。太陽もすでに真昼時です。あれが沈んでしまわぬうちに、王城に行き着くことができなかったら、あのよい友達が、私のために死ぬのです。」
+　濁流は、メロスの叫びをせせら笑うごとく、ますます激しく躍り狂う。波は波をのみ、巻き、あおり立て、そうして時は、刻一刻と消えていく。今はメロスも覚悟した。泳ぎきるよりほかにない。ああ、神々も照覧あれ！　濁流にも負けぬ愛と誠の偉大な力を、今こそ発揮してみせる。メロスは、ざんぶと流れに飛び込み、百匹の大蛇のようにのたうち荒れ狂う波を相手に、必死の闘争を開始した。満身の力を腕にこめて、押し寄せ渦巻き引きずる流れを、なんのこれしきとかき分けかき分け、獅子奮迅の人の子の姿には、神もあわれと思ったか、ついに憐愍を垂れてくれた。押し流されつつも、みごと、対岸の樹木の幹に、すがりつくことができたのである。ありがたい。メロスは馬のように大きな胴震いを一つして、すぐにまた先を急いだ。一刻といえども、無駄にはできない。日はすでに西に傾きかけている。ぜいぜい荒い呼吸をしながら峠を登り、登りきって、ほっとした時、突然、目の前に一隊の山賊が躍り出た。
+「待て。」
+「何をするのだ。私は日の沈まぬうちに王城へ行かなければならぬ。放せ。」
+「どっこい放さぬ。持ち物全部を置いていけ。」
+「私には命のほかには何もない。その、たった一つの命も、これから王にくれてやるのだ。」
+「その、命が欲しいのだ。」
+「さては、王の命令で、ここで私を待ち伏せしていたのだな。」
+　山賊たちは、ものも言わず一斉に棍棒を振り上げた。メロスはひょいと、体を折り曲げ、飛鳥のごとく身近の一人に襲いかかり、その棍棒を奪い取って、「気の毒だが正義のためだ！」と猛然一撃、たちまち、三人を殴り倒し、残る者のひるむ隙に、さっさと走って峠を下った。一気に峠を駆け降りたが、さすがに疲労し、おりから午後の灼熱の太陽がまともに、かっと照ってきて、メロスは幾度となくめまいを感じ、これではならぬ、と気を取り直しては、よろよろ二、三歩歩いて、ついに、がくりと膝を折った。立ち上がることができぬのだ。天を仰いで、悔し泣きに泣きだした。ああ、あ、濁流を泳ぎきり、山賊を三人も打ち倒し韋駄天、ここまで突破してきたメロスよ。真の勇者、メロスよ。今、ここで、疲れきって動けなくなるとは情けない。愛する友は、おまえを信じたばかりに、やがて殺されなければならぬ。おまえは、希代の不信の人間、まさしく王の思うつぼだぞ、と自分を叱ってみるのだが、全身萎えて、もはや芋虫ほどにも前進かなわぬ。路傍の草原にごろりと寝転がった。身体疲労すれば、精神もともにやられる。もう、どうでもいいという、勇者に不似合いなふてくされた根性が、心の隅に巣くった。私は、これほど努力したのだ。約束を破る心は、みじんもなかった。神も照覧、私は精いっぱいに努めてきたのだ。動けなくなるまで走ってきたのだ。私は不信の徒ではない。ああ、できることなら私の胸を断ち割って、真紅の心臓をお目にかけたい。愛と信実の血液だけで動いているこの心臓を見せてやりたい。けれども私は、この大事な時に、精も根も尽きたのだ。私は、よくよく不幸な男だ。私は、きっと笑われる。私の一家も笑われる。私は友を欺いた。中途で倒れるのは、初めから何もしないのと同じことだ。ああ、もう、どうでもいい。これが、私の定まった運命なのかもしれない。セリヌンティウスよ、許してくれ。君は、いつでも私を信じた。私も君を、欺かなかった。私たちは、本当によい友と友であったのだ。一度だって、暗い疑惑の雲を、お互い胸に宿したことはなかった。今だって、君は私を無心に待っているだろう。ああ、待っているだろう。ありがとう、セリヌンティウス。よくも私を信じてくれた。それを思えば、たまらない。友と友の間の信実は、この世でいちばん誇るべき宝なのだからな。セリヌンティウス、私は走ったのだ。君を欺くつもりは、みじんもなかった。信じてくれ！　私は急ぎに急いでここまで来たのだ。濁流を突破した。山賊の囲みからも、するりと抜けて一気に峠を駆け降りてきたのだ。私だから、できたのだよ。ああ、このうえ、私に望みたもうな。放っておいてくれ。どうでも、いいのだ。私は負けたのだ。だらしがない。笑ってくれ。王は私に、ちょっと遅れてこい、と耳打ちした。遅れたら、身代わりを殺して、私を助けてくれると約束した。私は王の卑劣を憎んだ。けれども、今になってみると、私は王の言うままになっている。私は、遅れていくだろう。王は、独り合点して私を笑い、そうしてこともなく私を放免するだろう。そうなったら、私は、死ぬよりつらい。私は、永遠に裏切り者だ。地上で最も、不名誉の人種だ。セリヌンティウスよ、私も死ぬぞ。君と一緒に死なせてくれ。君だけは私を信じてくれるにちがいない。いや、それも私の、独りよがりか？　ああ、もういっそ、悪徳者として生き延びてやろうか。村には私の家がある。羊もいる。妹夫婦は、まさか私を村から追い出すようなことはしないだろう。正義だの、信実だの、愛だの、考えてみれば、くだらない。人を殺して自分が生きる。それが人間世界の定法ではなかったか。ああ、なにもかも、ばかばかしい。私は、醜い裏切り者だ。どうとも、勝手にするがよい。やんぬるかな。──四肢を投げ出して、うとうと、まどろんでしまった。
+　ふと耳に、潺々、水の流れる音が聞こえた。そっと頭をもたげ、息をのんで耳を澄ました。すぐ足もとで、水が流れているらしい。よろよろ起き上がって、見ると、岩の裂け目から滾々と、何か小さくささやきながら清水が湧き出ているのである。その泉に吸い込まれるようにメロスは身をかがめた。水を両手ですくって、一口飲んだ。ほうと長いため息が出て、夢から覚めたような気がした。歩ける。行こう。肉体の疲労回復とともに、僅かながら希望が生まれた。義務遂行の希望である。わが身を殺して、名誉を守る希望である。斜陽は赤い光を、木々の葉に投じ、葉も枝も燃えるばかりに輝いている。日没までには、まだ間がある。私を、待っている人があるのだ。少しも疑わず、静かに期待してくれている人があるのだ。私は、信じられている。私の命なぞは、問題ではない。死んでおわび、などと気のいいことは言っておられぬ。私は、信頼に報いなければならぬ。今はただその一事だ。走れ！　メロス。
+　私は信頼されている。私は信頼されている。先刻の、あの悪魔のささやきは、あれは夢だ。悪い夢だ。忘れてしまえ。五臓が疲れているときは、ふいとあんな悪い夢を見るものだ。メロス、おまえの恥ではない。やはり、おまえは真の勇者だ。再び立って走れるようになったではないか。ありがたい！　私は、正義の士として死ぬことができるぞ。ああ、日が沈む。ずんずん沈む。待ってくれ、ゼウスよ。私は生まれた時から正直な男であった。正直な男のままにして死なせてください。
+　道行く人を押しのけ、跳ね飛ばし、メロスは黒い風のように走った。野原で酒宴の、その宴席のまっただ中を駆け抜け、酒宴の人たちを仰天させ、犬を蹴飛ばし、小川を跳び越え、少しずつ沈んでゆく太陽の、十倍も速く走った。一団の旅人とさっとすれ違った瞬間、不吉な会話を小耳にはさんだ。「今頃は、あの男も、はりつけにかかっているよ。」ああ、その男、その男のために私は、今こんなに走っているのだ。その男を死なせてはならない。急げ、メロス。遅れてはならぬ。愛と誠の力を、今こそ知らせてやるがよい。風体なんかは、どうでもいい。メロスは、今は、ほとんど全裸体であった。呼吸もできず、二度、三度、口から血が噴き出た。見える。はるか向こうに小さく、シラクスの町の塔楼が見える。塔楼は、夕日を受けてきらきら光っている。
+「ああ、メロス様。」うめくような声が、風とともに聞こえた。
+「誰だ。」メロスは走りながら尋ねた。
+「フィロストラトスでございます。あなたのお友達セリヌンティウス様の弟子でございます。」その若い石工も、メロスのあとについて走りながら叫んだ。「もう、だめでございます。無駄でございます。走るのは、やめてください。もう、あのかたをお助けになることはできません。」
+「いや、まだ日は沈まぬ。」
+「ちょうど今、あのかたが死刑になるところです。ああ、あなたは遅かった。お恨み申します。ほんの少し、もうちょっとでも、早かったなら！」
+「いや、まだ日は沈まぬ。」メロスは胸の張りさける思いで、赤く大きい夕日ばかりを見つめていた。走るよりほかはない。
+「やめてください。走るのは、やめてください。今はご自分のお命が大事です。あのかたは、あなたを信じておりました。刑場に引き出されても、平気でいました。王様が、さんざんあのかたをからかっても、メロスは来ます、とだけ答え、強い信念をもち続けている様子でございました。」
+「それだから、走るのだ。信じられているから走るのだ。まにあう、まにあわぬは問題でないのだ。人の命も問題でないのだ。私は、なんだか、もっと恐ろしく大きいもののために走っているのだ。ついてこい！　フィロストラトス。」
+「ああ、あなたは気が狂ったか。それでは、うんと走るがいい。ひょっとしたら、まにあわぬものでもない。走るがいい。」
+　言うにや及ぶ。まだ日は沈まぬ。最後の死力を尽くして、メロスは走った。メロスの頭は、空っぽだ。何ひとつ考えていない。ただ、訳のわからぬ大きな力に引きずられて走った。日は、ゆらゆら地平線に没し、まさに最後の一片の残光も、消えようとした時、メロスは疾風のごとく刑場に突入した。まにあった。
+「待て。その人を殺してはならぬ。メロスが帰ってきた。約束のとおり、今、帰ってきた。」と、大声で刑場の群衆に向かって叫んだつもりであったが、喉が潰れてしわがれた声がかすかに出たばかり、群衆は、一人として彼の到着に気がつかない。すでにはりつけの柱が高々と立てられ、縄を打たれたセリヌンティウスは、徐々につり上げられてゆく。メロスはそれを目撃して最後の勇、先刻、濁流を泳いだように群衆をかき分け、かき分け、
+「私だ、刑吏！　殺されるのは、私だ。メロスだ。彼を人質にした私は、ここにいる！」と、かすれた声で精いっぱいに叫びながら、ついにはりつけ台に登り、つり上げられてゆく友の両足に、かじりついた。群衆は、どよめいた。あっぱれ。許せ、と口々にわめいた。セリヌンティウスの縄は、ほどかれたのである。
+「セリヌンティウス。」メロスは目に涙を浮かべて言った。
+「私を殴れ。力いっぱいに頬を殴れ。私は、途中で一度、悪い夢を見た。君がもし私を殴ってくれなかったら、私は君と抱擁する資格さえないのだ。殴れ。」
+　セリヌンティウスは、全てを察した様子でうなずき、刑場いっぱいに鳴り響くほど音高くメロスの右頬を殴った。殴ってから優しくほほえみ、
+「メロス、私を殴れ。同じくらい音高く私の頬を殴れ。私はこの三日の間、たった一度だけ、ちらと君を疑った。生まれて、初めて君を疑った。君が私を殴ってくれなければ、私は君と抱擁できない。」
+　メロスは腕にうなりをつけてセリヌンティウスの頬を殴った。
+「ありがとう、友よ。」二人同時に言い、ひしと抱き合い、それからうれし泣きにおいおい声を放って泣いた。
+　群衆の中からも、歔欷の声が聞こえた。暴君ディオニスは、群衆の背後から二人のさまを、まじまじと見つめていたが、やがて静かに二人に近づき、顔を赤らめて、こう言った。
+「おまえらの望みはかなったぞ。おまえらは、わしの心に勝ったのだ。信実とは、決して空虚な妄想ではなかった。どうか、わしをも仲間に入れてくれまいか。どうか、わしの願いを聞き入れて、おまえらの仲間の一人にしてほしい。」
+　どっと群衆の間に、歓声が起こった。
+「ばんざい、王様ばんざい。」
+　一人の少女が、緋のマントをメロスにささげた。メロスは、まごついた。よき友は、気をきかせて教えてやった。
+「メロス、君は、真っ裸じゃないか。早くそのマントを着るがいい。このかわいい娘さんは、メロスの裸体を、皆に見られるのが、たまらなく口惜しいのだ。」
+　勇者は、ひどく赤面した。`;
+
+        // --- コンポーネント ---
+
+        // 解説パネル（画面下部固定、スクロール阻害なし）
+        const ExplanationPanel = ({ word, data, onClose }) => {
+            if (!word) return null;
+
+            return (
+                <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom duration-300">
+                    {/* 影の演出 */}
+                    <div className="absolute -top-10 left-0 right-0 h-10 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
+                    
+                    <div className="bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.1)] pb-8 pt-4 px-6 md:px-20">
+                        <div className="max-w-4xl mx-auto flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                                <div className="flex items-baseline gap-3 mb-2">
+                                    <h3 className="text-xl md:text-2xl font-bold text-rose-900 font-serif">{word}</h3>
+                                    <p className="text-sm text-rose-600 font-sans">{data.yomi}</p>
+                                </div>
+                                <p className="text-base md:text-lg text-slate-800 font-medium leading-relaxed font-sans">
+                                    {data.mean}
+                                </p>
+                            </div>
+                            <button 
+                                onClick={onClose} 
+                                className="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full p-2 transition-colors shrink-0"
+                            >
+                                <XIcon size={24} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // テキスト表示用コンポーネント
+        const InteractiveText = ({ text, vocab, onWordClick }) => {
+            const parsedContent = useMemo(() => {
+                const sortedKeys = Object.keys(vocab).sort((a, b) => b.length - a.length);
+                const regex = new RegExp(`(${sortedKeys.join('|')})`, 'g');
+                
+                return text.split('\n').map((paragraph, pIndex) => {
+                    if (!paragraph.trim()) return <br key={pIndex} />;
+
+                    const parts = paragraph.split(regex);
+                    return (
+                        <p key={pIndex} className="mb-8 leading-9 tracking-wide text-justify text-slate-800 text-lg">
+                            {parts.map((part, i) => {
+                                if (vocab[part]) {
+                                    return (
+                                        <span 
+                                            key={i}
+                                            className="interactive-word"
+                                            onClick={() => onWordClick(part)}
+                                        >
+                                            {part}
+                                        </span>
+                                    );
+                                }
+                                return part;
+                            })}
+                        </p>
+                    );
+                });
+            }, [text, vocab]);
+
+            return <div className="font-serif">{parsedContent}</div>;
+        };
+
+        // あらすじタブ（インフォグラフィック風、開閉機能付き）
+        const SummaryTab = () => {
+            const [expandedStep, setExpandedStep] = useState(null);
+
+            const toggleStep = (idx) => {
+                setExpandedStep(expandedStep === idx ? null : idx);
+            };
+
+            const steps = [
+                {
+                    phase: "発端",
+                    title: "メロスの激怒",
+                    desc: "邪知暴虐な王に激怒したメロスは城へ乗り込むが捕まる。妹の結婚式のため、親友を人質に「3日間の猶予」を得る。",
+                    detail: "村の牧人メロスは、人間不信のため人々を処刑する王に激怒し、城に乗り込むが捕縛される。処刑されそうになるが、「妹の結婚式を挙げたい」と懇願。親友セリヌンティウスを人質に残すことを条件に、3日後の日没までに戻る約束をして一時釈放される。",
+                    keywords: ["邪知暴虐", "激怒", "人質", "3日間の猶予"],
+                    icon: "🔥"
+                },
+                {
+                    phase: "平和",
+                    title: "妹の結婚式",
+                    desc: "村へ戻り、妹の結婚式を無事に挙げる。束の間の平和と幸福を味わうが、出発の時は迫る。",
+                    detail: "一睡もせずに村へ戻ったメロスは、妹と牧人の結婚式を急いで挙げる。祝宴は盛り上がり、メロスも「一生このまま暮らしたい」と願うほど幸せな時間を過ごすが、約束を守るため、後ろ髪を引かれる思いで村を出発する。",
+                    keywords: ["祝宴", "未練", "出発", "律儀"],
+                    icon: "💐"
+                },
+                {
+                    phase: "試練",
+                    title: "帰路の苦難",
+                    desc: "王城への帰路、川の氾濫で橋が流され、さらに山賊に襲われる。満身創痍でこれらを突破する。",
+                    detail: "城への帰路、昨夜の豪雨で川が氾濫し橋が破壊されていた。渡し船もなく、メロスは濁流を泳いで渡る。さらに峠では王の命令を受けた山賊に襲われるが、必死の思いでこれらを撃退し、満身創痍で先を急ぐ。",
+                    keywords: ["氾濫", "濁流", "山賊", "満身創痍"],
+                    icon: "🌊"
+                },
+                {
+                    phase: "挫折",
+                    title: "心身の限界",
+                    desc: "疲労が極限に達し、一度は走ることを諦める。「どうでもいい」という不信の心が芽生える。",
+                    detail: "度重なる困難で体力を使い果たしたメロスは、ついに動けなくなる。「もうどうでもいい」と自暴自棄になり、親友を見捨てて自分だけ助かろうとする「裏切りの心」が頭をもたげる。勇者としての誇りも消えかけ、深い眠りに落ちてしまう。",
+                    keywords: ["不信", "諦め", "裏切り", "日没"],
+                    icon: "🥀"
+                },
+                {
+                    phase: "復活",
+                    title: "疾走と到着",
+                    desc: "湧き水を飲んで復活。自らの義務と名誉のため、全裸に近い姿で死に物狂いで走る。",
+                    detail: "ふと耳にした湧き水の音で目を覚まし、水を飲んで体力を回復。同時に「信頼に報いなければならない」という希望と義務感が蘇る。日没が迫る中、メロスは服も脱ぎ捨て、全裸に近い姿で死に物狂いで走り続ける。",
+                    keywords: ["湧き水", "希望", "義務", "疾走"],
+                    icon: "🏃"
+                },
+                {
+                    phase: "結末",
+                    title: "王の改心",
+                    desc: "処刑直前に到着。互いの「一瞬の疑い」を告白して抱き合う二人の姿に、王は人間への信頼を取り戻す。",
+                    detail: "処刑寸前に刑場へ滑り込み、約束を果たす。メロスはセリヌンティウスに途中の裏切り心を、セリヌンティウスはメロスを疑った心を告白し合い、殴り合って抱擁する。その真実の友情を見た暴君ディオニスは改心し、仲間に入れてほしいと懇願する。",
+                    keywords: ["信頼", "告白", "抱擁", "改心"],
+                    icon: "🤝"
+                }
+            ];
+
+            return (
+                <div className="animate-in slide-in-from-bottom-4 duration-500 pb-10">
+                    <h2 className="text-2xl font-bold text-slate-900 mb-10 flex items-center gap-3 font-serif border-b-2 border-slate-100 pb-4">
+                        <Clock size={28} className="text-rose-600"/> 
+                        <span>物語のタイムライン</span>
+                    </h2>
+                    
+                    <div className="max-w-3xl mx-auto">
+                        {steps.map((step, idx) => (
+                            <div key={idx} className="relative pl-12 pb-8 last:pb-0 group">
+                                {/* 線 */}
+                                {idx !== 5 && (
+                                    <div className="absolute left-[19px] top-10 bottom-0 w-1 bg-slate-200 group-hover:bg-rose-200 transition-colors"></div>
+                                )}
+                                
+                                {/* アイコン */}
+                                <div className="absolute left-0 top-0 w-10 h-10 bg-white border-2 border-rose-500 rounded-full flex items-center justify-center text-xl shadow-sm z-10">
+                                    {step.icon}
+                                </div>
+
+                                <div 
+                                    className={`bg-white rounded-xl border transition-all cursor-pointer overflow-hidden ${
+                                        expandedStep === idx 
+                                        ? 'border-rose-200 shadow-md ring-1 ring-rose-100' 
+                                        : 'border-slate-200 shadow-sm hover:shadow-md hover:border-rose-200'
+                                    }`}
+                                    onClick={() => toggleStep(idx)}
+                                >
+                                    <div className="p-6">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-rose-600 tracking-widest block mb-1">{step.phase}</span>
+                                            {expandedStep === idx ? <ChevronUp size={20} className="text-slate-400"/> : <ChevronDown size={20} className="text-slate-400"/>}
+                                        </div>
+                                        <h3 className="font-bold text-xl mb-3 text-slate-900 font-serif">{step.title}</h3>
+                                        <p className="text-slate-600 leading-relaxed text-sm">
+                                            {step.desc}
+                                        </p>
+                                    </div>
+                                    
+                                    {/* 詳細展開部分 */}
+                                    <div className={`bg-rose-50 px-6 overflow-hidden transition-all duration-300 ease-in-out ${
+                                        expandedStep === idx ? 'max-h-96 py-6 border-t border-rose-100 opacity-100' : 'max-h-0 py-0 opacity-0'
+                                    }`}>
+                                        <p className="text-slate-800 text-sm leading-relaxed font-medium mb-4">
+                                            {step.detail}
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {step.keywords.map((keyword, kIdx) => (
+                                                <span key={kIdx} className="inline-flex items-center gap-1 text-xs font-bold text-rose-700 bg-white border border-rose-200 px-2 py-1 rounded-md shadow-sm">
+                                                    <Key size={10} />
+                                                    {keyword}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // 人物タブ（開閉式詳細機能付き）
+        const CharactersTab = () => {
+            const [expandedChar, setExpandedChar] = useState(null);
+
+            const toggleChar = (idx) => {
+                setExpandedChar(expandedChar === idx ? null : idx);
+            };
+
+            const characters = [
+                {
+                    name: "メロス",
+                    role: "主人公 / 羊飼い",
+                    desc: "正義感が強く単純な男。激怒して王に挑むが、途中で諦めかける人間的な弱さも持つ。",
+                    quote: "人の心を疑うのは、最も恥ずべき悪徳だ。",
+                    keywords: ["激怒", "正直", "単純", "勇者"],
+                    episodes: "妹の結婚式のために走り、親友を人質に差し出す。途中何度もくじけそうになるが、最後は裸で走り抜く。",
+                    color: "rose"
+                },
+                {
+                    name: "セリヌンティウス",
+                    role: "親友 / 石工",
+                    desc: "メロスの無二の親友。黙って人質となりメロスを待つが、一度だけ彼を疑ったことを告白する。",
+                    quote: "君が私を殴ってくれなければ、私は君と抱擁できない。",
+                    keywords: ["無二の親友", "石工", "信頼", "静寂"],
+                    episodes: "理由も聞かずにメロスの身代わりとなる。処刑直前までメロスを信じ続けるが、一度だけ疑念を抱いてしまう。",
+                    color: "emerald"
+                },
+                {
+                    name: "ディオニス",
+                    role: "暴君 / 王",
+                    desc: "人間不信の王。誰も信じられず殺戮を繰り返すが、最後はメロスたちの信頼に敗北を認める。",
+                    quote: "信実とは、決して空虚な妄想ではなかった。",
+                    keywords: ["暴君", "孤独", "人間不信", "改心"],
+                    episodes: "人を信じられず次々と処刑していたが、メロスとセリヌンティウスの友情を見て改心する。",
+                    color: "indigo"
+                },
+                {
+                    name: "フィロストラトス",
+                    role: "弟子 / 石工",
+                    desc: "セリヌンティウスの弟子。現実に絶望し、メロスに諦めを促す「現実主義」の象徴。",
+                    quote: "もう、だめでございます。無駄でございます。",
+                    keywords: ["弟子", "現実主義", "諦め", "警告"],
+                    episodes: "必死に走るメロスに対し、間に合わないから自分の命を守るよう忠告する。",
+                    color: "slate"
+                }
+            ];
+
+            return (
+                <div className="grid grid-cols-1 gap-6 animate-in slide-in-from-bottom-4 duration-500 pb-10">
+                    {characters.map((char, idx) => (
+                        <div 
+                            key={idx} 
+                            className={`bg-white rounded-xl overflow-hidden border transition-all cursor-pointer ${
+                                expandedChar === idx 
+                                ? `border-${char.color}-300 shadow-md ring-1 ring-${char.color}-100` 
+                                : 'border-slate-200 shadow-sm hover:shadow-md'
+                            }`}
+                            onClick={() => toggleChar(idx)}
+                        >
+                            <div className="flex flex-col md:flex-row">
+                                <div className={`bg-${char.color}-50 w-full md:w-48 p-6 flex flex-col items-center justify-center text-center border-b md:border-b-0 md:border-r border-slate-100`}>
+                                    <h3 className={`text-2xl font-bold text-${char.color}-900 font-serif mb-2`}>{char.name}</h3>
+                                    <span className={`text-xs font-bold bg-white px-3 py-1 rounded-full text-${char.color}-600 border border-${char.color}-100`}>
+                                        {char.role}
+                                    </span>
+                                </div>
+                                
+                                <div className="p-6 md:p-8 flex-1 flex flex-col justify-center relative">
+                                    <div className="flex justify-between items-start">
+                                        <p className="text-slate-600 mb-4 leading-relaxed pr-8">
+                                            {char.desc}
+                                        </p>
+                                        {expandedChar === idx ? <ChevronUp size={20} className="text-slate-400 absolute top-6 right-6"/> : <ChevronDown size={20} className="text-slate-400 absolute top-6 right-6"/>}
+                                    </div>
+                                    
+                                    <div className="relative pl-6">
+                                        <Quote className={`absolute left-0 top-0 text-${char.color}-200 w-4 h-4`} fill="currentColor" />
+                                        <p className={`text-lg font-serif italic text-${char.color}-800`}>
+                                            「{char.quote}」
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 詳細展開部分 */}
+                            <div className={`bg-slate-50 px-6 overflow-hidden transition-all duration-300 ease-in-out ${
+                                expandedChar === idx ? 'max-h-96 py-6 border-t border-slate-100 opacity-100' : 'max-h-0 py-0 opacity-0'
+                            }`}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <h4 className="flex items-center gap-2 font-bold text-slate-700 mb-2 text-sm uppercase tracking-wider">
+                                            <ScrollText size={16} /> Episode
+                                        </h4>
+                                        <p className="text-sm text-slate-600 leading-relaxed">
+                                            {char.episodes}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <h4 className="flex items-center gap-2 font-bold text-slate-700 mb-2 text-sm uppercase tracking-wider">
+                                            <Key size={16} /> Keywords
+                                        </h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {char.keywords.map((kw, kIdx) => (
+                                                <span key={kIdx} className={`text-xs font-bold text-${char.color}-700 bg-white border border-${char.color}-200 px-3 py-1 rounded-full`}>
+                                                    {kw}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // メインAppコンポーネント
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('text');
+            const [selectedWord, setSelectedWord] = useState(null);
+            
+            // スクロール位置保持用
+            const scrollPositions = React.useRef({ text: 0, summary: 0, chars: 0 });
+
+            const handleTabChange = (newTab) => {
+                // 現在のタブのスクロール位置を保存
+                scrollPositions.current[activeTab] = window.scrollY;
+                setActiveTab(newTab);
+            };
+
+            // タブ変更時にスクロール位置を復元
+            React.useLayoutEffect(() => {
+                const savedPosition = scrollPositions.current[activeTab] || 0;
+                // 即座に復元（ブラウザの描画タイミングにより微調整が必要な場合はsetTimeout(..., 0)を使用）
+                window.scrollTo(0, savedPosition);
+            }, [activeTab]);
+
+            // ヘッダーナビゲーションのスタイル
+            const navBtnClass = (tab) => `
+                flex items-center gap-1 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs md:text-sm font-bold transition-all
+                ${activeTab === tab ? 'bg-rose-50 text-rose-700 ring-1 ring-rose-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}
+            `;
+
+            return (
+                <div className="min-h-screen bg-[#f8fafc] font-sans text-slate-900 pb-32">
+                    
+                    {/* Header */}
+                    <header className="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 shadow-sm">
+                        <div className="max-w-4xl mx-auto px-4 md:px-6 h-auto py-2 md:py-0 md:h-16 flex flex-col md:flex-row items-center justify-between gap-2 md:gap-0">
+                            <div className="flex items-center justify-between w-full md:w-auto">
+                                <h1 className="text-xl md:text-2xl font-bold text-slate-900 font-serif tracking-tight flex items-center gap-2 cursor-pointer" onClick={() => handleTabChange('text')}>
+                                    <BookOpen size={24} className="text-rose-600" />
+                                    走れメロス
+                                </h1>
+                                {/* Mobile Author Name */}
+                                <span className="md:hidden text-[10px] font-bold text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full bg-slate-50">
+                                    太宰 治
+                                </span>
+                            </div>
+
+                            {/* Navigation */}
+                            <nav className="flex items-center justify-center bg-white border border-slate-100 p-1 rounded-full shadow-sm w-full md:w-auto">
+                                <button onClick={() => handleTabChange('summary')} className={`flex-1 md:flex-none justify-center ${navBtnClass('summary')}`}>
+                                    <ListIcon size={16} className="md:mr-1" />
+                                    あらすじ
+                                </button>
+                                <button onClick={() => handleTabChange('chars')} className={`flex-1 md:flex-none justify-center ${navBtnClass('chars')}`}>
+                                    <Users size={16} className="md:mr-1" />
+                                    登場人物
+                                </button>
+                                <button onClick={() => handleTabChange('text')} className={`flex-1 md:flex-none justify-center ${navBtnClass('text')}`}>
+                                    <BookOpen size={16} className="md:mr-1" />
+                                    本文を読む
+                                </button>
+                            </nav>
+
+                            <span className="hidden md:inline-block text-xs font-bold text-slate-500 border border-slate-200 px-3 py-1 rounded-full bg-slate-50">
+                                太宰 治
+                            </span>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <main className="max-w-4xl mx-auto px-6 py-8">
+
+                        {/* Tab Contents */}
+                        {activeTab === 'summary' && <SummaryTab />}
+                        {activeTab === 'chars' && <CharactersTab />}
+                        {activeTab === 'text' && (
+                            <div className="animate-in fade-in duration-700">
+                                <div className="mb-8 p-4 bg-white rounded-lg border-l-4 border-rose-500 shadow-sm flex items-center gap-3 text-slate-700 text-sm">
+                                    <div className="bg-rose-100 p-2 rounded-full text-rose-600">
+                                        <Info size={18} className="shrink-0" />
+                                    </div>
+                                    <p className="font-medium">
+                                        <span className="text-rose-600 font-bold border-b border-rose-300 mx-1">赤色のマーカー部分</span>
+                                        をタップすると、ここに意味が表示されます。
+                                    </p>
+                                </div>
+
+                                <div className="bg-white p-8 md:p-14 shadow-xl shadow-slate-200 border border-slate-100 relative rounded-sm">
+                                     <div className="absolute top-0 left-0 w-full h-1 bg-rose-600"></div>
+                                     
+                                     <div className="mb-12 text-center">
+                                        <h2 className="text-4xl font-bold text-slate-900 font-serif mb-4">走れメロス</h2>
+                                        <p className="text-lg text-slate-500 font-serif">太宰 治</p>
+                                     </div>
+                                    
+                                    <InteractiveText 
+                                        text={storyText} 
+                                        vocab={vocabulary} 
+                                        onWordClick={setSelectedWord}
+                                    />
+                                    
+                                    <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                        <div className="inline-block px-4 py-1 border border-slate-300 text-slate-400 text-xs tracking-widest uppercase rounded-full">
+                                            完
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Bottom Explanation Panel */}
+                    <ExplanationPanel 
+                        word={selectedWord} 
+                        data={vocabulary[selectedWord]} 
+                        onClose={() => setSelectedWord(null)} 
+                    />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
