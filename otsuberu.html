@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オツベルと象 - 学習用リーダー</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* カスタム設定 */
+        :root {
+            --accent-color: #0891b2; /* Cyan 600 */
+            --bg-color: #f8fafc; /* Slate 50 */
+            --text-body: #334155; /* Slate 700 */
+            --text-heading: #0f172a; /* Slate 900 */
+        }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-body);
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* 本文用フォント設定（読みやすさ重視） */
+        .font-novel {
+            font-family: 'Shippori Mincho', serif;
+            line-height: 2.0;     /* 行間 */
+            letter-spacing: 0.05em;
+            text-align: justify;
+            font-weight: 500;
+            font-size: 1.125rem;   /* PC: 18px (以前より小さく) */
+        }
+        
+        @media (max-width: 768px) {
+            .font-novel {
+                font-size: 1rem; /* スマホ: 16px */
+                line-height: 1.9;
+            }
+        }
+
+        /* 注釈ハイライト */
+        .highlight-word {
+            background: linear-gradient(transparent 65%, #bae6fd 65%); /* 下線風マーカー */
+            cursor: pointer;
+            border-radius: 2px;
+            padding: 0 2px;
+            transition: all 0.2s ease;
+            color: #0369a1;
+            font-weight: 700;
+        }
+        .highlight-word:hover {
+            background: #0ea5e9;
+            color: white;
+            text-decoration: none;
+        }
+
+        /* トランジション */
+        .slide-up-enter-active, .slide-up-leave-active {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+        }
+        .slide-up-enter-from, .slide-up-leave-to {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.2s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+
+        /* スクロールバー非表示（メニュー用） */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen flex flex-col relative">
+
+        <!-- ==========================================
+             1. グローバルヘッダー
+             ========================================== -->
+        <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+            <div class="max-w-5xl mx-auto px-4 md:px-6">
+                <div class="flex flex-col md:flex-row justify-between items-center h-auto md:h-16 py-3 md:py-0">
+                    <!-- タイトルエリア -->
+                    <div class="mb-3 md:mb-0 text-center md:text-left flex items-baseline gap-3">
+                        <h1 class="text-xl font-bold tracking-wide text-slate-800">{{ novelData.title }}</h1>
+                        <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{{ novelData.author }}</span>
+                    </div>
+
+                    <!-- ナビゲーションメニュー -->
+                    <nav class="w-full md:w-auto overflow-x-auto no-scrollbar">
+                        <div class="flex justify-center space-x-1 min-w-max p-1 bg-slate-100 rounded-lg">
+                            <button 
+                                v-for="(tab, key) in tabs" 
+                                :key="key"
+                                @click="switchTab(key)"
+                                :class="['px-4 py-2 rounded-md text-xs md:text-sm font-bold transition-all duration-300', 
+                                    currentTab === key 
+                                    ? 'bg-white text-cyan-700 shadow-sm ring-1 ring-black/5' 
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200']"
+                            >
+                                {{ tab.label }}
+                            </button>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- メインコンテンツ -->
+        <main class="flex-grow container mx-auto px-4 md:px-6 py-8 md:py-12 max-w-4xl">
+            
+                
+                <!-- VIEW 1: 物語の内容 (旧:構成・概要) -->
+                <div v-if="currentTab === 'structure'" key="structure" class="space-y-8 animate-fade-in">
+                    <div class="bg-white p-8 rounded-none md:rounded-2xl border-l-8 border-cyan-600 shadow-sm">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-4 flex items-center gap-3">
+                            物語の内容
+                        </h2>
+                        <p class="text-slate-600 leading-8 font-medium">
+                            このお話は、「ある牛飼い」が昔のことを思い出して語るスタイルで書かれています。
+                            「日曜日」が来るたびに、物語が進んでいきます。最初は楽しそうに見えた仕事が、だんだんと苦しいものに変わっていく様子に注目しましょう。
+                        </p>
+                    </div>
+                    
+                    <div class="grid gap-5">
+                        <div v-for="(item, index) in novelData.structure" :key="index" class="group bg-white border border-slate-200 hover:border-cyan-400 transition-colors duration-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md">
+                            <button @click="toggleDetail('structure', index)" class="w-full flex justify-between items-center p-6 text-left bg-white">
+                                <span class="text-lg font-bold text-slate-800 group-hover:text-cyan-700 transition">{{ item.header }}</span>
+                                <span class="text-cyan-600 text-2xl font-bold transition-transform duration-300" :class="{'rotate-45': item.isOpen}">＋</span>
+                            </button>
+                            <div v-show="item.isOpen" class="px-6 pb-8 text-slate-700 leading-8 border-t border-slate-100 bg-slate-50">
+                                <p class="mb-5 font-medium">{{ item.summary }}</p>
+                                <div class="bg-white p-4 rounded border border-slate-200 text-sm leading-7 text-slate-600 mb-4">
+                                    <span class="font-bold text-cyan-700 block mb-2">【ポイント】</span>
+                                    {{ item.detail }}
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <span v-for="tag in item.tags" :key="tag" class="text-xs font-bold text-slate-500 bg-slate-200 px-2 py-1 rounded">#{{ tag }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: 登場人物 -->
+                <div v-else-if="currentTab === 'characters'" key="characters" class="space-y-8">
+                    <div class="text-center mb-10">
+                        <h2 class="text-3xl font-bold text-slate-800">登場人物紹介</h2>
+                        <div class="w-16 h-1 bg-cyan-500 mx-auto mt-4 rounded-full"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div v-for="(char, index) in novelData.characters" :key="index" 
+                             @click="toggleDetail('characters', index)"
+                             class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden group">
+                            
+                            <div class="absolute top-0 left-0 w-1.5 h-full bg-slate-200 group-hover:bg-cyan-600 transition-colors"></div>
+                            
+                            <div class="pl-4">
+                                <div class="flex justify-between items-baseline mb-3">
+                                    <h3 class="text-xl font-bold text-slate-800">{{ char.name }}</h3>
+                                    <span class="text-xs font-bold text-white bg-cyan-600 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">くわしく見る</span>
+                                </div>
+                                <p class="text-sm font-bold text-slate-500 mb-4 min-h-[3em]">{{ char.description }}</p>
+                                
+                                <div v-show="char.isOpen" class="pt-5 border-t border-slate-100 animate-fade-in">
+                                    <div class="mb-4">
+                                        <h4 class="text-sm font-bold text-cyan-700 mb-1">■ どんな人？</h4>
+                                        <p class="text-sm text-slate-700 leading-7">{{ char.detail }}</p>
+                                    </div>
+                                    <div class="mb-4">
+                                        <h4 class="text-sm font-bold text-cyan-700 mb-1">■ ここに注目</h4>
+                                        <p class="text-sm text-slate-700 leading-7">{{ char.symbolism }}</p>
+                                    </div>
+                                    <blockquote class="text-sm italic font-serif text-slate-500 bg-slate-50 p-3 rounded border-l-4 border-slate-300">
+                                        "{{ char.quote }}"
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 3: キーワード -->
+                <div v-else-if="currentTab === 'keywords'" key="keywords" class="space-y-8">
+                    <div class="bg-slate-800 text-white p-8 rounded-2xl shadow-xl">
+                        <h2 class="text-2xl font-bold mb-2">用語・キーワード解説</h2>
+                        <p class="text-slate-300 text-sm font-medium">物語をもっと深く知るための大切な言葉</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div v-for="(kw, index) in novelData.keywords" :key="index" class="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition">
+                            <div @click="toggleDetail('keywords', index)" class="p-5 flex items-center cursor-pointer hover:bg-slate-50 transition">
+                                <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-cyan-100 text-cyan-700 font-bold mr-4 text-sm">{{ index + 1 }}</span>
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-800">{{ kw.word }}</h3>
+                                    <p class="text-xs font-bold text-slate-500 mt-1">{{ kw.shortDesc }}</p>
+                                </div>
+                            </div>
+                            <div v-show="kw.isOpen" class="px-5 pb-6 pl-16 bg-slate-50 border-t border-slate-100">
+                                <p class="text-slate-700 text-base leading-8 font-medium">{{ kw.fullDesc }}</p>
+                                <button @click.stop="jumpToText" class="mt-4 text-sm font-bold text-cyan-700 hover:text-cyan-900 flex items-center gap-1 group bg-white px-3 py-1 rounded border border-cyan-200 inline-block shadow-sm">
+                                    本文でさがす <span class="group-hover:translate-x-1 transition-transform">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 4: 本文を読む (Reader) -->
+                <div v-else-if="currentTab === 'read'" key="read">
+                    <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-none md:rounded-lg border border-slate-200 min-h-screen">
+                        <div class="p-6 md:p-16">
+                            <!-- 本文 -->
+                            <div class="font-novel text-slate-800" v-html="formattedNovelText" @click="handleTextClick"></div>
+                            
+                            <div class="mt-20 pt-10 border-t-2 border-slate-100 text-center pb-10">
+                                <span class="text-sm font-bold text-slate-400">ー 完 ー</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- パディング（下部固定パネル分） -->
+                    <div class="h-40"></div>
+                </div>
+        </main>
+
+        <!-- ==========================================
+             語彙解説パネル (下部固定)
+             ========================================== -->
+        <transition name="slide-up">
+            <div v-if="activeAnnotation" class="fixed bottom-0 left-0 w-full z-50 px-2 pb-2 md:px-0 md:pb-0">
+                <div class="max-w-3xl mx-auto bg-slate-900/95 backdrop-blur-md text-white shadow-2xl rounded-2xl md:rounded-t-2xl md:rounded-b-none border-t border-white/10 overflow-hidden transform transition-all">
+                    <!-- ハンドルバー -->
+                    <div class="h-1.5 w-12 bg-white/20 rounded-full mx-auto mt-3 mb-1 cursor-grab active:cursor-grabbing"></div>
+                    
+                    <div class="p-6 flex flex-col relative">
+                        <!-- 閉じるボタン -->
+                        <button @click="activeAnnotation = null" class="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800 p-2 rounded-full transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="text-xs font-bold bg-cyan-600 text-white px-2 py-0.5 rounded shadow-sm">言葉の意味</span>
+                            <h3 class="text-xl font-bold text-white tracking-wide">{{ activeAnnotation.word }}</h3>
+                        </div>
+                        
+                        <p class="text-base md:text-lg text-slate-200 leading-8 pr-8 font-medium">
+                            {{ activeAnnotation.desc }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, onUnmounted, nextTick } = Vue;
+
+        const NOVEL_DATA = {
+            title: "オツベルと象",
+            author: "宮沢 賢治",
+            text: `
+　……ある牛飼いが物語る。
+
+　　　第一日曜
+
+　オツベルときたらたいしたもんだ。稲こき機械の六台も据えつけて、のんのんのんのんのんのんと、おおそろしない音をたててやっている。
+　十六人の百姓どもが、顔をまるっきり真っ赤にして足で踏んで機械を回し、小山のように積まれた稲をかたっぱしからこいていく。わらはどんどん後ろの方へ投げられて、また新しい山になる。そこらは、もみやわらから立った細かなちりで、変にぼうっと黄色になり、まるで砂漠の煙のようだ。
+　その薄暗い仕事場を、オツベルは、大きな琥珀のパイプをくわえ、吹き殻をわらに落とさないよう、目を細くして気をつけながら、両手を背中に組み合わせて、ぶらぶら行ったり来たりする。
+　小屋はずいぶん頑丈で、学校ぐらいもあるのだが、なにせ新式稲こき機械が、六台もそろって回ってるから、のんのんのんのんふるうのだ。中に入るとそのために、すっかり腹がすくほどだ。そして実際オツベルは、そいつで上手に腹を減らし、昼飯時には、六寸ぐらいのビフテキだの、雑巾ほどあるオムレツの、ほくほくしたのを食べるのだ。
+　とにかく、そうして、のんのんのんのんやっていた。
+　そしたらそこへどういうわけか、その、白象がやってきた。白い象だぜ、ペンキを塗ったのでないぜ。どういうわけで来たかって？　そいつは象のことだから、たぶんぶらっと森を出て、ただなにとなく来たのだろう。
+　そいつが小屋の入り口に、ゆっくり顔を出した時、百姓どもはぎょっとした。なぜぎょっとした？　よくきくねえ、何をしだすか知れないじゃないか。かかり合っては大変だから、どいつも皆、一生懸命、自分の稲をこいていた。
+　ところがその時オツベルは、並んだ機械の後ろの方で、ポケットに手を入れながら、ちらっと鋭く象を見た。それからすばやく下を向き、なんでもないというふうで、今までどおり行ったり来たりしていたもんだ。
+　すると今度は白象が、片足床に上げたのだ。百姓どもはぎょっとした。それでも仕事が忙しいし、かかり合ってはひどいから、そっちを見ずに、やっぱり稲をこいていた。
+　オツベルは奥の薄暗い所で両手をポケットから出して、も一度ちらっと象を見た。それからいかにも退屈そうに、わざと大きなあくびをして、両手を頭の後ろに組んで、行ったり来たりやっていた。ところが象が威勢よく、前足二つ突き出して、小屋に上がってこようとする。百姓どもはぎくっとし、オツベルも少しぎょっとして、大きな琥珀のパイプから、ふっと煙を吐き出した。それでもやっぱり知らないふうで、ゆっくりそこらを歩いていた。
+　そしたらとうとう、象がのこのこ上がってきた。そして機械の前のとこを、のんきに歩き始めたのだ。
+　ところがなにせ、機械はひどく回っていて、もみは夕立かあられのように、パチパチ象に当たるのだ。象はいかにもうるさいらしく、小さなその目を細めていたが、またよく見ると、確かに少し笑っていた。
+　オツベルはやっと覚悟を決めて、稲こき機械の前に出て、象に話をしようとしたが、その時象が、とてもきれいな、うぐいすみたいないい声で、こんな文句を言ったのだ。
+「ああ、だめだ。あんまりせわしく、砂が私の歯に当たる。」
+　全くもみは、パチパチパチパチ歯に当たり、また真っ白な頭や首にぶっつかる。
+　さあ、オツベルは命がけだ。パイプを右手に持ち直し、度胸をすえてこう言った。
+「どうだい、ここはおもしろいかい。」
+「おもしろいねえ。」象が体を斜めにして、目を細くして返事した。
+「ずうっとこっちにいたらどうだい。」
+　百姓どもははっとして、息を殺して象を見た。オツベルは言ってしまってから、にわかにがたがた震えだす。ところが象はけろりとして、
+「いてもいいよ。」と答えたもんだ。
+「そうか。それではそうしよう。そういうことにしようじゃないか。」オツベルが顔をくしゃくしゃにして、真っ赤になって喜びながらそう言った。
+　どうだ、そうしてこの象は、もうオツベルの財産だ。いまに見たまえ、オツベルは、あの白象を、働かせるか、サーカス団に売り飛ばすか、どっちにしても万円以上もうけるぜ。
+
+　　　第二日曜
+
+　オツベルときたらたいしたもんだ。それにこの前稲こき小屋で、うまく自分のものにした、象も実際たいしたもんだ。力も二十馬力もある。だいいち見かけが真っ白で、牙は全体きれいな象牙でできている。皮も全体、立派でじょうぶな象皮なのだ。そしてずいぶん働くもんだ。けれどもそんなに稼ぐのも、やっぱり主人が偉いのだ。
+「おい、おまえは時計はいらないか。」丸太で建てたその象小屋の前に来て、オツベルは琥珀のパイプをくわえ、顔をしかめてこうきいた。
+「僕は時計はいらないよ。」象が笑って返事した。
+「まあ持ってみろ、いいもんだ。」こう言いながらオツベルは、ブリキでこさえた大きな時計を、象の首からぶら下げた。
+「なかなかいいね。」象も言う。
+「鎖もなくちゃだめだろう。」オツベルときたら、百キロもある鎖をさ、その前足にくっつけた。
+「うん、なかなか鎖はいいね。」三足歩いて象が言う。
+「靴を履いたらどうだろう。」
+「僕は靴など履かないよ。」
+「まあ履いてみろ、いいもんだ。」オツベルは顔をしかめながら、赤い張り子の大きな靴を、象の後ろのかかとにはめた。
+「なかなかいいね。」象も言う。
+「靴に飾りをつけなくちゃ。」オツベルはもう大急ぎで、四百キロある分銅を、靴の上から、はめ込んだ。
+「うん、なかなかいいね。」象は二足歩いてみて、さもうれしそうにそう言った。
+　次の日、ブリキの大きな時計と、やくざな紙の靴とは破け、象は鎖と分銅だけで、大喜びで歩いておった。
+「すまないが税金も高いから、今日はすこうし、川から水をくんでくれ。」オツベルは両手を後ろで組んで、顔をしかめて象に言う。
+「ああ、僕水をくんでこよう。もう何杯でもくんでやるよ。」
+　象は目を細くして喜んで、その昼過ぎに五十だけ、川から水をくんできた。そして菜っ葉の畑にかけた。
+　夕方象は小屋にいて、十把のわらを食べながら、西の三日の月を見て、
+「ああ、稼ぐのは愉快だねえ、さっぱりするねえ。」と言っていた。
+「すまないが税金がまた上がる。今日はすこうし、森から薪を運んでくれ。」オツベルは房のついた赤い帽子をかぶり、両手をかくしに突っ込んで、次の日象にそう言った。
+「ああ、僕薪を持ってこよう。いい天気だねえ。僕はぜんたい森へ行くのは大好きなんだ。」象は笑ってこう言った。
+　オツベルは少しぎょっとして、パイプを手から危なく落としそうにしたが、もうその時は、象がいかにも愉快なふうで、ゆっくり歩きだしたので、また安心してパイプをくわえ、小さなせきを一つして、百姓どもの仕事のほうを見に行った。
+　その昼過ぎの半日に、象は九百把薪を運び、目を細くして喜んだ。
+　晩方象は小屋にいて、八把のわらを食べながら、西の四日の月を見て、
+「ああ、せいせいした。サンタマリア。」と、こう独り言したそうだ。
+　その次の日だ。
+「すまないが、税金が五倍になった。今日はすこうし鍛冶場へ行って、炭火を吹いてくれないか。」
+「ああ、吹いてやろう。本気でやったら、僕、もう、息で、石も投げ飛ばせるよ。」
+　オツベルはまたどきっとしたが、気を落ち着けて笑っていた。
+　象はのそのそ鍛冶場へ行って、べたんと足を折って座り、ふいごの代わりに半日炭を吹いたのだ。
+　その晩、象は象小屋で、七把のわらを食べながら、空の五日の月を見て、
+「ああ、疲れたな、うれしいな、サンタマリア。」と、こう言った。
+　どうだ、そうして次の日から、象は朝から稼ぐのだ。わらも昨日はただ五把だ。よくまあ、五把のわらなどで、あんな力が出るもんだ。
+　実際、象は経済だよ。それというのもオツベルが、頭がよくて偉いためだ。オツベルときたらたいしたもんさ。
+
+　　　第五日曜
+
+　オツベルかね、そのオツベルは、俺も言おうとしてたんだが、いなくなったよ。
+　まあ落ち着いて聞きたまえ。前に話したあの象を、オツベルは少しひどくしすぎた。仕方がだんだんひどくなったから、象がなかなか笑わなくなった。ときには赤い竜の目をして、じっとこんなにオツベルを見下ろすようになってきた。
+　ある晩、象は象小屋で、三把のわらを食べながら、十日の月を仰ぎ見て、
+「苦しいです。サンタマリア。」と言ったということだ。
+　こいつを聞いたオツベルは、ことごと象につらくした。
+　ある晩、象は象小屋で、ふらふら倒れて地べたに座り、わらも食べずに、十一日の月を見て、
+「もう、さようなら、サンタマリア。」と、こう言った。
+「おや、なんだって？　さよならだ？」月がにわかに象にきく。
+「ええ、さよならです。サンタマリア。」
+「なんだい、なりばかり大きくて、からっきし意気地のないやつだなあ。仲間へ手紙を書いたらいいや。」月が笑ってこう言った。
+「お筆も紙もありませんよう。」象は細ういきれいな声で、しくしくしくしく泣きだした。
+「そら、これでしょう。」すぐ目の前で、かわいい子どもの声がした。象が頭を上げて見ると、赤い着物の童子が立って、すずりと紙をささげていた。象は早速手紙を書いた。
+「僕はずいぶんめに遭っている。みんなで出てきて助けてくれ。」
+　童子はすぐに手紙を持って、林の方へ歩いていった。
+　赤衣の童子が、そうして山に着いたのは、ちょうど昼飯頃だった。この時、山の象どもは、沙羅樹の下の暗がりで、碁などをやっていたのだが、額を集めてこれを見た。
+「僕はずいぶんめに遭っている。みんなで出てきて助けてくれ。」
+斉に立ち上がり、真っ黒になってほえだした。
+「オツベルをやっつけよう。」議長の象が高く叫ぶと、
+「おう、出かけよう。グララアガア、グララアガア。」みんなが一度に呼応する。
+　さあ、もうみんな、嵐のように林の中を鳴き抜けて、グララアガア、グララアガア、野原の方へとんでいく。小さな木などは根こぎになり、やぶやなんかもめちゃめちゃだ。グワア　グワア　グワア　グワア、花火みたいに野原の中へとび出した。それから、なんの、走って、走って、とうとう向こうの青くかすんだ野原の果てに、オツベルの屋敷の黄色な屋根を見つけると、象は一度に噴火した。
+　グララアガア、グララアガア。その時はちょうど一時半、オツベルは皮の寝台の上で昼寝の盛りで、からすの夢を見ていたもんだ。あまり大きな音なので、オツベルの家の百姓どもが、門から少し外へ出て、小手をかざして向こうを見た。林のような象だろう。汽車より速くやってくる。さあ、まるっきり、血の気もうせて駆け込んで、「だんなあ、象です。押し寄せやした。だんなあ、象です。」と、声を限りに叫んだもんだ。
+　ところがオツベルはやっぱり偉い。目をぱっちりとあいた時は、もうなにもかもわかっていた。
+「おい、象のやつは小屋にいるのか。いる？　いる？　いるのか。よし、戸を閉めろ。戸を閉めるんだよ。早く象小屋の戸を閉めるんだ。ようし、早く丸太を持ってこい。閉じこめちまえ、ちくしょうめじたばたしやがるな、丸太をそこへ縛りつけろ。何ができるもんか。わざと力を減らしてあるんだ。ようし、もう五、六本、持ってこい。さあ、だいじょうぶだ。だいじょうぶだとも。慌てるなったら。おい、みんな、今度は門だ。門を閉めろ。かんぬきをかえ。突っ張り。突っ張り。そうだ。おい、みんな心配するなったら。しっかりしろよ。」オツベルはもう支度ができて、ラッパみたいないい声で、百姓どもを励ました。ところがどうして、百姓どもは気が気じゃない。こんな主人に巻き添えなんぞ食いたくないから、みんなタオルやハンケチや、汚れたような白いようなものを、ぐるぐる腕に巻きつける。降参をする印なのだ。
+　オツベルはいよいよ躍起となって、そこら辺りを駆け回る。オツベルの犬も気がたって、火のつくようにほえながら、屋敷の中をはせ回る。
+　まもなく地面はぐらぐらと揺られ、そこらはばしゃばしゃ暗くなり、象は屋敷を取り巻いた。グララアガア、グララアガア、その恐ろしい騒ぎの中から、
+「今助けるから安心しろよ。」優しい声も聞こえてくる。
+「ありがとう。よく来てくれて、ほんとに僕はうれしいよ。」象小屋からも声がする。さあ、そうすると、周りの象は、いっそうひどく、グララアガア、グララアガア、塀の周りをぐるぐる走っているらしく、たびたび中から、怒って振り回す鼻も見える。けれども塀はセメントで、中には鉄も入っているから、なかなか象も壊せない。塀の中にはオツベルが、たった一人で叫んでいる。百姓どもは目もくらみ、そこらをうろうろするだけだ。そのうち外の象どもは、仲間の体を台にして、いよいよ塀を越しかかる。だんだん、にゅうと顔を出す。そのしわくちゃで灰色の、大きな顔を見上げた時、オツベルの犬は気絶した。さあ、オツベルは撃ちだした。六連発のピストルさ。ドーン、グララアガア、ドーン、グララアガア、ドーン、グララアガア。ところが弾は通らない。牙に当たれば跳ね返る。一匹なぞはこう言った。
+「なかなかこいつはうるさいねえ。パチパチ顔へ当たるんだ。」オツベルはいつかどこかで、こんな文句を聞いたようだと思いながら、ケースを帯から詰め替えた。そのうち、象の片足が、塀からこっちへはみ出した。それからも一つはみ出した。五匹の象がいっぺんに、塀からどっと落ちてきた。オツベルはケースを握ったまま、もうくしゃくしゃに潰れていた。早くも門が開いていて、グララアガア、グララアガア、象がどしどしなだれ込む。
+「牢はどこだ。」みんなは小屋に押し寄せる。丸太なんぞは、マッチのようにへし折られ、あの白象は大変痩せて小屋を出た。
+「まあ、よかったね、痩せたねえ。」みんなは静かにそばに寄り、鎖と分銅をはずしてやった。
+「ああ、ありがとう。ほんとに僕は助かったよ。」白象は寂しく笑ってそう言った。
+　おや、川へはいっちゃいけないったら。
+            `,
+            annotations: {
+                "琥珀": "木の樹液が固まってできた宝石のようなもの。黄色くて透き通っています。",
+                "六寸": "長さの単位。約18cmくらい。",
+                "ビフテキ": "ビーフステーキのこと。昔の言葉です。",
+                "サンタマリア": "聖母マリア（イエス・キリストのお母さん）のこと。象が苦しいときに助けを求めて叫んだ名前。",
+                "沙羅樹": "仏教に関係の深い、とてもありがたい木。",
+                "グララアガア": "象たちが怒ってほえる声。",
+                "ブリキ": "スズという金属をぬった鉄の板。安っぽい感じがします。",
+                "五把": "わらを束ねた数。「把（わ）」は束のこと。数が減らされているのは、ごはんが減らされているということです。",
+                "二十馬力": "力の強さを表す言葉。馬20頭分の力があるということ。",
+                "稲こき機械": "イネからお米の粒をとりはずすための機械。",
+                "張り子": "紙などを重ねて貼って形を作ったもの。中はからっぽで、こわれやすい。",
+                "のんのんのんのん": "機械が回る音。単調で、どこか不気味な感じがします。",
+                "百姓": "ここでは農作業をする労働者たちのこと。",
+                "雑巾": "「雑巾ほどあるオムレツ」というたとえ。とても大きくて平べったいことを表しています。",
+                "吹いて": "風を送って火を強くすること。",
+                "ふいご": "火を強くするために風を送る道具。",
+                "三日の月": "三日月。月は象のことを空から静かに見ています。",
+                "竜の目": "怒りで恐ろしい目つきになっていること。",
+                "五倍": "税金がいきなり5倍になること。オツベルが勝手に決めた理不尽なルール。"
+            },
+            structure: [
+                {
+                    header: "① 白象がやってきた",
+                    summary: "オツベルの工場に、白い象が迷い込んできました。オツベルは象をだまして、自分のものにしてしまいます。",
+                    detail: "機械が動くうるさい工場に、森から来た白い象が現れます。オツベルはずる賢く、象は疑うことを知らない純粋な性格です。これが悲劇の始まりでした。",
+                    tags: ["契約", "だまされる", "油断"],
+                    isOpen: false
+                },
+                {
+                    header: "② 働かされる象",
+                    summary: "象は働き始めます。オツベルは「時計」や「靴」をあげるふりをして、実は重たい鎖をつけて逃げられないようにしました。",
+                    detail: "象は「かっこいい時計や靴」にあこがれていましたが、それは実は重い鎖でした。「便利そうに見えて、実は自由を奪うもの」のたとえです。",
+                    tags: ["うそのプレゼント", "鎖", "最初は楽しかった"],
+                    isOpen: false
+                },
+                {
+                    header: "③ どんどんひどくなる",
+                    summary: "「税金」という理由で、仕事はどんどん増え、ごはんは減らされていきます。象は弱っていきます。",
+                    detail: "最初は笑っていた象も、だんだん元気がなくなります。オツベルは「税金だから仕方ない」と言いますが、それは象をこき使うためのうそです。",
+                    tags: ["ごはんが減る", "働きすぎ", "助けて..."],
+                    isOpen: false
+                },
+                {
+                    header: "④ 手紙と救出",
+                    summary: "死にそうな象は、月に助けを求めます。手紙を書くと、仲間の象たちが怒って押し寄せ、オツベルをやっつけました。",
+                    detail: "象の願いが月に届き、仲間の象たちが嵐のようにやってきました。オツベルの自慢の機械や工場も、自然の力の前ではひとたまりもありませんでした。",
+                    tags: ["反撃", "仲間", "自然の力", "助かった"],
+                    isOpen: false
+                }
+            ],
+            characters: [
+                {
+                    name: "オツベル",
+                    description: "工場の持ち主。お金もうけのことしか考えていない。",
+                    detail: "たくさんの人を働かせて、自分だけ贅沢（ぜいたく）をしている人。象のことを「生き物」ではなく「お金を生む道具」としか思っていない、冷たい心の持ち主です。",
+                    symbolism: "自分勝手な人間、お金もうけ主義",
+                    quote: "どうだい、ここはおもしろいかい。",
+                    isOpen: false
+                },
+                {
+                    name: "白象",
+                    description: "森から来た純粋な象。働くのは楽しいと思っていたけれど…。",
+                    detail: "最初は働くことが楽しかったけれど、オツベルにだまされてボロボロになってしまいます。無邪気な象が、ひどい目にあっていく様子がかわいそうです。",
+                    symbolism: "自然、だまされる弱い立場の人",
+                    quote: "ああ、稼ぐのは愉快だねえ、さっぱりするねえ。",
+                    isOpen: false
+                },
+                {
+                    name: "月",
+                    description: "空からすべてを見ている存在。",
+                    detail: "苦しむ象の話を静かに聞いて、「仲間に手紙を書けばいい」と教えてくれました。感情的にならず、冷静に正しい道を示してくれる存在です。",
+                    symbolism: "神様のような視点、静かな救い",
+                    quote: "仲間へ手紙を書いたらいいや。",
+                    isOpen: false
+                },
+                {
+                    name: "赤衣の童子",
+                    description: "不思議な赤い着物の子供。",
+                    detail: "象の手紙を仲間のところへ届けてくれた子供。象の強い願いが形になったような、神様の使いのような不思議な存在です。",
+                    symbolism: "奇跡、助け",
+                    quote: "そら、これでしょう。",
+                    isOpen: false
+                }
+            ],
+            keywords: [
+                {
+                    word: "労働と搾取",
+                    shortDesc: "「働くこと」と「利用されること」",
+                    fullDesc: "最初は「楽しい」と思って働いていたのに、いつの間にか「苦しい」ものに変わってしまいます。がんばって働いているのに、幸せになれない。そんな理不尽な状況を描いています。",
+                    isOpen: false
+                },
+                {
+                    word: "サンタマリア",
+                    shortDesc: "神様への祈り",
+                    fullDesc: "象が本当に苦しいときに叫んだ言葉です。機械の音しかしない冷たい工場の中で、象の心の叫びが響きます。",
+                    isOpen: false
+                },
+                {
+                    word: "時計と靴",
+                    shortDesc: "自由を奪う罠（わな）",
+                    fullDesc: "オツベルが象にあげたもの。これらは便利でかっこいいものに見えますが、実は象を縛り付けるための重りでした。「便利なものに頼りすぎて、自由を失うこと」への警告かもしれません。",
+                    isOpen: false
+                },
+                {
+                    word: "のんのんのんのん",
+                    shortDesc: "不気味な音",
+                    fullDesc: "稲こき機械の音です。物語の中で何度も繰り返されます。オツベルの工場が、休むことなく動き続けている不気味さを表しています。",
+                    isOpen: false
+                },
+                {
+                    word: "手紙",
+                    shortDesc: "反撃のきっかけ",
+                    fullDesc: "閉じ込められた象が、外の世界とつながる唯一の方法でした。自分の気持ちを言葉にして伝えることが、状況を変える大きな力になりました。",
+                    isOpen: false
+                },
+                {
+                    word: "川",
+                    shortDesc: "最後の言葉の謎",
+                    fullDesc: "最後に牛飼いが言う「川へはいっちゃいけないったら」。これにはいろいろな意味が考えられます。「あの世に行ってはいけない」とか「もう地獄（工場）には戻るな」という意味かもしれません。",
+                    isOpen: false
+                }
+            ]
+        };
+
+        createApp({
+            setup() {
+                const tabs = {
+                    structure: { label: '物語の内容' },
+                    characters: { label: '登場人物' },
+                    keywords: { label: '用語解説' },
+                    read: { label: '本文を読む' }
+                };
+                
+                // ... existing logic ...
+                
+                const currentTab = ref('structure');
+                const novelData = ref(NOVEL_DATA);
+                const activeAnnotation = ref(null);
+                let scrollTimeout = null;
+
+                const formattedNovelText = computed(() => {
+                    let text = novelData.value.text;
+                    text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    text = text.replace(/\n/g, "<br>");
+                    Object.keys(novelData.value.annotations).forEach(key => {
+                        const regex = new RegExp(key, "g");
+                        text = text.replace(regex, `<span class="highlight-word" data-word="${key}">${key}</span>`);
+                    });
+                    return text;
+                });
+
+                const toggleDetail = (section, index) => {
+                    novelData.value[section][index].isOpen = !novelData.value[section][index].isOpen;
+                };
+
+                const jumpToText = () => {
+                    switchTab('read');
+                };
+
+                // --- Scroll Memory Logic ---
+
+                const restoreScrollPosition = () => {
+                    const savedPos = localStorage.getItem('novel_scroll_pos');
+                    if (savedPos) {
+                        nextTick(() => {
+                            window.scrollTo({
+                                top: parseInt(savedPos),
+                                behavior: 'auto'
+                            });
+                        });
+                    }
+                };
+
+                const handleScroll = () => {
+                    if (currentTab.value !== 'read') return;
+                    if (scrollTimeout) return;
+                    scrollTimeout = setTimeout(() => {
+                        localStorage.setItem('novel_scroll_pos', window.scrollY);
+                        scrollTimeout = null;
+                    }, 200);
+                };
+
+                const switchTab = (tabKey) => {
+                    if (currentTab.value === 'read') {
+                        localStorage.setItem('novel_scroll_pos', window.scrollY);
+                    }
+
+                    currentTab.value = tabKey;
+                    
+                    if (tabKey === 'read') {
+                        restoreScrollPosition();
+                    } else {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                };
+
+                const handleTextClick = (e) => {
+                    const target = e.target;
+                    if (target.classList.contains('highlight-word')) {
+                        const word = target.getAttribute('data-word');
+                        const desc = novelData.value.annotations[word];
+                        activeAnnotation.value = { word, desc };
+                    }
+                };
+
+                onMounted(() => {
+                    window.addEventListener('scroll', handleScroll);
+                });
+
+                onUnmounted(() => {
+                    window.removeEventListener('scroll', handleScroll);
+                    if (scrollTimeout) clearTimeout(scrollTimeout);
+                });
+
+                return {
+                    tabs,
+                    currentTab,
+                    novelData,
+                    formattedNovelText,
+                    activeAnnotation,
+                    switchTab,
+                    toggleDetail,
+                    handleTextClick,
+                    jumpToText
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
