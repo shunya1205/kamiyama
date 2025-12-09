@@ -264,7 +264,10 @@
 
                         <div class="flex items-center gap-3 mb-3">
                             <span class="text-xs font-bold bg-cyan-600 text-white px-2 py-0.5 rounded shadow-sm">言葉の意味</span>
-                            <h3 class="text-xl font-bold text-white tracking-wide">{{ activeAnnotation.word }}</h3>
+                            <div>
+                                <div v-if="activeAnnotation.read" class="text-xs text-cyan-300 font-bold mb-0.5">{{ activeAnnotation.read }}</div>
+                                <h3 class="text-xl font-bold text-white tracking-wide leading-none">{{ activeAnnotation.word }}</h3>
+                            </div>
                         </div>
                         
                         <p class="text-base md:text-lg text-slate-200 leading-8 pr-8 font-medium">
@@ -385,25 +388,25 @@
 　おや、川へはいっちゃいけないったら。
             `,
             annotations: {
-                "琥珀": "木の樹液が固まってできた宝石のようなもの。黄色くて透き通っています。",
-                "六寸": "長さの単位。約18cmくらい。",
-                "ビフテキ": "ビーフステーキのこと。昔の言葉です。",
-                "サンタマリア": "聖母マリア（イエス・キリストのお母さん）のこと。象が苦しいときに助けを求めて叫んだ名前。",
-                "沙羅樹": "仏教に関係の深い、とてもありがたい木。",
-                "グララアガア": "象たちが怒ってほえる声。",
-                "ブリキ": "スズという金属をぬった鉄の板。安っぽい感じがします。",
-                "五把": "わらを束ねた数。「把（わ）」は束のこと。数が減らされているのは、ごはんが減らされているということです。",
-                "二十馬力": "力の強さを表す言葉。馬20頭分の力があるということ。",
-                "稲こき機械": "イネからお米の粒をとりはずすための機械。",
-                "張り子": "紙などを重ねて貼って形を作ったもの。中はからっぽで、こわれやすい。",
-                "のんのんのんのん": "機械が回る音。単調で、どこか不気味な感じがします。",
-                "百姓": "ここでは農作業をする労働者たちのこと。",
-                "雑巾": "「雑巾ほどあるオムレツ」というたとえ。とても大きくて平べったいことを表しています。",
-                "吹いて": "風を送って火を強くすること。",
-                "ふいご": "火を強くするために風を送る道具。",
-                "三日の月": "三日月。月は象のことを空から静かに見ています。",
-                "竜の目": "怒りで恐ろしい目つきになっていること。",
-                "五倍": "税金がいきなり5倍になること。オツベルが勝手に決めた理不尽なルール。"
+                "琥珀": { read: "こはく", desc: "木の樹液が固まってできた宝石のようなもの。黄色くて透き通っています。" },
+                "六寸": { read: "ろくすん", desc: "長さの単位。約18cmくらい。" },
+                "ビフテキ": { read: "", desc: "ビーフステーキのこと。昔の言葉です。" },
+                "サンタマリア": { read: "", desc: "聖母マリア（イエス・キリストのお母さん）のこと。象が苦しいときに助けを求めて叫んだ名前。" },
+                "沙羅樹": { read: "さらじゅ", desc: "仏教に関係の深い、とてもありがたい木。" },
+                "グララアガア": { read: "", desc: "象たちが怒ってほえる声。" },
+                "ブリキ": { read: "", desc: "スズという金属をぬった鉄の板。安っぽい感じがします。" },
+                "五把": { read: "ごわ", desc: "わらを束ねた数。「把（わ）」は束のこと。数が減らされているのは、ごはんが減らされているということです。" },
+                "二十馬力": { read: "にじゅうばりき", desc: "力の強さを表す言葉。馬20頭分の力があるということ。" },
+                "稲こき機械": { read: "いねこききかい", desc: "イネからお米の粒をとりはずすための機械。" },
+                "張り子": { read: "はりこ", desc: "紙などを重ねて貼って形を作ったもの。中はからっぽで、こわれやすい。" },
+                "のんのんのんのん": { read: "", desc: "機械が回る音。単調で、どこか不気味な感じがします。" },
+                "百姓": { read: "ひゃくしょう", desc: "ここでは農作業をする労働者たちのこと。" },
+                "雑巾": { read: "ぞうきん", desc: "「雑巾ほどあるオムレツ」というたとえ。とても大きくて平べったいことを表しています。" },
+                "吹いて": { read: "ふいて", desc: "風を送って火を強くすること。" },
+                "ふいご": { read: "", desc: "火を強くするために風を送る道具。" },
+                "三日の月": { read: "みっかのつき", desc: "三日月。月は象のことを空から静かに見ています。" },
+                "竜の目": { read: "りゅうのめ", desc: "怒りで恐ろしい目つきになっていること。" },
+                "五倍": { read: "ごばい", desc: "税金がいきなり5倍になること。オツベルが勝手に決めた理不尽なルール。" }
             },
             structure: [
                 {
@@ -585,8 +588,12 @@
                     const target = e.target;
                     if (target.classList.contains('highlight-word')) {
                         const word = target.getAttribute('data-word');
-                        const desc = novelData.value.annotations[word];
-                        activeAnnotation.value = { word, desc };
+                        const annotation = novelData.value.annotations[word];
+                        activeAnnotation.value = { 
+                            word, 
+                            desc: annotation.desc,
+                            read: annotation.read
+                        };
                     }
                 };
 
