@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>夏の葬列 - 作品研究</title>
+    
+    <!-- Tailwind CSS (デザイン用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js 3 (ロジック用) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Google Fonts (明朝体: 文学的な雰囲気のため) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Shippori Mincho', serif;
+            background-color: #fdfbf7; /* 和紙のようなごく薄いクリーム色 */
+            color: #2d3748;
+            line-height: 1.8;
+        }
+        
+        /* UI用フォント（ゴシック体） */
+        .font-ui {
+            font-family: 'Zen Maru Gothic', sans-serif;
+        }
+
+        /* 本文のハイライト装飾 */
+        .annotation-highlight {
+            border-bottom: 2px dashed #93c5fd;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #1e40af;
+            font-weight: 500;
+            padding-bottom: 1px;
+        }
+        .annotation-highlight:hover {
+            background-color: #eff6ff;
+            border-bottom-color: #2563eb;
+        }
+        
+        /* ルビの調整 */
+        ruby {
+            ruby-position: over;
+        }
+        rt {
+            font-size: 0.6em;
+            color: #64748b;
+            font-weight: normal;
+        }
+
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* アニメーション */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.4s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+        
+        /* アコーディオン */
+        .accordion-enter-active, .accordion-leave-active {
+            transition: all 0.3s ease-out;
+            max-height: 1000px;
+            overflow: hidden;
+        }
+        .accordion-enter-from, .accordion-leave-to {
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <div id="app" class="min-h-screen flex flex-col">
+        
+        <!-- ========================================== -->
+        <!-- 1. グローバルヘッダー (Sticky) -->
+        <!-- ========================================== -->
+        <header class="sticky top-0 z-40 bg-[#fdfbf7]/95 backdrop-blur-md shadow-sm border-b border-stone-200">
+            <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <!-- タイトル -->
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-wider flex items-center gap-3">
+                        {{ projectTitle }}
+                        <span class="text-xs bg-slate-800 text-white px-2 py-1 rounded-full font-ui font-normal tracking-normal">学習用</span>
+                    </h1>
+                    <p class="text-sm text-slate-500 font-ui">{{ authorName }}</p>
+                </div>
+
+                <!-- ナビゲーションメニュー -->
+                <nav class="flex overflow-x-auto pb-1 md:pb-0 gap-2 no-scrollbar font-ui">
+                    <button 
+                        v-for="tab in tabs" 
+                        :key="tab.id"
+                        @click="changeTab(tab.id)"
+                        :class="[
+                            'px-5 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all duration-200 border',
+                            currentView === tab.id 
+                                ? 'bg-slate-800 text-white border-slate-800 shadow-md transform scale-105' 
+                                : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700'
+                        ]"
+                    >
+                        {{ tab.label }}
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- メインコンテンツエリア -->
+        <main class="flex-grow max-w-5xl mx-auto w-full p-4 md:p-8">
+            
+            <!-- VIEW 1: 構成・概要 (Structure) -->
+            <section v-if="currentView === 'structure'" class="space-y-8 animate-fade-in">
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-4 font-ui flex items-center">
+                        <span class="w-2 h-8 bg-blue-500 rounded-full mr-3"></span>
+                        学習のポイント
+                    </h2>
+                    <p class="text-slate-700 leading-loose">
+                        この小説は、大人になった主人公が過去の記憶（戦争中の疎開体験）と向き合う物語です。<br>
+                        <span class="font-bold text-blue-700">「現在」と「過去（回想）」が交互に描かれる構成</span>や、鮮やかな色彩（白、青、緑）の対比に注目して読みましょう。<br>
+                        また、結末で明らかになる真実によって、主人公の心情がどう変化したかを読み取ることが重要です。
+                    </p>
+                </div>
+
+                <div v-for="(part, index) in dataStructure" :key="index" class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <button @click="part.isOpen = !part.isOpen" class="w-full text-left px-6 py-5 flex justify-between items-center bg-white hover:bg-stone-50 transition">
+                        <div class="flex items-center gap-4">
+                            <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-sm font-bold font-ui">場面 {{ index + 1 }}</span>
+                            <span class="font-bold text-lg text-slate-800">{{ part.title }}</span>
+                        </div>
+                        <span class="text-slate-400 bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center font-bold font-ui text-lg">
+                            {{ part.isOpen ? '−' : '＋' }}
+                        </span>
+                    </button>
+                    <transition name="accordion">
+                        <div v-show="part.isOpen" class="px-8 py-8 bg-[#faf9f6] border-t border-stone-100 relative">
+                            <!-- 装飾ライン -->
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500/20"></div>
+
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-500 mb-3 font-ui flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        あらすじ・内容
+                                    </h4>
+                                    <p class="leading-loose text-slate-800 text-justify">{{ part.summary }}</p>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-blue-600 mb-3 font-ui flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        読み取りの重要ポイント
+                                    </h4>
+                                    <p class="text-slate-700 leading-loose bg-blue-50/50 p-4 rounded-lg border border-blue-100 text-justify">
+                                        {{ part.analysis }}
+                                    </p>
+                                    <div class="flex flex-wrap gap-2 mt-4">
+                                        <span v-for="tag in part.tags" :key="tag" class="px-3 py-1 bg-white text-slate-500 text-xs font-bold rounded-full border border-slate-200 font-ui">
+                                            # {{ tag }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
+            </section>
+
+            <!-- VIEW 2: 登場人物・要素 (Characters) -->
+            <section v-if="currentView === 'characters'" class="space-y-8 animate-fade-in">
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800 font-ui flex items-center">
+                        <span class="w-2 h-8 bg-green-500 rounded-full mr-3"></span>
+                        登場人物の心情分析
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div v-for="char in dataCharacters" :key="char.name" class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden flex flex-col h-full hover:shadow-md transition-shadow">
+                        <div class="p-6 pb-0 flex items-start justify-between">
+                            <div>
+                                <h3 class="text-2xl font-bold text-slate-800 mb-1">{{ char.name }}</h3>
+                                <p class="text-sm text-slate-500 font-ui">{{ char.role }}</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center text-2xl">
+                                {{ char.icon }}
+                            </div>
+                        </div>
+                        
+                        <div class="p-6 flex-grow">
+                            <p class="text-slate-700 leading-loose mb-6">{{ char.desc }}</p>
+                            
+                            <div class="bg-stone-50 p-4 rounded-lg border-l-4 border-stone-400 mb-6">
+                                <p class="text-sm font-bold text-stone-500 mb-2 font-ui">印象的なセリフ・描写</p>
+                                <p class="italic text-stone-800 font-medium">"{{ char.quote }}"</p>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-stone-50 border-t border-stone-100 mt-auto">
+                             <button @click="openModal(char.details, char.name + 'の詳細分析')" class="w-full py-3 bg-white border border-stone-300 rounded-lg text-slate-600 font-bold text-sm hover:bg-slate-800 hover:text-white transition-colors duration-300 font-ui flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                もっと詳しく読む
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 3: キーワード・象徴 (Keywords) -->
+            <section v-if="currentView === 'keywords'" class="space-y-8 animate-fade-in">
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800 font-ui flex items-center">
+                        <span class="w-2 h-8 bg-purple-500 rounded-full mr-3"></span>
+                        重要な言葉・象徴の意味
+                    </h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div v-for="kw in dataKeywords" :key="kw.word" class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm hover:border-purple-300 transition-colors cursor-pointer group" @click="kw.isOpen = !kw.isOpen">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800 group-hover:text-purple-700 transition-colors flex items-center gap-2">
+                                    {{ kw.word }}
+                                    <span v-if="!kw.isOpen" class="text-[10px] bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full font-ui">TAP</span>
+                                </h3>
+                                <p class="text-slate-500 text-sm mt-2 font-ui">{{ kw.shortDef }}</p>
+                            </div>
+                            <span class="text-stone-300 group-hover:text-purple-500 transition-colors">
+                                <svg class="w-6 h-6 transform transition-transform" :class="{'rotate-180': kw.isOpen}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </span>
+                        </div>
+                        <transition name="accordion">
+                            <div v-if="kw.isOpen" class="mt-4 pt-4 border-t border-stone-100">
+                                <p class="text-slate-800 leading-loose text-sm mb-3">
+                                    <span class="font-bold text-purple-600 block mb-1 font-ui">解説</span>
+                                    {{ kw.analysis }}
+                                </p>
+                                <p class="text-xs text-slate-400 font-ui text-right">関連：{{ kw.related }}</p>
+                            </div>
+                        </transition>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW 4: 本文を読む (Read Text) -->
+            <section v-if="currentView === 'read'" class="relative animate-fade-in pb-32">
+                <div class="max-w-3xl mx-auto bg-white px-8 py-12 md:p-16 shadow-lg rounded-xl mb-12 border border-stone-100">
+                    <div class="mb-16 text-center">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4 tracking-widest text-slate-900">{{ projectTitle }}</h2>
+                        <p class="text-xl text-slate-600 tracking-wider font-ui">{{ authorName }}</p>
+                    </div>
+
+                    <div class="bg-blue-50/50 p-4 rounded-lg mb-8 text-sm text-blue-800 font-ui flex items-start gap-3 border border-blue-100">
+                        <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div>
+                            <strong>学習のヒント：</strong><br>
+                            青色の点線が引かれた言葉をタップすると、意味や解説が表示されます。<br>
+                            難しい漢字にはふりがなが振ってあります。
+                        </div>
+                    </div>
+
+                    <!-- 本文レンダリングエリア -->
+                    <!-- v-htmlで整形済みテキスト（ルビ＋注釈span）を表示 -->
+                    <div 
+                        class="prose prose-xl prose-slate max-w-none font-serif leading-10 text-justify tracking-wide text-slate-800"
+                        @click="handleTextClick"
+                    >
+                        <p v-for="(paragraph, idx) in formattedText" :key="idx" v-html="paragraph" class="mb-10 indent-1"></p>
+                    </div>
+                    
+                    <div class="mt-16 pt-12 border-t border-stone-200 text-center text-sm text-stone-400 font-ui">
+                        [ 完 ]
+                    </div>
+                </div>
+                
+                <!-- 注釈ポップアップ（画面下部固定） -->
+                <transition name="fade">
+                    <div v-if="activeAnnotation" class="fixed bottom-6 left-4 right-4 z-50 flex justify-center pointer-events-none">
+                        <div class="bg-white/95 backdrop-blur-md shadow-2xl border border-blue-200 rounded-xl max-w-2xl w-full p-6 pointer-events-auto border-l-8 border-l-blue-500 animate-slide-up transform transition-all">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <span class="text-xs font-bold text-blue-500 uppercase tracking-wider font-ui mb-1 block">用語解説</span>
+                                    <h4 class="font-bold text-xl text-slate-900">{{ activeAnnotation.word }}</h4>
+                                </div>
+                                <button @click="activeAnnotation = null" class="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full p-2 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-slate-700 leading-loose text-base font-medium">{{ activeAnnotation.desc }}</p>
+                        </div>
+                    </div>
+                </transition>
+            </section>
+
+        </main>
+
+        <!-- 汎用モーダル (分析詳細などで使用) -->
+        <transition name="fade">
+            <div v-if="showModal" class="fixed inset-0 bg-slate-900/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm" @click.self="showModal = false">
+                <div class="bg-white rounded-xl w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl relative flex flex-col">
+                    <div class="bg-white border-b border-stone-100 px-8 py-5 flex justify-between items-center z-10">
+                        <h3 class="text-xl font-bold text-slate-800 font-ui">{{ modalTitle }}</h3>
+                        <button @click="showModal = false" class="text-stone-400 hover:text-stone-600 transition p-2 rounded-full hover:bg-stone-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="p-8 overflow-y-auto custom-scrollbar">
+                        <p class="text-slate-700 leading-loose whitespace-pre-wrap text-lg">{{ modalBody }}</p>
+                    </div>
+                    <div class="bg-stone-50 px-8 py-4 border-t border-stone-100 text-right">
+                        <button @click="showModal = false" class="px-6 py-2 bg-slate-800 text-white font-bold rounded-lg hover:bg-slate-700 transition shadow-lg font-ui">閉じる</button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <footer class="bg-white border-t border-stone-200 text-slate-400 text-center py-8 text-sm mt-auto font-ui">
+            <p>&copy; {{ projectTitle }} Interactive Learning Materials</p>
+        </footer>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- Vue.js Logic Script -->
+    <!-- ========================================== -->
+    <script>
+        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+
+        /* * ======================================================
+         * データ入力エリア
+         * ======================================================
+         */
+        
+        const META_DATA = {
+            title: "夏の葬列",
+            author: "山川 方夫"
+        };
+
+        const RAW_TEXT = [
+            "　海岸の小さな町の駅に降りて、彼は、しばらくはもの珍しげに辺りを眺めていた。駅前の風景はすっかり変わっていた。アーケードのついた明るいマーケットふうの通りができ、その道路も、硬く舗装されてしまっている。はだしのまま、砂利の多いこの道を駆けて通学させられた小学生の頃の自分を、急になまなましく彼は思い出した。あれは、戦争の末期だった。彼はいわゆる疎開児童として、この町にまる三か月ほど住んでいたのだった。──あれ以来、俺は一度もこの町を訪ねたことがない。その自分が、今は大学を出、就職をし、一人前の出張帰りのサラリーマンの一人として、この町に来ている……。",
+            "　東京には、明日までに帰ればよかった。二、三時間は十分にぶらぶらできる時間がある。彼は駅の売店でたばこを買い、それに火をつけると、ゆっくりと歩きだした。",
+            "　夏の真昼だった。小さな町の家並みはすぐに尽きて、昔のままの踏切を越えると、線路に沿い、両側にやや起伏のある畑地が広がる。彼は目を細めながら歩いた。遠くに、かすかに海の音がしていた。",
+            "　なだらかな小丘の裾、ひょろ長い一本の松に見覚えのある丘の裾を回りかけて、突然、彼は化石したように足を止めた。真昼の重い光を浴び、青々とした葉を波打たせた広い芋畑の向こうに、一列になって、喪服を着た人々の小さな葬列が動いている。",
+            "　一瞬、彼は十数年の歳月が宙に消えて、自分が再びあの時の中にいる錯覚にとらえられた。……呆然と口を開けて、彼は、しばらくは呼吸をすることを忘れていた。",
+            "　濃緑の葉を重ねた一面の広い芋畑の向こうに、一列になった小さな人影が動いていた。線路脇の道に立って、彼は、真っ白なワンピースを着た同じ疎開児童のヒロ子さんと、並んでそれを見ていた。",
+            "　この海岸の町の小学校（当時は国民学校といったが）では、東京から来た子どもは、彼とヒロ子さんの二人きりだった。二年上級の五年生で、勉強もよくでき、大柄なヒロ子さんは、いつも彼をかばってくれ、弱虫の彼を離れなかった。",
+            "　よく晴れた昼近くで、その日も、二人きりで海岸で遊んできた帰りだった。",
+            "　行列は、ひどくのろのろとしていた。先頭の人は、大昔の人のような白い着物に黒っぽい長い帽子をかぶり、顔の前で何かを振りながら歩いている。続いて、竹筒のようなものを持った若い男。そして、四角く細長い箱を担いだ四人の男たちと、その横をうつむいたまま歩いてくる黒い和服の女。……",
+            "「お葬式だわ。」",
+            "と、ヒロ子さんが言った。彼は、口をとがらせて答えた。",
+            "「変なの。東京じゃあんなことしないよ。」",
+            "「でも、こっちじゃああするのよ。」ヒロ子さんは、姉さんぶって教えた。「そしてね。子どもが行くと、おまんじゅうをくれるの。お母さんがそう言ったわ。」",
+            "「おまんじゅう？　本当のアンコの？」",
+            "「そうよ。ものすごく甘いの。そして、とっても大きくって、赤ちゃんの頭ぐらいあるんだって。」",
+            "　彼は唾をのんだ。",
+            "「ね。……僕らにも、くれると思う？」",
+            "「そうね。」ヒロ子さんは、真面目な顔をして首をかしげた。「くれる、かもしれない。」",
+            "「ほんと？」",
+            "「行ってみようか？　じゃあ。」",
+            "「よし。」と彼は叫んだ。「競走だよ！」",
+            "　芋畑は、真っ青な波を重ねた海みたいだった。彼はその中に躍り込んだ。近道をしてやるつもりだった。……ヒロ子さんは、あぜ道を大回りしている。僕のほうが早いに決まっている、もし早い者順でヒロ子さんの分がなくなっちゃったら、半分分けてやってもいい。芋のつるが足にからむ柔らかい緑の海の中を、彼は、手を振り回しながら夢中で駆け続けた。",
+            "　正面の丘の陰から、大きな石が飛び出したような気がしたのはその途中でだった。石はこちらを向き、急速な爆音と一緒に、不意に、何かを引きはがすような激しい連続音が聞こえた。叫び声があがった。「カンサイキだあ。」と、その声はどなった。",
+            "　艦載機だ。彼は恐怖に喉がつまり、とたんに芋畑の中に倒れ込んだ。炸裂音が空中にすさまじい響きをたてて頭上を過ぎ、女の泣きわめく声が聞こえた。ヒロ子さんじゃない、と彼は思った。あれは、もっと大人の女の人の声だ。",
+            "「二機だ、隠れろ！　またやって来るぞう。」奇妙に間のびしたその声の間に、別の男の声が叫んだ。「おーい、引っ込んでろその女の子、だめ、走っちゃだめ！　白い服は絶好の目標になるんだ、……おい！」",
+            "　白い服──ヒロ子さんだ。きっと、ヒロ子さんは撃たれて死んじゃうんだ。",
+            "　その時第二撃が来た。男が絶叫した。",
+            "　彼は、動くことができなかった。ほっぺたを畑の土に押しつけ、目をつぶって、懸命に呼吸を殺していた。頭がしびれているみたいで、でも、無意識のうちに体を覆おうとするみたいに、手で必死に芋の葉を引っぱり続けていた。辺りが急にしーんとして、旋回する小型機の爆音だけが不気味に続いていた。",
+            "　突然、視野に大きく白い物が入ってきて、柔らかい重い物が彼を押さえつけた。",
+            "「さ、早く逃げるの。一緒に、さ、早く。だいじょぶ？」",
+            "目をつり上げ、別人のような真っ青なヒロ子さんが、熱い呼吸で言った。彼は、口がきけなかった。全身が硬直して、目にはヒロ子さんの服の白さだけが鮮やかに映っていた。",
+            "「今のうちに、逃げるの、……何してるの？　さ、早く！」",
+            "　ヒロ子さんは、怒ったような怖い顔をしていた。ああ、僕はヒロ子さんと一緒に殺されちゃう。僕は死んじゃうんだ、と彼は思った。声の出たのは、そのとたんだった。不意に、彼は狂ったような声で叫んだ。",
+            "「よせ！　向こうへ行け！　目だっちゃうじゃないかよ！」",
+            "「助けに来たのよ！」ヒロ子さんもどなった。「早く、道の防空壕に……。」",
+            "「嫌だったら！　ヒロ子さんとなんて、一緒に行くの嫌だよ！」夢中で、彼は全身の力でヒロ子さんを突き飛ばした。「……向こうへ行け！」",
+            "　悲鳴を、彼は聞かなかった。その時強烈な衝撃と轟音が地べたをたたきつけて、芋の葉が空に舞い上がった。辺りに砂ぼこりのような幕が立って、彼は、彼の手であおむけに突き飛ばされたヒロ子さんがまるでゴムまりのように弾んで空中に浮くのを見た。",
+            "　葬列は、芋畑の間を縫って進んでいた。それはあまりにも記憶の中のあの日の光景に似ていた。これは、ただの偶然なのだろうか。",
+            "　真夏の太陽がじかに首筋に照りつけ、めまいに似たものを覚えながら、彼は、ふと、自分には夏以外の季節がなかったような気がしていた。……それも、助けに来てくれた少女を、わざわざ銃撃の下に突き飛ばしたあの夏、殺人を犯した、戦時中の、あのただ一つの夏の季節だけが、いまだに自分を取り巻き続けているような気がしていた。",
+            "　彼女は重傷だった。下半身を真っ赤に染めたヒロ子さんはもはや意識がなく、男たちが即席の担架で彼女の家へ運んだ。そして、彼は彼女のその後を聞かずにこの町を去った。あの翌日、戦争は終わったのだ。",
+            "　芋の葉を、白く裏返して風が渡っていく。葬列は彼の方に向かってきた。中央に、写真の置かれているそまつな柩がある。写真の顔は女だ。それもまだ若い女のように見える。……不意に、ある予感が彼をとらえた。彼は歩き始めた。",
+            "　彼は、片足をあぜ道の土に載せて立ち止まった。あまり人数の多くはない葬式の人の列が、ゆっくりとその彼の前を過ぎる。彼は少し頭を下げ、しかし目は熱心に柩の上の写真を見つめていた。もし、あの時死んでいなかったら、彼女はたしか二十八か、九だ。",
+            "　突然、彼は奇妙な喜びで胸がしぼられるような気がした。その写真には、ありありと昔の彼女の面影が残っている。それは、三十歳近くなったヒロ子さんの写真だった。",
+            "　まちがいはなかった。彼は、自分が叫び出さなかったのが、むしろ不思議なくらいだった。",
+            "　──俺は、人殺しではなかったのだ。",
+            "　彼は、胸にわき上がるものを、懸命に冷静に抑えつけながら思った。たとえなんで死んだにせよ、とにかくこの十数年間を生き続けたのなら、もはや彼女の死は俺の責任とはいえない。少なくとも、俺に直接の責任がないのは確かなのだ。",
+            "「……この人、足が悪かった？」",
+            "彼は、群れながら列のあとに続く子どもたちの一人に尋ねた。あの時、彼女は太腿をやられたのだ、と思い返しながら。",
+            "「ううん。悪くなかったよ。体は全然じょうぶだったよ。」",
+            "一人が、首を振って答えた。",
+            "　では、治ったのだ！　俺は全くの無罪なのだ！",
+            "　彼は、長い呼吸を吐いた。苦笑が頬に上ってきた。俺の殺人は、幻影にすぎなかった。あれからの年月、重苦しく俺を取り巻き続けていた一つの夏の記憶、それは俺の妄想、俺の悪夢でしかなかったのだ。",
+            "　葬列は確実に一人の人間の死を意味していた。それを前に、いささか彼は不謹慎だったかもしれない。しかし十数年間もの悪夢から解き放たれ、彼は、青空のような一つの幸福に化してしまっていた。……もしかしたら、その有頂天さが、彼にそんなよけいな質問を口に出させたのかもしれない。",
+            "「なんの病気で死んだの？　この人。」",
+            "うきうきした、むしろ軽薄な口調で彼は尋ねた。",
+            "「このおばさんねえ、気がちがっちゃってたんだよ。」",
+            "ませた目をした男の子が答えた。",
+            "「一昨日ねえ、川に飛び込んで自殺しちゃったのさ。」",
+            "「へえ。失恋でもしたの？」",
+            "「バカだなあおじさん。」運動靴の子どもたちは、口々にさもおかしそうに笑った。",
+            "「だってさ、このおばさん、もうおばあさんだったんだよ。」",
+            "「おばあさん？　どうして。あの写真だったら、せいぜい三十くらいじゃないか。」",
+            "「ああ、あの写真か。……あれねえ、うんと昔のしかなかったんだってよ。」",
+            "　はなを垂らした子があとを言った。",
+            "「だってさ、あのおばさん、なにしろ戦争でね、一人きりの女の子がこの畑で機銃で撃たれて死んじゃってね、それからずっと気がちがっちゃってたんだもんさ。」",
+            "　葬列は、松の木の立つ丘へと登り始めていた。遠くなったその葬列との距離を縮めようというのか、子どもたちは芋畑の中に躍り込むと、喚声をあげながら駆け始めた。",
+            "　立ち止まったまま、彼は写真を載せた柩が軽く左右に揺れ、彼女の母の葬列が丘を登っていくのを見ていた。一つの夏と一緒に、その柩の抱きしめている沈黙。彼は、今はその二つになった沈黙、二つの死が、もはや自分の中で永遠に続くだろうこと、永遠に続くほかはないことがわかっていた。彼は、葬列のあとは追わなかった。追う必要がなかった。この二つの死は、結局、俺の中に埋葬されるほかはないのだ。",
+            "　──でも、なんという皮肉だろう、と彼は口の中で言った。あれから、俺はこの傷に触りたくない一心で海岸のこの町を避け続けてきたというのに。そうして今日、せっかく十数年後のこの町、現在のあの芋畑を眺めて、はっきりと敗戦の夏のあの記憶を自分の現在から追放し、過去の中に封印してしまって、自分の身を軽くするためにだけ俺はこの町に降りてみたというのに。……全く、なんという偶然の皮肉だろう。",
+            "　やがて、彼はゆっくりと駅の方角に足を向けた。風が騒ぎ、芋の葉のにおいがする。よく晴れた空が青く、太陽はあい変わらずまぶしかった。海の音が耳に戻ってくる。汽車が、単調な車輪の響きをたて、線路を走っていく。彼は、ふと、今とは違う時間、たぶん未来の中の別な夏に、自分はまた今と同じ風景を眺め、今と同じ音を聞くのだろうという気がした。そして時を隔て、俺はきっと自分の中の夏の幾つかの瞬間を、一つの痛みとしてよみがえらすのだろう……。",
+            "　思いながら、彼はアーケードの下の道を歩いていた。もはや逃げ場所はないのだという意識が、彼の足どりをひどく確実なものにしていた。"
+        ];
+
+        const FURIGANA_DATA = {
+            "舗装": "ほそう", "砂利": "じゃり", "疎開": "そかい", "起伏": "きふく", 
+            "小丘": "しょうきゅう", "裾": "すそ", "喪服": "もふく", "葬列": "そうれつ",
+            "呆然": "ぼうぜん", "濃緑": "のうりょく", "国民学校": "こくみんがっこう", "大柄": "おおがら",
+            "竹筒": "たけづつ", "柩": "ひつぎ", "唾": "つば", "艦載機": "かんさいき", 
+            "炸裂音": "さくれつおん", "旋回": "せんかい", "防空壕": "ぼうくうごう", "轟音": "ごうおん",
+            "銃撃": "じゅうげき", "贖罪": "しょくざい", "不謹慎": "ふきんしん", "有頂天": "うちょうてん",
+            "軽薄": "けいはく", "妄想": "もうそう", "埋葬": "まいそう", "幻影": "げんえい",
+            "懸命": "けんめい", "一瞬": "いっしゅん", "錯覚": "さっかく", "あぜ道": "あぜみち"
+        };
+
+        const ANNOTATIONS = {
+            "疎開児童": "戦争中、空襲などの危険を避けるため、都市部から地方（田舎）へ移り住んだ子供たちのこと。",
+            "国民学校": "1941年から1947年まで使われていた名称で、現在の「小学校」にあたる学校のこと。",
+            "艦載機": "航空母艦（空母）という軍艦に積まれている戦闘機などのこと。",
+            "カンサイキ": "「艦載機」のこと。カタカナで書くことで、子供にとって正体不明の恐ろしい音として聞こえたことを表しています。",
+            "防空壕": "空襲のときに爆弾から身を守るために、地面を掘って作った避難場所。",
+            "化石したように": "あまりの驚きやショックで、まるで石になったかのように体が全く動かなくなる様子。",
+            "葬列": "お葬式のとき、遺体を棺に入れてお墓や焼き場まで運んでいく人々の列。",
+            "舗装": "道路の表面をアスファルトやコンクリートなどで固めて、通りやすくすること。",
+            "砂利": "細かい石ころ。昔の道は舗装されておらず、砂利道が多かった。",
+            "起伏": "土地が高くなったり低くなったりしていること。なだらかな坂などがある様子。",
+            "喪服": "お葬式のときに着る、黒などの礼服。",
+            "呆然": "驚きやショックで、何も考えられなくなってぼんやりしてしまうこと。",
+            "濃緑": "濃い緑色。夏の植物の生命力の強さを感じさせる色。",
+            "大柄": "体格が良いこと。ヒロ子さんが主人公よりも大きく、守ってくれる存在だったことを示しています。",
+            "竹筒": "竹を切って筒状にしたもの。ここではお葬式の道具として使われている。",
+            "柩": "遺体を入れる箱（ひつぎ）。棺桶（かんおけ）ともいう。",
+            "炸裂音": "爆弾などが破裂したときのすさまじい音。",
+            "旋回": "空中で円を描くように回ること。飛行機が頭上を何度も回っている様子。",
+            "不謹慎": "慎み（つつしみ）がないこと。お葬式という厳粛な場で、ふざけたり失礼なことをしたりすること。",
+            "妄想": "ありもしないことを、本当にあるかのように想像してしまうこと。",
+            "幻影": "実際にはないのに、あるように見えるもの。まぼろし。",
+            "あぜ道": "田んぼや畑の間にある、人が通るための細い道。",
+            "有頂天": "喜びで夢中になり、自分を忘れてしまうこと。"
+        };
+
+        const STRUCTURE_DATA = [
+            { 
+                title: "帰郷と回想の始まり", 
+                summary: "大人になった主人公が、かつて疎開していた海辺の町を訪れます。駅前はきれいに舗装されて変わってしまいましたが、自然の風景は昔のままです。その対比が、これから始まる過去への旅の入り口となっています。", 
+                analysis: "現在は「舗装された硬い道」、過去は「痛かった砂利道」として対比されています。これは、主人公が今は安全で安定した生活（サラリーマン）を送っている一方で、過去の記憶には痛みが伴うことを暗示しています。",
+                tags: ["現在と過去", "情景描写", "対比"],
+                isOpen: false
+            },
+            { 
+                title: "二つの葬列", 
+                summary: "芋畑の向こうに、お葬式の列（葬列）が見えます。この光景が引き金（トリガー）となり、主人公の記憶は一気に戦争中のあの夏の日へと引き戻されます。", 
+                analysis: "「化石したように」という表現は、時間が止まったような衝撃を表しています。目の前の「現在の葬列」と、記憶の中の「過去の葬列」が重なり合う、物語の重要な転換点です。",
+                tags: ["フラッシュバック", "象徴", "時間の停止"],
+                isOpen: false
+            },
+            { 
+                title: "罪の記憶（クライマックス）", 
+                summary: "空襲の日、自分を助けに来てくれたヒロ子さんを、主人公は恐怖のあまり突き飛ばしてしまいました。彼女の白い服が敵機の目印になると思ったからです。", 
+                analysis: "「白い服」は本来なら清らかさの象徴ですが、戦場では「死を招く目印」になってしまうという残酷さが描かれています。主人公の行動は「保身（自分だけ助かりたい心）」によるものですが、極限状態における人間の弱さとして描かれています。",
+                tags: ["罪悪感", "戦争の理不尽", "エゴイズム"],
+                isOpen: false
+            },
+            { 
+                title: "結末と真実", 
+                summary: "現在の葬列が、実はヒロ子さんの母親のものであり、ヒロ子さんはあの後も生きていたことが判明します。主人公は「自分は人殺しではなかった」と歓喜しますが……。", 
+                analysis: "主人公は「人殺し」という罪の意識からは解放されましたが、その直後にさらに重い事実（ヒロ子さんが心を病んで亡くなったこと、それが自分のせいかもしれないこと）を突きつけられます。「逃げ場所はない」という最後の言葉は、過去の罪からは決して逃げられないという、大人の重い覚悟と絶望を表しています。",
+                tags: ["皮肉な結末", "どんでん返し", "永遠の夏"],
+                isOpen: false
+            }
+        ];
+
+        const CHARACTERS_DATA = [
+            {
+                name: "彼（主人公）",
+                icon: "👨‍💼",
+                role: "視点人物 / 元・疎開児童",
+                desc: "現在は東京で働くサラリーマン。子供の頃はいじめられっ子で弱虫でした。戦争中にヒロ子さんを見捨ててしまったという深い罪悪感を抱えて生きてきましたが、今回の帰郷でその記憶と決着をつけようとします。",
+                quote: "俺は人殺しではなかったのだ。（...）俺の殺人は、幻影にすぎなかった。",
+                details: "彼は非常に人間臭い人物です。自分の罪が勘違いだったとわかった瞬間、「うきうきした」口調になるなど、調子に乗りやすい一面があります。しかし、ラストシーンではその軽薄さが打ち砕かれ、一生消えない「痛み」を背負って生きていくことになります。この物語は、彼が本当の意味で「戦争の傷跡」を理解するまでの過程を描いているとも言えます。"
+            },
+            {
+                name: "ヒロ子さん",
+                icon: "👧",
+                role: "ヒロイン / 犠牲者",
+                desc: "主人公と同じく東京から来た疎開児童。体が大きく、勉強もでき、いつも主人公をかばってくれるお姉さんのような存在でした。白いワンピースがトレードマーク。",
+                quote: "助けに来たのよ！",
+                details: "彼女は「母性（守ってくれる存在）」の象徴です。危険を顧みず主人公を助けに来た彼女の勇気が、皮肉にも彼女自身の運命を狂わせてしまいました。彼女の「白さ」は、戦争という黒い暴力の中で際立つ「純粋さ」を表していますが、その純粋さが仇となってしまう悲劇が描かれています。"
+            }
+        ];
+
+        const KEYWORDS_DATA = [
+            {
+                word: "葬列（そうれつ）",
+                shortDef: "死を運ぶ列。過去と現在をつなぐ最大のモチーフ。",
+                analysis: "タイトルにもなっている通り、この物語の核となる象徴です。生命力あふれる芋畑（生）の中を静かに進む葬列（死）という視覚的なインパクトに加え、主人公を無理やり過去の記憶へと引き戻す装置（トリガー）としての役割を果たしています。",
+                related: "喪服、柩、沈黙、化石",
+                isOpen: false
+            },
+            {
+                word: "白い服 / 白いワンピース",
+                shortDef: "ヒロ子さんの象徴であり、空襲時の標的。",
+                analysis: "通常、「白」は清潔や純粋を表す良いイメージの色です。しかしこの作品では、「敵機に見つかりやすい色」＝「死を招く色」として描かれています。戦争という異常な状況下では、美しいものや善意（助けに来ること）が、逆に悲劇の原因になってしまうという恐ろしさを象徴しています。",
+                related: "入道雲、真昼の光、残酷な対比",
+                isOpen: false
+            },
+            {
+                word: "艦載機（かんさいき）",
+                shortDef: "圧倒的な暴力と死の恐怖。",
+                analysis: "平和な日常（遊びの帰り道）を突如破壊する「戦争」そのものです。パイロットの顔などは見えず、ただ機械的な暴力として描かれることで、子供たちにはどうすることもできない不条理な運命（＝死）を象徴しています。",
+                related: "爆音、炸裂音、黒い影",
+                isOpen: false
+            },
+            {
+                word: "芋畑（いもばたけ）",
+                shortDef: "悲劇の舞台であり、生命力の象徴。",
+                analysis: "物語の重要な場面はすべてこの芋畑で起こります。「青々とした葉」「緑の海」と表現されるように、芋畑は本来、生命力にあふれた場所です。その生き生きとした場所で、死（空襲や葬列）が描かれることで、「生と死」のコントラストが強烈な印象を残します。",
+                related: "海、波、風、緑",
+                isOpen: false
+            },
+            {
+                word: "写真",
+                shortDef: "真実を告げる証拠。時間の止まった過去。",
+                analysis: "柩の上に置かれた写真は、主人公に「ヒロ子さんが生きていた」という真実を突きつけます。現在は老婆になって死んだはずのヒロ子さんが、写真の中では若く美しいままであることは、主人公の中で「あの夏」から時間が止まっていたこと（トラウマ）と重なります。",
+                related: "柩、面影、三十歳",
+                isOpen: false
+            },
+            {
+                word: "おまんじゅう",
+                shortDef: "悲劇のきっかけとなった、子供らしい無邪気な欲望。",
+                analysis: "「葬式に行くとおまんじゅうがもらえる」というヒロ子さんの言葉が、主人公を行動へと駆り立てました。この無邪気な食欲（生への執着）が、結果として取り返しのつかない死の場面に繋がるという、運命の皮肉さを強調しています。",
+                related: "アンコ、赤ちゃんの頭、競走",
+                isOpen: false
+            },
+            {
+                word: "沈黙（ちんもく）",
+                shortDef: "柩が語る死の重みと、主人公が背負う永遠の秘密。",
+                analysis: "結末で柩（ひつぎ）は何も語りませんが、そこには「二つの死（ヒロ子さんとその母）」という重い事実があります。主人公はこの沈黙を一生背負い、誰にも言えない過去として心の中に埋葬し続けることを悟ります。",
+                related: "柩、埋葬、永遠、孤独",
+                isOpen: false
+            },
+            {
+                word: "真昼の光 / 太陽",
+                shortDef: "逃げ場のない現実と、罪の意識を照らすもの。",
+                analysis: "この物語は常に「まぶしい太陽」の下で進行します。暗闇ではなく明るい光の下で悲劇が起こることで、恐怖がより鮮明になります。また、太陽は主人公の罪や嘘を白日の下にさらし、どこへ逃げても照らし続ける「視線」のような役割も果たしています。",
+                related: "めまい、影、夏",
+                isOpen: false
+            },
+            {
+                word: "海",
+                shortDef: "記憶の底にあるもの。運命の背景。",
+                analysis: "海は遠くで音が聞こえるだけの存在ですが、主人公の心象風景（心の景色）とリンクしています。記憶がよみがえるときは「波」のように押し寄せ、芋畑も「緑の海」に見えます。海は、変えようのない過去や、圧倒的な運命の象徴として背景に存在し続けています。",
+                related: "青空、波音、潮の匂い",
+                isOpen: false
+            },
+            {
+                word: "舗装（ほそう）された道路",
+                shortDef: "戦後の復興と、変わってしまった現在。",
+                analysis: "冒頭で強調される「硬く舗装された道路」は、過去の「痛かった砂利道」と対比されています。これは町が豊かになったこと（戦後復興）を示すとともに、主人公自身も大人になり、靴を履いて安全に歩ける社会的な地位を得たことを暗示しています。",
+                related: "アーケード、駅前、砂利道、靴",
+                isOpen: false
+            }
+        ];
+
+        /* * ======================================================
+         * Vue アプリケーション設定
+         * ======================================================
+         */
+        createApp({
+            setup() {
+                const currentView = ref('structure');
+                const projectTitle = ref(META_DATA.title);
+                const authorName = ref(META_DATA.author);
+                const activeAnnotation = ref(null);
+                
+                const showModal = ref(false);
+                const modalTitle = ref('');
+                const modalBody = ref('');
+
+                const dataStructure = ref(STRUCTURE_DATA);
+                const dataCharacters = ref(CHARACTERS_DATA);
+                const dataKeywords = ref(KEYWORDS_DATA);
+
+                const tabs = [
+                    { id: 'structure', label: '学習のポイント' },
+                    { id: 'characters', label: '登場人物' },
+                    { id: 'keywords', label: '重要語句' },
+                    { id: 'read', label: '本文を読む' },
+                ];
+
+                /* * ---------------------------------------------
+                 * ロジック: 本文の整形（ルビ振り ＋ 注釈ハイライト）
+                 * ---------------------------------------------
+                 */
+                const formattedText = computed(() => {
+                    return RAW_TEXT.map(paragraph => {
+                        let processed = paragraph;
+                        
+                        // 1. 注釈キーのリストを取得
+                        const annotationKeys = Object.keys(ANNOTATIONS);
+
+                        // 2. まず注釈対象語句をスパンで囲む（ただし data-word は使わず index を使う）
+                        // 文字列ではなくインデックスを使うことで、後のルビ処理で属性値が壊れるのを防ぐ
+                        annotationKeys.forEach((key, index) => {
+                            const regex = new RegExp(`(${key})`, 'g');
+                            // data-index 属性を使用（数字なら漢字ルビ変換の影響を受けない）
+                            processed = processed.replace(regex, `<span class="annotation-highlight" data-index="${index}">$1</span>`);
+                        });
+
+                        // 3. 次にルビを振る
+                        // data-index="123" のような数値部分は、漢字の置換対象にならないため安全
+                        Object.keys(FURIGANA_DATA).forEach(key => {
+                            const reading = FURIGANA_DATA[key];
+                            const rubyTag = `<ruby>${key}<rt>${reading}</rt></ruby>`;
+                            processed = processed.split(key).join(rubyTag);
+                        });
+
+                        return processed;
+                    });
+                });
+
+                /* * ---------------------------------------------
+                 * ロジック: インタラクション
+                 * ---------------------------------------------
+                 */
+                const handleTextClick = (event) => {
+                    // クリックされた要素が .annotation-highlight か、その内部（rubyタグなど）かを確認
+                    const target = event.target.closest('.annotation-highlight');
+                    
+                    if (target) {
+                        // data-index から元のキーを復元する
+                        const index = target.getAttribute('data-index');
+                        if (index !== null) {
+                            const keys = Object.keys(ANNOTATIONS);
+                            const word = keys[index];
+                            if (word && ANNOTATIONS[word]) {
+                                activeAnnotation.value = {
+                                    word: word,
+                                    desc: ANNOTATIONS[word]
+                                };
+                            }
+                        }
+                    } else {
+                        // 背景クリックで閉じる
+                        activeAnnotation.value = null;
+                    }
+                };
+
+                const openModal = (text, title) => {
+                    modalTitle.value = title;
+                    modalBody.value = text;
+                    showModal.value = true;
+                };
+
+                /* * ---------------------------------------------
+                 * ロジック: 読書位置の記憶 (LocalStorage)
+                 * ---------------------------------------------
+                 */
+                const changeTab = (tabId) => {
+                    if (currentView.value === 'read') {
+                        localStorage.setItem('summerProcession_scrollPos', window.scrollY);
+                    }
+
+                    currentView.value = tabId;
+
+                    if (tabId === 'read') {
+                        nextTick(() => {
+                            const savedPos = localStorage.getItem('summerProcession_scrollPos');
+                            if (savedPos) {
+                                window.scrollTo({
+                                    top: parseInt(savedPos, 10),
+                                    behavior: 'auto'
+                                });
+                            } else {
+                                window.scrollTo(0, 0);
+                            }
+                        });
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
+                };
+
+                return {
+                    projectTitle,
+                    authorName,
+                    tabs,
+                    currentView,
+                    changeTab,
+                    dataStructure,
+                    dataCharacters,
+                    dataKeywords,
+                    formattedText,
+                    handleTextClick,
+                    activeAnnotation,
+                    showModal,
+                    modalTitle,
+                    modalBody,
+                    openModal
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
