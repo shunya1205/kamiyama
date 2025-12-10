@@ -156,17 +156,13 @@
             padding: 2rem 1.5rem;
         }
 
+        /* アニメーション関連のスタイルを削除し、即時切り替えに変更 */
         .view-section {
             display: none;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .view-section.active {
             display: block;
-            opacity: 1;
-            transform: translateY(0);
         }
 
         h2 {
@@ -700,7 +696,7 @@
 
             characters: [
                 { name: "少年 (主人公)", desc: "小学5年生。涙が出ないことに戸惑う。", note: "「邪魔者」として扱われる疎外感から、シライとの交流を通じて、祖父の死を「自分ごと」として受け入れるまでの心の変化が描かれる。" },
-                { name: "シライさん", desc: "東京の雑誌記者。12年前に祖父を取材。", note: "少年と大人（父たち）をつなぐ媒介者。写真を通じて家族の過去を少年に伝え、少年の心の扉を開く重要な役割を果たす。" },
+                { name: "シライさん", desc: "東京の雑誌記者。12年前に祖父を取材。", note: "少年と大人（父たち）をつなぐ媒介者。写真を通じて家族の過去を少年に伝える、少年の心の扉を開く重要な役割を果たす。" },
                 { name: "父 (ハジメ)", desc: "少年の父。現在は一人前の漁師。", note: "シライの訪問を喜びつつも、父（祖父）の死に深く悲しんでいる。酔って「デコが白い」と泣く姿は、漁師としての祖父への敬意と愛情の表れ。" },
                 { name: "祖父", desc: "熟練の漁師。脳溢血で急死した。", note: "物語には直接登場しないが、写真や周囲の語り、そして「タオル」という遺品を通じて、その存在感が強く描かれる。象徴的存在。" }
             ],
@@ -899,27 +895,21 @@
                 const activeBtn = document.querySelector(`.nav-btn[onclick="app.switchView('${viewId}')"]`);
                 if(activeBtn) activeBtn.classList.add('active');
 
-                document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+                // アニメーション関連を削除し、即時切り替えに変更
+                document.querySelectorAll('.view-section').forEach(sec => {
+                    sec.classList.remove('active');
+                    sec.style.display = 'none';
+                });
                 
-                // フェードインアニメーションのために少し遅らせる
                 const targetSec = document.getElementById(`view-${viewId}`);
                 targetSec.style.display = 'block';
-                setTimeout(() => {
-                    targetSec.classList.add('active');
-                }, 10);
-                
-                // 非アクティブなセクションをdisplay:noneにする（アニメーション後）
-                document.querySelectorAll('.view-section:not(#view-' + viewId + ')').forEach(sec => {
-                    sec.classList.remove('active');
-                    setTimeout(() => {
-                         if(!sec.classList.contains('active')) sec.style.display = 'none';
-                    }, 400); 
-                });
+                targetSec.classList.add('active');
 
                 this.currentView = viewId;
 
                 if (viewId === 'read') {
-                    setTimeout(() => this.restoreScrollPositionForRead(), 50);
+                    // 即座にスクロール位置を復元（描画タイミング考慮で最小限の遅延のみ）
+                    setTimeout(() => this.restoreScrollPositionForRead(), 0);
                 } else {
                     window.scrollTo(0, 0);
                 }
