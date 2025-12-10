@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タオル - 重松清 | 文学作品深読アーカイブ</title>
+    <style>
+        /* * ==========================================
+         * Rich Modern Design System
+         * ==========================================
+         */
+        :root {
+            /* 配色パレット */
+            --primary-color: #3b82f6;      /* メインの青 */
+            --primary-dark: #1d4ed8;       /* 濃い青 */
+            --accent-color: #f59e0b;       /* アクセント（黄色・オレンジ系） */
+            
+            --bg-color: #f8fafc;           /* 背景色（完全な白ではなく目に優しいオフホワイト） */
+            --surface-color: #ffffff;      /* カード等の表面色 */
+            
+            --text-main: #1e293b;          /* メインテキスト */
+            --text-sub: #64748b;           /* サブテキスト */
+            
+            --border-color: #e2e8f0;       /* 境界線 */
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            
+            --marker-color: rgba(254, 240, 138, 0.6); /* 蛍光ペン風の黄色 */
+            --marker-border: #eab308;                 /* マーカーの下線色 */
+        }
+
+        /* ダークモード対応 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #60a5fa;
+                --primary-dark: #3b82f6;
+                --accent-color: #fbbf24;
+                
+                --bg-color: #0f172a;
+                --surface-color: #1e293b;
+                
+                --text-main: #f1f5f9;
+                --text-sub: #94a3b8;
+                
+                --border-color: #334155;
+                --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+                --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3);
+                
+                --marker-color: rgba(59, 130, 246, 0.25); /* ダークモードは青系マーカー */
+                --marker-border: #60a5fa;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.75;
+            padding-top: 80px; /* ヘッダー分 */
+            padding-bottom: 120px;
+        }
+
+        /* --- Global Header --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: rgba(255, 255, 255, 0.9); /* すりガラス効果用ベース */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            header {
+                background-color: rgba(15, 23, 42, 0.9);
+            }
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        .header-author {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        /* --- Navigation Menu --- */
+        nav {
+            overflow-x: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        nav::-webkit-scrollbar { display: none; }
+
+        .nav-items {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.25rem;
+            background-color: var(--surface-color);
+            border-radius: 99px;
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 99px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-main);
+            background-color: var(--bg-color);
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+
+        /* --- Main Content Layout --- */
+        main {
+            max-width: 900px; /* カードグリッドのため少し幅広に */
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .view-section {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .view-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+            border-left: 5px solid var(--primary-color);
+            padding-left: 1rem;
+            line-height: 1.2;
+        }
+        
+        .section-desc {
+            margin-bottom: 2rem;
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            margin-left: 1.3rem; /* ボーダー分の調整 */
+        }
+
+        /* --- 4. Reading View (本文デザイン強化) --- */
+        #view-read {
+            font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
+            font-size: 1.25rem; /* サイズアップ */
+            line-height: 2.5;   /* 行間ゆったり */
+            text-align: justify;
+            color: var(--text-main);
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        #view-read p {
+            margin-bottom: 2.5rem;
+            text-indent: 1em;
+        }
+
+        /* 注釈キーワードの強調スタイル (要望対応) */
+        .text-keyword {
+            font-weight: 700; /* 太字 */
+            background: linear-gradient(transparent 60%, var(--marker-color) 0); /* 下半分マーカー */
+            border-bottom: 2px solid var(--marker-border); /* 底辺にしっかりした線 */
+            padding: 0 2px 2px 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 2px;
+            color: var(--text-main);
+        }
+
+        .text-keyword:hover {
+            background-color: var(--marker-color); /* ホバー時は全体塗りつぶし */
+            color: var(--primary-dark);
+        }
+
+        /* --- Card Styles (共通) --- */
+        .card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .card-header::after {
+            content: '+';
+            font-weight: 400;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            transition: transform 0.3s;
+        }
+
+        .card.open .card-header::after {
+            content: '−';
+            transform: rotate(180deg);
+        }
+        
+        .card.open .card-header {
+            background-color: rgba(59, 130, 246, 0.05); /* 開いたときに薄い青背景 */
+        }
+
+        .card-body {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .card.open .card-body {
+            padding-bottom: 1.5rem;
+            max-height: 800px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* --- 1. Structure View (タイムライン風デザイン) --- */
+        #structure-list {
+            position: relative;
+            padding-left: 1rem;
+        }
+        
+        /* タイムラインの縦線 */
+        #structure-list::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 28px; /* バッジの中心に合わせる */
+            width: 2px;
+            height: 100%;
+            background-color: var(--border-color);
+            z-index: 0;
+        }
+
+        .structure-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+            padding-left: 3.5rem; /* バッジ分空ける */
+        }
+
+        .structure-badge {
+            position: absolute;
+            top: 15px;
+            left: 14px;
+            width: 30px;
+            height: 30px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transform: translateX(-50%);
+            z-index: 1;
+            box-shadow: 0 0 0 4px var(--bg-color); /* 周囲を白抜きにして線を切る */
+        }
+
+        /* --- 2. Characters View (アバター付きデザイン) --- */
+        #character-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .char-card {
+            border-left: 4px solid var(--accent-color); /* アクセントカラーの左線 */
+        }
+        
+        .char-header-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .char-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-sub);
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- 3. Keywords View (グリッド・辞書カード風) --- */
+        #keyword-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1rem;
+        }
+
+        .keyword-card .card-header {
+            font-size: 0.9rem;
+            padding: 1rem 1.25rem;
+        }
+        
+        .keyword-yomi {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            font-weight: normal;
+            margin-top: 0.2rem;
+        }
+
+        /* --- Annotation Popup (Floating Bottom Sheet) --- */
+        #annotation-box {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(120%);
+            width: 90%;
+            max-width: 600px;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 2000;
+        }
+
+        #annotation-box.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .annotation-header {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .annotation-header h4 {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            font-family: serif;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .annotation-yomi {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+        }
+
+        .annotation-text {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .close-annotation {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-sub);
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+        
+        .close-annotation:hover {
+            background-color: var(--border-color);
+            color: var(--text-main);
+        }
+
+        /* レスポンシブ調整 */
+        @media (max-width: 640px) {
+            header {
+                flex-direction: column;
+                justify-content: center;
+                height: auto;
+                padding: 1rem;
+                gap: 1rem;
+            }
+            
+            .header-left {
+                align-items: center;
+            }
+            
+            nav {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
+            body {
+                padding-top: 130px;
+            }
+            
+            main {
+                padding: 1rem;
+            }
+            
+            .structure-item {
+                padding-left: 2.5rem; /* スマホでは少し詰める */
+            }
+            
+            #structure-list::before {
+                left: 14px;
+            }
+            
+            .structure-badge {
+                width: 28px;
+                height: 28px;
+                left: 0;
+                transform: none;
+            }
+
+            #character-list, #keyword-list {
+                grid-template-columns: 1fr; /* スマホは1列 */
+            }
+            
+            #view-read {
+                font-size: 1.1rem;
+                line-height: 2.2;
+            }
+            
+            #annotation-box {
+                bottom: 0;
+                width: 100%;
+                max-width: 100%;
+                border-radius: 16px 16px 0 0;
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- グローバルヘッダー -->
+    <header>
+        <div class="header-left">
+            <div class="header-title" id="app-title"></div>
+            <div class="header-author" id="app-author"></div>
+        </div>
+        <nav>
+            <div class="nav-items">
+                <button class="nav-btn" onclick="app.switchView('structure')">物語の構成</button>
+                <button class="nav-btn" onclick="app.switchView('characters')">登場人物</button>
+                <button class="nav-btn" onclick="app.switchView('keywords')">キーワード</button>
+                <button class="nav-btn" onclick="app.switchView('read')">本文を読む</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main id="app-container">
+        
+        <!-- 1. Structure View -->
+        <section id="view-structure" class="view-section">
+            <h2>物語の構成</h2>
+            <p class="section-desc">物語の流れを5つのステップで整理します。</p>
+            <div id="structure-list">
+                <!-- JSでタイムライン風リストを生成 -->
+            </div>
+        </section>
+
+        <!-- 2. Characters View -->
+        <section id="view-characters" class="view-section">
+            <h2>登場人物・要素分析</h2>
+            <p class="section-desc">人物ごとの特徴や役割を深掘りします。</p>
+            <div id="character-list">
+                <!-- JSでグリッドカードを生成 -->
+            </div>
+        </section>
+
+        <!-- 3. Keywords View -->
+        <section id="view-keywords" class="view-section">
+            <h2>重要なキーワード・象徴</h2>
+            <p class="section-desc">タップして語句の意味と背景を確認しましょう。</p>
+            <div id="keyword-list">
+                <!-- JSでグリッドカードを生成 -->
+            </div>
+        </section>
+
+        <!-- 4. Reading View -->
+        <section id="view-read" class="view-section">
+            <!-- 本文 -->
+            <div id="novel-text"></div>
+        </section>
+    </main>
+
+    <!-- 注釈表示エリア -->
+    <div id="annotation-box">
+        <button class="close-annotation" onclick="app.closeAnnotation()">&times;</button>
+        <div class="annotation-content">
+            <div class="annotation-header">
+                <h4 id="anno-word"></h4>
+                <span id="anno-yomi" class="annotation-yomi"></span>
+            </div>
+            <p id="anno-desc" class="annotation-text"></p>
+        </div>
+    </div>
+
+    <!-- 
+      ==========================================
+      JavaScript Logic
+      ==========================================
+    -->
+    <script>
+        /**
+         * 1. 作品データ（編集可能エリア）
+         */
+        const CONTENT_DATA = {
+            title: "タオル",
+            author: "重松 清",
+            text: `
+午後になって少年の家を訪ねてきた客は、初めて見る顔だった。背広に黒いネクタイを締めているのは、朝から入れかわり立ちかわりやってくる他の客と同じだったが、家の外にいた親戚に挨拶する時の言葉づかいが違った。「このたびは、どうもご愁傷さまです。」——テレビでしか聞いたことのない東京の言葉だった。
+祭壇のすぐ前に座っていた父は、その人が来たのを知ると、玄関まで迎えに出た。
+「よう来てくれました、ほんまに、お忙しいのに……。」
+父はうれしそうで、懐かしそうだった。久しぶりにお兄さんに会った弟のように、自分より少し年上の客を、まぶしそうに見つめていた。
+「十二年ぶりになるのかな。」
+「もう、そげんなりますか……。」
+父はそばにいた少年の肩を抱いて、「ほな、コレが生まれる前いうことですか。」と言った。
+「息子さん？」
+父は少年の名前を客に告げ、小学五年生なんだとも伝えて、「ほれ、挨拶せんか。」と少年の背中を軽く押した。
+少年が細い声で「こんにちは。」と言うと、客は体をかがめ、少年と目の高さを合わせて、「お父さんによく似てるね。」と笑った。
+父はてれくさそうに「似とるんは勉強のできんところだけですわ。」と言って、客を座敷に招き入れた。
+少年も客の後ろについて座敷に入る。
+今朝からずっと——本当のことを言えば、二日前に祖父が亡くなってからずっと、家のどこにいればいいのかわからずにいた。
+二階の自分の部屋は、親戚の着替えのための部屋になった。一階の部屋のふすまはあらかたはずされ、玄関の引き戸もさっきはずされた。通りに面した窓は白と黒の幕で覆われ、幕の前には花環がたくさん並べられた。台所には町内会のおばさんたちが出たり入ったりして、母の姿を探すだけでも大変だった。
+「邪魔になるけん、外で遊んどりんさい。」と母に言われ、家の前でサッカーボールを蹴っていたら、目を真っ赤に泣きはらした叔母に「こげな日にふらふら遊んどったらバチが当たるよ。」と叱られた。しかたなく家に入ってテレビをつけると別の叔母に「音を出したらいけんよ。」と言われ、マンガを読んでいたら漁協の組合長が「おじいちゃんのそばにおってあげんさい。」と酒に酔った声で言って、そのくせ祭壇の設けられた広間に行ってみると、大人たちが集まっていて、座る場所などどこにもなかった。
+おじいちゃんが死んだ。
+それは、わかる。
+ずっと一緒に暮らしていた祖父だ。かわいがってもらっていた。「中学生になったら、おじいちゃんの船で漁に連れていってやるけん。」と口癖のように言っていた祖父が、脳溢血で、お別れの言葉を交わす間もなく死んでしまった。
+おじいちゃんが死んだのは悲しいことだ。
+それも、わかる。
+悲しいときには、泣いてしまう。
+それだって、ちゃんとわかっている。
+なのに、涙が出てこない。悲しいかどうかもはっきりしない。自分の居場所を見つけられないと、ゆっくり悲しむこともできないのかもしれない。
+父に案内されて祭壇の前に座った客は、丁寧なしぐさで合掌と焼香をした。父以外の誰とも知り合いではないのか、広間にいる人たちは皆、けげんそうな顔で客の背中をちらちら見ていた。客のほうも、焼香を終えたあとは広間にいる理由をなくしてしまったように、どこか居心地悪そうだった。
+客は、今夜の泊まり先に、町内の民宿を予約していた。父は「ウチに泊まってもろうてもよかったのに。」と少し残念そうに言って、戸口の脇に立ったままだった少年を呼んだ。
+「おじちゃんを『みちしお荘』まで案内しちゃってくれや。」
+「……うん。」
+「ほいで、どうせおまえはここにおっても邪魔になるだけじゃけえ、お通夜が始まるまでおじちゃんのお世話して、町の案内でもさせてもらえや。」
+母に続いて父にも「邪魔。」だと言われたのは悲しかったが、とりあえず道案内と客のお世話という仕事が与えられてほっとした。
+客が玄関で靴を履いている時、父は初めて「ほな、シライさん、またあとで。」と客を名前で呼んだ。客も「ハジメさんも、あまり無理して疲れを出さないようにしてください。」と応えた。ハジメというのが父の名前だ。漢字で「一」と書く。
+「お待たせ。」
+シライさんは玄関の外で待っていた少年に声をかけ、大きなバッグを肩に提げて歩きだした。礼服姿にはあまり似合わない、リュックサックのようなバッグだった。
+少年の家から『みちしお荘』までは、海に沿った一本道だった。夕方のなぎの時間にさしかかって、風が止まり、よどんだ潮のにおいが濃くなっている。
+「二人まとめて厄介払いされちゃったな。」
+シライさんはそう言って笑った。ヤッカイバライの意味はよくわからなかったが、なんとなくシライさんが「俺たちは同じだな。」と言ってるんじゃないかと感じて、それがちょっとうれしくて、少年は自分から話しかけてみることにした。
+「お父ちゃんと知り合いですか？」
+「ああ。お父さんとも、亡くなったおじいさんとも知り合いだったんだ。」
+「漁に出てたんですか？」
+「いや、そうじゃなくて……。」
+シライさんは歩きながらバッグの腹を軽くたたいた。「取材をしたんだ、おじいさんの。」——シライさんは旅行雑誌の記者で、十二年前に祖父をグラビアページで紹介したのだという。
+「見たこと、あります、それ。」
+「そうか。おじいさん、カッコよかっただろ。」
+少年は、こくん、とうなずいた。祖父を褒められてうれしかったのが半分、残り半分は、シライさんの話にうまくついていけたことで、うれしいというより、ほっとした。
+祖父は地元で一番の腕をもつ一本釣りの漁師だった。今の、この季節——春先にはタイを狙う。夜明け前に港を出て、まだ日の高いうちに一日の仕事は終わる。
+「その頃はまだ、お父さんは見習いみたいなもので、おじいさんの船に乗って、しょっちゅう叱られてたんだ。髪も今みたいな角刈りじゃなくて、リーゼントで……リーゼントって、わかるかな？」
+本当はよくわからない。わからなくてもいいや、と思った。自分が生まれる前の父の姿はアルバムの古い写真で何度か見たことはあっても、こんなふうに誰かから話を聞くのは初めてだった。
+シライさんは「あとで写真見せてやるよ。」と笑った。「たくさん持ってきてるんだ。」
+少年は少し足を速めた。お父さんの知らないところで、お父さんの昔の写真を見て、お父さんの昔の話を聞く——というのが、いい。買ってきたばかりのマンガを開くときのように、胸がどきどきして、わくわくする。
+『みちしお荘』は、船だまりのすぐ前にあった。古びた漁船が二十隻近く並んだ中に祖父の船もある。ひときわ古い。少年が中学校に上がったら船を新調しようかと話していて、それっきりになってしまった。
+シライさんは宿帳に名前を書いたあと、部屋には入らずに、一階の食堂に少年を誘った。
+「ジュース飲むか？」
+「……はい。」
+「じゃあ、ジュースと、ビール。」
+注文を取った『みちしお荘』のおかみさんは、少年を見て「おじいちゃんも急なことじゃったなあ。」と寂しそうな顔になり、頭をなでてくれた。
+ビールとジュース、それに「サービスです。」とゆでたイカの小鉢がテーブルに並んだ。この地方でベイカと呼ぶ、春が旬の小さなイカだ。酢味噌で食べると、すっぱさの奥でじんわりと甘みがにじむ。
+「人が亡くなったときには乾杯っていわないんだ。献杯っていうんだ。」
+ケンパイ。また知らない言葉が出てきた。ふだんなら、家に帰って母にきけば、すぐに漢字を教えてくれる。でも、今夜はたぶんそんなことを話しかける余裕はないだろう。
+ビールとジュースのコップを軽くぶつけてケンパイすると、シライさんはビールを一口飲んで、ふうう、と声に出して息をついた。
+「写真、見せてやるよ。」
+床に置いたバッグのファスナーを開け、中からぶ厚く膨らんだ封筒を取り出した。
+「これ、全部写真なんですか？」
+「ああ。全部、おじいさんとお父さんの写真だよ。」
+ほら、これ、とシライさんは封筒から出した写真を何枚かまとめて少年に渡した。
+祖父と父がいた。船に乗っていた。二人とも今よりずっと若い。父はまだ二十歳そこそこで、祖父も還暦前だった。
+はげていない頃の写真を見せたらおじいちゃんは恥ずかしがるだろうか、とクスッと笑いかけて、ああそうか、と頬をすぼめた。もうおじいちゃんと話すことはできないんだな。おとといから何度も思ってきたことなのに、今初めて、それが悲しさと結びついた。
+漁をしている時の祖父の写真は、どれもタオルを頭に巻いていた。いつもだ。昔から変わらない。最後の漁に出たおとといもそうだった。出かける前に庭のほうに回る。漁の道具をしまった納屋の脇に、針金を渡した物干し台がある。昨日のうちに干しておいたタオルをそこから取って、キュッと頭に巻き付けて、「ほな行ってくるけん。」と港へ向かう。漁を終え、魚市場に魚を卸し、仲間と軽く一杯やってから家に帰ってくると、頭からはずしたタオルを水洗いして、物干し台の針金に掛ける。ずっとそうだった。毎日毎日、それを繰り返していた。
+「ほら、この頃はまだお父さんの雰囲気、あんまり漁師らしくないだろ。」
+「……はい。」
+「漁師を継ぐのは嫌だ嫌だって、俺と酒を飲むと文句ばっかり言ってたんだ。」
+「そうなんですか？」
+「今は、生まれついての漁師です、って顔してるけどな。」
+シライさんはおかしそうに笑った。
+グラビアの撮影の仕事は一週間ほどだったが、家に泊まり込んでの取材を続けたおかげで、祖父や父とすっかり仲よくなった。
+「仲よくなったっていっても、俺は東京だから、年賀状のやりとりぐらいしかできなくて、おじいさんが生きてるうちにもう一度会って写真を撮りたかったんだけど……。でも、昨日ハジメさんから連絡もらってうれしかったし、けっこうスケジュールはキツかったんだけど、ボクに会えたから、やっぱり来てよかったなあ、って。」
+シライさんはバッグから別の封筒を取り出して、中に入っていたはがきを「特別に見せてやるよ。」と少年の前に置いた。
+年賀状だった。差出人は祖父。印刷された文面の横に、手書きの一文が添えられていた。
+〈愚息もようやく一丁前になり、孫もこの四月で六年生です。三代で船に乗れたらうれしいことです。〉
+祖父の字だ。まちがいない、これはおじいちゃんの字だった。
+「ボクは大きくなったら、何になりたいんだ？」
+てれくさかったが、正直に「Ｊリーガー。」と答えた。シライさんは「そうか、じゃあもっとたくさん食べて、もっと大きくならないとな。」と笑ってくれた。
+日が落ちてから、少年はシライさんと二人で家に戻った。
+シライさんはお通夜の焼香を終えると、広間で親戚や町の人たちと酒を飲み始めた。シライさんの持ってきた祖父や父の若い頃の写真は、みんなの思い出話の肴になっているようだった。
+少年は、また居場所をなくしてしまい、外に出てそっとサッカーボールを蹴ったり、台所をのぞいたり、階段の踊り場に座ってマンガを読んだりして暇をつぶした。『みちしお荘』にいた頃はあんなに仲よしだったシライさんが、家に着くとあっさりと大人の仲間に入ってしまったのが、ちょっと悔しかった。
+台所の前を通りかかった時、叔母さんたちの話し声が聞こえた。祖父のなきがらを清めている時の話だった。首筋のしわをタオルで拭いていたら、潮と、魚と、それからさびのにおいが立ち上ってきたのだという。「何十年も船に乗ってきたんじゃけん、体に染みついとるんじゃろうねえ。」と叔母さんが言うと、母が「お義父さんは風呂が嫌いじゃったけんねえ。」と返し、みんなで懐かしそうに笑っていた。
+おとといまではこの家にいた人のことを、もうみんなは思い出話にしてしゃべっている。
+急に寂しくなった。涙は出なくても、だんだん悲しくなってきた。
+玄関からまた外に出て、庭のほうに回った。
+納屋の脇に、ほの白いものが見えた。
+祖父のタオルだった。
+手を伸ばしかけたが、触るのがなんとなく怖くて、中途半端な位置に手を持ち上げたまま、しばらくタオルを見つめた。
+「おう、ここにおったんか。」
+背中に声をかけられ、振り向くと、父とシライさんがいた。
+「おじいちゃんの写真、シライさんに見せてもろうとったら、おもしろかったんじゃ。おじいちゃんは漁に出るときはいつもタオルを巻いとったろう。じゃけん、家におる時の写真を見たら、おまえ、みいんなデコのところが白うなっとるんよ。そこだけ日に焼けとらんけん……。」
+父はかなり酔っているのか、ろれつの怪しい声で言って、体を揺すって笑った。
+「ほいで、今もそうなんじゃろうか思うて棺桶をのぞいてみたら、やっぱりデコが白いんよ。じゃけん、のう、シライさん、じいさんをええ男にして冥土に送ってやらんといけんもんのう……。」
+涙声になってきた父の言葉を引き取って、シライさんが「タオルを取りに来たんだ。」と言った。「やっぱり、タオルがないとおじいちゃんじゃないから。」
+父は涙ぐみながら針金からタオルをはずし、少年に「せっかくじゃけん、おまえも頭に巻いてみいや。」と言った。
+シライさんも「そうだな、写真撮ってやるよ。」とカメラをかまえた。
+少年はタオルをねじって細くした——いつも祖父がそうしていたように。
+額にきつく巻き付けた。
+水道の水ですすぎきれなかった潮のにおいが鼻をくすぐった。おじいちゃんのにおいだ、と思った。
+「おう、よう似合うとるど。」
+父は拍手をして、そのままうつむき、太い腕で目もとをこすった。
+シライさんがカメラのフラッシュをたいた。まぶしさに目を細め、またたくと、熱いものがまぶたからあふれ出た。かすかな潮のにおいは、そこにもあった。`,
+
+            structure: [
+                { title: "訪問者", summary: "祖父の葬儀の日、東京から雑誌記者シライが訪れる。", detail: "少年の家に、亡くなった祖父の知り合いである記者シライが訪れる。父（ハジメ）はシライを懐かしそうに歓迎するが、少年は初めて会う「東京の大人」に緊張している。" },
+                { title: "居場所のない少年", summary: "葬儀の準備に追われる家の中で、少年は居場所を失う。", detail: "祖父の死による悲しみよりも、慌ただしい家の中で邪魔者扱いされる疎外感が勝っている。感情が整理できず、涙も出てこない状態。" },
+                { title: "案内と交流", summary: "少年はシライを民宿へ案内し、少しずつ打ち解ける。", detail: "「二人まとめて厄介払い」というシライの言葉に共感を覚え、少年は彼に心を開き始める。父と祖父の過去について話を聞き、ワクワクする。" },
+                { title: "祖父の思い出", summary: "民宿で写真を見ながら、祖父と父の若い頃の話を聞く。", detail: "シライが見せる写真には、リーゼント姿の父や、タオルを頭に巻いた祖父が写っている。祖父からの年賀状には、孫（少年）への期待が書かれていたことを知る。" },
+                { title: "タオル", summary: "祖父の棺にタオルを入れるため、少年・父・シライが納屋へ行く。", detail: "父は祖父の額が日焼けせずに白いことを気にし、いつも巻いていたタオルを持たせようとする。少年がタオルを頭に巻いたとき、潮のにおいと共に、抑えていた悲しみが涙となって溢れ出す。" }
+            ],
+
+            characters: [
+                { name: "少年 (主人公)", desc: "小学5年生。涙が出ないことに戸惑う。", note: "「邪魔者」として扱われる疎外感から、シライとの交流を通じて、祖父の死を「自分ごと」として受け入れるまでの心の変化が描かれる。" },
+                { name: "シライさん", desc: "東京の雑誌記者。12年前に祖父を取材。", note: "少年と大人（父たち）をつなぐ媒介者。写真を通じて家族の過去を少年に伝え、少年の心の扉を開く重要な役割を果たす。" },
+                { name: "父 (ハジメ)", desc: "少年の父。現在は一人前の漁師。", note: "シライの訪問を喜びつつも、父（祖父）の死に深く悲しんでいる。酔って「デコが白い」と泣く姿は、漁師としての祖父への敬意と愛情の表れ。" },
+                { name: "祖父", desc: "熟練の漁師。脳溢血で急死した。", note: "物語には直接登場しないが、写真や周囲の語り、そして「タオル」という遺品を通じて、その存在感が強く描かれる。象徴的存在。" }
+            ],
+
+            annotations: {
+                "ご愁傷さま": { yomi: "ごしゅうしょうさま", desc: "人の死を悼み、遺族にお悔やみを言う時の言葉。" },
+                "祭壇": { yomi: "さいだん", desc: "神仏や死者の霊をまつるための壇。" },
+                "座敷": { yomi: "ざしき", desc: "畳の敷いてある部屋。客間。" },
+                "花環": { yomi: "はなわ", desc: "葬儀の際に贈られる、造花で作った輪の飾り。" },
+                "脳溢血": { yomi: "のういっけつ", desc: "脳出血の古い呼び方。" },
+                "合掌": { yomi: "がっしょう", desc: "両手のひらを合わせること。" },
+                "焼香": { yomi: "しょうこう", desc: "仏教の葬儀で香をたくこと。" },
+                "けげんそう": { yomi: "怪訝そう", desc: "納得がいかない、不思議だ、という顔つき。" },
+                "なぎ": { yomi: "凪", desc: "風がやんで海面が静まること。" },
+                "厄介払い": { yomi: "やっかいばらい", desc: "邪魔な人をよそへ追いやること。" },
+                "リーゼント": { yomi: "りーぜんと", desc: "前髪を高く盛り上げた髪型。昔の不良スタイルの象徴。" },
+                "還暦": { yomi: "かんれき", desc: "数え年で61歳のこと。" },
+                "愚息": { yomi: "ぐそく", desc: "自分の息子のことをへりくだって言う言葉。" },
+                "一丁前": { yomi: "いっちょうまえ", desc: "一人前の能力があること。" },
+                "肴": { yomi: "さかな", desc: "酒を飲む時のつまみ、または話題。" },
+                "なきがら": { yomi: "亡骸", desc: "遺体。" },
+                "冥土": { yomi: "めいど", desc: "あの世。" },
+                "献杯": { yomi: "けんぱい", desc: "死者に敬意を表して杯を捧げること。" },
+                "ベイカ": { yomi: "べいか", desc: "小さいイカの一種。方言。" },
+                "タオル": { yomi: "たおる", desc: "【重要】祖父の漁師としての誇りと日常の象徴。少年がこれを巻くことで感情が解放される重要なアイテム。" },
+                "潮のにおい": { yomi: "しおのにおい", desc: "【重要】祖父の生きた証であり、少年の感情を呼び覚ますトリガー。" },
+                "デコ": { yomi: "でこ", desc: "額（ひたい）。祖父の白い額は努力の証。" }
+            }
+        };
+
+        /**
+         * 2. アプリケーションロジック
+         */
+        const app = {
+            currentView: 'structure',
+            
+            init() {
+                this.renderHeader();
+                this.renderStructure();
+                this.renderCharacters();
+                this.renderKeywords();
+                this.renderText();
+                
+                // 初回ビュー設定
+                this.switchView('structure');
+                
+                window.addEventListener('scroll', this.handleScroll.bind(this));
+            },
+
+            renderHeader() {
+                document.getElementById('app-title').textContent = CONTENT_DATA.title;
+                document.getElementById('app-author').textContent = CONTENT_DATA.author;
+            },
+
+            /* --- 1. Structure View Renderer (タイムライン) --- */
+            renderStructure() {
+                const container = document.getElementById('structure-list');
+                CONTENT_DATA.structure.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'structure-item card';
+                    // タイムラインバッジの番号
+                    const badgeNum = index + 1;
+                    
+                    div.innerHTML = `
+                        <div class="structure-badge">${badgeNum}</div>
+                        <div class="card-header" onclick="app.toggleCard(this)">
+                            <span>${item.title}</span>
+                        </div>
+                        <div class="card-body">
+                            <p style="font-weight:700; margin-bottom:0.75rem; color:var(--primary-dark);">${item.summary}</p>
+                            <hr style="border:0; border-top:1px dashed var(--border-color); margin:0.5rem 0;">
+                            <p>${item.detail}</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            /* --- 2. Characters View Renderer (グリッド + アバター) --- */
+            renderCharacters() {
+                const container = document.getElementById('character-list');
+                CONTENT_DATA.characters.forEach((char, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'card char-card';
+                    
+                    // アバターの文字（名前の1文字目）
+                    const initial = char.name.charAt(0);
+                    
+                    div.innerHTML = `
+                        <div class="card-header" onclick="app.toggleCard(this)">
+                            <div class="char-header-content">
+                                <div class="char-avatar">${initial}</div>
+                                <span>${char.name}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p style="font-weight:600; margin-bottom:0.5rem;">${char.desc}</p>
+                            <p style="font-size:0.9rem; color:var(--text-sub);">${char.note}</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            /* --- 3. Keywords View Renderer (グリッド) --- */
+            renderKeywords() {
+                const container = document.getElementById('keyword-list');
+                Object.keys(CONTENT_DATA.annotations).forEach((key, index) => {
+                    const data = CONTENT_DATA.annotations[key];
+                    const div = document.createElement('div');
+                    div.className = 'card keyword-card';
+                    div.innerHTML = `
+                        <div class="card-header" onclick="app.toggleCard(this)">
+                            <div>
+                                <span>${key}</span>
+                                <span class="keyword-yomi">${data.yomi}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>${data.desc}</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            toggleCard(headerElement) {
+                // 親のcardクラスを持つ要素を探す（構造変更に対応）
+                const card = headerElement.closest('.card');
+                card.classList.toggle('open');
+            },
+
+            /* --- 4. Text View Renderer --- */
+            renderText() {
+                const container = document.getElementById('novel-text');
+                const paragraphs = CONTENT_DATA.text.split(/\n/);
+                let htmlContent = "";
+
+                // 重要度順（長い順）にソートして、短い単語が長い単語の一部として誤置換されるのを防ぐ簡易ロジック
+                const sortedKeys = Object.keys(CONTENT_DATA.annotations).sort((a, b) => b.length - a.length);
+
+                paragraphs.forEach(p => {
+                    if (p.trim() === "") return;
+                    let line = p;
+
+                    // 単純置換だが、一度タグ化したものを壊さないように注意が必要。
+                    // 本格的なNLP処理ではないため、ここではプレースホルダー方式で置換する
+                    
+                    // 1. まず一意なプレースホルダーに置換
+                    const map = {};
+                    sortedKeys.forEach((key, idx) => {
+                        // 既に置換済みの文字列を含まないように注意（今回は簡易実装）
+                        const placeholder = `__KEY_${idx}__`;
+                        if (line.includes(key)) {
+                            map[placeholder] = key;
+                            // 全置換
+                            line = line.split(key).join(placeholder);
+                        }
+                    });
+
+                    // 2. プレースホルダーをHTMLタグに戻す
+                    Object.keys(map).forEach(ph => {
+                        const originalKey = map[ph];
+                        const htmlTag = `<span class="text-keyword" onclick="app.showAnnotation('${originalKey}')">${originalKey}</span>`;
+                        line = line.split(ph).join(htmlTag);
+                    });
+
+                    htmlContent += `<p>${line}</p>`;
+                });
+
+                container.innerHTML = htmlContent;
+            },
+
+            showAnnotation(key) {
+                const data = CONTENT_DATA.annotations[key];
+                if (!data) return;
+
+                document.getElementById('anno-word').textContent = key;
+                document.getElementById('anno-yomi').textContent = data.yomi;
+                document.getElementById('anno-desc').textContent = data.desc;
+
+                document.getElementById('annotation-box').classList.add('visible');
+            },
+
+            closeAnnotation() {
+                document.getElementById('annotation-box').classList.remove('visible');
+            },
+
+            /* --- View Switching & Scroll Logic --- */
+            switchView(viewId) {
+                if (this.currentView === 'read') {
+                    this.saveScrollPosition();
+                }
+
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.querySelector(`.nav-btn[onclick="app.switchView('${viewId}')"]`);
+                if(activeBtn) activeBtn.classList.add('active');
+
+                document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+                
+                // フェードインアニメーションのために少し遅らせる
+                const targetSec = document.getElementById(`view-${viewId}`);
+                targetSec.style.display = 'block';
+                setTimeout(() => {
+                    targetSec.classList.add('active');
+                }, 10);
+                
+                // 非アクティブなセクションをdisplay:noneにする（アニメーション後）
+                document.querySelectorAll('.view-section:not(#view-' + viewId + ')').forEach(sec => {
+                    sec.classList.remove('active');
+                    setTimeout(() => {
+                         if(!sec.classList.contains('active')) sec.style.display = 'none';
+                    }, 400); 
+                });
+
+                this.currentView = viewId;
+
+                if (viewId === 'read') {
+                    setTimeout(() => this.restoreScrollPositionForRead(), 50);
+                } else {
+                    window.scrollTo(0, 0);
+                }
+            },
+
+            STORAGE_KEY: 'novel_reader_pos_' + CONTENT_DATA.title,
+
+            saveScrollPosition() {
+                localStorage.setItem(this.STORAGE_KEY, window.scrollY);
+            },
+
+            handleScroll() {
+                if (this.currentView === 'read') {
+                    if (this.scrollTimeout) clearTimeout(this.scrollTimeout);
+                    this.scrollTimeout = setTimeout(() => this.saveScrollPosition(), 500);
+                }
+            },
+
+            restoreScrollPosition() {
+                // 初期ロード時は不要（Structureが表示されるため）
+            },
+
+            restoreScrollPositionForRead() {
+                const savedY = localStorage.getItem(this.STORAGE_KEY);
+                if (savedY) {
+                    window.scrollTo({ top: parseInt(savedY, 10), behavior: 'auto' });
+                }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
