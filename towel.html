@@ -156,7 +156,6 @@
             padding: 2rem 1.5rem;
         }
 
-        /* アニメーション関連のスタイルを削除し、即時切り替えに変更 */
         .view-section {
             display: none;
         }
@@ -241,6 +240,8 @@
             align-items: center;
             font-weight: 700;
             color: var(--text-main);
+            background-color: transparent;
+            transition: background-color 0.2s;
         }
 
         .card-header::after {
@@ -260,18 +261,21 @@
             background-color: rgba(59, 130, 246, 0.05); /* 開いたときに薄い青背景 */
         }
 
+        /* アコーディオンの中身：アニメーション最適化 */
         .card-body {
-            padding: 0 1.5rem;
+            /* 左右paddingは固定し、上下paddingとheightのみアニメーションさせる */
+            padding: 0 1.5rem; 
             max-height: 0;
+            opacity: 0;
             overflow: hidden;
-            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s;
+            /* timeを0.3sに短縮し、ease-outでキビキビさせる */
+            transition: max-height 0.3s ease-out, padding-bottom 0.3s ease-out, opacity 0.3s ease-out;
             color: var(--text-main);
             font-size: 0.95rem;
         }
 
         .card.open .card-body {
-            padding-bottom: 1.5rem;
-            max-height: 800px;
+            /* JSで制御するため、CSSでの max-height 指定を削除 */
             border-top: 1px solid var(--border-color);
         }
 
@@ -824,9 +828,35 @@
             },
 
             toggleCard(headerElement) {
-                // 親のcardクラスを持つ要素を探す（構造変更に対応）
+                // 親のcardクラスを持つ要素を探す
                 const card = headerElement.closest('.card');
-                card.classList.toggle('open');
+                const body = card.querySelector('.card-body');
+                
+                if (card.classList.contains('open')) {
+                    // --- 閉じる処理 (スムーズ化) ---
+                    // 1. まず現在の高さを明示的にセット（アニメーションの開始点を作る）
+                    body.style.maxHeight = body.scrollHeight + "px";
+                    body.style.paddingBottom = "1.5rem"; // 現在のpadding
+                    body.style.opacity = "1";
+                    
+                    // 2. 次の描画フレームで0にする（transitionを効かせる）
+                    requestAnimationFrame(() => {
+                        body.style.maxHeight = "0px";
+                        body.style.paddingBottom = "0px";
+                        body.style.opacity = "0";
+                    });
+                    
+                    card.classList.remove('open');
+                } else {
+                    // --- 開く処理 ---
+                    card.classList.add('open');
+                    
+                    // 中身の高さを取得してセット
+                    // transitionが効くようにpaddingを戻す
+                    body.style.paddingBottom = "1.5rem";
+                    body.style.opacity = "1";
+                    body.style.maxHeight = body.scrollHeight + "px";
+                }
             },
 
             /* --- 4. Text View Renderer --- */
