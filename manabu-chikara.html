@@ -610,11 +610,21 @@
                 saveScrollPosition();
             }
 
-            // 全ビュー非表示
-            Object.values(els.views).forEach(el => el.classList.add('hidden'));
+            // 全ビュー非表示 & opacityリセット
+            Object.values(els.views).forEach(el => {
+                el.classList.add('hidden');
+                el.style.opacity = '';
+            });
+            
+            const targetEl = els.views[targetId];
+
+            // ちらつき防止：Readerの場合は一旦透明にして描画
+            if (targetId === 'view-reader') {
+                targetEl.style.opacity = '0';
+            }
             
             // ターゲット表示
-            els.views[targetId].classList.remove('hidden');
+            targetEl.classList.remove('hidden');
             
             // ボタンのアクティブ状態更新
             document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -627,9 +637,20 @@
                 }
             });
 
-            // Readerならスクロール位置復元、それ以外はトップへ
+            // スクロール制御（ちらつき防止ロジック適用）
             if (targetId === 'view-reader') {
-                restoreScrollPosition();
+                const y = STATE.scrollPositions['view-reader'] || 0;
+                
+                // 1. 即座にスクロール（DOM表示直後、まだ透明）
+                window.scrollTo(0, y);
+                
+                // 2. 描画タイミングに合わせて不透明に戻す（スムーズに表示）
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        window.scrollTo(0, y); // 念のため再設定
+                        targetEl.style.opacity = '1';
+                    });
+                });
             } else {
                 window.scrollTo(0, 0);
             }
@@ -649,13 +670,7 @@
             saveStateToStorage();
         }
 
-        function restoreScrollPosition() {
-            const y = STATE.scrollPositions['view-reader'] || 0;
-            // 即時実行だとレンダリングが間に合わない場合があるので微小遅延
-            setTimeout(() => {
-                window.scrollTo(0, y);
-            }, 50);
-        }
+        // switchView内で処理するため、restoreScrollPosition関数は廃止
 
         function saveStateToStorage() {
             // Readerにいる場合は常に最新のスクロール位置を更新してから保存
