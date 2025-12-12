@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紙の建築 - 坂 茂 | インタラクティブ読解</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Noto Serif JP for text, Noto Sans JP for UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* カスタムスタイル設定 */
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f8fafc; /* Slate-50 */
+            color: #1e293b; /* Slate-800 */
+        }
+        
+        /* 本文用フォント設定 */
+        .prose-text {
+            font-family: 'Noto Serif JP', serif;
+            line-height: 2.0;
+            font-size: 1.125rem;
+            text-align: justify;
+        }
+
+        /* 重要な語句のスタイル（アンダーライン） */
+        .term-highlight {
+            border-bottom: 2px solid #6366f1; /* Indigo-500 */
+            background-color: rgba(99, 102, 241, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            padding-bottom: 2px;
+        }
+        .term-highlight:hover {
+            background-color: rgba(99, 102, 241, 0.25);
+        }
+
+        /* タブのアクティブ状態 */
+        .tab-active {
+            border-bottom: 3px solid #6366f1;
+            color: #4f46e5;
+            font-weight: 700;
+        }
+        .tab-inactive {
+            color: #64748b;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-inactive:hover {
+            color: #334155;
+            border-bottom: 3px solid #cbd5e1;
+        }
+
+        /* アコーディオン・モーダルのトランジション */
+        .details-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+        }
+        .details-content.open {
+            max-height: 1000px; /* 十分な高さ */
+            opacity: 1;
+        }
+
+        /* スクロールバーのカスタマイズ（任意） */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- 
+        ================================================================
+        1. データ定義エリア (CONTENT_DATA)
+        作品のテキスト、解説、注釈はここで編集してください。
+        ================================================================
+    -->
+    <script>
+        const CONTENT_DATA = {
+            meta: {
+                title: "紙の建築",
+                author: "坂 茂"
+            },
+            // ■ 1. 大まかな内容 (Structure)
+            structure: [
+                {
+                    id: "part1",
+                    title: "導入：紙への疑問と可能性",
+                    summary: "「紙で建築」という常識への問いかけから始まり、阪神・淡路大震災での「紙の教会」の実例を提示。紙管（再生紙）が実は構造材として強度を持つことを明かす。",
+                    tags: ["導入", "紙の教会", "紙管"]
+                },
+                {
+                    id: "part2",
+                    title: "開発の経緯：もったいない精神",
+                    summary: "1986年の展覧会で予算不足と「もったいない」精神から紙管の使用を考案。紙の特性（防水・難燃化・強度・リサイクル性）を再評価し、安価で環境負荷が低い利点を発見。",
+                    tags: ["アアルト展", "リサイクル", "素材特性"]
+                },
+                {
+                    id: "part3",
+                    title: "展開：ルワンダ難民支援",
+                    summary: "1994年ルワンダ紛争。森林伐採による環境破壊を防ぐため、UNHCRに紙管シェルターを提案。ジュネーブ本部へ直談判し採用される。ボランティア活動の原点。",
+                    tags: ["ルワンダ", "UNHCR", "環境破壊"]
+                },
+                {
+                    id: "part4",
+                    title: "実践：阪神・淡路大震災とプライバシー",
+                    summary: "1995年神戸。教会の再建提案は一度断られるが、仮設住宅建設で信頼を得て実現。さらに避難所での「プライバシーの欠如」という課題に気づき、紙管の間仕切りを開発。",
+                    tags: ["阪神・淡路大震災", "紙の教会", "間仕切り"]
+                },
+                {
+                    id: "part5",
+                    title: "普及：東日本大震災とシステム化",
+                    summary: "2011年東日本大震災。当初は理解されなかったが、実証を通じて普及。平時から自治体と「防災協定」を結ぶことで、災害時に迅速に提供できる仕組み（システム）を構築。",
+                    tags: ["東日本大震災", "説得", "防災協定"]
+                },
+                {
+                    id: "part6",
+                    title: "結論：建築家の使命",
+                    summary: "熊本地震での迅速な対応。建築家の役割は記念碑的建物だけでなく、災害時の住環境改善にもあるという信念。「役に立つこと」への喜びと使命感を表明。",
+                    tags: ["熊本地震", "建築家の責任", "使命"]
+                }
+            ],
+            // ■ 2. 登場人物・要素分析 (Elements)
+            elements: [
+                {
+                    name: "坂 茂",
+                    role: "筆者 / 建築家",
+                    desc: "世界的建築家。「もったいない」という感性と行動力を持ち合わせる。美しい建物を作るだけでなく、社会課題（難民、災害）の解決に建築の技術を使うことを使命としている。",
+                    quote: "住環境を改善するのが建築家としての使命と考え、その信念のもとに活動を続けています。"
+                },
+                {
+                    name: "紙管 (Paper Tube)",
+                    role: "素材 / 主役",
+                    desc: "再生紙を巻いた筒。通常は芯として捨てられるが、本筆者は「構造材」として再発見した。安価、軽量、高強度、リサイクル可能という特性を持つ。",
+                    quote: "再生紙を筒状に巻いた「紙管」を、建物を形づくる「構造材」として使っているのです。"
+                },
+                {
+                    name: "UNHCR",
+                    role: "組織 / 国連難民高等弁務官事務所",
+                    desc: "難民支援を行う国連機関。筆者はここの本部（ジュネーブ）へ直談判に行き、紙のシェルターを採用させた。",
+                    quote: "これ以上は待っていられないと、私はジュネーブまで直接担当者に会いに行きました。"
+                },
+                {
+                    name: "VAN",
+                    role: "組織 / ボランタリー・アーキテクツ・ネットワーク",
+                    desc: "筆者が携わるボランティア団体。自治体と防災協定を結び、災害時に迅速に間仕切りを供給する役割を担う。",
+                    quote: "役所がＶＡＮに発注し、材料費は役所が出し、施工は私たちがするという協定です。"
+                }
+            ],
+            // ■ 3. 重要なキーワード (Keywords)
+            // 構造変更: desc を廃止し、meaning(意味), context(文脈), explanation(解説) に分割
+            keywords: [
+                { 
+                    word: "構造材", 
+                    yomi: "こうぞうざい", 
+                    meaning: "建築物を物理的に支える骨組み（柱、梁、土台など）のこと。建物自体の重さや、地震・風などの外的な力に耐える強度が求められる。",
+                    context: "通常は木材、鉄骨、鉄筋コンクリートが用いられるが、筆者は再生紙を用いた「紙管」が十分な耐力を持つことを証明し、常識を覆して採用した。",
+                    explanation: "紙は弱いというイメージがあるが、筒状に巻いて加工することで建築基準法を通るほどの強度を出せる。これを「構造材」として認可させた点が、坂茂の建築における最大の技術的革新である。"
+                },
+                { 
+                    word: "仮設", 
+                    yomi: "かせつ", 
+                    meaning: "特定の目的のために、一時的な期間だけ設置されること。",
+                    context: "阪神・淡路大震災後の「紙の教会」や、被災者のための「仮設住宅」など、緊急時の一時的な建築として登場する。",
+                    explanation: "一般的に仮設建築は質が低くても良いとされがちだが、筆者は「仮設であっても美しく、居心地が良ければ、人々にとって恒久的な存在になりうる」という独自の哲学を持って設計している。"
+                },
+                { 
+                    word: "難民", 
+                    yomi: "なんみん", 
+                    meaning: "紛争、迫害、災害などにより、故郷や生活拠点を奪われ、他国や他の地域へ逃れざるを得なくなった人々。",
+                    context: "1994年のルワンダ紛争で大量の難民が発生した際、その悲惨な状況と環境破壊を目の当たりにしたことが、筆者の人道支援活動の原点となった。",
+                    explanation: "難民キャンプでは、ただ雨風をしのげれば良いというだけでなく、人間の尊厳をどう守るかが課題となる。筆者は建築家の視点からその改善に取り組んだ。"
+                },
+                { 
+                    word: "シェルター", 
+                    yomi: "", 
+                    meaning: "緊急時に身を守るための避難場所、または簡易的な住居。",
+                    context: "UNHCRはプラスチックシートを配るだけだったが、筆者は現地で調達可能な紙管を骨組みに使う、安価で環境に優しいシェルターを提案・開発した。",
+                    explanation: "従来のテント設営のために周辺の木を伐採し、深刻な環境破壊が起きていた問題を解決するための「代替素材」としての側面も重要であった。"
+                },
+                { 
+                    word: "プライバシー", 
+                    yomi: "", 
+                    meaning: "個人の私生活や領域が、他者から無断で干渉されたり覗かれたりしない権利や状態。",
+                    context: "日本の体育館などの避難所では「雑魚寝」が一般的で、着替えや休息時の視線を遮るものがなく、被災者の精神的ストレスの大きな原因となっていた。",
+                    explanation: "筆者はこれを単なる贅沢ではなく「基本的人権」の問題と捉え、紙と布による間仕切りシステム（PPS）を用いて、避難所内での個人の尊厳回復を目指した。"
+                },
+                { 
+                    word: "間仕切り", 
+                    yomi: "まじきり", 
+                    meaning: "建築内部の空間を区切るための壁や衝立（ついたて）、カーテンなどの総称。",
+                    context: "広大な避難所空間において、家族ごとのプライバシーを確保するために開発された、紙管と布を用いた簡易システム。",
+                    explanation: "誰でも簡単に組み立てられ、軽量で、不要になればリサイクル可能であることが重要。災害支援の現場では、迅速性と施工の容易さが命となる。"
+                },
+                { 
+                    word: "防災協定", 
+                    yomi: "ぼうさいきょうてい", 
+                    meaning: "災害発生時に迅速かつ円滑な支援活動を行うため、自治体間や自治体と民間企業・団体との間で、平時に締結しておく取り決め。",
+                    context: "東日本大震災で、避難所への間仕切り導入の説得に時間がかかった反省から、発災前に協定を結び、即座に供給できる体制（システム）を構築した。",
+                    explanation: "個人のボランティア精神に頼るだけでなく、行政のシステムの中に支援活動を組み込むことで、支援のスピードと規模を最大化しようとする実務的なアプローチである。"
+                },
+                { 
+                    word: "エコノミークラス症候群", 
+                    yomi: "〜しょうこうぐん", 
+                    meaning: "長時間狭い座席などで足を動かさずにいることで血栓ができ、それが肺などに詰まって呼吸困難や死に至る病態（静脈血栓塞栓症）。",
+                    context: "熊本地震などでは、避難所の劣悪な環境（プライバシーの欠如など）を避けて車中泊をする人が増え、この健康被害のリスクが高まった。",
+                    explanation: "間仕切りによって避難所を「安心して眠れる場所」にすることは、単なる快適さの提供にとどまらず、災害関連死を防ぐ医療的・防災的な意義も持っている。"
+                },
+                { 
+                    word: "人為的な災害", 
+                    yomi: "じんいてきなさいがい", 
+                    meaning: "自然現象そのものではなく、人間社会の活動や構造物の不備などが原因となって拡大した被害。",
+                    context: "「地震が人を殺すのではなく、倒壊した建物が人を殺す」という事実を指し、建築家の責任を問う文脈で使われた。",
+                    explanation: "自然災害は防げないが、被害の拡大は人間の技術と知恵（建築家の職能）で防ぐことができるという、筆者の強い職業倫理（プロフェッショナリズム）を示している。"
+                },
+                { 
+                    word: "復興", 
+                    yomi: "ふっこう", 
+                    meaning: "災害などで被災した地域が、元の状態に戻るだけでなく、より良い生活環境や社会基盤を備えた状態へと再生すること。",
+                    context: "神父の「街の復興までは教会を再建しない」という言葉に象徴されるように、個別の建物の再建より、地域コミュニティ全体の生活再建を優先する姿勢。",
+                    explanation: "筆者にとっての復興とは、ハード面（建物）の整備だけでなく、ソフト面（被災者の心のケアやコミュニティの維持）も含む包括的なプロセスである。"
+                }
+            ],
+            // ■ 4. 本文 (Text)
+            text: [
+                "「紙で建築物を造る。」と聞いて、皆さんはどのように思いますか。紙が水や火に耐えられるか、強度は問題ないか、長持ちするかなどの疑問をもつのではないでしょうか。",
+                
+                "次のページの写真を見てください。これは、一九九五年に起きた阪神・淡路大震災のあと、神戸市に建てた{{仮設}}集会場「紙の教会」です。この教会の柱は何でできていると思いますか。実は、再生紙を筒状に巻いた「紙管」を、建物を形づくる「{{構造材}}」として使っているのです。",
+                
+                "建築に紙を使ったのは、物を捨てるのが「もったいない」と考えたからです。一九八六年に、アルヴァ＝アアルトというフィンランドの建築家の展覧会を日本で開催した時のことです。私は会場を作ることになりました。アアルトは、木をふんだんに使う建築家です。しかし、大量の木を使う予算がないことと、展示後に捨てるのがもったいないことから、安くて、{{リサイクル}}が可能な材料を探しました。その時、私の事務所にあった、布を巻いてあった紙管を見て、木の代わりに使えると考えたのです。会場の天井、壁、展示台に紙管を使ってみると、思った以上に強度がありました。",
+                
+                "紙は、一枚のままでは弱いのですが、重ねると強くなります。また、牛乳パックや壁紙に使えるように、防水や{{難燃化}}ができます。紙管は、紙を巻いて作るので形は自由にできませんが、強度が出せ、筒の{{径}}も長さも自由に作れます。同じ長さや太さの木材に比べると軽く、安価で、組み立てが簡単です。そして、役目を果たしたあとはリサイクルが容易で、環境への{{負荷}}が抑えられます。また、紙管の工場は日本中、世界中のどこにでもあるので、短期間で手に入れられる利点もあります。",
+                
+                "一九九四年にアフリカのルワンダで二つの民族が武力衝突し、二百万人以上が{{難民}}になりました。日本でも連日、難民キャンプの悲惨な様子が報道されました。難民が毛布にくるまって震えている報道写真を見て、私は衝撃を受けました。国連難民高等弁務官事務所（{{ＵＮＨＣＲ}}）が{{設営}}した難民キャンプでは、{{シェルター}}用のプラスチックシートを支給しましたが、難民がテントを張るための支柱に使う木を周囲の森林から{{伐採}}したため、{{甚大}}な環境破壊も起きていました。",
+                
+                "私は東京にあるＵＮＨＣＲの事務所に行き、支柱に紙管を使うシェルターを提案したところ、ジュネーブにあるＵＮＨＣＲの本部に直接連絡をとることを勧められました。すぐに本部に手紙を送ったのですが、一か月たっても返事が来ません。これ以上は待っていられないと、私はジュネーブまで直接担当者に会いに行きました。この提案は採用され、「紙の難民用シェルター」の開発が始まりました。それは建築家としてのボランティア活動の始まりでもありました。",
+                
+                "一九九五年一月、阪神・淡路大震災が起きました。地震で建物が{{倒壊}}し、さらに広く火災に見舞われ、六千五百人近いかたが亡くなりました。建築物によって多くの人命が失われたことに、建築家として責任を感じずにはいられません。何かできることはないかと、一月末、被災地へ行きました。神戸市の{{全壊}}したカトリック教会の跡地に被災者が集まっているのを見た私は、ルワンダでの経験を生かして人々の役に立てないかと考え、紙管で教会を建てることを神父に提案しました。",
+                
+                "すると、こう言われました。",
+                
+                "「街がこのようになってしまった今、周囲が{{復興}}するまで再建するつもりはない。」",
+                
+                "神父は当初、被災者が公園で{{粗末}}なテント生活をしている中、教会だけが立派な建物を建てることなどできないという思いでした。そこで資金を集め、まず彼らのために紙管で仮設住宅を造りました。この活動をとおして人々の信頼を得られ、ボランティアの力を借りて、初めに紹介した「紙の教会」を建てることができました。",
+                
+                "さらにその時、被災者から、避難所で{{プライバシー}}の確保に苦労していることを聞き、避難所にプライバシーはなくてはならないという{{確信}}をもちました。そこで次は、紙管の{{間仕切り}}を開発しました。紙管を組み立てて布を掛けるだけの、一つが二メートル四方という実に簡素な住まいですが、プライバシーを確保することができます。その後、新潟県中越地震や福岡県西方沖地震の被災地での設営を経て、手軽に安く組み立てられる仕組みにしたり、家族の人数に応じて広さを変えられるようにしたりするなど、被災者の生活環境がよくなるよう、改良を重ねていきました。",
+                
+                "二〇一一年三月、東日本大震災が起きました。多くの被災者が、体育館のような仕切りのない場所での避難生活を{{余儀なく}}されました。そこではプライバシーがなく、心身ともにまいってしまいます。私は間仕切りを車に積んで、学生ボランティアとともに避難所を回りました。しかし、自治体の担当者に提案してもなかなか理解してもらえず、八十か所ある避難所のうち、最初に回った三十か所で断られ続けました。",
+                
+                "ようやく受け入れてもらえたのは、岩手県の高校の体育館です。避難所を管理していた高校の物理の先生が、すぐやろうと言ってくれました。",
+                
+                "この活動が報道されたことで受け入れが進み、約五十か所の避難所に提供できました。",
+                
+                "課題もありました。東日本大震災では、避難所を訪ね歩き、管理者を説得するのにあまりにも時間がかかってしまいました。そこで、平常時にいろいろな自治体の防災の日にデモンストレーションを行い、理解を得られるようにしたのです。そのかいがあって、いくつかの自治体と私の携わるボランタリー・アーキテクツ・ネットワーク（ＶＡＮ）が{{防災協定}}を結び、迅速に提供できるようになりました。公式な避難所の設備として、もし災害があって必要になったら、役所がＶＡＮに発注し、材料費は役所が出し、施工は私たちがするという協定です。",
+                
+                "二〇一六年四月に熊本地震が起きました。余震で建物が倒壊するのを恐れて、避難所や車の中で泊まる避難者の{{エコノミークラス症候群}}の危険性が指摘されていました。すでに大分県と防災協定を結んでいたことから、大分県からの支援ということで熊本県内の避難所に間仕切りを提供することが決まりました。行政の協力が得られたので普及が非常に早く、一か月半で三十七か所に設置することができました。",
+                
+                "私は、常々、建築家はどうしたら社会に貢献できるかと考えてきました。地震では、人が直接的に被害をこうむるわけでなく、建物が崩れたために、けがをしたり、亡くなったりしています。それは自然災害ではなく、{{人為的な災害}}です。街の復興のためのプロジェクトでは建築家が必要とされますが、その前に、避難所や仮設住宅という生活環境の悪いところを改善することも、建築家のすべき仕事だと考えます。",
+                
+                "大きな建物を設計するのも、仮設住宅を設計するのも、避難所用の間仕切りを作るのも、使う人から居心地がいいと喜んでもらえれば、どれも私にとって同じくらいの喜びがあります。住環境を改善するのが建築家としての{{使命}}と考え、その信念のもとに活動を続けています。"
+            ],
+            // 本文タップ時の注釈データ
+            vocabData: {
+                "構造材": { yomi: "こうぞうざい", text: "建物の骨組みとなり、重さを支える重要な材料。" },
+                "仮設": { yomi: "かせつ", text: "一時的に設置されること。災害時の仮住まいなど。" },
+                "リサイクル": { yomi: "リサイクル", text: "使い終わったものを再資源化して利用すること。" },
+                "難燃化": { yomi: "なんねんか", text: "燃えにくい性質に加工すること。" },
+                "径": { yomi: "けい", text: "円の直径、または筒の太さ。" },
+                "負荷": { yomi: "ふか", text: "負担、重荷。ここでは環境へのダメージのこと。" },
+                "難民": { yomi: "なんみん", text: "紛争や災害から逃れ、生活の場を失った人々。" },
+                "ＵＮＨＣＲ": { yomi: "ユーエヌエイチシーアール", text: "国連難民高等弁務官事務所。難民保護を行う国連の機関。" },
+                "設営": { yomi: "せつえい", text: "建物や設備を作って準備すること。" },
+                "シェルター": { yomi: "", text: "緊急避難用の簡易な住居や覆い。" },
+                "伐採": { yomi: "ばっさい", text: "木を切り倒すこと。" },
+                "甚大": { yomi: "じんだい", text: "被害などが非常に大きいこと。" },
+                "倒壊": { yomi: "とうかい", text: "建物などが倒れて壊れること。" },
+                "全壊": { yomi: "ぜんかい", text: "建物が完全に壊れること。" },
+                "復興": { yomi: "ふっこう", text: "一度衰えたものが、再び盛んになること。" },
+                "粗末": { yomi: "そまつ", text: "作りが雑で、質が良くないこと。" },
+                "プライバシー": { yomi: "", text: "私生活や個人の秘密を守る権利。" },
+                "確信": { yomi: "かくしん", text: "固く信じて疑わない心。" },
+                "間仕切り": { yomi: "まじきり", text: "部屋などを仕切るための壁や板。" },
+                "余儀なく": { yomi: "よぎなく", text: "他によい方法がなく、仕方なくすること。" },
+                "防災協定": { yomi: "ぼうさいきょうてい", text: "災害時に協力し合うための事前の約束。" },
+                "施工": { yomi: "せこう", text: "工事を実施すること。" },
+                "エコノミークラス症候群": { yomi: "エコノミークラスしょうこうぐん", text: "長時間同じ姿勢でいることで血栓ができ、呼吸困難などになる病気。" },
+                "人為的な災害": { yomi: "じんいてきなさいがい", text: "人間の行動や作ったものが原因で起こる災害。" },
+                "使命": { yomi: "しめい", text: "与えられた重大な役目。" }
+            }
+        };
+    </script>
+
+    <!-- 
+        ================================================================
+        2. UI 構造 (HTML Body)
+        ================================================================
+    -->
+
+    <!-- グローバルヘッダー (Sticky) -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-gray-200">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-between py-3">
+                <h1 class="text-lg font-bold text-gray-800" id="header-title"></h1>
+                <!-- ナビゲーション -->
+                <nav class="w-full md:w-auto mt-2 md:mt-0 overflow-x-auto">
+                    <ul class="flex space-x-1 md:space-x-4 min-w-max">
+                        <li><button onclick="app.switchView('structure')" id="btn-structure" class="nav-btn px-3 py-2 text-sm font-medium transition-colors tab-active">大まかな内容</button></li>
+                        <li><button onclick="app.switchView('elements')" id="btn-elements" class="nav-btn px-3 py-2 text-sm font-medium transition-colors tab-inactive">登場人物・要素</button></li>
+                        <li><button onclick="app.switchView('keywords')" id="btn-keywords" class="nav-btn px-3 py-2 text-sm font-medium transition-colors tab-inactive">重要語句</button></li>
+                        <li><button onclick="app.switchView('read')" id="btn-read" class="nav-btn px-3 py-2 text-sm font-medium transition-colors tab-inactive bg-indigo-50 text-indigo-700 rounded-md">本文を読む</button></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="flex-grow max-w-3xl mx-auto w-full px-4 py-8 pb-32">
+        
+        <!-- ビュー1: 大まかな内容 (Structure) -->
+        <section id="view-structure" class="block space-y-6">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">構成と要約</h2>
+                <p class="text-gray-600">文章全体の流れを時系列で把握しましょう。</p>
+            </div>
+            <div id="structure-container" class="relative border-l-2 border-indigo-200 ml-3 space-y-8">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー2: 登場人物・要素 (Elements) -->
+        <section id="view-elements" class="hidden space-y-6">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">要素分析</h2>
+                <p class="text-gray-600">物語を構成する重要な要素や人物について掘り下げます。</p>
+            </div>
+            <div id="elements-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー3: キーワード (Keywords) -->
+        <section id="view-keywords" class="hidden space-y-6">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">重要キーワード</h2>
+                <p class="text-gray-600">学習に必要な用語の深い定義を確認します。</p>
+            </div>
+            <div id="keywords-container" class="space-y-3">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー4: 本文を読む (Read Text) -->
+        <section id="view-read" class="hidden">
+            <article id="text-container" class="prose-text text-gray-800 space-y-6 pt-4">
+                <!-- JSで生成 -->
+            </article>
+        </section>
+
+    </main>
+
+    <!-- フッター -->
+    <footer class="bg-gray-100 border-t border-gray-200 mt-auto py-6">
+        <div class="max-w-4xl mx-auto px-4 text-center text-gray-500 text-sm">
+            <p>© <span id="footer-year"></span> Educational Viewer Template</p>
+        </div>
+    </footer>
+
+    <!-- 語句解説ポップアップ (Fixed Bottom Sheet) -->
+    <div id="annotation-popup" class="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] border-t border-gray-200 p-6 transform translate-y-full transition-transform duration-300 z-50">
+        <div class="max-w-3xl mx-auto relative">
+            <button onclick="app.closePopup()" class="absolute -top-3 right-0 p-2 text-gray-400 hover:text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="pr-8">
+                <p class="text-xs text-indigo-600 font-bold mb-1" id="popup-yomi"></p>
+                <h3 class="text-xl font-bold text-gray-900 mb-2" id="popup-word"></h3>
+                <p class="text-gray-700 leading-relaxed" id="popup-desc"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+        ================================================================
+        3. ロジック (JavaScript)
+        ================================================================
+    -->
+    <script>
+        const app = {
+            state: {
+                currentView: 'structure',
+                // ■ 読書位置の記憶ロジックで使用する変数
+                scrollPositions: {
+                    read: 0,
+                    structure: 0,
+                    elements: 0,
+                    keywords: 0
+                }
+            },
+
+            init() {
+                // タイトル設定
+                document.getElementById('header-title').textContent = `${CONTENT_DATA.meta.title} [${CONTENT_DATA.meta.author}]`;
+                document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+                // 各セクションのレンダリング
+                this.renderStructure();
+                this.renderElements();
+                this.renderKeywords();
+                this.renderText();
+
+                // ■ 読書位置の復元（LocalStorageから読み込み）
+                const savedScroll = localStorage.getItem('readScrollPos');
+                if (savedScroll) {
+                    this.state.scrollPositions.read = parseInt(savedScroll, 10);
+                }
+
+                // 初期ビューのスクロール監視開始
+                this.setupScrollListener();
+            },
+
+            // ---------------------------------------------------------
+            // ビュー切り替えロジック
+            // ---------------------------------------------------------
+            switchView(viewId) {
+                if (this.state.currentView === viewId) return;
+
+                // 1. 現在のビューのスクロール位置を保存
+                // (特に本文ビューの場合はLocalStorageにも保存)
+                const currentScrollY = window.scrollY;
+                this.state.scrollPositions[this.state.currentView] = currentScrollY;
+                
+                if (this.state.currentView === 'read') {
+                    localStorage.setItem('readScrollPos', currentScrollY);
+                }
+
+                // 2. ビューの表示切り替え（display:none/block）
+                // アニメーションなし
+                ['structure', 'elements', 'keywords', 'read'].forEach(id => {
+                    const el = document.getElementById(`view-${id}`);
+                    const btn = document.getElementById(`btn-${id}`);
+                    
+                    if (id === viewId) {
+                        el.classList.remove('hidden');
+                        el.classList.add('block');
+                        // タブのアクティブ化
+                        btn.classList.remove('tab-inactive');
+                        btn.classList.add('tab-active');
+                    } else {
+                        el.classList.remove('block');
+                        el.classList.add('hidden');
+                        // タブの非アクティブ化
+                        btn.classList.remove('tab-active');
+                        btn.classList.add('tab-inactive');
+                    }
+                });
+
+                // ポップアップを閉じる
+                this.closePopup();
+
+                // 3. 次のビューのスクロール位置を復元
+                // 即座に実行すると描画が追いつかない場合があるため、わずかな遅延を入れるのが一般的だが
+                // Vanilla JSのdisplay切り替えは同期的なので直後でOK
+                this.state.currentView = viewId;
+                window.scrollTo(0, this.state.scrollPositions[viewId] || 0);
+            },
+
+            // ---------------------------------------------------------
+            // スクロール監視 (読書位置の記憶用)
+            // ---------------------------------------------------------
+            setupScrollListener() {
+                let isScrolling;
+                window.addEventListener('scroll', () => {
+                    window.clearTimeout(isScrolling);
+                    // スクロール終了後100msで位置を保存（負荷軽減）
+                    isScrolling = setTimeout(() => {
+                        if (this.state.currentView === 'read') {
+                            const y = window.scrollY;
+                            this.state.scrollPositions.read = y;
+                            localStorage.setItem('readScrollPos', y);
+                        }
+                    }, 100);
+                });
+            },
+
+            // ---------------------------------------------------------
+            // レンダリング関数群
+            // ---------------------------------------------------------
+            
+            // 1. 構成 (Structure)
+            renderStructure() {
+                const container = document.getElementById('structure-container');
+                CONTENT_DATA.structure.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = "mb-8 ml-6 relative";
+                    div.innerHTML = `
+                        <span class="absolute flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-full -left-10 ring-4 ring-white text-indigo-600 font-bold text-sm">
+                            ${index + 1}
+                        </span>
+                        <div class="bg-white p-5 rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:shadow-md transition-shadow" onclick="app.toggleAccordion('struct-${index}')">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-lg font-bold text-gray-900">${item.title}</h3>
+                                <span class="text-indigo-400 transform transition-transform duration-300" id="icon-struct-${index}">▼</span>
+                            </div>
+                            <div id="struct-${index}" class="details-content">
+                                <p class="text-gray-700 leading-relaxed mb-3">${item.summary}</p>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    ${item.tags.map(tag => `<span class="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded">${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            // 2. 要素 (Elements)
+            renderElements() {
+                const container = document.getElementById('elements-container');
+                CONTENT_DATA.elements.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white p-5 rounded-lg border border-gray-200 shadow-sm cursor-pointer hover:border-indigo-300 transition-all";
+                    div.onclick = () => app.toggleAccordion(`elem-${index}`);
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-lg font-bold">
+                                ${item.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900">${item.name}</h3>
+                                <p class="text-xs text-gray-500">${item.role}</p>
+                            </div>
+                        </div>
+                        <div id="elem-${index}" class="details-content">
+                            <p class="text-sm text-gray-700 mt-2 leading-relaxed">${item.desc}</p>
+                            <div class="mt-3 p-3 bg-gray-50 rounded text-xs italic text-gray-600 border-l-2 border-gray-400">
+                                "${item.quote}"
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            // 3. キーワード (Keywords) - 更新：3セクション表示に対応
+            renderKeywords() {
+                const container = document.getElementById('keywords-container');
+                CONTENT_DATA.keywords.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white border border-gray-200 rounded-lg overflow-hidden";
+                    div.innerHTML = `
+                        <button class="w-full text-left px-5 py-4 flex justify-between items-center focus:outline-none hover:bg-gray-50 transition-colors" onclick="app.toggleAccordion('key-${index}')">
+                            <div>
+                                <span class="text-xs text-indigo-500 block">${item.yomi}</span>
+                                <span class="text-lg font-bold text-gray-800">${item.word}</span>
+                            </div>
+                            <span class="text-gray-400 transform transition-transform duration-300" id="icon-key-${index}">+</span>
+                        </button>
+                        <div id="key-${index}" class="details-content bg-gray-50 px-5">
+                            <div class="py-4 border-t border-gray-200 space-y-4">
+                                <div>
+                                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">意味</span>
+                                    <p class="text-gray-700 text-sm leading-relaxed">${item.meaning}</p>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">文脈での役割</span>
+                                    <p class="text-gray-700 text-sm leading-relaxed">${item.context}</p>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider block mb-1">解説</span>
+                                    <p class="text-gray-700 text-sm leading-relaxed bg-indigo-50 p-3 rounded-md">${item.explanation}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            // 4. 本文 (Text) - 注釈機能付き
+            renderText() {
+                const container = document.getElementById('text-container');
+                CONTENT_DATA.text.forEach(paragraph => {
+                    const p = document.createElement('p');
+                    
+                    // {{word}} を <span ...>word</span> に置換する
+                    let htmlContent = paragraph.replace(/\{\{(.+?)\}\}/g, (match, word) => {
+                        // データが存在するか確認
+                        if (CONTENT_DATA.vocabData[word]) {
+                            return `<span class="term-highlight" onclick="app.showAnnotation('${word}')">${word}</span>`;
+                        }
+                        return word;
+                    });
+
+                    p.innerHTML = htmlContent;
+                    container.appendChild(p);
+                });
+            },
+
+            // ---------------------------------------------------------
+            // UI インタラクション
+            // ---------------------------------------------------------
+            
+            // アコーディオン開閉
+            toggleAccordion(id) {
+                const content = document.getElementById(id);
+                const isOpen = content.classList.contains('open');
+                const icon = document.getElementById(`icon-${id}`);
+
+                // 他を閉じる（任意：ここでは複数展開OKとするが、アイコン操作のため単純化）
+                // 自身をトグル
+                if (isOpen) {
+                    content.classList.remove('open');
+                    if(icon) icon.style.transform = 'rotate(0deg)';
+                    if(icon && icon.textContent === '+') icon.textContent = '+'; 
+                } else {
+                    content.classList.add('open');
+                    if(icon) icon.style.transform = 'rotate(180deg)';
+                    // キーワードビュー用のアイコン切り替え
+                    if(icon && icon.textContent === '+') {
+                         icon.textContent = '-';
+                         icon.style.transform = 'rotate(0deg)';
+                    }
+                }
+            },
+
+            // 注釈ポップアップ表示
+            showAnnotation(word) {
+                const data = CONTENT_DATA.vocabData[word];
+                if (!data) return;
+
+                document.getElementById('popup-word').textContent = word;
+                document.getElementById('popup-yomi').textContent = data.yomi;
+                document.getElementById('popup-desc').textContent = data.text;
+
+                const popup = document.getElementById('annotation-popup');
+                popup.classList.remove('translate-y-full');
+            },
+
+            closePopup() {
+                const popup = document.getElementById('annotation-popup');
+                popup.classList.add('translate-y-full');
+            }
+        };
+
+        // アプリケーション初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
