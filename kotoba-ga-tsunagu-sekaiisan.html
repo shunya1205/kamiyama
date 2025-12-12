@@ -148,7 +148,7 @@
     </main>
 
     <!-- 4. 本文の読解支援機能（解説パネル） -->
-    <div id="definition-panel" class="fixed bottom-16 md:bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg transform translate-y-full transition-transform duration-300 z-40 p-4 md:p-6 rounded-t-xl md:rounded-none md:max-w-4xl md:mx-auto md:border-x">
+    <div id="definition-panel" class="fixed hidden bottom-16 md:bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 p-4 md:p-6 rounded-t-xl md:rounded-none md:max-w-4xl md:mx-auto md:border-x">
         <div class="flex justify-between items-start mb-2">
             <div>
                 <h3 id="panel-term" class="text-xl font-bold text-gray-900 font-serif flex items-center">
@@ -541,11 +541,11 @@
                 }
 
                 const panel = document.getElementById('definition-panel');
-                panel.classList.remove('translate-y-full');
+                panel.classList.remove('hidden'); // hidden クラスを削除して表示
             },
 
             closePanel() {
-                document.getElementById('definition-panel').classList.add('translate-y-full');
+                document.getElementById('definition-panel').classList.add('hidden'); // hidden クラスを追加して非表示
             },
 
             setupNavigation() {
