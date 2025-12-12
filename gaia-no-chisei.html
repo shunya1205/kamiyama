@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ガイアの知性 - 読解・分析</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media', // OSの設定に合わせてダークモードを適用
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif JP"', '"Hiragino Mincho ProN"', 'serif'],
+                        sans: ['"Noto Sans JP"', '"Hiragino Kaku Gothic ProN"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* カスタムスタイル: スクロールバーの調整など */
+        body {
+            /* ダークモード時のチラつき防止 */
+            background-color: #f8fafc;
+            color: #1e293b;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0f172a;
+                color: #e2e8f0;
+            }
+        }
+        /* 本文の注釈ハイライト */
+        .annotation-highlight {
+            border-bottom: 2px solid #0ea5e9;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .annotation-highlight:hover {
+            background-color: rgba(14, 165, 233, 0.1);
+        }
+        @media (prefers-color-scheme: dark) {
+            .annotation-highlight {
+                border-bottom-color: #38bdf8;
+            }
+            .annotation-highlight:hover {
+                background-color: rgba(56, 189, 248, 0.2);
+            }
+        }
+        /* 選択中のタブのスタイル */
+        .tab-active {
+            border-bottom: 3px solid #0ea5e9;
+            color: #0ea5e9;
+            font-weight: bold;
+        }
+        @media (prefers-color-scheme: dark) {
+            .tab-active {
+                border-bottom-color: #38bdf8;
+                color: #38bdf8;
+            }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- グローバルヘッダー (Sticky) -->
+    <header class="sticky top-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur shadow-sm border-b border-gray-200 dark:border-gray-800">
+        <div class="max-w-4xl mx-auto px-4">
+            <!-- タイトルエリア -->
+            <div class="py-3 flex justify-between items-center">
+                <h1 class="text-lg md:text-xl font-bold font-serif text-gray-800 dark:text-gray-100" id="header-title">
+                    <!-- JSで設定 -->
+                </h1>
+            </div>
+            <!-- ナビゲーションメニュー -->
+            <nav class="flex space-x-4 overflow-x-auto pb-0 hide-scrollbar" aria-label="Tabs">
+                <button onclick="app.switchTab('overview')" id="btn-overview" class="whitespace-nowrap py-3 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+                    大まかな内容
+                </button>
+                <button onclick="app.switchTab('elements')" id="btn-elements" class="whitespace-nowrap py-3 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+                    登場人物・要素
+                </button>
+                <button onclick="app.switchTab('keywords')" id="btn-keywords" class="whitespace-nowrap py-3 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+                    キーワード
+                </button>
+                <button onclick="app.switchTab('read')" id="btn-read" class="whitespace-nowrap py-3 px-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+                    本文を読む
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-6 md:py-8">
+        
+        <!-- 1. 大まかな内容 (Overview) -->
+        <section id="view-overview" class="hidden space-y-6">
+            <div class="bg-blue-50 dark:bg-slate-800 p-6 rounded-lg border border-blue-100 dark:border-slate-700">
+                <h2 class="text-xl font-bold mb-2 text-blue-800 dark:text-blue-300">作品構造マップ</h2>
+                <p class="text-sm text-gray-600 dark:text-gray-300">各セクションをタップして要点を確認しましょう。</p>
+            </div>
+            <div id="overview-container" class="space-y-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 2. 登場人物・要素分析 (Elements) -->
+        <section id="view-elements" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="elements-container">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 3. キーワード・象徴 (Keywords) -->
+        <section id="view-keywords" class="hidden space-y-6">
+            <div class="space-y-4" id="keywords-container">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 4. 本文 (Read Text) -->
+        <section id="view-read" class="hidden">
+            <article class="prose prose-lg dark:prose-invert max-w-none font-serif leading-loose" id="text-content">
+                <!-- JSで生成 -->
+            </article>
+            <!-- 余白を追加してスクロールしやすくする -->
+            <div class="h-32"></div>
+        </section>
+
+    </main>
+
+    <!-- 注釈表示エリア (Fixed Bottom Sheet) -->
+    <div id="annotation-sheet" class="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-gray-700 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] transform translate-y-full transition-transform duration-300 z-40 p-4 pb-8 md:pb-4 max-h-[40vh] overflow-y-auto">
+        <div class="max-w-4xl mx-auto relative">
+            <button onclick="app.closeAnnotation()" class="absolute top-0 right-0 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <h3 id="anno-term" class="text-lg font-bold text-brand-600 dark:text-brand-500 mb-2"></h3>
+            <p id="anno-desc" class="text-gray-700 dark:text-gray-300 text-base leading-relaxed"></p>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        /***********************************************************
+         * 1. 作品データ定義 (編集エリア)
+         ***********************************************************/
+        const BOOK_DATA = {
+            title: "ガイアの知性",
+            author: "龍村 仁",
+            
+            // 構造分析データ
+            structure: [
+                {
+                    title: "導入：鯨と象への興味",
+                    summary: "筆者が鯨と象に惹かれたきっかけと、それに関わる人間たちの共通点。",
+                    detail: "筆者は意識せずとも鯨と象に関わる機会が増えた。それらに関わる人々は、対象を「知的好奇心」の対象としてではなく、何か大切なものを学ぶべき「畏敬の念」の対象として見ていた。",
+                    tags: ["出会い", "畏敬", "人間への興味"]
+                },
+                {
+                    title: "比較：三種の知性",
+                    summary: "鯨・象・人の生物学的な共通点と、決定的な違い。",
+                    detail: "大脳新皮質の大きさや成長の遅さ（学習期間の長さ）において、三種は対等である。しかし、人間だけが他の二種とは決定的に異なる道を歩んでいる。",
+                    tags: ["大脳新皮質", "成長過程", "対等な存在"]
+                },
+                {
+                    title: "転換：新たな認識の芽生え",
+                    summary: "人間の「知性」への自負と、1960年代以降のパラダイムシフト。",
+                    detail: "人間は道具や科学技術を生み出す能力こそが「知性」だと思い込んでいる。しかし、鯨や象と深く関わる人々の中から、それとは異なる「知性」の存在を疑う声が上がり始めた。",
+                    tags: ["常識への疑問", "1960年代", "コミュニケーション"]
+                },
+                {
+                    title: "事例：異種の知性との交流",
+                    summary: "オルカの芸やイルカの言語、象の行動から見える高度な精神性。",
+                    detail: "オルカは強制ではなく自らの意志で人間を楽しませ、高度な身体制御を行っている。イルカは人間に名前をつけようとし、象は死者の歯を認識し弔うような行動を見せる。",
+                    tags: ["オルカの芸", "イルカの命名", "象の弔い"]
+                },
+                {
+                    title: "結論：二つの知性",
+                    summary: "「攻撃的な知性」と「受容的な知性」。人類が進むべき道。",
+                    detail: "人間の知性は自然を支配する「攻撃的な知性」。対して鯨や象は自然に適応し共生する「受容的な知性」。人類は後者を学び、「ガイアの知性」へと進化する必要がある。",
+                    tags: ["攻撃的な知性", "受容的な知性", "ガイアの知性"]
+                }
+            ],
+
+            // 登場人物・要素データ
+            elements: [
+                {
+                    name: "鯨と象",
+                    role: "受容的な知性の象徴",
+                    desc: "数千万年もの間、地球環境に適応して生き続けてきた巨大生物。自然をコントロールせず、繊細に理解し適応する。",
+                    quote: "彼らは、自然をコントロールしようなどとはいっさい思わず...その高度な「知性」を使っている。"
+                },
+                {
+                    name: "人間（人類）",
+                    role: "攻撃的な知性の象徴",
+                    desc: "言葉や道具、科学技術を発達させた存在。自然を支配・利用しようとし、環境破壊を引き起こしている。",
+                    quote: "自分たちだけの安全と便利さのために自然をコントロールし、意のままに支配しようとする"
+                },
+                {
+                    name: "オルカ（シャチ）",
+                    role: "コミュニケーションの達人",
+                    desc: "水族館という不自由な環境下でも、状況を理解し、人間（調教師）に合わせて自らの能力を制御する配慮を見せる。",
+                    quote: "自分が「友」として受け入れることを決意した人間を喜ばせ、そして自分自身も生きることを楽しむ"
+                },
+                {
+                    name: "調教師・学者たち",
+                    role: "媒介者・発見者",
+                    desc: "従来の科学的・人間中心的な視点を超えて、動物たちに畏敬の念を抱き、彼らから学ぼうとする人々。",
+                    quote: "鯨や象から、なにかとてつもなく大切なものを学び取ろうとしている。"
+                }
+            ],
+
+            // キーワードデータ
+            keywords: [
+                {
+                    term: "ガイア",
+                    meaning: "地球を一つの巨大な生命体とみなす概念。",
+                    context: "筆者は、人間の知性と鯨・象の知性は、ガイアという大きな知性の両側面である可能性を示唆している。"
+                },
+                {
+                    term: "畏敬の念",
+                    meaning: "偉大なもの、崇高なものに対して抱く、おそれ敬う気持ち。",
+                    context: "筆者や関係者は、単なる興味を超えて、鯨や象に対してこの感情を抱くようになった。"
+                },
+                {
+                    term: "大脳新皮質",
+                    meaning: "脳の外層部分で、高度な知覚、運動、思考、言語などを司る領域。",
+                    context: "鯨・象・人は、この部分が発達しており、対等の精神活動が可能であるとされる根拠。"
+                },
+                {
+                    term: "攻撃的な知性",
+                    meaning: "自然を支配・管理し、自分たちの利益のために環境を作り変えようとする人間の知性のあり方。",
+                    context: "文明の発展をもたらしたが、同時に環境破壊も招いた。"
+                },
+                {
+                    term: "受容的な知性",
+                    meaning: "自然の複雑な営みを理解し、それに適応・同調して生きようとする鯨や象の知性のあり方。",
+                    context: "人類がこれから学ぶべき、持続可能な生存のための知恵。"
+                }
+            ],
+
+            // 注釈・解説データ（IDは本文中のデータ属性とリンク）
+            annotations: {
+                "a1": { term: "畏敬の念", rubi: "いけいのねん", text: "崇高なものや偉大なものに触れたときに感じる、おそれうやまう気持ち。" },
+                "a2": { term: "大脳新皮質", rubi: "だいのうしんひしつ", text: "脳の表面を覆う層で、知能、言語、学習などの高度な精神活動を司る部分。人間や哺乳類で特に発達している。" },
+                "a3": { term: "示唆", rubi: "しさ", text: "それとなく教えること。間接的にヒントを与えること。" },
+                "a4": { term: "ガイア", rubi: "がいあ", text: "ギリシャ神話の大地の女神。転じて、地球全体を一つの自己調節能力を持つ生命体とみなす「ガイア仮説」を指す。" },
+                "a5": { term: "異口同音", rubi: "いくどうおん", text: "多くの人が口をそろえて同じことを言うこと。" },
+                "a6": { term: "オルカ", rubi: "おるか", text: "シャチの別名。マイルカ科の哺乳類で、非常に高い知能と社会性を持つ。" },
+                "a7": { term: "三次元レベル", rubi: "さんじげんれべる", text: "平面（縦・横）だけでなく、高さ（深さ）も含めた空間的な調整のこと。" },
+                "a8": { term: "かんぬき", rubi: "かんぬき", text: "門や扉が開かないようにするために、左右の金具に通す横木。" },
+                "a9": { term: "攻撃的な知性", rubi: "こうげきてきなちせい", text: "対象を分析し、分解し、自分の都合の良いように作り変えようとする知性の働き。" },
+                "a10": { term: "受容的な知性", rubi: "じゅようてきなちせい", text: "あるがままを受け入れ、全体の調和の中で自分がどうあるべきかを察知する知性の働き。" }
+            },
+
+            // 本文データ（段落ごとの配列。注釈箇所は独自タグ [[id|表記]] で記述し、パース時に変換する）
+            textBody: [
+                "　ここ数年、私には鯨と象を撮影する機会がとても多かった。特に意識的に選んだつもりはないのに、結果としてそうなってきた理由を考えてみると、これは、鯨や象と深くつき合っている人たちが皆、人間としてとてもおもしろかったからだ。",
+                "　人種も職業も皆それぞれ異なっているのに、彼らには独特の、共通した雰囲気がある。",
+                "　彼らは、鯨や象を、自分の知的好奇心の対象とは考えなくなってきている。鯨や象から、なにかとてつもなく大切なものを学び取ろうとしている。そして、鯨や象に対して、[[a1|畏敬の念]]さえ抱いているようにみえる。",
+                "　人間が、どうして野生の動物に対して[[a1|畏敬の念]]まで抱くようになってしまうのだろうか。この、人間に対する興味から、私も鯨や象に興味を抱くようになった。そして、自然の中での鯨や象との出会いを重ね、彼らのことを知れば知るほど、私もまた、鯨や象に[[a1|畏敬の念]]を抱くようになった。",
+                "　今では、鯨と象は、私たち人類にある重大な[[a3|示唆]]を与えるために、あの大きな体で（現在の地球環境では、体が大きければ大きいほど生きるのが難しい。）数千万年もの間この地球に生き続けてきてくれたのでは、とさえ思っている。",
+                "　[[a2|大脳新皮質]]の大きさとその複雑さからみて、鯨と象と人はほぼ対等の精神活動ができる、と考えられる。すなわち、この三種は、地球上で最も高度に進化した「知性」をもった存在だ、ということができる。実際、この三種の誕生からの成長過程はほぼ同じで、あらゆる動物の中で最も遅い。一歳は一歳、二歳は二歳、十五、六歳でほぼ一人前になり、寿命も六、七十歳から長寿のもので百歳まで生きる。本能だけで生きるのではなく、年長者から生きるためのさまざまな知恵を学ぶために、これだけゆっくりと成長するのだろう。",
+                "　このような点からみると、鯨と象と人は確かに似ている。しかし、誰の目にも明らかなように、人と他の二種とは何かが決定的に違っている。",
+                "　現代人の中で、鯨や象が自分たちに匹敵する「知性」をもった存在である、と素直に信じられる人は、まずほとんどいないだろう。それは、我々が、言葉や文字を生み出し、道具や機械をつくり、交通や通信手段を進歩させ、今やこの地球の全生命の未来を左右できるほどに科学技術を進歩させた、この能力を「知性」だと思いこんでいるからだ。",
+                "　これらの点からみれば、自らは何も生産せず、自然が与えてくれるものだけを食べて生き、あとは何もしないでいるようにみえる（実はそうではないのだが）鯨や象が、自分たちと対等の「知性」をもった存在とはとても思えないのは、当然のことである。",
+                "　しかし、一九六〇年代に入って、さまざまな動機から、鯨や象たちと深いつき合いをするようになった人たちの中から、この「常識」に対する疑問が生まれ始めた。",
+                "　鯨や象は、人の「知性」とは全く別種の「知性」をもっているのではないか、あるいは、人の「知性」は、この[[a4|ガイア]]に存在する大きな「知性」の偏った一面の現れであり、もう一方の面に鯨や象の「知性」が存在するのではないか、という疑問である。",
+                "　この疑問は、最初、水族館に捕らえられた[[a6|オルカ]]（シャチ）やイルカに芸を教えようとする調教師や医者や心理学者、その手伝いをした音楽家、鯨の脳に興味をもつ大脳生理学者たちの実体験から生まれた。",
+                "　彼らが[[a5|異口同音]]に言う言葉がある。それは、[[a6|オルカ]]やイルカは決して、ただ餌を欲しいがために本能的に芸をしているのではない、ということである。",
+                "　彼らは捕らわれの身となった自分の状況を、はっきり認識している、という。そして、その状況を自ら受け入れると決意した時、初めて、自分とコミュニケーションしようとしている人間、さしあたっては調教師を喜ばせるために、そしてその状況の下で自分自身も、精いっぱい生きることを楽しむために、「芸」と呼ばれることを始めるのだ。水族館で[[a6|オルカ]]が見せてくれる「芸」のほとんどは、実は人間が[[a6|オルカ]]に強制的に教えこんだものではない。[[a6|オルカ]]のほうが、人間が求めていることを正確に理解し、自分のもっている高度な能力を、か弱い人間（調教師）のレベルに合わせて制御し、調整をしながら使っているからこそ可能になる「芸」なのだ。",
+                "　例えば、体長七メートルもある巨大な[[a6|オルカ]]が、狭いプールでちっぽけな人間を背ビレにつかまらせたまま猛スピードで泳ぎ、プールの端にくると、合図もないのに自ら細心の注意を払って人間が落ちないようにスピードを落とし、そのまま人間をプールサイドに立たせてやる。また、水中から、直立姿勢の人間を自分の鼻先に立たせたまま上昇し、その人間を空中に放り出す際には、その人間が決してプールサイドのコンクリートの上に投げ出されず、再び水中の安全な場所に落下するよう、スピード・高さ・方向などを[[a7|三次元レベル]]で調整する。こんなことがはたして、ムチと飴による人間の強制だけでできるだろうか。まして[[a6|オルカ]]は水中で生活している七メートルの巨体の持ち主なのだ。",
+                "　そこには、人間の強制ではなく、明らかに、[[a6|オルカ]]自身の意志と選択がはたらいている。狭いプールに閉じこめられ、本来もっている高度な能力の何万分の一も使えない過酷な状況におかれながらも、自分が「友」として受け入れることを決意した人間を喜ばせ、そして自分自身も生きることを楽しむ[[a6|オルカ]]の「心」があるからこそできることなのだ。",
+                "　また、こんな話もある。",
+                "　人間が彼らに何かを教えようとすると、彼らの理解能力は驚くべき速さだそうだけれども、同時に、彼らもまた人間に何かを教えようとする、というのだ。",
+                "　フロリダの若い学者が、一頭の雌イルカに名前をつけ、それを発音させようと試みた。イルカと人間では声帯が大きく異なるので、なかなかうまくいかなかった。それでも、少しうまくいったときには、その学者は頭を上下にうんうんと振った。二人（一人と一頭か）の間ではそのしぐさが、互いに了解した、という合図だった。何度も繰り返しているうちに、学者は、そのイルカが自分の名前とは別の、イルカ語のある音節を同時に繰り返し発音するのに気がついた。しかしそれが何を意味するのかはわからなかった。そしてある時、はたと気づいた。「彼女は私にイルカ語の名前をつけ、それを私に発音せよ、と言っているのではないか。」そう思った彼は、必死でその発音を試みた。",
+                "　自分でも少しうまくいったかな、と思った時、なんとその雌イルカは、うんうんと頭を振り、とてもうれしそうにプール中をはしゃぎ回ったというのだ。",
+                "　象については、こんな話がある。",
+                "　アフリカのケニアで、ある自然保護官が象の寿命を調べるため、自然死した象の歯を集めていた。草原で新しく見つけた歯を持ち帰り倉庫に納めておいたところ、その日から毎晩、巨大な象がやってきて、倉庫の[[a8|かんぬき]]を開けようとする。不思議に思ったその保護官は、ある晩、[[a8|かんぬき]]を開けたままにしておいた。すると、翌朝、数百個も集められていた歯の中から、その新しく収集した歯だけがなくなっていた。保護官がその歯を捜したところ、その歯はなんと、彼が発見したまさにその場所に戻されていたのだ。毎晩倉庫にやってきた象は、たぶん亡くなった象の肉親だったのだろう。それにしてもその象は、どうやって歯が倉庫にあることを知ったのだろう。数百個もある歯の中から、どうやって肉親の歯を見分けたのだろう。そして最大の謎は、その象が、なぜ歯を元の場所にわざわざ戻したのだろう、ということだ。",
+                "　このように、鯨や象が高度な「知性」をもっていることは、たぶんまちがいない事実だ。",
+                "　しかし、その「知性」は、科学技術を進歩させてきた人間の「知性」とは大きく違うものだ。人間の「知性」は、自分たちだけの安全と便利さのために自然をコントロールし、意のままに支配しようとする、いわば「[[a9|攻撃的な知性]]」だ。この「[[a9|攻撃的な知性]]」をあまりにも進歩させてきた結果として、人間は環境破壊を起こし、地球全体の生命を危機に陥れている。これに対して、鯨や象のもつ「知性」は、いわば「[[a10|受容的な知性]]」とでも呼べるものだ。彼らは、自然をコントロールしようなどとはいっさい思わず、そのかわり、この自然のもつ無限に多様で複雑な営みを、できるだけ繊細に理解し、それに適応して生きるために、その高度な「知性」を使っている。",
+                "　だからこそ彼らは、我々人類よりはるか以前から、あの大きな体でこの地球に生きながらえてきたのだ。同じ地球に生まれながら、片面だけの「知性」を異常に進歩させてしまった我々人類は、今、もう一方の「知性」の持ち主である鯨や象たちからさまざまなことを学ぶことによって、真の意味の「[[a4|ガイア]]の知性」に進化する必要がある、と私は思っている。"
+            ]
+        };
+
+        /***********************************************************
+         * 2. アプリケーションロジック
+         ***********************************************************/
+        const app = {
+            currentTab: 'overview',
+            scrollKey: 'gaia_reader_scroll_pos',
+            isScrolling: false,
+
+            init() {
+                // タイトル設定
+                document.title = `${BOOK_DATA.title} - 読解支援`;
+                document.getElementById('header-title').textContent = `${BOOK_DATA.title}　${BOOK_DATA.author}`;
+
+                // コンテンツ生成
+                this.renderOverview();
+                this.renderElements();
+                this.renderKeywords();
+                this.renderText();
+
+                // スクロールイベント監視（読書位置保存のため）
+                window.addEventListener('scroll', () => {
+                    if (this.currentTab === 'read') {
+                        // パフォーマンス向上のためデバウンス的に処理したいが、
+                        // 簡易実装としてそのまま保存する（現代のブラウザならほぼ問題ない）
+                        // ただし頻度を減らすためTimeoutを使う
+                        if (!this.isScrolling) {
+                            window.requestAnimationFrame(() => {
+                                this.saveReadPosition();
+                                this.isScrolling = false;
+                            });
+                            this.isScrolling = true;
+                        }
+                    }
+                });
+
+                // 初期タブ表示
+                this.switchTab('overview');
+            },
+
+            /*******************************************************
+             * タブ切り替えと読書位置管理
+             *******************************************************/
+            switchTab(tabId) {
+                // 現在のタブが「read」なら、切り替える前に位置を保存（念のため）
+                if (this.currentTab === 'read') {
+                    this.saveReadPosition();
+                }
+
+                // 全セクションを非表示
+                ['overview', 'elements', 'keywords', 'read'].forEach(id => {
+                    document.getElementById(`view-${id}`).classList.add('hidden');
+                    document.getElementById(`btn-${id}`).classList.remove('tab-active', 'border-blue-500', 'text-blue-600', 'dark:text-blue-400', 'dark:border-blue-400');
+                    // 非アクティブなスタイルに戻す（クラス操作はTailwindのクラス依存）
+                });
+
+                // 選択されたセクションを表示
+                document.getElementById(`view-${tabId}`).classList.remove('hidden');
+                
+                // タブボタンのアクティブ化
+                const activeBtn = document.getElementById(`btn-${tabId}`);
+                activeBtn.classList.add('tab-active');
+
+                this.currentTab = tabId;
+
+                // もし「本文」タブなら、位置を復元
+                if (tabId === 'read') {
+                    this.restoreReadPosition();
+                } else {
+                    // 他のタブはトップへ
+                    window.scrollTo(0, 0);
+                }
+            },
+
+            // 2. 読書位置の記憶ロジック
+            saveReadPosition() {
+                const scrollY = window.scrollY || document.documentElement.scrollTop;
+                localStorage.setItem(this.scrollKey, scrollY);
+            },
+
+            restoreReadPosition() {
+                const savedPos = localStorage.getItem(this.scrollKey);
+                if (savedPos) {
+                    // 少し遅延させないと描画完了前にスクロールしようとして失敗することがある
+                    setTimeout(() => {
+                        window.scrollTo(0, parseInt(savedPos, 10));
+                    }, 0);
+                } else {
+                    window.scrollTo(0, 0);
+                }
+            },
+
+            /*******************************************************
+             * コンテンツ描画メソッド
+             *******************************************************/
+            renderOverview() {
+                const container = document.getElementById('overview-container');
+                BOOK_DATA.structure.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white dark:bg-slate-800 p-4 rounded shadow-sm border-l-4 border-blue-400 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition";
+                    div.onclick = () => this.toggleDetail(div);
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg dark:text-gray-100"><span class="text-blue-500 mr-2">Step.${index + 1}</span>${item.title}</h3>
+                            <span class="text-gray-400 text-sm">▼</span>
+                        </div>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2">${item.summary}</p>
+                        <div class="detail-content hidden mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <p class="text-gray-800 dark:text-gray-200 mb-3">${item.detail}</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${item.tags.map(tag => `<span class="px-2 py-1 bg-gray-100 dark:bg-slate-600 text-xs rounded text-gray-600 dark:text-gray-200">#${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            renderElements() {
+                const container = document.getElementById('elements-container');
+                BOOK_DATA.elements.forEach(elm => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white dark:bg-slate-800 p-5 rounded shadow-sm border border-gray-100 dark:border-slate-700 cursor-pointer hover:shadow-md transition";
+                    div.onclick = () => this.toggleDetail(div);
+                    div.innerHTML = `
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-bold text-lg">
+                                ${elm.name.charAt(0)}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg dark:text-gray-100">${elm.name}</h3>
+                                <p class="text-xs text-indigo-500 dark:text-indigo-400 font-bold">${elm.role}</p>
+                            </div>
+                        </div>
+                        <div class="detail-content hidden mt-3 space-y-3">
+                            <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">${elm.desc}</p>
+                            <div class="bg-gray-50 dark:bg-slate-700 p-3 rounded text-sm italic text-gray-600 dark:text-gray-400 border-l-2 border-gray-300 dark:border-gray-500">
+                                "${elm.quote}"
+                            </div>
+                        </div>
+                        <p class="text-xs text-center text-gray-400 mt-2 detail-hint">タップして詳細を表示</p>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            renderKeywords() {
+                const container = document.getElementById('keywords-container');
+                BOOK_DATA.keywords.forEach(kw => {
+                    const div = document.createElement('div');
+                    div.className = "group bg-white dark:bg-slate-800 p-4 rounded border-l-4 border-emerald-400 cursor-pointer hover:bg-emerald-50 dark:hover:bg-slate-700 transition";
+                    div.onclick = () => this.toggleDetail(div);
+                    div.innerHTML = `
+                        <h3 class="font-bold text-lg text-emerald-800 dark:text-emerald-400 group-hover:text-emerald-700">${kw.term}</h3>
+                        <div class="detail-content hidden mt-3 space-y-2 animate-fade-in">
+                            <p class="text-gray-800 dark:text-gray-200"><span class="font-bold text-xs text-gray-500 block mb-1">意味</span>${kw.meaning}</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm bg-black/5 dark:bg-white/5 p-2 rounded"><span class="font-bold text-xs text-gray-500 block mb-1">文脈</span>${kw.context}</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            },
+
+            renderText() {
+                const container = document.getElementById('text-content');
+                // テキストを行ごとに処理し、注釈タグをHTMLに変換
+                const htmlContent = BOOK_DATA.textBody.map(paragraph => {
+                    // [[id|text]] パターンを置換
+                    const processed = paragraph.replace(/\[\[(.*?)\|(.*?)\]\]/g, (match, id, text) => {
+                        return `<span class="annotation-highlight text-brand-600 dark:text-brand-400 font-medium" onclick="app.showAnnotation('${id}', event)">${text}</span>`;
+                    });
+                    return `<p class="mb-6 text-gray-800 dark:text-gray-300 text-justify leading-loose tracking-wide">${processed}</p>`;
+                }).join('');
+                container.innerHTML = htmlContent;
+            },
+
+            // UIユーティリティ: 詳細のトグル表示
+            toggleDetail(element) {
+                const detail = element.querySelector('.detail-content');
+                const hint = element.querySelector('.detail-hint');
+                if (detail.classList.contains('hidden')) {
+                    detail.classList.remove('hidden');
+                    if(hint) hint.style.display = 'none';
+                } else {
+                    detail.classList.add('hidden');
+                    if(hint) hint.style.display = 'block';
+                }
+            },
+
+            // UIユーティリティ: 注釈表示
+            showAnnotation(id, event) {
+                event.stopPropagation(); // 親要素への伝播防止
+                const data = BOOK_DATA.annotations[id];
+                if (!data) return;
+
+                const sheet = document.getElementById('annotation-sheet');
+                const termEl = document.getElementById('anno-term');
+                const descEl = document.getElementById('anno-desc');
+
+                termEl.innerHTML = `${data.term} <span class="text-sm font-normal text-gray-500 ml-2">(${data.rubi})</span>`;
+                descEl.textContent = data.text;
+
+                // 表示アニメーション
+                sheet.classList.remove('translate-y-full');
+            },
+
+            closeAnnotation() {
+                document.getElementById('annotation-sheet').classList.add('translate-y-full');
+            }
+        };
+
+        // 初期化実行
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
