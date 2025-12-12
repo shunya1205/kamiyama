@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水の山 富士山 - 読解・分析</title>
+    
+    <!-- Google Fonts: 品格のある明朝体と可読性の高いゴシック体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons: 軽量で美しいアイコンセット -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* * CSS Variables & Reset 
+         * 山と水、静謐さをテーマにしたデザインシステム
+         */
+        :root {
+            /* Palette: Fuji Indigo & Snow White */
+            --c-bg-body: #F5F7FA;
+            --c-bg-gradient: linear-gradient(135deg, #E2E8F0 0%, #F5F7FA 100%);
+            
+            --c-surface: rgba(255, 255, 255, 0.9); /* Glassmorphism base */
+            --c-surface-hover: rgba(255, 255, 255, 1.0);
+            
+            --c-primary: #2C3E50;    /* 山肌のような深いグレー */
+            --c-accent: #2B6CB0;     /* 富士の藍色 */
+            --c-accent-dark: #1A365D;
+            --c-accent-sub: #319795; /* 樹海の緑・水の青緑 */
+            
+            --c-text: #2D3748;
+            --c-text-muted: #718096;
+            --c-border: rgba(203, 213, 224, 0.6);
+            
+            --c-highlight: rgba(49, 151, 149, 0.15); /* マーカー色（控えめな青緑） */
+
+            --font-sans: 'Noto Sans JP', sans-serif;
+            --font-serif: 'Noto Serif JP', serif;
+            
+            --header-height: 70px;
+            --max-width: 960px;
+            
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
+            
+            --radius-md: 12px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --c-bg-body: #171923;
+                --c-bg-gradient: linear-gradient(135deg, #1A202C 0%, #171923 100%);
+                
+                --c-surface: rgba(45, 55, 72, 0.85);
+                --c-surface-hover: rgba(45, 55, 72, 1.0);
+                
+                --c-primary: #E2E8F0;
+                --c-accent: #63B3ED;
+                --c-accent-dark: #90CDF4;
+                --c-accent-sub: #4FD1C5;
+                
+                --c-text: #E2E8F0;
+                --c-text-muted: #A0AEC0;
+                --c-border: rgba(255, 255, 255, 0.1);
+                
+                --c-highlight: rgba(99, 179, 237, 0.25);
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: var(--font-sans);
+            background: var(--c-bg-gradient);
+            background-attachment: fixed; /* 背景固定で奥行きを出す */
+            color: var(--c-text);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+            padding-top: var(--header-height);
+            min-height: 100vh;
+        }
+
+        /* 背景装飾：富士山のシルエット的なニュアンス */
+        body::before {
+            content: "";
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40vh;
+            background: linear-gradient(to top, rgba(44, 62, 80, 0.05), transparent);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* * 1. Global Header (Glassmorphism)
+         */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background-color: rgba(255, 255, 255, 0.85); /* 透過 */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--c-border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            header { background-color: rgba(26, 32, 44, 0.85); }
+        }
+
+        .book-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .book-title { 
+            font-family: var(--font-serif);
+            font-weight: 700; 
+            font-size: 1.1rem; 
+            letter-spacing: 0.05em;
+            color: var(--c-primary);
+        }
+        .book-author { 
+            font-size: 0.75rem; 
+            color: var(--c-text-muted); 
+            margin-top: 2px;
+        }
+
+        nav { display: flex; gap: 0.5rem; }
+        
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--c-text-muted);
+            font-size: 0.85rem;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover { 
+            background-color: rgba(0,0,0,0.03); 
+            color: var(--c-accent); 
+        }
+        
+        .nav-btn.active { 
+            background-color: var(--c-surface);
+            color: var(--c-accent); 
+            box-shadow: var(--shadow-sm);
+            font-weight: 700;
+        }
+        
+        @media (max-width: 768px) {
+            header { padding: 0 1rem; }
+            .nav-text { display: none; }
+            .nav-btn { padding: 0.6rem; font-size: 1.25rem; }
+        }
+
+        /* * Layout & View Container 
+         */
+        main {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 8rem 1.5rem;
+        }
+
+        .view-section { 
+            display: none; 
+            animation: fadeIn 0.4s ease;
+        }
+        .view-section.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-family: var(--font-serif);
+            font-size: 1.75rem;
+            color: var(--c-primary);
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--c-accent-sub);
+            display: inline-block;
+        }
+
+        /* * View 1: Structure (大まかな内容)
+         */
+        .timeline {
+            position: relative;
+            padding-left: 2.5rem;
+            border-left: 1px solid var(--c-border);
+            margin-left: 1rem;
+        }
+        .timeline-item {
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+        .timeline-marker {
+            position: absolute;
+            left: -3.05rem; /* Line adjustment */
+            top: 1.5rem;
+            width: 1rem;
+            height: 1rem;
+            background: var(--c-bg-body);
+            border: 2px solid var(--c-accent-sub);
+            border-radius: 50%;
+            z-index: 1;
+            transition: all 0.3s;
+        }
+        .timeline-item:hover .timeline-marker {
+            background: var(--c-accent-sub);
+            transform: scale(1.2);
+        }
+        
+        .structure-card {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-md);
+            padding: 1.75rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+        }
+        .structure-card::after {
+            /* 左端のアクセントライン */
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--c-accent);
+            opacity: 0.6;
+        }
+        
+        .structure-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--c-accent);
+        }
+        .structure-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        .structure-title { 
+            font-family: var(--font-serif);
+            font-weight: 700; 
+            font-size: 1.2rem; 
+            color: var(--c-primary);
+        }
+        .structure-tag {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            background: rgba(49, 151, 149, 0.1);
+            color: var(--c-accent-sub);
+            border-radius: 20px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .structure-summary {
+            font-size: 0.95rem;
+            color: var(--c-text);
+        }
+        .structure-details {
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--c-border);
+            font-size: 0.95rem;
+            display: none; 
+            color: var(--c-text-muted);
+            background: rgba(0,0,0,0.01);
+            margin: 1.25rem -1.75rem -1.75rem -1.75rem; /* カード幅いっぱいに */
+            padding: 1.5rem 1.75rem;
+        }
+        .structure-card.open .structure-details { display: block; }
+        .structure-card.open .ph-caret-down { transform: rotate(180deg); }
+
+        /* * View 2: Characters/Elements (要素分析) - Grid Card 
+         */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .element-card {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .element-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        .element-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .element-icon-box {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(43, 108, 176, 0.1);
+            color: var(--c-accent);
+            border-radius: 12px;
+            font-size: 1.75rem;
+        }
+        .element-title { 
+            font-family: var(--font-serif);
+            font-weight: 700; 
+            font-size: 1.25rem; 
+            color: var(--c-primary);
+        }
+        .element-role {
+            font-size: 0.8rem;
+            color: var(--c-accent-sub);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .element-desc { 
+            font-size: 0.95rem; 
+            color: var(--c-text); 
+            margin-bottom: 1.5rem; 
+            flex-grow: 1;
+        }
+        .element-details-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            border: 1px solid var(--c-accent);
+            color: var(--c-accent);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .element-details-btn:hover { 
+            background: var(--c-accent); 
+            color: white; 
+        }
+
+        /* * View 3: Keywords (キーワード) - Enhanced List
+         */
+        .keyword-list { list-style: none; }
+        .keyword-item {
+            background: var(--c-surface);
+            border: 1px solid var(--c-border);
+            border-bottom: none;
+            padding: 0;
+            transition: background 0.2s;
+        }
+        .keyword-item:first-child { border-top-left-radius: var(--radius-md); border-top-right-radius: var(--radius-md); }
+        .keyword-item:last-child { border-bottom-left-radius: var(--radius-md); border-bottom-right-radius: var(--radius-md); border-bottom: 1px solid var(--c-border); }
+        
+        .keyword-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.25rem 1.75rem;
+            cursor: pointer;
+        }
+        .keyword-header:hover {
+            background-color: rgba(0,0,0,0.02);
+        }
+        .keyword-term { 
+            font-family: var(--font-serif);
+            font-weight: 700; 
+            font-size: 1.1rem;
+            color: var(--c-accent-dark); 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        /* キーワードのカテゴリバッジ */
+        .kw-badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--c-bg-body);
+            color: var(--c-text-muted);
+            font-family: var(--font-sans);
+            font-weight: normal;
+            border: 1px solid var(--c-border);
+        }
+
+        .keyword-content {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            display: none;
+            padding: 0 1.75rem 1.75rem 1.75rem;
+            color: var(--c-text);
+        }
+        .keyword-item.open {
+            background-color: rgba(255,255,255, 0.5);
+        }
+        .keyword-item.open .keyword-content { display: block; }
+        
+        .kw-section-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--c-accent-sub);
+            margin: 1rem 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .kw-quote-box {
+            background: rgba(43, 108, 176, 0.05);
+            padding: 1rem;
+            border-left: 3px solid var(--c-accent);
+            border-radius: 0 4px 4px 0;
+            margin: 0.5rem 0;
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: var(--c-text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* * View 4: Read Text (本文) - Vertical Rhythm & Typography
+         */
+        #view-read {
+            font-family: var(--font-serif);
+            font-size: 1.15rem;
+            line-height: 2.4; /* ゆったりとした行間 */
+            color: var(--c-primary);
+            max-width: 740px;
+            margin: 0 auto;
+        }
+        .text-paragraph { 
+            margin-bottom: 2.5rem; 
+            text-align: justify;
+            text-justify: inter-ideograph;
+        }
+        
+        /* インタラクティブな用語ハイライト */
+        .term-highlight {
+            border-bottom: 2px solid var(--c-accent-sub);
+            background: linear-gradient(transparent 70%, rgba(49, 151, 149, 0.1) 70%);
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0 2px;
+            border-radius: 2px;
+            color: var(--c-accent-dark);
+            font-weight: 600;
+        }
+        .term-highlight:hover {
+            background-color: var(--c-accent-sub);
+            color: #fff;
+            border-bottom-color: transparent;
+        }
+
+        /* * Definition Panel (Bottom Sheet) - Modern Glass
+         */
+        #definition-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            max-height: 80vh;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+            border-top: 1px solid var(--c-border);
+            padding: 2rem;
+            border-radius: 24px 24px 0 0;
+            transform: translateY(110%);
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 2000;
+        }
+        #definition-panel.active { transform: translateY(0); }
+
+        /* --- Mini Mode for Reading Context --- 
+         * 本文閲覧時のコンパクトモード
+         */
+        #definition-panel.mini-mode {
+            border-radius: 12px;
+            bottom: 24px; /* 下から少し浮かせる */
+            left: 50%;
+            transform: translateX(-50%) translateY(150%); /* 初期は隠す */
+            width: 90%;
+            max-width: 640px;
+            height: auto;
+            max-height: none;
+            overflow-y: visible;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            background: rgba(255, 255, 255, 0.98); /* 視認性優先で不透明度アップ */
+            border-top: none;
+            border: 1px solid var(--c-border);
+        }
+        
+        #definition-panel.mini-mode.active {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Mini Mode: ヘッダー調整 */
+        #definition-panel.mini-mode .def-header {
+            margin-bottom: 0.25rem;
+            padding-bottom: 0;
+            border-bottom: none;
+            justify-content: flex-start;
+            gap: 1rem;
+            align-items: baseline;
+        }
+        #definition-panel.mini-mode .def-term {
+            font-size: 1.1rem; /* 少し小さく */
+        }
+        #definition-panel.mini-mode .def-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            font-size: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--c-text-muted);
+        }
+        #definition-panel.mini-mode .def-close:hover {
+            color: var(--c-accent);
+        }
+
+        /* Mini Mode: コンテンツ調整 */
+        #definition-panel.mini-mode .def-body {
+            gap: 0;
+        }
+        #definition-panel.mini-mode .def-section {
+            margin-bottom: 0;
+        }
+        #definition-panel.mini-mode .def-label {
+            display: none; /* ラベルは非表示にして圧迫感を減らす */
+        }
+        #definition-panel.mini-mode .def-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--c-text);
+        }
+        
+        .panel-content-wrapper {
+            max-width: var(--max-width);
+            margin: 0 auto;
+        }
+
+        .def-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--c-border);
+            padding-bottom: 1rem;
+        }
+        .def-term { 
+            font-size: 1.75rem; 
+            font-weight: 700; 
+            font-family: var(--font-serif); 
+            color: var(--c-accent-dark);
+        }
+        .def-close {
+            background: var(--c-bg-body);
+            border: 1px solid var(--c-border);
+            border-radius: 50%;
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; cursor: pointer; color: var(--c-text-muted);
+            transition: all 0.2s;
+        }
+        .def-close:hover {
+            background: var(--c-primary);
+            color: white;
+            border-color: var(--c-primary);
+        }
+        
+        .def-body { display: grid; gap: 1.5rem; }
+        
+        .def-section {
+            margin-bottom: 0.5rem;
+        }
+        .def-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--c-accent-sub);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .def-text {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--c-text);
+        }
+        .def-quote {
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: var(--c-text-muted);
+            background: rgba(0,0,0,0.03);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        /* Overlay for panel - 透明にして本文を読めるように修正 */
+        #panel-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0); /* 透明 */
+            /* backdrop-filter: blur(2px);  すりガラス削除 */
+            z-index: 1999;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        #panel-overlay.active { opacity: 1; pointer-events: auto; }
+
+        /* Furigana styling */
+        ruby rt { font-size: 0.55em; color: var(--c-accent-sub); font-weight: normal; }
+
+    </style>
+</head>
+<body>
+
+    <!-- ヘッダー -->
+    <header>
+        <div class="book-info">
+            <span class="book-title" id="display-title"></span>
+            <span class="book-author" id="display-author"></span>
+        </div>
+        <nav>
+            <button class="nav-btn active" data-target="view-overview">
+                <i class="ph ph-tree-structure"></i><span class="nav-text">構造</span>
+            </button>
+            <button class="nav-btn" data-target="view-elements">
+                <i class="ph ph-mountains"></i><span class="nav-text">要素</span>
+            </button>
+            <button class="nav-btn" data-target="view-keywords">
+                <i class="ph ph-book-bookmark"></i><span class="nav-text">語句</span>
+            </button>
+            <button class="nav-btn" data-target="view-read">
+                <i class="ph ph-book-open-text"></i><span class="nav-text">本文</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main>
+        
+        <!-- 1. 構造 (Overview) -->
+        <section id="view-overview" class="view-section active">
+            <h2>論理構成分析</h2>
+            <div class="timeline" id="structure-container">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 2. 要素 (Elements) -->
+        <section id="view-elements" class="view-section">
+            <h2>主要素の役割と象徴</h2>
+            <div class="grid-layout" id="elements-container">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 3. キーワード (Keywords) -->
+        <section id="view-keywords" class="view-section">
+            <h2>重要語句・深掘り解説</h2>
+            <div class="keyword-list" id="keywords-container">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 4. 本文 (Read Text) -->
+        <section id="view-read" class="view-section">
+            <div id="text-container">
+                <!-- JSで生成 -->
+            </div>
+            <!-- 読了後の余白 -->
+            <div style="height: 150px; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--c-text-muted); font-size: 0.9rem; font-family: var(--font-serif);">
+                <i class="ph ph-check-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--c-accent-sub);"></i>
+                読了
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 用語解説パネル (モーダル/ボトムシート) -->
+    <div id="panel-overlay" onclick="closePanel()"></div>
+    <div id="definition-panel">
+        <div class="panel-content-wrapper">
+            <div class="def-header">
+                <div class="def-term" id="panel-term"></div>
+                <button class="def-close" onclick="closePanel()"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="def-body">
+                <!-- IDを追加してJSで制御しやすくしたセクション群 -->
+                <div class="def-section" id="panel-desc-section">
+                    <span class="def-label">定義・意味</span>
+                    <div class="def-text" id="panel-desc"></div>
+                </div>
+                <div class="def-section" id="panel-context-section">
+                    <span class="def-label">文脈における意義</span>
+                    <div class="def-text" id="panel-context"></div>
+                </div>
+                <div class="def-section" id="panel-note-section">
+                    <span class="def-label">深掘り解説</span>
+                    <div class="def-text" id="panel-note"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /*************************************************************************
+         * 1. 作品データ (CONTENT_DATA)
+         * 情報密度を高めた更新版データ
+         *************************************************************************/
+        const CONTENT_DATA = {
+            title: "水の山　富士山",
+            author: "丸井 敦尚",
+            
+            // 本文データ
+            text: [
+                "標高三、七七六メートルを誇る日本の最高峰「{{富士山|fuji}}」は、均整のとれた円錐形の{{火山|volcano}}として世界にも名高い。古くから多くの人の心を捉え、芸術や信仰の対象となってきたことが評価され、二〇一三年には{{世界文化遺産|heritage}}に登録された。",
+                "富士山は標高が高いため、夏を除いて山頂が雪で覆われている。また、降り注ぐ雨と合わせた{{降水量|rain}}は、年間二十二億トンにもなるといわれている。このうち五億トン以上の水が、山の麓から{{湧水|spring}}となって流出していると見積もられており、広い山麓には、百を超す湧水が確認されている。富士山がもたらすこの水は、豊かな自然環境を育み、同時に、人々の生活や産業を支えてもいる。",
+                "ところで、富士山自体には、その山腹に一筋も河川がない。実際に富士山に登ってみると、雪解け水や雨は流れをつくることなく、地面にしみこんでしまう様子が見られる。富士山に降った大量の雨は、どこへ行ってしまったのだろうか。また、富士山からの水の恵みは、どのようにしてもたらされるのだろうか。",
+                "そこで、富士山の内部の構造について調べてみた。富士山を断面図にして見てみると、富士山は三つの火山が積み重なってできていることがわかる（図１）。約六十万年前に噴火してできた古い火山がいちばん下にある。これを、約十万年前に再噴火してできた火山が覆っている。この火山は三千メートルに達し、ほぼ現在の富士山の形状をなしている。さらに、一万年前から始まった噴火により、現在見られる富士山ができあがった。つまり、私たちが見ている富士山の下には、古い時代の二つの火山が埋もれているのである。",
+                "{{溶岩|lava}}には、冷えて固まる時にガスが抜けてできた、スポンジのような細かな穴がある。富士山の表面はこの冷えた溶岩に覆われているため、水は溶岩の穴を通って地中にしみ込んで{{地下水|groundwater}}となっている。そのため、富士山の表面には河川がないのである。",
+                "加えて、富士山の溶岩は、国内の火山としては粘り気が少なく、遠くまで流れていくという特質をもつ。そのため、富士山は均整のとれた円錐形になり、広い{{裾野|susono}}をもつことになった。そして、裾野では、地下水となって遠くまで流れてくる水を利用して、多くの人々が暮らすようになったのである。",
+                "続いて、このような構造になっている富士山の地下で、水がどのように流れているかを調べることにした。約一万年前からの噴火で積み重なった{{溶岩流|lavaflow}}を、富士山麓の湧水と重ねてみる（図２）。すると、溶岩流の末端部に湧水があることがわかる。もしかしたら、溶岩流が、地下水の流れる道となっているのかもしれない。",
+                "そこで、実際に地下水の流れ方を調べてみた。{{白糸の滝|shiraito}}や{{陣馬の滝|jimba}}では、約一万年前以降の新しい溶岩と、新しい溶岩流に押しつぶされて硬くなった十万年前の溶岩との間から湧き出した水が、滝となっている。すなわち、地下水は古い地層にはしみ込まず、上にあるスポンジのような新しい地層との間を流れていたのである（図３）。",
+                "この地下水が富士山につながっているかどうかを確認するため、山腹と湧水の間の裾野に広がる{{青木ヶ原樹海|jukai}}に入って調べてみた。樹海には、溶岩流が流れた跡にできる巨大な洞穴が数多く存在する。直径十メートル以上の洞穴が、長さにして五百メートル以上続くこともある。洞穴の中には、地下水が地層からしみ出ている場所もある。洞穴内の水は、千メートル以上の標高差を下ってきたことも、調査の結果からわかっている。すなわち、富士山はそれ自体が、時期の異なる二つの地層に挟まれた巨大な水脈であり、山頂や山腹にもたらされた降水は、溶岩流に沿って四方八方へと流下していたのである。",
+                "もう一度、富士山の地表の溶岩流（図２）を見てみよう。富士山の北側には、{{富士五湖|fujigoko}}と呼ばれる湖がある。その一つの本栖湖では、湖底に湧水が発見されており、洞穴の中の地下水と同じ水質であることがわかっている。すなわち、降水は地下水となって洞穴を通り、富士五湖に湧き出していたことになる。富士五湖のそばには{{忍野八海|oshino}}があり、ここの水質も洞穴内の水と同じであった。富士山の南側にも{{柿田川湧水|kakita}}や{{三島市|mishima}}の湧水群があり、それらの湧水の水質も富士山麓の地下水と同様、二十年以上の時間をかけて流下してきたことがわかってきた。さらに{{駿河湾|suruga}}の海水にも、富士山から来た水が含まれていることもわかっている。",
+                "このように、私たちは洞穴や湖、湧水という窓をとおして、富士山頂から山麓を下り、いずれは海洋へと流れる水の旅を追いかけることができた。初めに述べた降水量と湧水の湧出量の違いだが、降水量の半分ほどは蒸発し、五億トンほどは湧水となることから、その差は海底に湧き出していることになる。",
+                "この豊富な地下水は、人々の生活を支えている。地下水がつくる清流は、年間を通して水温が一定に保たれている。また、山頂から山麓までの長い距離を流れている間に、地層に含まれる物質が溶けこみ、その中には、生物の成育に欠かせない栄養分も豊富に含まれている。このような水が、{{ワサビ|wasabi}}の栽培のほか、{{ヤマメ|yamame}}や{{イワナ|iwana}}の養殖などにも使われている。さらには、私たちの喉を潤す飲料水にもなっている。",
+                "湧水をめぐって富士山麓の仕組みや構造に注目することで、富士山が雄大な自然を形づくるとともに、多くの恩恵を私たちにもたらしていることがわかった。一方、富士山には、地表に近いところの湧水だけでなく、地下深くから上ってくる水の動きなど、水に関することでも未解明の課題が残されている。これらについても追究していくことによって、富士山の新たな魅力を捉えていくことができるにちがいない。"
+            ],
+
+            // 構造分析データ
+            structure: [
+                { 
+                    title: "序論：問題提起", 
+                    tag: "Introduction", 
+                    summary: "富士山の「水」にまつわるパラドックスの提示。",
+                    detail: "冒頭で「年間22億トンもの降水がある」という事実と、「山腹には川が一筋もない」という矛盾した現象を対置している。読者に「水はどこへ消えたのか？」という問いを抱かせることで、地質学的調査への動機づけを行っている。" 
+                },
+                { 
+                    title: "調査１：内部構造", 
+                    tag: "Structure", 
+                    summary: "三層に重なる火山構造の解明。",
+                    detail: "断面図を用いた分析により、富士山が単一の山ではなく、60万年前、10万年前、1万年前という異なる時期に噴火した3つの火山が積み重なって形成されていることを提示する。" 
+                },
+                { 
+                    title: "調査２：溶岩の特性", 
+                    tag: "Mechanism", 
+                    summary: "多孔質の溶岩がもたらす浸透作用。",
+                    detail: "新しい溶岩にはガスが抜けた「スポンジ状の穴」が無数にあり、これが水を地下へ通すフィルターの役割を果たしていることを説明。同時に、溶岩の粘り気が少ないことが、広大な裾野（＝集水域の広さ）を形成した要因であると述べる。" 
+                },
+                { 
+                    title: "調査３：水の追跡", 
+                    tag: "Tracing", 
+                    summary: "不透水層と帯水層の関係。",
+                    detail: "古い溶岩層は重みで押しつぶされて硬い「床（不透水層）」となり、その上の新しい溶岩層（スポンジ状）を水が流れていることを、白糸の滝などの実地調査で証明する。" 
+                },
+                { 
+                    title: "調査４：水脈の証明", 
+                    tag: "Proof", 
+                    summary: "溶岩洞穴と広域な水循環。",
+                    detail: "青木ヶ原樹海の洞穴が地下水のパイプラインであることを突き止め、その水脈が富士五湖や遠く離れた柿田川湧水、さらには駿河湾にまで繋がっている壮大なスケールを示す。" 
+                },
+                { 
+                    title: "結論：水の恵み", 
+                    tag: "Conclusion", 
+                    summary: "自然のシステムと人々の生活の結びつき。",
+                    detail: "富士山そのものが巨大な「浄化装置」兼「貯水タンク」であり、そこで濾過されミネラルを含んだ水が、農業、養殖、飲料水として人々の生活を根底から支えていると結ぶ。" 
+                }
+            ],
+
+            // 要素分析データ
+            elements: [
+                { 
+                    icon: "ph-mountain", 
+                    name: "富士山", 
+                    role: "巨大な水瓶・浄化装置", 
+                    desc: "単なる美しい景観ではなく、三層構造を持つ巨大な「水の循環システム」として描かれる。", 
+                    quote: "富士山はそれ自体が、時期の異なる二つの地層に挟まれた巨大な水脈であり",
+                    detail: "本テキストにおける富士山は、芸術的な鑑賞対象（序論）から、地質学的な分析対象（本論）を経て、最終的に人々の生活を支える恵みの源泉（結論）へと意味づけが変化していく。特に「三つの火山が重なっている」という構造的特徴が、水脈形成の決定的な要因として強調されている。" 
+                },
+                { 
+                    icon: "ph-drop-half-bottom", 
+                    name: "溶岩と穴", 
+                    role: "フィルター・パイプライン", 
+                    desc: "水を通す媒体。ガスが抜けたスポンジ状の構造が、地表の水を地下へ導く。", 
+                    quote: "溶岩には、冷えて固まる時にガスが抜けてできた、スポンジのような細かな穴がある",
+                    detail: "「穴」こそが本論の鍵である。通常、岩盤は水を遮るものだが、富士山の新しい溶岩は多孔質であるために水を通す。さらに、溶岩流の跡にできた「洞穴」は、地下水が流れる高速道路のような役割を果たし、遠距離への輸送を可能にしている。" 
+                },
+                { 
+                    icon: "ph-layers", 
+                    name: "新旧の地層", 
+                    role: "器（うつわ）の構造", 
+                    desc: "硬い古い地層が「床」となり、その上の新しい地層が「水路」となる二重構造。", 
+                    quote: "地下水は古い地層にはしみ込まず、上にあるスポンジのような新しい地層との間を流れていた",
+                    detail: "水が存在するためには、それを受け止める「底」が必要である。約十万年前の古い火山層が重みで圧縮されて不透水層（床）となり、その上が帯水層となることで、地下水は散逸せずに特定の方向へ流れることができる。この地質学的偶然が豊かな湧水を生んでいる。" 
+                },
+                { 
+                    icon: "ph-plant", 
+                    name: "湧水", 
+                    role: "循環の出口・恩恵の具現", 
+                    desc: "長い地下の旅を終えて地表に現れた水。生活と産業を支える資源。", 
+                    quote: "この豊富な地下水は、人々の生活を支えている",
+                    detail: "湧水は単なる水ではなく、「時間」と「地質」の産物として描かれる。20年以上かけて濾過され、ミネラルを含み、一定温度に保たれたこの水は、ワサビ栽培や養殖といった特定の産業を可能にする代替不可能な資源である。" 
+                }
+            ],
+
+            // 辞書データ
+            definitions: {
+                "fuji": { 
+                    term: "富士山", 
+                    rubies: "ふじさん", 
+                    category: "地理",
+                    desc: "標高3,776mの日本最高峰であり、象徴的な円錐形を持つ成層火山。",
+                    context: "本論では「美の対象」としてよりも、「巨大な水脈システム」としての機能的側面が焦点となっている。",
+                    note: "「不二（二つとない）山」や「不尽（尽きることのない）山」など名前の由来には諸説ある。活火山であり、気象庁により常時観測対象とされている。" 
+                },
+                "volcano": { 
+                    term: "火山", 
+                    rubies: "かざん", 
+                    category: "地学",
+                    desc: "地下のマグマが地表に噴出して形成された地形。", 
+                    context: "富士山は単一の山ではなく、小御岳火山、古富士火山、新富士火山の3世代が重層的に積み重なって形成されていることが、水脈形成の根拠として提示される。",
+                    note: "世界的に見ても、これほど美しい円錐形（コニーデ型）を保っている成層火山は珍しい。これは粘性の低い溶岩が均等に広がった結果である。"
+                },
+                "heritage": { 
+                    term: "世界文化遺産", 
+                    rubies: "せかいぶんかいさん", 
+                    category: "社会",
+                    desc: "人類全体の普遍的価値を持つとしてユネスコに登録された文化財。", 
+                    context: "自然遺産ではなく「文化遺産」である点が重要。ゴミ問題などで自然遺産としての登録は難航したが、信仰の対象・芸術の源泉としての精神的価値が認められた。",
+                    note: "登録名称は「富士山―信仰の対象と芸術の源泉」。構成資産には、山頂だけでなく、本編に登場する富士五湖、忍野八海、白糸の滝、三保の松原などが含まれる。" 
+                },
+                "rain": {
+                    term: "降水量",
+                    rubies: "こうすいりょう",
+                    category: "気象",
+                    desc: "特定の場所に降った雨や雪の量。",
+                    context: "富士山には年間22億トンもの膨大な降水があることが、全ての議論の出発点となっている。",
+                    note: "富士山の年間降水量は平地の約2倍〜3倍にも達する。"
+                },
+                "spring": { 
+                    term: "湧水", 
+                    rubies: "ゆうすい", 
+                    category: "水文",
+                    desc: "地下水帯から地表へ自然に湧き出した水。", 
+                    context: "富士山の湧水は、降水量の約2割強にあたる年間約5億トン。残りの半分は蒸発し、残りは海底湧水となっていると推測される。",
+                    note: "バナジウムなどのミネラル分を豊富に含むことが多く、健康志向の飲料水としても商業的価値が高い。" 
+                },
+                "lava": { 
+                    term: "溶岩", 
+                    rubies: "ようがん", 
+                    category: "地学",
+                    desc: "マグマが地表に出て揮発成分（ガス）を失い、冷え固まった岩石。", 
+                    context: "富士山の溶岩（玄武岩質）は粘り気が少なく（サラサラしている）、ガスが抜けた跡の気泡が多いため、高い透水性を持つことが強調されている。",
+                    note: "対照的に、昭和新山のような粘り気の強い溶岩（安山岩・流紋岩質）は、盛り上がってドーム状になる。富士山の広大な裾野は、この溶岩の性質によるものである。" 
+                },
+                "groundwater": { 
+                    term: "地下水", 
+                    rubies: "ちかすい", 
+                    category: "水文",
+                    desc: "地中の土壌や岩盤の隙間（帯水層）を満たして流動している水。", 
+                    context: "富士山の地下水は流速が遅く、山頂から麓まで数十年かけて流れる。この長い滞留時間が、不純物の濾過とミネラルの溶解を可能にしている。",
+                    note: "地下水は温度が年間を通して一定（富士山麓では約10〜13度）であるため、夏は冷たく、冬は温かく感じられる。" 
+                },
+                "susono": { 
+                    term: "裾野", 
+                    rubies: "すその", 
+                    category: "地理",
+                    desc: "山麓の緩やかに傾斜した広がり。", 
+                    context: "富士山の裾野は特に広く、これが巨大な「雨受け」の役割を果たし、大量の地下水を涵養（かんよう）する集水域となっている。",
+                    note: "慣用句としての「裾野が広い」は、ある分野に関連する人口や領域が広いことを指す（例：野球は競技人口の裾野が広い）。" 
+                },
+                "lavaflow": { 
+                    term: "溶岩流", 
+                    rubies: "ようがんりゅう", 
+                    category: "地学",
+                    desc: "火口から流れ出した溶岩の流れそのもの。", 
+                    context: "冷えて固まった後も、その内部や下部に空洞を残すことがあり、これが地下水の水路（パイプライン）となる。",
+                    note: "富士山の溶岩流の中でも「三島溶岩流」などは約30km先まで到達しており、長距離の水輸送を可能にした。" 
+                },
+                "shiraito": { 
+                    term: "白糸の滝", 
+                    rubies: "しらいとのたき", 
+                    category: "地名",
+                    desc: "静岡県富士宮市にある、幅150mの湾曲した絶壁から数百の滝が流れ落ちる名所。", 
+                    context: "「新旧の地層の境目」が地表に現れている場所として登場。上の透水層と下の不透水層の境界を目視できる、地質学的な教科書のような場所である。",
+                    note: "上流に川が存在せず、絶壁の地層の間から直接水が湧き出して滝になっている潜流瀑（せんりゅうばく）である点が非常に珍しい。" 
+                },
+                "jimba": {
+                    term: "陣馬の滝",
+                    rubies: "じんばのたき",
+                    category: "地名",
+                    desc: "富士宮市にある滝。源頼朝が巻狩りの際に陣を張った伝説が名前の由来。",
+                    context: "白糸の滝と同様、新旧の溶岩層の間から水が湧き出ている様子を観察できる場所。",
+                    note: "五斗目木川（ごとめきがわ）にかかる素朴で美しい滝。"
+                },
+                "jukai": { 
+                    term: "青木ヶ原樹海", 
+                    rubies: "あおきがはらじゅかい", 
+                    category: "地名",
+                    desc: "貞観大噴火（864年）の溶岩流の上に形成された約30平方キロメートルの原生林。", 
+                    context: "地下に多数の溶岩洞穴を隠し持っており、地下水の通り道として機能している場所。土壌が薄く、木の根が横に広がる独特の景観を持つ。",
+                    note: "溶岩に含まれる磁鉄鉱の影響で方位磁針が狂うという俗説があるが、実際には極端に近づけない限り通常通り機能する。" 
+                },
+                "fujigoko": { 
+                    term: "富士五湖", 
+                    rubies: "ふじごこ", 
+                    category: "地名",
+                    desc: "本栖湖、精進湖、西湖、河口湖、山中湖。", 
+                    context: "これらの湖の一部（本栖湖、精進湖、西湖）は地下でつながっており、湖面標高が連動している（サイフォン現象）。これは地下水脈の存在を裏付ける証拠の一つである。",
+                    note: "かつては「剗の海（せのうみ）」という巨大な湖だったが、延暦や貞観の噴火による溶岩流で分断されて現在の形になった。" 
+                },
+                "oshino": { 
+                    term: "忍野八海", 
+                    rubies: "おしのはっかい", 
+                    category: "地名",
+                    desc: "かつての「忍野湖」が干上がって盆地になり、湧水口が池として残ったもの。", 
+                    context: "水質が洞穴内の水と一致することから、富士山の地下水が湧き出たものであることが証明された。",
+                    note: "出口池、お釜池、底抜池、銚子池、湧池、濁池、鏡池、菖蒲池の8つ。古くから富士修験の霊場として尊ばれた。" 
+                },
+                "kakita": { 
+                    term: "柿田川湧水", 
+                    rubies: "かきたがわゆうすい", 
+                    category: "地名",
+                    desc: "富士山から約40km離れた三島地域に湧き出る、日本で最も短い一級河川。", 
+                    context: "富士山に降った雨が地下を通って、20〜30年後にここに湧き出る。長距離・長時間を経た水の旅の終着点の一つ。",
+                    note: "かつては工場の排水で汚染されていたが、住民運動により清流を取り戻した歴史を持つ。" 
+                },
+                "mishima": {
+                    term: "三島市",
+                    rubies: "みしまし",
+                    category: "地名",
+                    desc: "伊豆半島の付け根に位置する市。「水の都」と呼ばれる。",
+                    context: "富士山の湧水が市内の至る所から湧き出しており、柿田川湧水群などと並ぶ湧水地帯。",
+                    note: "三嶋大社を中心とした門前町でもある。"
+                },
+                "suruga": {
+                    term: "駿河湾",
+                    rubies: "するがわん",
+                    category: "地理",
+                    desc: "静岡県の南側に広がる湾。最深部は2,500mに達する日本一深い湾。",
+                    context: "富士山の地下水は陸地だけでなく、海底にも湧き出していることが示されている。",
+                    note: "サクラエビやシラス漁が有名。"
+                },
+                "wasabi": { 
+                    term: "ワサビ", 
+                    rubies: "", 
+                    category: "生物",
+                    desc: "日本固有のアブラナ科植物。清浄な流水環境を好む。", 
+                    context: "富士山の湧水が「水温一定」「栄養分豊富」「清浄」であることの証明として挙げられている。これらの条件が揃わないと育たない。",
+                    note: "静岡県はワサビ栽培の発祥の地であり、生産量も日本一。特に畳石式栽培と呼ばれる、湧水を効率よく利用する方法がとられている。" 
+                },
+                "yamame": {
+                    term: "ヤマメ",
+                    rubies: "やまめ",
+                    category: "生物",
+                    desc: "サケ科の淡水魚。冷たくきれいな川の上流域に生息する。",
+                    context: "きれいな水の指標生物であり、富士山の湧水が清浄であることを証明している。",
+                    note: "「渓流の女王」とも呼ばれる美しい魚。"
+                },
+                "iwana": {
+                    term: "イワナ",
+                    rubies: "いわな",
+                    category: "生物",
+                    desc: "サケ科の淡水魚。ヤマメよりもさらに源流に近い冷たい水域に住む。",
+                    context: "水温が年間を通して低く一定である湧水環境に適応している。",
+                    note: "日本で最も標高の高い場所まで生息する魚類の一つ。"
+                }
+            }
+        };
+
+        /*************************************************************************
+         * 2. アプリケーションロジック
+         *************************************************************************/
+
+        // 状態管理
+        let currentViewId = 'view-structure'; 
+        const SCROLL_KEY = 'fuji_text_scroll_pos';
+
+        // DOM Elements
+        const displayTitle = document.getElementById('display-title');
+        const displayAuthor = document.getElementById('display-author');
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const sections = document.querySelectorAll('.view-section');
+        const definitionPanel = document.getElementById('definition-panel');
+        const panelOverlay = document.getElementById('panel-overlay');
+
+        function init() {
+            displayTitle.textContent = CONTENT_DATA.title;
+            displayAuthor.textContent = CONTENT_DATA.author;
+
+            renderStructure();
+            renderElements();
+            renderKeywords();
+            renderText();
+
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('data-target');
+                    switchView(targetId);
+                });
+            });
+            
+            // パネル外クリックで閉じる
+            panelOverlay.addEventListener('click', closePanel);
+        }
+
+        function switchView(targetId) {
+            if (currentViewId === 'view-read') {
+                localStorage.setItem(SCROLL_KEY, window.scrollY);
+            }
+
+            sections.forEach(sec => sec.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+
+            navBtns.forEach(btn => {
+                if(btn.getAttribute('data-target') === targetId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            if (targetId === 'view-read') {
+                const savedPos = localStorage.getItem(SCROLL_KEY);
+                if (savedPos) {
+                    setTimeout(() => window.scrollTo(0, parseInt(savedPos)), 10);
+                } else {
+                    window.scrollTo(0, 0);
+                }
+            } else {
+                window.scrollTo(0, 0);
+            }
+            closePanel();
+            currentViewId = targetId;
+        }
+
+        /* --- Rendering Functions --- */
+
+        // 1. Structure
+        function renderStructure() {
+            const container = document.getElementById('structure-container');
+            let html = '';
+            CONTENT_DATA.structure.forEach(item => {
+                html += `
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="structure-card" onclick="toggleCard(this)">
+                            <div class="structure-header">
+                                <span class="structure-title">${item.title}</span>
+                                <span class="structure-tag">${item.tag}</span>
+                            </div>
+                            <div class="structure-summary">${item.summary}</div>
+                            <div class="structure-details">
+                                <strong><i class="ph ph-magnifying-glass"></i> 詳細分析:</strong><br>
+                                ${item.detail}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // 2. Elements
+        function renderElements() {
+            const container = document.getElementById('elements-container');
+            let html = '';
+            CONTENT_DATA.elements.forEach((item, index) => {
+                html += `
+                    <div class="element-card">
+                        <div class="element-header">
+                            <div class="element-icon-box"><i class="ph ${item.icon}"></i></div>
+                            <div>
+                                <div class="element-title">${item.name}</div>
+                                <div class="element-role">${item.role}</div>
+                            </div>
+                        </div>
+                        <div class="element-desc">${item.desc}</div>
+                        <button class="element-details-btn" onclick="showElementDetail('${index}')">
+                            分析を読む
+                        </button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+        
+        // 要素詳細表示
+        window.showElementDetail = (index) => {
+            const item = CONTENT_DATA.elements[index];
+            definitionPanel.classList.remove('mini-mode'); // 詳細モード
+            openPanel({
+                term: item.name,
+                desc: item.detail,
+                context: item.role,
+                note: item.quote ? `「${item.quote}」` : "",
+                isElement: true
+            });
+        };
+
+        // 3. Keywords
+        function renderKeywords() {
+            const container = document.getElementById('keywords-container');
+            let html = '';
+            Object.keys(CONTENT_DATA.definitions).forEach(key => {
+                const item = CONTENT_DATA.definitions[key];
+                html += `
+                    <li class="keyword-item" onclick="toggleKeyword(this)">
+                        <div class="keyword-header">
+                            <span class="keyword-term">
+                                ${item.term}
+                                <span class="kw-badge">${item.category}</span>
+                            </span>
+                            <i class="ph ph-caret-down" style="color:var(--c-text-muted)"></i>
+                        </div>
+                        <div class="keyword-content">
+                            <div class="kw-section-title"><i class="ph ph-book-open"></i> 意味</div>
+                            <div>${item.desc}</div>
+                            
+                            ${item.context ? `
+                            <div class="kw-section-title"><i class="ph ph-link"></i> 文脈</div>
+                            <div>${item.context}</div>
+                            ` : ''}
+
+                            <div class="kw-section-title"><i class="ph ph-lightbulb"></i> 解説</div>
+                            <div style="font-size:0.9rem; color:var(--c-text-muted);">${item.note}</div>
+                        </div>
+                    </li>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // 4. Text
+        function renderText() {
+            const container = document.getElementById('text-container');
+            let html = '';
+            CONTENT_DATA.text.forEach(paragraph => {
+                const processed = paragraph.replace(/\{\{(.*?)\|(.*?)\}\}/g, (match, term, id) => {
+                    return `<span class="term-highlight" onclick="showDefinition('${id}')">${term}</span>`;
+                });
+                html += `<p class="text-paragraph">${processed}</p>`;
+            });
+            container.innerHTML = html;
+        }
+
+        /* --- Interaction --- */
+
+        window.toggleCard = (el) => {
+            el.classList.toggle('open');
+        };
+        window.toggleKeyword = (el) => {
+            el.classList.toggle('open');
+            const icon = el.querySelector('.ph-caret-down');
+            if(el.classList.contains('open')) {
+                icon.style.transform = "rotate(180deg)";
+            } else {
+                icon.style.transform = "rotate(0deg)";
+            }
+        };
+
+        // 本文中の用語をクリックした時の処理（最小限の情報のみ表示）
+        window.showDefinition = (id) => {
+            const data = CONTENT_DATA.definitions[id];
+            if (!data) return;
+            
+            // 本文閲覧時はミニモードにする
+            definitionPanel.classList.add('mini-mode');
+
+            // 本文閲覧時は、読書を妨げないよう定義のみを渡し、
+            // contextやnoteを含めないことでパネル側で非表示にする
+            openPanel({
+                term: data.term,
+                rubies: data.rubies,
+                desc: data.desc
+                // context, note はあえて渡さない
+            });
+        };
+
+        // パネル表示の汎用関数
+        // 渡されたデータが存在しない項目は、HTML要素ごと非表示にする
+        function openPanel(data) {
+            const termEl = document.getElementById('panel-term');
+            
+            // 各セクションの親要素（表示切り替え用）
+            const descSection = document.getElementById('panel-desc-section');
+            const contextSection = document.getElementById('panel-context-section');
+            const noteSection = document.getElementById('panel-note-section');
+            
+            // 各テキスト要素
+            const descEl = document.getElementById('panel-desc');
+            const contextEl = document.getElementById('panel-context');
+            const noteEl = document.getElementById('panel-note');
+            
+            // 用語とルビ
+            if(data.rubies) {
+                termEl.innerHTML = `<ruby>${data.term}<rt>${data.rubies}</rt></ruby>`;
+            } else {
+                termEl.textContent = data.term;
+            }
+
+            // 定義・意味 (desc)
+            if (data.desc) {
+                descSection.style.display = 'block';
+                descEl.textContent = data.desc;
+            } else {
+                descSection.style.display = 'none';
+            }
+
+            // 文脈 (context)
+            if (data.context) {
+                contextSection.style.display = 'block';
+                contextEl.textContent = data.context;
+            } else {
+                contextSection.style.display = 'none';
+            }
+
+            // 深掘り解説 / 引用 (note)
+            if (data.note) {
+                 noteSection.style.display = 'block';
+                 if (data.isElement) {
+                    noteEl.innerHTML = `<div class="def-quote">${data.note}</div>`;
+                 } else {
+                    noteEl.textContent = data.note;
+                 }
+            } else {
+                 noteSection.style.display = 'none';
+            }
+            
+            definitionPanel.classList.add('active');
+            
+            // 修正: mini-mode（本文読書中）はオーバーレイを表示しない
+            // これにより、パネルを開いたまま次の語句をタップして連続で解説を見ることができる
+            if (definitionPanel.classList.contains('mini-mode')) {
+                panelOverlay.classList.remove('active');
+            } else {
+                panelOverlay.classList.add('active');
+            }
+        }
+
+        window.closePanel = () => {
+            definitionPanel.classList.remove('active');
+            definitionPanel.classList.remove('mini-mode'); // モードリセット
+            panelOverlay.classList.remove('active');
+        };
+
+        init();
+
+    </script>
+</body>
+</html>
