@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>子どもの権利 - 学習用インタラクティブリーダー</title>
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind Settings to use a readable font -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Zen Kaku Gothic New"', '"Hiragino Sans"', 'Meiryo', 'sans-serif'],
+                        serif: ['"Noto Serif JP"', '"Hiragino Mincho ProN"', 'serif'],
+                    },
+                    colors: {
+                        primary: '#3b82f6', // Focus color
+                        secondary: '#64748b',
+                        paper: '#fdfbf7', // Easy on eyes background
+                        darkPaper: '#1e293b',
+                    },
+                    animation: {
+                        fadeIn: 'fadeIn 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(-5px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Vue.js 3 (CDN) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom Styles for nuances Tailwind doesn't cover easily inline */
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background-color: #fdfbf7;
+            color: #334155;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .serif-text {
+            font-family: 'Noto Serif JP', serif;
+            line-height: 2.2; /* 少し広めの行間で読みやすく */
+        }
+        /* Hide scrollbar for clean UI in panels */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Highlight animation */
+        .interactive-word {
+            border-bottom: 2px solid #93c5fd;
+            background-color: rgba(219, 234, 254, 0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        .interactive-word:hover {
+            background-color: #bfdbfe;
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="min-h-screen flex flex-col">
+
+    <!-- 1. グローバルヘッダー (Sticky) -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+            <!-- Title Area -->
+            <div class="text-center md:text-left">
+                <h1 class="text-lg font-bold text-gray-800 tracking-wide">{{ bookData.title }}</h1>
+                <p class="text-xs text-gray-500 font-medium">{{ bookData.author }}</p>
+            </div>
+
+            <!-- Navigation Menu -->
+            <nav class="flex space-x-1 bg-gray-100 p-1 rounded-lg overflow-x-auto max-w-full no-scrollbar w-full md:w-auto">
+                <button 
+                    v-for="item in navItems" 
+                    :key="item.id"
+                    @click="switchView(item.id)"
+                    :class="[
+                        'flex-1 md:flex-none px-3 py-2 text-xs md:text-sm font-medium rounded-md whitespace-nowrap transition-all duration-200',
+                        currentView === item.id 
+                            ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' 
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
+                    ]"
+                >
+                    {{ item.label }}
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow w-full max-w-3xl mx-auto p-4 md:p-10 pb-40">
+        
+        <!-- View 1: Structure/Overview -->
+        <div v-if="currentView === 'structure'" key="structure" class="space-y-6">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-1 h-8 bg-blue-500 rounded-full"></div>
+                <h2 class="text-2xl font-bold text-gray-800">構成と要約</h2>
+            </div>
+            
+            <div class="grid gap-4">
+                <div 
+                    v-for="(part, index) in bookData.structure" 
+                    :key="index"
+                    class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer group"
+                    @click="toggleItem('structure', index)"
+                >
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-lg text-gray-700 flex items-center">
+                            <span class="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full text-sm font-bold mr-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">{{ index + 1 }}</span>
+                            {{ part.heading }}
+                        </h3>
+                        <span class="text-gray-400 text-sm transform transition-transform duration-300" :class="{'rotate-180': activeStructure === index}">▼</span>
+                    </div>
+                    
+                    <!-- Collapsible Content -->
+                    <div v-if="activeStructure === index" class="mt-4 pt-4 border-t border-gray-100 text-gray-600 space-y-4 animate-fadeIn">
+                        <div>
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Summary</span>
+                            <p class="text-sm leading-relaxed">{{ part.summary }}</p>
+                        </div>
+                        <div class="bg-blue-50/50 p-3 rounded-lg text-sm border border-blue-100">
+                            <span class="text-xs font-bold text-blue-500 uppercase tracking-wider block mb-1">Analysis Point</span>
+                            <p class="text-blue-900 leading-relaxed">{{ part.detail }}</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <span v-for="tag in part.tags" :key="tag" class="px-2.5 py-1 bg-gray-100 text-xs font-medium text-gray-500 rounded-full">#{{ tag }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 2: Characters/Elements -->
+        <div v-else-if="currentView === 'elements'" key="elements" class="space-y-6">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-1 h-8 bg-green-500 rounded-full"></div>
+                <h2 class="text-2xl font-bold text-gray-800">登場人物・要素分析</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div 
+                    v-for="(elem, index) in bookData.elements" 
+                    :key="index"
+                    class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-green-300 hover:shadow-md transition-all cursor-pointer group"
+                    @click="toggleItem('elements', index)"
+                >
+                    <div class="p-5 bg-gradient-to-br from-gray-50 to-white group-hover:from-green-50/50 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-bold text-xl text-gray-800">{{ elem.name }}</h3>
+                                <p class="text-xs font-medium text-green-600 mt-1 uppercase tracking-wide">{{ elem.role }}</p>
+                            </div>
+                            <span v-if="activeElement === index" class="text-green-500 text-lg">●</span>
+                        </div>
+                    </div>
+                    
+                    <div v-if="activeElement === index" class="p-5 border-t border-gray-100 animate-fadeIn">
+                        <p class="text-gray-700 text-sm leading-relaxed mb-4">{{ elem.description }}</p>
+                        
+                        <div class="mb-4 bg-gray-50 rounded-lg p-3">
+                            <p class="text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">特徴・変化</p>
+                            <ul class="list-none text-sm text-gray-600 space-y-2">
+                                <li v-for="point in elem.points" :key="point" class="flex items-start">
+                                    <span class="text-green-400 mr-2">✔</span>
+                                    {{ point }}
+                                </li>
+                            </ul>
+                        </div>
+
+                        <blockquote class="border-l-4 border-green-300 pl-3 py-1 italic text-gray-600 text-sm font-serif bg-green-50/30 rounded-r">
+                            "{{ elem.quote }}"
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 3: Keywords -->
+        <div v-else-if="currentView === 'keywords'" key="keywords" class="space-y-6">
+            <div class="flex items-center space-x-3 mb-6">
+                <div class="w-1 h-8 bg-purple-500 rounded-full"></div>
+                <h2 class="text-2xl font-bold text-gray-800">重要語句・象徴</h2>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm divide-y divide-gray-100 overflow-hidden">
+                <div 
+                    v-for="(kw, index) in bookData.keywords" 
+                    :key="index"
+                    class="group hover:bg-purple-50/30 transition-colors cursor-pointer"
+                    @click="toggleItem('keywords', index)"
+                >
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-gray-700 group-hover:text-purple-700 transition-colors">{{ kw.word }}</span>
+                        </div>
+                        <span class="text-[10px] uppercase font-bold text-purple-600 bg-purple-50 border border-purple-100 px-2 py-1 rounded-full">{{ kw.category }}</span>
+                    </div>
+                    
+                    <div v-if="activeKeyword === index" class="px-4 pb-4 pt-0 text-sm text-gray-600 animate-fadeIn">
+                        <div class="pl-4 border-l-2 border-purple-200 space-y-3">
+                            <p><span class="font-bold text-gray-800 text-xs uppercase mr-2">意味</span> {{ kw.definition }}</p>
+                            <div class="bg-gray-50 p-3 rounded text-gray-700 leading-relaxed border border-gray-100">
+                                <span class="font-bold text-gray-400 text-xs uppercase block mb-1">文脈</span>
+                                {{ kw.context }}
+                            </div>
+                            <div class="flex justify-end pt-1">
+                                <button @click.stop="goToTextWithHighlight(kw.word)" class="flex items-center text-xs font-bold text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-2 py-1 rounded transition-colors">
+                                    本文で確認する <span class="ml-1 text-lg leading-none">→</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 4: Read Text -->
+        <div v-else-if="currentView === 'read'" key="read" class="relative">
+            <!-- 謎の線を削除しました -->
+            <div class="mb-8 flex justify-between items-end sticky top-20 z-10 bg-[#fdfbf7]/90 backdrop-blur pb-2">
+            </div>
+            
+            <article class="prose prose-lg md:prose-xl max-w-none serif-text text-gray-800 pb-20 pt-4"> 
+                <!-- Paragraph Loop: Text is injected here -->
+                <p 
+                    v-for="(para, pIndex) in processedParagraphs" 
+                    :key="pIndex" 
+                    class="mb-8 indent-[1em] text-justify leading-loose"
+                    v-html="para"
+                    @click="handleTextClick"
+                ></p>
+            </article>
+
+            <!-- Annotation Bottom Sheet (Fixed) -->
+            <transition name="fade">
+                <div 
+                    v-if="selectedAnnotation" 
+                    class="fixed bottom-4 left-4 right-4 md:left-auto md:right-10 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 p-5 transform transition-all duration-300 ring-1 ring-black/5"
+                >
+                    <div class="flex justify-between items-start mb-3 border-b border-gray-100 pb-2">
+                        <div>
+                            <h4 class="text-lg font-bold text-blue-600 flex items-baseline gap-2">
+                                {{ selectedAnnotation.word }}
+                                <span v-if="selectedAnnotation.reading" class="text-sm text-gray-400 font-normal">({{ selectedAnnotation.reading }})</span>
+                            </h4>
+                        </div>
+                        <button @click="selectedAnnotation = null" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-700 leading-relaxed mb-4">{{ selectedAnnotation.desc }}</p>
+                    <div v-if="selectedAnnotation.note" class="text-xs bg-yellow-50 text-yellow-800 p-3 rounded-lg border border-yellow-100 flex gap-2">
+                        <span class="font-bold">💡</span>
+                        <span>{{ selectedAnnotation.note }}</span>
+                    </div>
+                </div>
+            </transition>
+        </div>
+
+    </main>
+</div>
+
+<!-- DATA & LOGIC SCRIPT -->
+<script>
+    const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+
+    /* ----------------------------------------------------------------
+       1. DATA INPUT AREA (作品データ・解説・注釈)
+       ここでコンテンツを編集してください。
+    ---------------------------------------------------------------- */
+    const RAW_DATA = {
+        title: "子どもの権利",
+        author: "大谷 美紀子",
+        // 本文：段落ごとに配列に格納
+        text: [
+            "「子どもは黙って大人の言うことを聞きなさい。」こんなことを言われて理不尽な思いをしたことはありませんか。",
+            "子どもが生きて成長していくためには、大人から守られ助けられることが必要です。このため、子どもは心身ともに未熟だから、大人の言うとおりにするべきだというのが、長い間、世界中で支配的な考え方でした。",
+            "この子どもに対する見方を大きく変えたのが、国連で一九八九年に作られた「子どもの権利条約」です。子どもには大人とは異なる特別の保護が必要です。同時に、子どもは、一人の人間として、大人と同じように人権をもっています。子どもの権利条約は、子どもには、生きる権利や成長する権利、暴力から守られる権利、教育を受ける権利などがあること、そして、子どもの権利を守るのは、親の責任であるばかりでなく、国の責任であることを明確に定めました。現在、世界中の一九六か国が子どもの権利条約に入っています。",
+            "私たちが目にする日本のニュースの中にも、親に虐待されて命を失う子どもや、いじめに遭って学校に行けなくなったり、命を絶つまでに追い込まれたりする子どもについての報道が後を絶ちません。世界に目を向ければ、武力紛争やテロで多くの子どもが命を奪われています。子どもが、兵士として軍隊に参加させられたり、無理やり結婚させられたり、劣悪な環境で働かされたりしています。",
+            "こうした現実に対して、子どもの権利条約が守られているかを監視するために作られたのが、国連の「子どもの権利委員会」です。委員を務めるのは、世界中から選ばれた十八人の子どもの権利の専門家です。私も委員の一人です。条約に入った国は、五年ごとに条約の実施状況を委員会に報告しなければなりません。委員は、各国から提出された報告書に基づいて、ユニセフや市民、子どもたち自身などから提出された情報も参考にして、政府代表との直接の対話を通じて条約が守られているかどうかを審査し、問題があれば改善するよう勧告します。",
+            "勧告を受け入れた国では、例えば次のようなことがありました。バルカン半島のユーゴスラビアでは一九九一年に紛争が起き、激しい戦闘を経て、六つの国に分裂しました。その中で二〇〇六年に独立国家になったモンテネグロには、親による養育を受けることができない子どもや障害のある子どもが大勢施設に入れられているという問題がありました。そこで、子どもの権利委員会は、全ての子どもは家庭的な養育環境で成長すべきであるとの観点から、二〇一〇年に改善を勧告しました。モンテネグロ政府は、ユニセフの支援により、子どもが施設から出て、里親や養親による養育を受けられるよう、省庁間で協力して取り組みました。その結果、施設で暮らす子どもは半分近くまで減少しました。さらに、「脱施設化を達成するために一生懸命努力します。」と政府は改善を約束しています。",
+            "ところで、私は高校生の時に、世界に貢献する国連の仕事がしたいと思いました。その後、自分の専門分野を、あらゆる人の生活や社会の仕組みに関わる法律にしようと決め、司法試験を受けて、弁護士になりました。その過程で、人権について勉強し、人権侵害や差別が起こらないようにするための方策について考えるようになりました。",
+            "しかし、高校生の頃は、国連で働きたいと言いながら、国連について漠然としたイメージしかなく、その具体的な活動について、実はほとんど知らなかったのです。弁護士になってから、初めて、国連が人権の分野で大きな役割を果たしてきたことを知り、夢中になって国連と人権について調べ、勉強しました。そして、国連は、人類が起こした二度の世界大戦の悲惨な経験を踏まえ、将来の世代を戦争の惨害から救いたいとの決意から一九四五年に設立されたことを知りました。人種、性別、言語、宗教による差別なく、全ての人の人権が保障されることが平和の基礎であるとの確信から、人権の保障を目的の一つに掲げ活動してきたことも知りました。子どもの権利条約も、国連の活動の中で作られた国際人権条約の一つです。",
+            "人はみな、人種や民族、性別などによる外見の違いがあります。生まれた国によって話す言葉も置かれた状況も異なります。同じ国の中でも育つ家庭環境はさまざまです。そうしたそれぞれ違いのある一人一人が集まって社会を作っています。その違いを認め合い、意見が異なるときも、対話によって解決し、自分と違う立場にいる人の気持ちや心の痛みを想像するといった、日常の生活の中での努力が平和な社会を築くことにつながります。",
+            "しかし、どれだけの大人、子どもがこの子どもの権利条約を知っているでしょうか。大人の中には、子どもに権利なんて教えると大人の言うことを聞かなくなる、自己中心的で権利主張ばかりするわがままな人間になると心配する人もいます。しかし、子どもの権利条約では、子どもの教育の目的を、子どもが人権を尊重し、他者への理解、平和や寛容、男女の平等を学び身につけ、責任ある大人になるための準備にあると定めています。子どもが人権を学ぶことは、自分を含む全ての人の命の尊さと平等を学ぶことであり、自分を大切にすると同時に、他人を思いやり、平和な社会を築くために必要なのです。"
+        ],
+        // 読解支援用データ（key: 本文中の語句, value: 解説データ）
+        annotations: {
+            "理不尽": { reading: "りふじん", desc: "道理に合わないこと。矛盾していて納得がいかないこと。" },
+            "未熟": { reading: "みじゅく", desc: "学問や技術などの経験が十分でないこと。また、体が十分に成長していないこと。" },
+            "支配的": { reading: "しはいてき", desc: "ある考え方や勢力が、その場や社会の大部分を占めている様子。" },
+            "子どもの権利条約": { reading: "こどものけんりじょうやく", desc: "1989年に国連で採択された、子どもの基本的人権を国際的に保障するための条約。正式名称は「児童の権利に関する条約」。", note: "世界で最も多くの国が締結している人権条約です。" },
+            "人権": { reading: "じんけん", desc: "人間が人間らしく生きるために、生まれながらにして持っている権利。" },
+            "虐待": { reading: "ぎゃくたい", desc: "むごい扱いをすること。特に、保護者が子どもに対して暴力を振るったり、世話をしなかったりすること。" },
+            "武力紛争": { reading: "ぶりょくふんそう", desc: "国と国、あるいは国内の勢力同士が、武器を使って争うこと。戦争や内戦。" },
+            "子どもの権利委員会": { reading: "こどものけんりいいんかい", desc: "子どもの権利条約に参加している国が、条約のルールを守っているかどうかを監視・審査する国連の機関。" },
+            "勧告": { reading: "かんこく", desc: "ある事柄について、改善するように相手に勧め説くこと。強制力はないが、強い影響力を持つ。" },
+            "脱施設化": { reading: "だつしせつか", desc: "施設での集団生活ではなく、家庭または家庭に近い環境での養育へ移行すること。" },
+            "司法試験": { reading: "しほうしけん", desc: "裁判官、検察官、弁護士になるために必要な国家試験。非常に難関とされる。" },
+            "漠然": { reading: "ばくぜん", desc: "ぼんやりとしてはっきりしないさま。" },
+            "寛容": { reading: "かんよう", desc: "心が広く、人の言動を受け入れること。他人の欠点や過ちを厳しく責めないこと。" },
+            "尊さ": { reading: "とうとさ", desc: "価値が高く、大切にするべきであること。" }
+        },
+        // 分析データ：Structure
+        structure: [
+            { heading: "導入：子ども観の転換", summary: "「大人の言うことを聞くべき」という従来の考えから、子どもを一人の人間として尊重する考えへの変化。", detail: "筆者は読者の経験に問いかけ、旧来の「未熟な存在」という子ども観を提示し、それを覆す存在として「子どもの権利条約」を導入している。", tags: ["パラダイムシフト", "権利主体"] },
+            { heading: "現状と課題", summary: "日本や世界における、虐待、紛争、貧困など、子どもの権利が脅かされている過酷な現実。", detail: "条約が存在してもなお、国内外で深刻な人権侵害が続いている事実を列挙し、条約の実効性を確保する仕組みの必要性につなげている。", tags: ["虐待", "紛争", "リアリティ"] },
+            { heading: "守る仕組み：子どもの権利委員会", summary: "条約の実施状況を監視する「子どもの権利委員会」の役割と、モンテネグロでの成功事例。", detail: "筆者自身の役割（委員）を紹介し、具体的な国（モンテネグロ）の事例を挙げることで、国際的な監視システムが実際にどう機能し、社会を変えるかを示している。", tags: ["監視機能", "成功事例", "脱施設化"] },
+            { heading: "筆者の背景と国連", summary: "高校時代の夢から弁護士へ、そして国連委員へと至る筆者のキャリアと、国連設立の理念。", detail: "個人的なナラティブ（物語）を挟むことで、読者に親近感を持たせつつ、国連が「平和」と「人権」を目的として設立された歴史的背景を解説している。", tags: ["キャリア", "国連の歴史", "平和"] },
+            { heading: "結論：なぜ学ぶのか", summary: "多様性を認め合う平和な社会の構築と、子どもの権利を学ぶことの真の意義。", detail: "権利学習＝ワガママになるという誤解を解き、権利を学ぶことは「他者を尊重し、平和を作る力を養うこと」であると結論づけている。", tags: ["多様性", "他者理解", "未来への責任"] }
+        ],
+        // 分析データ：Elements
+        elements: [
+            { name: "子ども", role: "権利の主体", description: "かつては「保護されるべき未熟な存在」と見なされていたが、条約により「権利を持つ一人の人間」として再定義された。", points: ["保護の対象から権利の主体へ", "生きる権利、育つ権利を持つ", "平和な社会の担い手"], quote: "子どもは、一人の人間として、大人と同じように人権をもっています。" },
+            { name: "大人・親・国", role: "義務の履行者", description: "子どもの権利を守り、成長を支える責任を持つ存在。しかし、時に虐待や搾取の加害者ともなり得る。", points: ["権利を守る責任者", "虐待や無理解の原因にもなる", "条約を理解し教育する役割"], quote: "子どもの権利を守るのは、親の責任であるばかりでなく、国の責任である" },
+            { name: "筆者（大谷美紀子）", role: "専門家・実践者", description: "弁護士であり、国連子どもの権利委員会の委員。自身の高校時代の経験を交え、読者に語りかける。", points: ["高校生の時に国連に憧れる", "弁護士として人権に関わる", "日本人委員として世界で活動"], quote: "私も委員の一人です。" },
+            { name: "国連", role: "国際的な枠組み", description: "二度の世界大戦の反省から生まれ、平和と人権の確立を目指す組織。", points: ["1945年設立", "戦争の惨害を防ぐ", "人権保障が平和の基礎という信念"], quote: "全ての人の人権が保障されることが平和の基礎である" }
+        ],
+        // 分析データ：Keywords (10個以上)
+        keywords: [
+            { word: "子どもの権利条約", category: "条約", definition: "1989年国連採択。子どもを権利主体と認め、生存・発達・保護・参加の権利を定める。", context: "子ども観を根本から変えた歴史的な条約。" },
+            { word: "子どもの権利委員会", category: "組織", definition: "条約加盟国の実施状況を審査・勧告する、18人の専門家による国連機関。", context: "条約が「絵に描いた餅」にならないよう監視する役割。" },
+            { word: "理不尽", category: "感情", definition: "道理に合わず、納得できないこと。", context: "冒頭で読者の共感を呼ぶために使われている言葉。" },
+            { word: "勧告", category: "手続き", definition: "改善を促すための公式なアドバイス。", context: "強制力はないが、国際社会での影響力は強く、モンテネグロの例のように実際に政策を変える力がある。" },
+            { word: "ユニセフ", category: "組織", definition: "国連児童基金。子どもの命と健やかな成長を守るために活動する。", context: "委員会や各国政府と協力して、現場での支援を行うパートナー。" },
+            { word: "脱施設化", category: "政策", definition: "施設での集団養育から、里親など家庭的な環境での養育へ移行すること。", context: "モンテネグロにおける具体的な改善事例として挙げられている。" },
+            { word: "平和の基礎", category: "概念", definition: "差別のない人権保障こそが、戦争のない世界を作る土台であるという考え。", context: "国連設立の核心的な理念。" },
+            { word: "多様性", category: "社会", definition: "人種、言葉、環境など、互いに異なる背景を持っていること。", context: "違いを認め合うことが、社会を作る上で重要だと説かれている。" },
+            { word: "自己中心的", category: "誤解", definition: "自分の都合ばかり考えること。", context: "「権利を教えるとワガママになる」という大人たちの誤解として登場。" },
+            { word: "責任ある大人", category: "目標", definition: "他者を尊重し、社会の一員としての役割を果たせる人間。", context: "子どもの権利教育の最終的なゴール。" },
+            { word: "人権", category: "核心", definition: "全て人間が生まれながらに持っている、自由で幸福に生きる権利。", context: "大人も子どもも等しく持っているもの。" }
+        ]
+    };
+
+    createApp({
+        setup() {
+            const bookData = ref(RAW_DATA);
+            const currentView = ref('structure'); // 初期ビュー
+            const activeStructure = ref(null);
+            const activeElement = ref(null);
+            const activeKeyword = ref(null);
+            
+            // Annotation Logic
+            const selectedAnnotation = ref(null);
+            const readScrollPos = ref(0);
+
+            const navItems = [
+                { id: 'structure', label: '大まかな内容' },
+                { id: 'elements', label: '登場人物・分析' },
+                { id: 'keywords', label: '重要語句' },
+                { id: 'read', label: '本文を読む' }
+            ];
+
+            // --------------------------------------------------------
+            // 2. 読書位置の記憶ロジック (LOCAL STORAGE + LOGIC)
+            // --------------------------------------------------------
+            
+            // アプリ起動時にLocalStorageから位置を復元
+            onMounted(() => {
+                const savedPos = localStorage.getItem('readScrollPosition');
+                if (savedPos) {
+                    readScrollPos.value = parseInt(savedPos, 10);
+                }
+            });
+
+            // ビュー切り替え関数
+            const switchView = (newView) => {
+                // 「本文」から離れる場合、現在のスクロール位置を保存
+                if (currentView.value === 'read') {
+                    readScrollPos.value = window.scrollY;
+                    localStorage.setItem('readScrollPosition', window.scrollY);
+                }
+
+                currentView.value = newView;
+
+                // 「本文」に戻る場合、位置を復元
+                if (newView === 'read') {
+                    nextTick(() => {
+                        window.scrollTo({ top: readScrollPos.value, behavior: 'auto' }); // 即座に戻す
+                    });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            };
+
+            // アコーディオンのトグル
+            const toggleItem = (type, index) => {
+                if (type === 'structure') activeStructure.value = activeStructure.value === index ? null : index;
+                if (type === 'elements') activeElement.value = activeElement.value === index ? null : index;
+                if (type === 'keywords') activeKeyword.value = activeKeyword.value === index ? null : index;
+            };
+
+            // --------------------------------------------------------
+            // 3. 本文処理ロジック (ハイライト機能)
+            // --------------------------------------------------------
+            
+            const processedParagraphs = computed(() => {
+                // 注釈データにある語句を自動で <span> タグで囲む処理
+                return bookData.value.text.map(para => {
+                    let html = para;
+                    const words = Object.keys(bookData.value.annotations);
+                    
+                    // 長い単語から先に置換するためにソート（重複マッチ防止の簡易策）
+                    words.sort((a, b) => b.length - a.length);
+
+                    words.forEach(word => {
+                        const regex = new RegExp(`(${word})`, 'g');
+                        // data-word属性を持たせてクリック可能にする
+                        html = html.replace(regex, `<span class="interactive-word" data-word="$1">$1</span>`);
+                    });
+                    return html;
+                });
+            });
+
+            // 本文中の単語クリックハンドラ
+            const handleTextClick = (event) => {
+                const target = event.target;
+                if (target.classList.contains('interactive-word')) {
+                    const word = target.getAttribute('data-word');
+                    const annotation = bookData.value.annotations[word];
+                    if (annotation) {
+                        selectedAnnotation.value = { word, ...annotation };
+                    }
+                } else {
+                    // 背景クリックで閉じる
+                    // selectedAnnotation.value = null; 
+                }
+            };
+
+            // キーワード一覧から本文へジャンプする機能
+            const goToTextWithHighlight = (word) => {
+                // まず本文ビューへ
+                switchView('read');
+                
+                // DOM更新後に該当箇所へスクロール
+                nextTick(() => {
+                    // 簡単な実装：最初に見つかったwordの位置へ
+                    const spans = document.querySelectorAll('.interactive-word');
+                    for (let span of spans) {
+                        if (span.getAttribute('data-word') === word) {
+                            span.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // 一時的に強調
+                            span.style.backgroundColor = '#fef08a'; // yellow-200
+                            setTimeout(() => span.style.backgroundColor = '', 2000);
+                            break;
+                        }
+                    }
+                });
+            };
+
+            return {
+                bookData,
+                currentView,
+                navItems,
+                switchView,
+                toggleItem,
+                activeStructure,
+                activeElement,
+                activeKeyword,
+                processedParagraphs,
+                handleTextClick,
+                selectedAnnotation,
+                goToTextWithHighlight
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
