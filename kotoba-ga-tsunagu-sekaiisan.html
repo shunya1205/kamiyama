@@ -65,9 +65,9 @@
         <div class="max-w-4xl mx-auto px-4">
             <div class="flex items-center justify-between h-16">
                 <!-- タイトルエリア -->
-                <div class="flex flex-col w-full md:w-auto items-center md:items-start">
-                    <h1 id="book-title" class="text-lg font-bold text-gray-900 leading-tight text-center md:text-left"></h1>
-                    <span id="book-author" class="text-xs text-gray-500 text-center md:text-left"></span>
+                <div class="hidden md:flex flex-col md:items-start">
+                    <h1 id="book-title" class="text-lg font-bold text-gray-900 leading-tight text-left"></h1>
+                    <span id="book-author" class="text-xs text-gray-500 text-left"></span>
                 </div>
                 
                 <!-- PC用ナビゲーション (タブレット以上で表示) -->
@@ -80,6 +80,12 @@
                     </button>
                 </nav>
             </div>
+        </div>
+
+        <!-- モバイル用タイトルバー (タブの上に表示) -->
+        <div class="md:hidden fixed bottom-16 left-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 z-30 px-4 py-2 text-center shadow-sm">
+            <h1 id="mobile-book-title" class="text-sm font-bold text-gray-900 leading-tight"></h1>
+            <span id="mobile-book-author" class="text-xs text-gray-500"></span>
         </div>
 
         <!-- モバイル用ナビゲーション (画面下部に固定) -->
@@ -372,6 +378,11 @@
             renderHeader() {
                 document.getElementById('book-title').textContent = BOOK_DATA.title;
                 document.getElementById('book-author').textContent = BOOK_DATA.author;
+                // モバイル用タイトルバーの設定
+                const mobileTitle = document.getElementById('mobile-book-title');
+                const mobileAuthor = document.getElementById('mobile-book-author');
+                if (mobileTitle) mobileTitle.textContent = BOOK_DATA.title;
+                if (mobileAuthor) mobileAuthor.textContent = BOOK_DATA.author;
             },
 
             // 構成ビューのレンダリング
