@@ -61,54 +61,34 @@
     <!-- =========================================================================
          1. グローバルヘッダー
     ========================================================================== -->
-    <header class="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-sm shadow-sm z-50 border-b border-gray-100 transition-all duration-300" id="global-header">
-        <div class="max-w-4xl mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
-                <!-- タイトルエリア -->
-                <div class="hidden md:flex flex-col md:items-start">
-                    <h1 id="book-title" class="text-lg font-bold text-gray-900 leading-tight text-left"></h1>
-                    <span id="book-author" class="text-xs text-gray-500 text-left"></span>
-                </div>
-                
-                <!-- PC用ナビゲーション (タブレット以上で表示) -->
-                <nav class="hidden md:flex space-x-1">
-                    <button onclick="app.switchView('structure')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors" data-target="structure">構成・要約</button>
-                    <button onclick="app.switchView('elements')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors" data-target="elements">人物・要素</button>
-                    <button onclick="app.switchView('keywords')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors" data-target="keywords">キーワード</button>
-                    <button onclick="app.switchView('read')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors" data-target="read">
-                        <i data-lucide="book-open" class="inline w-4 h-4 mr-1"></i>本文を読む
-                    </button>
-                </nav>
+    <header class="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-sm shadow-md z-50 transition-all duration-300" id="global-header">
+        <div class="max-w-4xl mx-auto">
+            <!-- 上段：タイトルと著者 -->
+            <div class="px-4 py-3 text-center border-b border-gray-100">
+                <h1 id="book-title" class="text-lg font-bold text-gray-900 leading-tight"></h1>
+                <span id="book-author" class="text-xs text-gray-500 block mt-1"></span>
             </div>
+            
+            <!-- 下段：ナビゲーションタブ -->
+            <nav class="flex w-full">
+                <button onclick="app.switchView('structure')" class="nav-tab flex-1 py-3 text-xs sm:text-sm font-medium text-gray-500 border-b-2 border-transparent hover:bg-gray-50 transition-colors" data-target="structure">
+                    構成
+                </button>
+                <button onclick="app.switchView('elements')" class="nav-tab flex-1 py-3 text-xs sm:text-sm font-medium text-gray-500 border-b-2 border-transparent hover:bg-gray-50 transition-colors" data-target="elements">
+                    分析
+                </button>
+                <button onclick="app.switchView('keywords')" class="nav-tab flex-1 py-3 text-xs sm:text-sm font-medium text-gray-500 border-b-2 border-transparent hover:bg-gray-50 transition-colors" data-target="keywords">
+                    語句
+                </button>
+                <button onclick="app.switchView('read')" class="nav-tab flex-1 py-3 text-xs sm:text-sm font-medium text-gray-500 border-b-2 border-transparent hover:bg-gray-50 transition-colors" data-target="read">
+                    本文
+                </button>
+            </nav>
         </div>
-
-        <!-- モバイル用タイトルバー (タブの上に表示) -->
-        <div class="md:hidden fixed bottom-16 left-0 w-full bg-white/95 backdrop-blur-sm border-t border-gray-200 z-30 px-4 py-2 text-center shadow-sm">
-            <h1 id="mobile-book-title" class="text-sm font-bold text-gray-900 leading-tight"></h1>
-            <span id="mobile-book-author" class="text-xs text-gray-500"></span>
-        </div>
-
-        <!-- モバイル用ナビゲーション (画面下部に固定) -->
-        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-50 pb-safe">
-            <div class="flex justify-around items-center h-16">
-                <button onclick="app.switchView('structure')" class="nav-btn-mobile flex flex-col items-center justify-center w-full h-full text-xs text-gray-500" data-target="structure">
-                    <i data-lucide="layout-list" class="w-6 h-6 mb-1"></i>構成
-                </button>
-                <button onclick="app.switchView('elements')" class="nav-btn-mobile flex flex-col items-center justify-center w-full h-full text-xs text-gray-500" data-target="elements">
-                    <i data-lucide="users" class="w-6 h-6 mb-1"></i>分析
-                </button>
-                <button onclick="app.switchView('keywords')" class="nav-btn-mobile flex flex-col items-center justify-center w-full h-full text-xs text-gray-500" data-target="keywords">
-                    <i data-lucide="key" class="w-6 h-6 mb-1"></i>語句
-                </button>
-                <button onclick="app.switchView('read')" class="nav-btn-mobile flex flex-col items-center justify-center w-full h-full text-xs text-blue-600 font-bold bg-blue-50/50" data-target="read">
-                    <i data-lucide="book-open" class="w-6 h-6 mb-1"></i>本文
-                </button>
-            </div>
-        </nav>
     </header>
 
     <!-- メインコンテンツエリア (ヘッダーの高さ分padding確保) -->
-    <main class="pt-20 max-w-3xl mx-auto px-4 sm:px-6 mb-20">
+    <main class="pt-32 max-w-3xl mx-auto px-4 sm:px-6 pb-20">
 
         <!-- ビュー1: 大まかな内容 (Structure) -->
         <section id="view-structure" class="view-section hidden">
@@ -378,11 +358,6 @@
             renderHeader() {
                 document.getElementById('book-title').textContent = BOOK_DATA.title;
                 document.getElementById('book-author').textContent = BOOK_DATA.author;
-                // モバイル用タイトルバーの設定
-                const mobileTitle = document.getElementById('mobile-book-title');
-                const mobileAuthor = document.getElementById('mobile-book-author');
-                if (mobileTitle) mobileTitle.textContent = BOOK_DATA.title;
-                if (mobileAuthor) mobileAuthor.textContent = BOOK_DATA.author;
             },
 
             // 構成ビューのレンダリング
@@ -502,23 +477,18 @@
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
                 document.getElementById(`view-${targetId}`).classList.remove('hidden');
 
-                document.querySelectorAll('.nav-btn, .nav-btn-mobile').forEach(btn => {
-                    if(btn.classList.contains('nav-btn')) {
-                         btn.classList.remove('bg-blue-50', 'text-blue-700');
-                    } else {
-                         btn.classList.remove('text-blue-600', 'font-bold', 'bg-blue-50/50');
-                         btn.classList.add('text-gray-500');
-                    }
+                // ナビゲーションタブのスタイル更新
+                document.querySelectorAll('.nav-tab').forEach(btn => {
+                    // リセット
+                    btn.classList.remove('text-blue-600', 'font-bold', 'border-blue-600', 'bg-blue-50/30');
+                    btn.classList.add('text-gray-500', 'border-transparent');
                 });
 
+                // アクティブ化
                 const activeBtns = document.querySelectorAll(`[data-target="${targetId}"]`);
                 activeBtns.forEach(btn => {
-                    if(btn.classList.contains('nav-btn')) {
-                        btn.classList.add('bg-blue-50', 'text-blue-700');
-                    } else {
-                        btn.classList.remove('text-gray-500');
-                        btn.classList.add('text-blue-600', 'font-bold', 'bg-blue-50/50');
-                    }
+                    btn.classList.remove('text-gray-500', 'border-transparent');
+                    btn.classList.add('text-blue-600', 'font-bold', 'border-blue-600', 'bg-blue-50/30');
                 });
 
                 this.state.currentView = targetId;
