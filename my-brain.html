@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自分の脳を知っていますか - 学習ビューア</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // 常時ライトモード
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        serif: ['"Noto Serif JP"', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        /* 読書用テキスト設定 */
+        .reading-text {
+            font-feature-settings: "palt";
+            line-height: 2.2; /* ルビが入るため行間を維持 */
+            letter-spacing: 0.05em;
+        }
+
+        /* 注釈ハイライト */
+        .highlight-word {
+            text-decoration: underline;
+            text-decoration-color: #0ea5e9;
+            text-decoration-style: dotted;
+            text-decoration-thickness: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background-color: rgba(14, 165, 233, 0.1);
+            border-radius: 4px;
+            padding: 0 2px;
+        }
+        .highlight-word:hover {
+            background-color: rgba(14, 165, 233, 0.3);
+            color: #0284c7;
+        }
+
+        /* アコーディオンアニメーション */
+        .accordion-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.active {
+            opacity: 1;
+        }
+        
+        /* ルビの調整 */
+        ruby {
+            ruby-align: center;
+        }
+        rt {
+            font-size: 0.6em;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- ====================================================================================
+         データ定義エリア
+         ==================================================================================== -->
+    <script>
+        // 作品メタデータ
+        const BOOK_META = {
+            title: "自分の脳を知っていますか",
+            author: "池谷 裕二",
+            theme: "脳科学・心理学"
+        };
+
+        // 1. 大まかな内容 (Structure)
+        const STRUCTURE_DATA = [
+            {
+                title: "導入：決断と脳",
+                summary: "日常的な決断のメカニズムについての問いかけ。",
+                details: "私たちは日々多くの決断を行っている。その際、無数の要素から何を基準に選んでいるのか、そこに脳のどのような働きがあるのかを提起する。",
+                tags: ["導入", "問いかけ", "日常"]
+            },
+            {
+                title: "実験：おとり効果",
+                summary: "クッキーを選ばせる実験を通じた、非合理的な判断の実例。",
+                details: "同じクッキーでも比較対象（おとり）が存在することで選択が変わる現象を紹介。「幅」と「高さ」という比較しやすい要素に引きずられる脳の性質を示す。",
+                tags: ["実験", "認知バイアス", "比較"]
+            },
+            {
+                title: "考察：進化と直感",
+                summary: "なぜ脳には「奇妙な癖」があるのか、進化論的な背景からの説明。",
+                details: "野生動物（シマウマとライオンの例）を挙げ、生死に関わる状況での「素早い判断」が生存に有利であったため、情報の効率化（直感）が進化したと解説。",
+                tags: ["進化論", "生存戦略", "効率化"]
+            },
+            {
+                title: "結び：脳の癖との付き合い方",
+                summary: "脳の癖を知ることの意義と、人間関係への応用。",
+                details: "直感は便利だが誤ることもある。その「癖」を自覚することで、他者への寛容さや人間関係の円滑化につながるという著者のメッセージ。",
+                tags: ["結論", "相互理解", "人間観"]
+            }
+        ];
+
+        // 2. 重要なキーワード (Keywords)
+        const KEYWORDS_DATA = [
+            { 
+                word: "決断", 
+                def: `<p class="mb-2"><strong>意味:</strong> 多くの選択肢の中から、意志を持って一つを選び取ること。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>この文章の出発点です。著者は「食堂での注文」のような日常的な行為を例に挙げ、私たちが無意識に行っている「選ぶ」という行為の背後にあるメカニズムへと読者を誘導しています。</p>` 
+            },
+            { 
+                word: "おとり効果 (Decoy Effect)", 
+                def: `<p class="mb-2"><strong>意味:</strong> 明らかに劣る選択肢（おとり）が提示されることで、特定の選択肢が相対的に魅力的に見え、選ばれる確率が上がる心理現象。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>脳の「奇妙な癖」を証明するための中心的な証拠として提示されています。論理的には無関係なはずの「第三の選択肢」によって、人間の判断がいかに簡単に揺らぐかを示す具体例です。</p>` 
+            },
+            { 
+                word: "比較", 
+                def: `<p class="mb-2"><strong>意味:</strong> 二つ以上のものを照らし合わせて、その異同や優劣を検討すること。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>脳が判断を行う際の「手抜き」の方法として語られます。脳は絶対的な価値（面積など）を計算するよりも、目に見える単純な要素（幅や高さ）を「比較」する方が楽であるため、錯覚に陥りやすくなります。</p>` 
+            },
+            { 
+                word: "直感", 
+                def: `<p class="mb-2"><strong>意味:</strong> 論理的な思考プロセスを省略し、感覚的に即座に物事の本質や答えをとらえること。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>進化の恩恵として肯定的に描かれつつ、現代社会ではエラーの原因にもなるという「諸刃の剣」として扱われています。経験の蓄積によって磨かれるものですが、万能ではないことが強調されています。</p>` 
+            },
+            { 
+                word: "合理性 / 非合理的", 
+                def: `<p class="mb-2"><strong>意味:</strong> 道理にかない、論理的であること。またはその逆。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>人間は自分を「合理的な生き物」だと信じたがりますが、著者はそれを否定します。しかし、それは「欠陥」ではなく、生存のためにスピードを優先した結果であると再定義しています。</p>` 
+            },
+            { 
+                word: "進化", 
+                def: `<p class="mb-2"><strong>意味:</strong> 生物が環境に適応して、長い時間をかけて形質を変化させること。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>なぜ脳にバイアス（癖）が存在するのかという「理由」の説明に使われます。シマウマの例を出し、太古の昔においては「正確さ」よりも「速さ」が生き残るための条件だったと論じています。</p>` 
+            },
+            { 
+                word: "効率化", 
+                def: `<p class="mb-2"><strong>意味:</strong> 無駄を省き、労力や時間を節約して成果を上げること。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>脳の働きのキーワードです。脳はエネルギーを節約するために、複雑な計算を避けて単純な指標で判断しようとします。この「サボり」こそが直感の正体であり、脳の癖の原因です。</p>` 
+            },
+            { 
+                word: "落とし穴", 
+                def: `<p class="mb-2"><strong>意味:</strong> 油断していると思わぬ失敗をする危険な点。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>直感に頼りすぎることの弊害を指します。「おとり効果」のように、特定の条件が揃うと脳のショートカット機能が誤作動を起こし、誤った判断をしてしまうリスクを表現しています。</p>` 
+            },
+            { 
+                word: "人間関係", 
+                def: `<p class="mb-2"><strong>意味:</strong> 人と人との関わりや結びつき。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>この科学的な解説の「出口（応用先）」です。脳の癖を理解することは単なる知識にとどまらず、他者の過ちを許容し、社会生活を円滑にするためのツールになると著者は結んでいます。</p>` 
+            },
+            { 
+                word: "脳の癖", 
+                def: `<p class="mb-2"><strong>意味:</strong> 脳が持つ特有の思考パターンやバイアス。</p>
+                      <p class="text-slate-600 bg-slate-100 p-2 rounded"><strong>文脈での位置付け:</strong><br>本文全体を貫くテーマです。著者はこれを「直すべき悪いこと」ではなく、「脳が頑張った結果の愛すべき特徴」として捉え直し、読者に肯定的な受容を促しています。</p>` 
+            }
+        ];
+
+        // 3. 本文データ (Text & Annotations) - 注釈（解説語句）のみにルビを付与
+        const TEXT_CONTENT = [
+            `　<span class="highlight-word" onclick="showNote(11)"><ruby>食堂<rt>しょくどう</rt></ruby></span>で何を注文しようか、次の休日に何をしようか、将来はどんな仕事をしようか——。私たちは生活の中でいろいろなことを<span class="highlight-word" onclick="showNote(1)"><ruby>決断<rt>けつだん</rt></ruby></span>しています。`,
+            `　何かを決断するときに、参考になりそうな要素はいくらでもあります。あれこれ全てを考えていては<span class="highlight-word" onclick="showNote(12)"><ruby>際限<rt>さいげん</rt></ruby></span>がありませんから、参考にすべき要素を選びながら決断しなくてはなりません。では、その場で最も適切と思われる要素を、人はどのように選ぶのでしょうか。それには、脳のどのようなはたらきが関わっているのでしょうか。この疑問を問うことで脳の<span class="highlight-word" onclick="showNote(2)"><ruby>奇妙<rt>きみょう</rt></ruby>な<ruby>癖<rt>くせ</rt></ruby></span>が理解できます。`,
+            `<br>`,
+            `　次の実験例を見てみましょう。大好きなクッキーを選ぶ実験です。`,
+            `　実験㈰では二枚のクッキーがあります。クッキーＡとクッキーＢは、置き方が異なりますが、同じクッキーです。この場合、当然ですが両者は半々の<span class="highlight-word" onclick="showNote(13)"><ruby>割合<rt>わりあい</rt></ruby></span>で選ばれます。`,
+            `　では、実験㈪のように、新たにクッキーＣを並べて、三枚にしたらどうでしょう。さすがに小さなクッキーＣを選ぶ人はいませんが、意外なことに、クッキーＡを選ぶ人が減り、クッキーＢを選ぶ人が増えます。これは「<span class="highlight-word" onclick="showNote(3)"><ruby>おとり効果<rt>こうか</rt></ruby></span>」と呼ばれます。ここでは、クッキーＣがおとりの役割をしています。それ自体は選ばれることのないクッキーＣですが、そこに存在することで、人の判断を変えてしまう現象です。`,
+            `　なぜこのような判断をするのでしょう。ヒトはいくつかの要素を比較して、少しでも得なほうを選ぼうとします。ここでは、一目で判断できる要素である、「幅」と「高さ」に<span class="highlight-word" onclick="showNote(14)"><ruby>着目<rt>ちゃくもく</rt></ruby></span>します。クッキーＡは、幅ではクッキーＣに勝っていますが、高さでは劣っています。一方、クッキーＢは幅でも高さでもクッキーＣよりも<span class="highlight-word" onclick="showNote(15)"><ruby>優<rt>すぐ</rt></ruby>れて</span>います。ですからクッキーＢに<span class="highlight-word" onclick="showNote(4)"><ruby>軍配<rt>ぐんばい</rt></ruby>が<ruby>上<rt>あ</rt></ruby>がります</span>。これがクッキーＢを選ぶ人が増える理由です。`,
+            `　一見<span class="highlight-word" onclick="showNote(5)"><ruby>理不尽<rt>りふじん</rt></ruby></span>な判断にも思えますが、これは脳がもともともっている癖です。なぜなら、同じ実験をヒトに近い<span class="highlight-word" onclick="showNote(16)">チンパンジー</span>に対して行っても、ヒトと似た結果が得られるからです。判断をすばやく行うために、必要な要素を<span class="highlight-word" onclick="showNote(6)"><ruby>直感<rt>ちょっかん</rt></ruby></span>的に選び抜くのです。`,
+            `　脳は、必ずしも<span class="highlight-word" onclick="showNote(17)"><ruby>合理的<rt>ごうりてき</rt></ruby></span>に物事を判断しているのではありません。同じ選択でも、状況によって判断が変わります。本人は<span class="highlight-word" onclick="showNote(18)"><ruby>論理的<rt>ろんりてき</rt></ruby></span>に考えているつもりかもしれませんが、知らず知らずのうちに判断の方法が変わり、<span class="highlight-word" onclick="showNote(7)"><ruby>非合理的<rt>ひごうりてき</rt></ruby>な<ruby>決断<rt>けつだん</rt></ruby></span>に陥ってしまうことがあるのです。`,
+            `<br>`,
+            `　どうしてこのような奇妙な癖があるのでしょうか。`,
+            `　野生の動物を想像してください。例えば、天敵のライオンに狙われているシマウマが、どの方角に逃げるべきかをじっくりと考えていたら、その間に命を落としてしまうかもしれません。すばやく要素をしぼり、限られた要素からすばやく正確な判断ができる動物こそが、無事に生き残ることができます。`,
+            `　このことからも、判断をすばやく行うための<span class="highlight-word" onclick="showNote(8)"><ruby>効率化<rt>こうりつか</rt></ruby></span>を進めた結果、脳に奇妙な癖ができたと考えられます。`,
+            `　すばやい判断のための直感は、長年の経験に基づいています。幼児は要素をうまくしぼることができないために、判断に時間がかかったり、判断をまちがえたりしがちですが、成長の過程で多くの経験を通じて、不要な要素をすばやく取り除くことができるようになります。よけいなことに気を配る手間が省かれ、効率よく生きられるようになります。これが直感のもたらす最大の<span class="highlight-word" onclick="showNote(19)"><ruby>恩恵<rt>おんけい</rt></ruby></span>です。`,
+            `　しかし、直感はいつでも正しいとは限りません。特殊な条件がそろうと、誤った判断に陥ってしまうこともあります。クッキーの実験の例では、本来はクッキーの面積を比較するべきです。しかし、面積の計算には時間がかかるので、つい、幅と高さという簡単な要素にしぼって比較してしまいます。これが<span class="highlight-word" onclick="showNote(9)"><ruby>落<rt>お</rt></ruby>とし<ruby>穴<rt>あな</rt></ruby></span>になるのです。`,
+            `<br>`,
+            `　このような脳の判断の癖は、「おとり効果」にとどまりません。これまでに少なくとも数百種類の癖が発見されています。とはいえ、だからだめだと言っているのではありません。脳の癖は、脳が効率よく作動しようと努めたことの<span class="highlight-word" onclick="showNote(20)"><ruby>裏返<rt>うらがえ</rt></ruby>し</span>です。脳そのものに罪はありません。`,
+            `　ただし注意してほしいことがあります。このような脳の癖は自然な現象だったとしても、もし、この癖に気づかないまま生活していたとしたら、問題を起こすことになるかもしれません。なぜなら全員が自分の考えをいつでも正しいと信じていると、人間関係を悪くしかねないからです。誤解や<span class="highlight-word" onclick="showNote(21)"><ruby>偏見<rt>へんけん</rt></ruby></span>が生まれ、<span class="highlight-word" onclick="showNote(10)"><ruby>不調和<rt>ふちょうわ</rt></ruby></span>や闘争さえ生じるかもしれません。`,
+            `　私たちの判断には脳の癖が影響するものだと互いに知っていれば、よけいな誤解を避ける<span class="highlight-word" onclick="showNote(22)"><ruby>予防策<rt>よぼうさく</rt></ruby></span>になります。それだけではありません。自分に対しても他人に対しても優しくなります。——だって脳がそうなっているのだからしかたがない。そのうえで、どうすればよいかと考えることができます。`,
+            `　ヒトは、物事を自分で決めたつもりでも、実は脳の<span class="highlight-word" onclick="showNote(23)"><ruby>仕組<rt>しく</rt></ruby>み</span>によって知らぬまに決めてしまっています。脳は一生懸命にはたらいてくれてはいますが、だからといって判断が常に正しいわけではありません。まちがうこともあるのが人間なのです。脳を知れば知るほど、人間って案外とかわいいなと思えてくることでしょう。`
+        ];
+
+        // 注釈・解説データ
+        const ANNOTATIONS = {
+            1: { term: "決断", desc: "はっきりと決めること。ここでは日常の些細な選択から人生の選択までを含む。" },
+            2: { term: "奇妙な癖", desc: "論理的でない、不思議な傾向のこと。ここでは「おとり効果」などの認知バイアスを指す。" },
+            3: { term: "おとり効果", desc: "Decoy Effect。明らかに劣る選択肢（おとり）が提示されることで、特定の選択肢が魅力的に見えてしまう現象。" },
+            4: { term: "軍配が上がる", desc: "相撲の行司が勝ち力士を示す道具から、勝負に勝つ、優れていると判断されること。" },
+            5: { term: "理不尽", desc: "道理に合わないこと。ここでは、同じものなのに選択が変わる不条理さを指す。" },
+            6: { term: "直感", desc: "推論によらず、感覚的に物事の本質をとらえること。脳の高速処理の結果。" },
+            7: { term: "非合理的な決断", desc: "理屈に合わない決定。損得勘定を誤ること。" },
+            8: { term: "効率化", desc: "ここでは、脳がエネルギー消費や時間を節約するために思考プロセスを簡略化すること。" },
+            9: { term: "落とし穴", desc: "ここでは、直感に頼りすぎた結果生じる判断ミスや失敗のこと。" },
+            10: { term: "不調和", desc: "釣り合いが取れないこと、仲が悪いこと。" },
+            
+            // 以下、追加分
+            11: { term: "食堂", desc: "食事をするための施設。ここでは誰もが経験する日常的な場面の例として挙げられている。" },
+            12: { term: "際限", desc: "終わりや限界。「際限がない」で、きりがないこと。" },
+            13: { term: "割合", desc: "全体に対する分量。ここでは確率のこと。" },
+            14: { term: "着目", desc: "注意して見ること。脳は複雑なことよりも、単純で目立つ特徴（幅や高さ）に目を向けがちである。" },
+            15: { term: "優れて", desc: "他よりも能力や価値が高いこと。" },
+            16: { term: "チンパンジー", desc: "ヒトに最も近い類人猿。彼らも同じ「脳の癖」を持つことは、この癖が進化の古い段階からある本能的なものであることを示唆する。" },
+            17: { term: "合理的", desc: "道理にかなっており、無駄がない様子。" },
+            18: { term: "論理的", desc: "筋道を立てて考える様子。" },
+            19: { term: "恩恵", desc: "恵みや利益。直感のおかげで、私たちは日常生活をスムーズに送ることができている。" },
+            20: { term: "裏返し", desc: "物事の反対の面。良い面（効率化）があれば、必ず悪い面（バイアス）もセットで存在するという意味。" },
+            21: { term: "偏見", desc: "偏った見方。バイアス。脳の癖を自覚していないと、無意識のうちに他人を偏った目で見てしまう危険性がある。" },
+            22: { term: "予防策", desc: "悪いことが起きないように前もって防ぐ手立て。脳の癖を知ることは、人間関係トラブルの「ワクチン」のような役割を果たす。" },
+            23: { term: "仕組み", desc: "物事の構造やメカニズム。自分の意思だと思っていることも、実は脳という器官の自動的な反応かもしれないという視点。" }
+        };
+    </script>
+    <!-- ====================================================================================
+         データ定義エリア終了
+         ==================================================================================== -->
+
+
+    <!-- グローバルヘッダー (Sticky) -->
+    <header class="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- タイトルエリア -->
+                <div class="flex-shrink-0">
+                    <h1 class="text-lg md:text-xl font-bold text-slate-800 truncate max-w-[200px] md:max-w-none" id="header-title">
+                        Loading...
+                    </h1>
+                    <p class="text-xs text-slate-500" id="header-author">Loading...</p>
+                </div>
+                
+                <!-- PC用ナビゲーション -->
+                <nav class="hidden md:flex space-x-1">
+                    <button onclick="switchTab('structure')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-100 transition-colors" data-target="structure">
+                        大まかな内容
+                    </button>
+                    <button onclick="switchTab('keywords')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-100 transition-colors" data-target="keywords">
+                        キーワード
+                    </button>
+                    <button onclick="switchTab('read')" class="nav-btn px-3 py-2 rounded-md text-sm font-medium bg-brand-500 text-white hover:bg-brand-600 shadow-sm transition-colors" data-target="read">
+                        本文を読む
+                    </button>
+                </nav>
+
+                <!-- モバイルメニューボタン -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-btn" class="p-2 rounded-md text-slate-600 hover:bg-slate-100 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- モバイルメニュー (デフォルト非表示) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-200">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="switchTab('structure')" class="mobile-nav-btn block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50" data-target="structure">大まかな内容</button>
+                <button onclick="switchTab('keywords')" class="mobile-nav-btn block w-full text-left px-3 py-2 rounded-md text-base font-medium text-slate-600 hover:text-brand-600 hover:bg-slate-50" data-target="keywords">キーワード</button>
+                <button onclick="switchTab('read')" class="mobile-nav-btn block w-full text-left px-3 py-2 rounded-md text-base font-medium text-brand-600 bg-brand-50 hover:bg-brand-100" data-target="read">本文を読む</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="max-w-4xl mx-auto px-4 py-8 min-h-screen">
+        
+        <!-- 1. Structure View -->
+        <section id="view-structure" class="view-section hidden animate-fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800 border-b pb-2 border-slate-200">大まかな内容</h2>
+            <div id="structure-list" class="space-y-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 3. Keywords View -->
+        <section id="view-keywords" class="view-section hidden animate-fade-in">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800 border-b pb-2 border-slate-200">重要なキーワード</h2>
+            <p class="mb-4 text-sm text-slate-500">※各キーワードをタップすると、意味と「本文での位置付け」が表示されます。</p>
+            <div id="keywords-list" class="space-y-3">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 4. Read Text View -->
+        <section id="view-read" class="view-section hidden animate-fade-in relative">
+            <div class="flex justify-between items-end mb-6 border-b pb-2 border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-800">本文</h2>
+                <!-- 進捗表示削除 -->
+            </div>
+            
+            <div id="text-container" class="reading-text text-lg md:text-xl text-slate-700 font-serif pb-32">
+                <!-- JSで生成 -->
+            </div>
+
+            <!-- 注釈表示エリア (Fixed at bottom) -->
+            <div id="note-display" class="fixed bottom-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-[600px] bg-white/95 border border-brand-200 shadow-xl rounded-lg p-4 transform translate-y-[150%] transition-transform duration-300 z-40 backdrop-blur-sm">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span id="note-term" class="block text-sm font-bold text-brand-600 mb-1"></span>
+                        <p id="note-desc" class="text-sm text-slate-700 leading-relaxed"></p>
+                    </div>
+                    <button onclick="hideNote()" class="text-slate-400 hover:text-slate-600 ml-4">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // ==========================================
+        // 初期化 & レンダリング
+        // ==========================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHeader();
+            renderStructure();
+            renderKeywords();
+            renderText();
+            
+            // モバイルメニュー制御
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // 初期タブ設定（URLハッシュまたはデフォルト）
+            const hash = window.location.hash.replace('#', '');
+            switchTab(hash || 'structure');
+
+            // 読書位置の復元 (Initialize scroll listener is inside switchTab)
+            initScrollObserver();
+        });
+
+        // ==========================================
+        // レンダリング関数群
+        // ==========================================
+
+        function renderHeader() {
+            document.getElementById('header-title').textContent = BOOK_META.title;
+            document.getElementById('header-author').textContent = BOOK_META.author;
+        }
+
+        function renderStructure() {
+            const container = document.getElementById('structure-list');
+            container.innerHTML = STRUCTURE_DATA.map((item, index) => `
+                <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden group">
+                    <button onclick="toggleAccordion('struct-${index}')" class="w-full text-left px-6 py-4 flex justify-between items-center focus:outline-none hover:bg-slate-50 transition-colors">
+                        <div>
+                            <span class="text-xs font-bold text-brand-500 uppercase tracking-wider mb-1 block">Part ${index + 1}</span>
+                            <h3 class="text-lg font-bold text-slate-800">${item.title}</h3>
+                        </div>
+                        <svg id="icon-struct-${index}" class="w-5 h-5 text-slate-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="struct-${index}" class="accordion-content px-6 bg-slate-50 border-t border-slate-100">
+                        <div class="py-4 space-y-3">
+                            <div>
+                                <h4 class="text-xs font-semibold text-slate-500 uppercase mb-1">要約</h4>
+                                <p class="text-sm text-slate-700 leading-relaxed">${item.summary}</p>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-semibold text-slate-500 uppercase mb-1">詳細解説</h4>
+                                <p class="text-sm text-slate-700 leading-relaxed">${item.details}</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2 pt-2">
+                                ${item.tags.map(tag => `<span class="px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-600">#${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderKeywords() {
+            const container = document.getElementById('keywords-list');
+            container.innerHTML = KEYWORDS_DATA.map((item, index) => `
+                <div class="group bg-white rounded-lg border border-slate-200 p-4 hover:border-brand-300 transition-colors">
+                    <button onclick="toggleAccordion('kw-${index}')" class="w-full text-left flex justify-between items-center focus:outline-none">
+                        <h3 class="text-md font-bold text-slate-800 group-hover:text-brand-600 transition-colors">${item.word}</h3>
+                        <span class="text-xs text-brand-500 opacity-0 group-hover:opacity-100 transition-opacity">詳細を見る</span>
+                    </button>
+                    <div id="kw-${index}" class="accordion-content mt-1">
+                        <div class="pt-4 text-sm text-slate-700 leading-relaxed border-t border-dashed border-slate-200 mt-2">
+                            ${item.def}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderText() {
+            const container = document.getElementById('text-container');
+            // 段落ごとにPタグでラップ
+            container.innerHTML = TEXT_CONTENT.map(para => 
+                `<p class="mb-6 indent-0 text-justify break-words">${para}</p>`
+            ).join('');
+        }
+
+        // ==========================================
+        // UI制御ロジック
+        // ==========================================
+
+        function switchTab(targetId) {
+            // ナビゲーションのステート更新
+            document.querySelectorAll('.nav-btn, .mobile-nav-btn').forEach(btn => {
+                const isActive = btn.dataset.target === targetId;
+                
+                // PC用ボタンのスタイル
+                if (btn.classList.contains('nav-btn')) {
+                    if (isActive) {
+                        btn.classList.add('bg-brand-500', 'text-white');
+                        btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+                    } else {
+                        btn.classList.remove('bg-brand-500', 'text-white');
+                        btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+                    }
+                }
+                
+                // モバイル用ボタンのスタイル
+                if (btn.classList.contains('mobile-nav-btn')) {
+                    if (isActive) {
+                        btn.classList.add('text-brand-600', 'bg-brand-50');
+                        btn.classList.remove('text-slate-600');
+                    } else {
+                        btn.classList.remove('text-brand-600', 'bg-brand-50');
+                        btn.classList.add('text-slate-600');
+                    }
+                }
+            });
+
+            // セクションの表示切り替え
+            document.querySelectorAll('.view-section').forEach(el => {
+                if (el.id === `view-${targetId}`) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+
+            // モバイルメニューを閉じる
+            document.getElementById('mobile-menu').classList.add('hidden');
+
+            // 読書位置の制御 (重要: Read Textタブに入った時だけ復元)
+            if (targetId === 'read') {
+                setTimeout(restoreReadingPosition, 50); // DOM描画待ち
+            } else {
+                window.scrollTo(0, 0); // 他のタブはトップへ
+            }
+        }
+
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(`icon-${id}`);
+            
+            if (content.style.maxHeight) {
+                // Close
+                content.style.maxHeight = null;
+                content.classList.remove('active');
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            } else {
+                // Open
+                content.style.maxHeight = content.scrollHeight + "px";
+                content.classList.add('active');
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // ==========================================
+        // 注釈機能
+        // ==========================================
+
+        function showNote(id) {
+            const data = ANNOTATIONS[id];
+            if (!data) return;
+
+            const noteDisplay = document.getElementById('note-display');
+            const termEl = document.getElementById('note-term');
+            const descEl = document.getElementById('note-desc');
+
+            termEl.textContent = data.term;
+            descEl.textContent = data.desc;
+
+            noteDisplay.classList.remove('translate-y-[150%]');
+        }
+
+        function hideNote() {
+            document.getElementById('note-display').classList.add('translate-y-[150%]');
+        }
+
+        // ==========================================
+        // 【重要】読書位置の記憶と復元 (LocalStorage)
+        // ==========================================
+
+        const STORAGE_KEY = 'book_read_progress';
+
+        function initScrollObserver() {
+            // スクロールイベントのデバウンス処理
+            let timeout;
+            window.addEventListener('scroll', () => {
+                // 現在がRead Textタブの場合のみ記録
+                if (!document.getElementById('view-read').classList.contains('hidden')) {
+                    if (timeout) clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        saveReadingPosition();
+                    }, 500); // 0.5秒停止したら保存
+                }
+            });
+        }
+
+        function saveReadingPosition() {
+            const scrollY = window.scrollY;
+            const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+            // 割合も保存（リサイズ対応用だが今回はシンプルにY座標メイン）
+            const progress = totalHeight > 0 ? scrollY / totalHeight : 0;
+            
+            const data = {
+                y: scrollY,
+                progress: progress,
+                timestamp: new Date().getTime()
+            };
+            
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function restoreReadingPosition() {
+            const data = localStorage.getItem(STORAGE_KEY);
+            if (data) {
+                const { y } = JSON.parse(data);
+                // コンテンツの高さが足りているか確認してからスクロール
+                if (document.body.scrollHeight >= y) {
+                    window.scrollTo({
+                        top: y,
+                        behavior: 'auto' // 即時ジャンプ
+                    });
+                }
+            }
+        }
+
+    </script>
+</body>
+</html>
