@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本の花火の楽しみ - 読解学習</title>
+    
+    <!-- Tailwind CSS (スタイリング用) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js 3 (フレームワーク) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Google Fonts (可読性の高いフォント) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- カスタム設定とスタイル -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark': '#0f172a', // 夜空のような濃紺
+                        'brand-accent': '#fbbf24', // 花火のような金色
+                        'brand-text': '#e2e8f0',
+                        'paper': '#f8fafc',
+                        'ink': '#1e293b'
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        serif: ['"Shippori Mincho"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ベーススタイル */
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f8fafc; /* ライトモード背景 */
+            color: #334155;
+        }
+
+        /* 本文表示エリアの特別スタイル */
+        .prose-content {
+            font-family: 'Shippori Mincho', serif;
+            line-height: 2.2;
+            letter-spacing: 0.05em;
+            font-size: 1.125rem;
+        }
+
+        /* 本文中の強調単語スタイル */
+        .interactive-word {
+            border-bottom: 2px solid #fbbf24;
+            background-color: rgba(251, 191, 36, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: 600;
+        }
+        .interactive-word:hover {
+            background-color: #fbbf24;
+            color: #0f172a;
+        }
+
+        /* スクロールバーのカスタマイズ */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* フェードインアニメーション */
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="flex flex-col min-h-screen">
+        
+        <!-- 1. グローバルヘッダー (固定表示) -->
+        <header class="sticky top-0 z-50 bg-brand-dark text-white shadow-lg backdrop-blur-sm bg-opacity-95">
+            <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center">
+                <!-- タイトルエリア -->
+                <div class="text-center md:text-left mb-2 md:mb-0">
+                    <h1 class="text-lg font-bold tracking-wider text-brand-accent">{{ workTitle }}</h1>
+                    <p class="text-xs text-slate-400">{{ authorName }}</p>
+                </div>
+
+                <!-- ナビゲーションメニュー -->
+                <nav class="flex space-x-1 md:space-x-4 text-xs md:text-sm overflow-x-auto w-full md:w-auto pb-1 md:pb-0 justify-center">
+                    <button 
+                        v-for="view in views" 
+                        :key="view.id"
+                        @click="changeView(view.id)"
+                        :class="[
+                            'px-3 py-2 rounded-full transition-colors whitespace-nowrap',
+                            currentView === view.id 
+                                ? 'bg-brand-accent text-brand-dark font-bold' 
+                                : 'text-slate-300 hover:bg-slate-700'
+                        ]"
+                    >
+                        {{ view.label }}
+                    </button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- メインコンテンツエリア -->
+        <main class="flex-grow container mx-auto px-4 py-8 max-w-4xl relative">
+            
+            <!-- VIEW 1: 大まかな内容 (Structure/Overview) -->
+            <div v-if="currentView === 'overview'" class="animate-fade-in space-y-8">
+                <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-brand-accent">
+                    <h2 class="text-2xl font-bold mb-4 flex items-center">
+                        <span class="text-3xl mr-2">📖</span> 作品の全体像
+                    </h2>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        この文章は、日本の花火が持つ独特の美意識と、それを支える花火師の技術や精神性について解説したものです。
+                        物理的な構造（科学）と、日本人の感性（情緒）の両面からアプローチしています。
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span v-for="tag in overviewTags" class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-sm font-medium">#{{ tag }}</span>
+                    </div>
+                </div>
+
+                <!-- 構成のインフォグラフィック風リスト -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-slate-700 ml-2">構成フロー</h3>
+                    <div v-for="(part, index) in structureParts" :key="index" 
+                         class="bg-white p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+                         @click="part.isOpen = !part.isOpen">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <span class="bg-brand-dark text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-4">{{ index + 1 }}</span>
+                                <h4 class="font-bold text-lg text-slate-800">{{ part.title }}</h4>
+                            </div>
+                            <span class="text-slate-400 group-hover:text-brand-accent transition-colors">
+                                {{ part.isOpen ? '▲' : '▼' }}
+                            </span>
+                        </div>
+                        <div v-show="part.isOpen" class="mt-4 pl-12 text-slate-600 border-l-2 border-slate-100 ml-4">
+                            <p class="mb-2 font-medium text-brand-dark">{{ part.summary }}</p>
+                            <p class="text-sm leading-relaxed">{{ part.detail }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: 登場人物・要素分析 (Elements) -->
+            <div v-if="currentView === 'elements'" class="animate-fade-in">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800">構成要素の分析</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div v-for="element in elements" :key="element.name" 
+                         class="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transform hover:-translate-y-1 transition-transform duration-300"
+                         @click="openElementModal(element)">
+                        <div class="bg-slate-100 p-4 border-b border-slate-200">
+                            <h3 class="font-bold text-xl text-brand-dark">{{ element.name }}</h3>
+                            <p class="text-xs text-slate-500 font-serif">{{ element.subTitle }}</p>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-slate-600 line-clamp-3 text-sm mb-3">{{ element.description }}</p>
+                            <div class="text-right">
+                                <span class="text-brand-accent font-bold text-sm hover:underline">詳細を見る &rarr;</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: 重要なキーワード (Keywords) -->
+            <div v-if="currentView === 'keywords'" class="animate-fade-in">
+                <h2 class="text-2xl font-bold mb-6 text-slate-800">キーワード・専門用語</h2>
+                <div class="space-y-3">
+                    <div v-for="keyword in keywords" :key="keyword.term" 
+                         class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                        <button class="w-full text-left px-6 py-4 flex justify-between items-center hover:bg-slate-50 transition-colors"
+                                @click="toggleKeyword(keyword)">
+                            <div class="flex items-baseline">
+                                <span class="text-lg font-bold text-brand-dark mr-3">{{ keyword.term }}</span>
+                                <span class="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{{ keyword.category }}</span>
+                            </div>
+                            <span class="text-slate-400 text-sm">{{ keyword.isOpen ? '閉じる' : '解説を開く' }}</span>
+                        </button>
+                        <div v-show="keyword.isOpen" class="px-6 py-6 bg-slate-50 border-t border-slate-100">
+                            <div class="mb-4">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">意味・定義</h4>
+                                <p class="text-slate-800 font-medium leading-relaxed">{{ keyword.definition }}</p>
+                            </div>
+                            <div class="mb-4">
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">文脈での重要性</h4>
+                                <p class="text-sm text-slate-600 leading-relaxed">{{ keyword.context }}</p>
+                            </div>
+                            <div v-if="keyword.linkId" class="text-right">
+                                <button @click="jumpToText(keyword.term)" class="text-xs text-brand-accent hover:text-orange-500 font-bold">
+                                    本文の該当箇所を探す (検索)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: 本文を読む (Read Text) -->
+            <div v-if="currentView === 'read'" class="animate-fade-in pb-32">
+                <div class="bg-white px-6 py-10 md:px-12 md:py-16 shadow-lg rounded-sm max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-serif font-bold mb-2 text-center text-ink">{{ workTitle }}</h2>
+                    <p class="text-right text-sm text-slate-500 mb-12 font-serif">{{ authorName }}</p>
+                    
+                    <!-- 本文レンダリングエリア -->
+                    <div class="prose-content space-y-6 text-justify">
+                        <!-- 段落ごとに生成 -->
+                        <p v-for="(para, idx) in processedParagraphs" 
+                           :key="idx" 
+                           v-html="para"
+                           @click="handleTextClick"
+                           class="mb-6 indent-4">
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- 読書位置保存インジケータ -->
+                <div v-if="scrollSavedMessage" class="fixed top-20 right-4 bg-green-500 text-white text-xs px-3 py-1 rounded shadow-lg animate-bounce">
+                    読書位置を保存しました
+                </div>
+            </div>
+
+        </main>
+
+        <!-- 3. 詳細情報ボトムシート/モーダル (用語解説など) -->
+        <div v-if="activeAnnotation" 
+             class="fixed bottom-0 left-0 right-0 z-50 p-4 transform transition-transform duration-300"
+             :class="activeAnnotation ? 'translate-y-0' : 'translate-y-full'">
+            <div class="bg-brand-dark text-white rounded-xl shadow-2xl max-w-2xl mx-auto overflow-hidden border border-slate-700">
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-xs text-brand-accent block mb-1">{{ activeAnnotation.reading }}</span>
+                            <h3 class="text-2xl font-bold">{{ activeAnnotation.phrase }}</h3>
+                        </div>
+                        <button @click="activeAnnotation = null" class="text-slate-400 hover:text-white bg-slate-800 rounded-full w-8 h-8 flex items-center justify-center">✕</button>
+                    </div>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-3">{{ activeAnnotation.meaning }}</p>
+                    <div class="bg-slate-800 p-3 rounded text-xs text-slate-400 italic">
+                        <span class="font-bold not-italic text-slate-300">補足:</span> {{ activeAnnotation.note }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 詳細解説モーダル (要素分析用) -->
+        <div v-if="activeModalElement" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" @click.self="activeModalElement = null">
+            <div class="bg-white rounded-lg shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+                <div class="bg-brand-dark p-6 text-white sticky top-0">
+                    <h3 class="text-2xl font-bold">{{ activeModalElement.name }}</h3>
+                    <p class="text-brand-accent text-sm">{{ activeModalElement.subTitle }}</p>
+                    <button @click="activeModalElement = null" class="absolute top-4 right-4 text-slate-400 hover:text-white">✕</button>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div>
+                        <h4 class="font-bold text-slate-800 border-b pb-2 mb-2">詳細解説</h4>
+                        <p class="text-slate-600 text-sm leading-relaxed">{{ activeModalElement.detail }}</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded border-l-4 border-brand-accent">
+                        <h4 class="font-bold text-xs text-slate-400 uppercase mb-2">本文より引用</h4>
+                        <p class="font-serif italic text-slate-700">"{{ activeModalElement.quote }}"</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 border-b pb-2 mb-2">変化・特徴のポイント</h4>
+                        <ul class="list-disc list-inside text-sm text-slate-600 space-y-1">
+                            <li v-for="point in activeModalElement.points">{{ point }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
+
+        /* * ==========================================
+         * 1. 作品データ（編集エリア）
+         * ==========================================
+         */
+        
+        // 基本情報
+        const WORK_TITLE = "日本の花火の楽しみ";
+        const AUTHOR_NAME = "小野里 公成";
+
+        // 本文データ (段落ごとの配列)
+        const TEXT_PARAGRAPHS = [
+            "日本では、夏を中心に一年を通して花火大会が開催されている。その数は主だったものだけでも千か所以上に上り、いずれも数千から数万人の観客がつめかけて花火を鑑賞する。花火が日本人をこれほどまでにひきつけるのは、どうしてなのだろうか。",
+            "現在は、欧米の花火大会のように大量の花火を連続して打ち上げる方法が人気を博している。しかし基本的には、一発ずつの花火をじっくり鑑賞できる打ち上げ方法が日本の花火大会の主流だ。ゆえに日本の花火は、一発のできばえを極限まで追求して進化してきた。その特徴は、整った形と、明瞭な色彩が変化するさまにあり、そこに人は美しさと魅力を見いだすのだと思う。",
+            "打ち上げ前の花火玉は丸い球体で、中に光や色を発する「星」と、花火玉を割って星を遠く飛散させるための「割火薬」が層をなして入っている。上空で破裂すると、一瞬で火薬の燃焼による花が大きく整った球体に広がる。これが「割物」と呼ばれる花火で、飛び散る星は光の粒となって明るく多彩な色を放つ。そして、その色が何度となく移り変わるという変色のしかけを備えている。これは、発色の違う火薬が二重三重の層になっているためである。",
+            "「割物」の中でも、球体の内側にさらに「芯」と呼ばれる球体を一つ、または複数入れ込んだ「芯物」という種類の花火がある。これは、製作に大変手間がかかることから、高い品質を維持することが難しい。それを可能にしてきたのが、「花火師」と呼ばれる職人がもつ高い技術とよりよい花火を探求する精神だ。",
+            "花火師たちは、花火を作り、それを打ち上げることを仕事とする。危険な火薬を取り扱うため、製作時にも打ち上げ時にも安全に配慮しながら、日々、新しい花火の創作に打ち込んでいる。",
+            "花火師によると、理想とする花火の姿は、ゆがみなくまん丸く大きく開いたものだという。破綻のない丸さは、日本の花火の最大の特徴として追求されてきた要素だ。さらに、はっきりした発色で一斉に変色し、一斉に消える。芯物の場合は、芯の部分全体ができるだけ丸く大きく開き、その中心が一点に合わさる。それぞれの条件は単純だが、同じように細心の作業をしても、全てを満たす満足のいく花火玉は、年に数えるほどしか生まれないとのことである。",
+            "形の乱れやゆがみは、見た目の美しさを半減させる。花火作りは、内包する部品作りから組み立てにいたるまでほとんどが手作業で、その良しあしや精度が、開花した時の姿に大きく影響する。丁寧な作業を積み重ねることで、理想の姿に近づけていくのだと花火師は言う。",
+            "大きく整った球体となって開花するためには、花火玉を、上昇から落下に転ずる一瞬止まった時に開かせることが欠かせない。動きの途中で開くと、花の形がゆがんで丸く開かない。このタイミングを合わせるために、打ち上げる技術にも気を配る。",
+            "花火玉が開いて、星が一斉に飛び散って作る全体の形のことを「盆」という。花火が開く時の直径は、花火玉の大きさでおおよそ決まっているが、それをより大きく見せ、理想的な盆にするために、星を正確に敷き詰め、加えて、割火薬の爆発力と、玉皮の強度などのバランスを追い求める。",
+            "花の花弁や芯になぞらえられる星は、花火の命といわれる。全ての星が一糸乱れず均等に飛び、同時に変色し、消えなければならない。内包する数百の星を均質に仕上げるために、花火師は星の製作に最も神経をつかう。形や燃え方にふぞろいがあれば、その星はまっすぐに飛ばない。いくつかの星が蛇行することを「星が泳ぐ」、着火しない星があって均等に広がった光の一部が欠けることを「抜け星」という。いずれも、理想とする花火の姿を破綻させてしまう要因になる。",
+            "それぞれの星の色合いや変色の具合も、観客の目を楽しませることができるかどうかに影響する。花火の完成度を高めるためには、色の変化の多さだけではなく、理想の色に見えるか、また、足並みがそろって同時に変化しているかが重要だ。",
+            "花火が消える時には、全ての星が一つも残らず一斉に燃え尽きて、全体が一瞬で消えるのが理想で、これを「消え口がよい」と評価する。消え際のよい花火は強烈な余韻を残し、開いている時の華やかさとの落差が、より鮮烈な印象とはかなさを見る者の心に焼きつける。花火師が丹精をこめて作った花火は、こうして夜空で咲き、消え去る時にようやく完結する芸術となるのだ。",
+            "現在の花火大会では、一発のできばえはもちろんのこと、それを連続して打ち上げる時の組み合わせやリズムといった演出面も、観客を楽しませるという観点から重要となっている。さらに、追い求めてきた丸く開く花火だけでなく、その技術をもとに、さまざまな形やこれまでにない動きをする花火も生み出され続けている。",
+            "こうして、熟練された花火師によって作られる日本の花火は、世界に誇ることのできる水準となっている。だが、誰もがその仕組みや価値を確認するために、花火を見ているわけではないだろう。花火は、大きな音とともに華やかに夜空に咲き、その直後には跡形もなく消えてなくなってしまう。その印象が、心の中にのみ残るので、人々は何度も見たいと思うのだろう。その一瞬の成果の背後には、花火師たちの高い技術が隠されている。古来より、情緒、風情といった感覚をよく理解し、求める日本人にとって、華やかさとはかなさとを同時に味わえる花火は、実に琴線にふれる、味わいに富んだ芸術なのだと思う。"
+        ];
+
+        // 注釈データ (本文中の強調表示とポップアップ用)
+        const ANNOTATIONS = [
+            { phrase: "割物", reading: "わりもの", meaning: "日本の代表的な打ち上げ花火の種類。球状の玉の中に星と割火薬が詰められ、空中で真ん丸に開くのが特徴。", note: "英語では'Chrysanthemum'（菊）などと呼ばれることがあります。" },
+            { phrase: "星", reading: "ほし", meaning: "花火玉の中に詰められる火薬の塊。燃焼しながら飛び散り、光や色を放つ。", note: "この星の配合で色が決まります。" },
+            { phrase: "芯物", reading: "しんもの", meaning: "割物の一種で、同心円状に二重、三重の花が開く構造のもの。", note: "多重芯（八重芯、三重芯など）は技術力の証明です。" },
+            { phrase: "花火師", reading: "はなびし", meaning: "花火の製造や打ち上げを行う職人。", note: "国家資格である火薬類取扱保安責任者などの免許が必要です。" },
+            { phrase: "盆", reading: "ぼん", meaning: "花火が夜空で開いた時の全体の広がりの形。", note: "「盆が良い」とは、丸くきれいに広がった状態を指します。" },
+            { phrase: "星が泳ぐ", reading: "ほしがおよぐ", meaning: "星がまっすぐに飛ばず、蛇行してしまう現象。", note: "製作上の不備やバランスの悪さが原因となります。" },
+            { phrase: "抜け星", reading: "ぬけぼし", meaning: "一部の星が着火しなかったりして、光の円が欠けてしまう現象。", note: "完全な球体を理想とする日本の花火では失敗とされます。" },
+            { phrase: "消え口", reading: "きえくち", meaning: "花火の光が一斉に消える瞬間。", note: "「消え口がよい」とは、バラバラにならずパッと同時に消えることです。" },
+            { phrase: "琴線", reading: "きんせん", meaning: "心の奥にある、感動しやすい感情。", note: "「琴線に触れる」で、深く感動することを意味します。" },
+            { phrase: "丹精", reading: "たんせい", meaning: "心を込めて物事を行うこと。", note: "「丹精込めて作る」などのように使われます。" },
+            { phrase: "情緒", reading: "じょうちょ", meaning: "折に触れて起こる、しみじみとした感情。", note: "日本的な美意識において重要視されます。" }
+        ];
+
+        // 構造分析データ
+        const STRUCTURE_PARTS = [
+            { title: "導入：日本の花火の現状", summary: "花火大会の数と人気", detail: "日本全国で多数開催され、多くの観客を集める。なぜこれほど人を惹きつけるのかという問いかけ。", isOpen: true },
+            { title: "本論1：日本花火の特徴", summary: "「一発の美」の追求", detail: "欧米の連発式とは異なり、一発の「整った形」と「色彩変化」を重視する「割物」の技術的特徴。", isOpen: false },
+            { title: "本論2：技術の粋「芯物」", summary: "高度な技術と職人魂", detail: "多重構造を持つ「芯物」の難易度と、それを作り出す花火師の探究心。", isOpen: false },
+            { title: "本論3：理想の追求", summary: "「丸さ」と「一斉変化」", detail: "理想的な「盆（形）」、「消え口（消え際）」を実現するための、部品作りから打ち上げのタイミングまでの緻密な作業。", isOpen: false },
+            { title: "結論：芸術としての花火", summary: "儚さと美しさの共存", detail: "技術に裏打ちされた一瞬の美しさが、日本人の情緒や琴線に触れる芸術であるという結び。", isOpen: false }
+        ];
+
+        // 要素分析データ
+        const ELEMENTS_DATA = [
+            { 
+                name: "花火師", 
+                subTitle: "The Pyrotechnician", 
+                description: "危険を伴う火薬を扱い、理想の美を追求する職人。科学的な精度と芸術的な感性の両方が求められる。",
+                quote: "丁寧な作業を積み重ねることで、理想の姿に近づけていくのだと花火師は言う。",
+                detail: "花火師は単なる製造者ではなく、夜空というキャンバスに絵を描く芸術家です。記事中では、彼らの「探求する精神」「細心の作業」「安全への配慮」が強調されています。",
+                points: ["手作業による精度の追求", "安全管理と創作の両立", "年に数個しか納得のいくものはできないという厳しさ"]
+            },
+            { 
+                name: "割物", 
+                subTitle: "Warimono Shells", 
+                description: "日本の花火の主流である、球状に開く花火。完璧な球体を目指して進化してきた。",
+                quote: "一瞬で火薬の燃焼による花が大きく整った球体に広がる。",
+                detail: "「割物」は日本花火の代名詞です。海外の円筒形の花火と異なり、球体の殻の中に星を配置することで、空中で真ん丸に開く構造を持っています。",
+                points: ["整った形（球体）", "明瞭な色彩変化", "二重三重の層構造（芯物）"]
+            },
+            { 
+                name: "星", 
+                subTitle: "Stars (Hoshi)", 
+                description: "花火の光と色の源。花火の命とも呼ばれる重要な部品。",
+                quote: "全ての星が一糸乱れず均等に飛び、同時に変色し、消えなければならない。",
+                detail: "「星」の均質性が花火の良し悪しを決定づけます。大きさや火薬の配合がわずかでも違うと、飛ぶ速度や消えるタイミングがずれ、失敗作（星が泳ぐ、抜け星）となります。",
+                points: ["花火の命といわれる", "製作に最も神経を使う部品", "変色と同時消失の鍵"]
+            },
+            { 
+                name: "観客・日本人", 
+                subTitle: "Audience / Japanese Sensibility", 
+                description: "花火の儚さに美を見出す受け手。",
+                quote: "華やかさとはかなさとを同時に味わえる花火は、実に琴線にふれる",
+                detail: "筆者は、花火技術の高さだけでなく、それを受け止める日本人の感性（情緒、風情）が花火を「芸術」に高めていると分析しています。",
+                points: ["一瞬で消えるものへの愛着", "技術の背後にある物語を感じる心", "余韻を楽しむ"]
+            }
+        ];
+
+        // キーワード詳細データ (10個以上)
+        const KEYWORDS_DATA = [
+            { term: "割物", category: "種類", definition: "球状の玉が破裂して、星が球形に飛散する日本の代表的な花火。", context: "欧米の花火との対比として、日本独自の発達を遂げた形式。", isOpen: false },
+            { term: "芯物", category: "種類", definition: "割物の内部に、さらに小さな球体（芯）を含む構造の花火。", context: "花火師の技術力の高さを象徴する、製作難易度の高い花火。", isOpen: false },
+            { term: "星", category: "部品", definition: "火薬を丸めた粒。燃えながら光や色を出す。", context: "花火の「命」と表現される最重要部品。", isOpen: false },
+            { term: "割火薬", category: "部品", definition: "花火玉を空中で爆発させ、星を飛ばすための火薬。", context: "星を遠くへ均等に飛ばすための爆発力の調整が必要。", isOpen: false },
+            { term: "盆", category: "形状", definition: "花火が開いた時の全体の形、広がり。", context: "「理想的な盆」を作ることが花火師の目標。", isOpen: false },
+            { term: "星が泳ぐ", category: "現象", definition: "星がまっすぐに飛ばず、ふらふらと蛇行すること。", context: "失敗例として挙げられ、精度の低さを示す。", isOpen: false },
+            { term: "抜け星", category: "現象", definition: "一部の星が光らず、円形の一部が欠けること。", context: "これも失敗例。均一性が損なわれた状態。", isOpen: false },
+            { term: "消え口", category: "美学", definition: "花火が燃え尽きて消える瞬間。", context: "一斉にパッと消える「消え口のよさ」が理想とされる。", isOpen: false },
+            { term: "玉皮", category: "部品", definition: "花火玉の外側を覆う殻。", context: "この強度が割火薬の爆発力とバランス取れていないときれいに開かない。", isOpen: false },
+            { term: "琴線", category: "感情", definition: "心の奥にある、感動しやすい心情。", context: "花火が日本人の心に深く響く理由の説明として使用。", isOpen: false },
+            { term: "丹精", category: "態度", definition: "心を込めて物事を行うこと。", context: "花火師の努力と誠実な姿勢を表す言葉。", isOpen: false },
+            { term: "余韻", category: "美学", definition: "音が止んだり、事象が終わった後に残る響きや味わい。", context: "花火が消えた後の暗闇と静寂に感じる美しさ。", isOpen: false },
+            { term: "変色", category: "技術", definition: "燃焼中に花火の色が変わること。", context: "日本の花火の大きな特徴の一つで、多層構造の星によって実現する。", isOpen: false }
+        ];
+
+        const app = createApp({
+            setup() {
+                // リアクティブな状態
+                const currentView = ref('overview');
+                const scrollSavedMessage = ref(false);
+                const activeAnnotation = ref(null);
+                const activeModalElement = ref(null);
+
+                // データ定数の参照
+                const workTitle = WORK_TITLE;
+                const authorName = AUTHOR_NAME;
+                const textParagraphs = TEXT_PARAGRAPHS;
+                const overviewTags = ["国語総合", "評論", "日本の文化", "芸術論", "職人技術"];
+                
+                // リアクティブデータ化
+                const structureParts = ref(STRUCTURE_PARTS);
+                const elements = ref(ELEMENTS_DATA);
+                const keywords = ref(KEYWORDS_DATA);
+
+                // ビュー定義
+                const views = [
+                    { id: 'overview', label: '大まかな内容' },
+                    { id: 'elements', label: '要素分析' },
+                    { id: 'keywords', label: 'キーワード' },
+                    { id: 'read', label: '本文を読む' }
+                ];
+
+                /* * ==========================================
+                 * 2. 読書位置の記憶ロジック
+                 * ==========================================
+                 */
+                const saveScrollPosition = () => {
+                    if (currentView.value === 'read') {
+                        localStorage.setItem('fireworks_scroll_pos', window.scrollY);
+                        scrollSavedMessage.value = true;
+                        setTimeout(() => scrollSavedMessage.value = false, 2000);
+                    }
+                };
+
+                const restoreScrollPosition = () => {
+                    const savedPos = localStorage.getItem('fireworks_scroll_pos');
+                    if (savedPos) {
+                        // DOM更新後にスクロールを実行
+                        nextTick(() => {
+                            window.scrollTo({ top: parseInt(savedPos), behavior: 'auto' });
+                        });
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
+                };
+
+                // ビュー切り替え時の処理
+                const changeView = (viewId) => {
+                    // 現在が「本文を読む」なら位置保存
+                    if (currentView.value === 'read') {
+                        saveScrollPosition();
+                    }
+
+                    currentView.value = viewId;
+                    activeAnnotation.value = null; // ポップアップを閉じる
+
+                    // 「本文を読む」へ移動時は位置復元、それ以外はトップへ
+                    if (viewId === 'read') {
+                        restoreScrollPosition();
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
+                };
+
+                /* * ==========================================
+                 * 3. 本文のレンダリングと注釈処理
+                 * ==========================================
+                 */
+                const processedParagraphs = computed(() => {
+                    return textParagraphs.map(para => {
+                        let processed = para;
+                        // 注釈リストに基づいてHTMLタグを挿入
+                        // 注意: 単純な置換だと重複マッチなどの問題が出る場合があるが、
+                        // この規模のテキストではシンプルな置換で十分機能する。
+                        ANNOTATIONS.forEach((anno, index) => {
+                            // 正規表現でグローバル置換
+                            const regex = new RegExp(anno.phrase, 'g');
+                            // data-idx属性で配列インデックスを持たせる
+                            processed = processed.replace(regex, 
+                                `<span class="interactive-word" data-idx="${index}">${anno.phrase}</span>`
+                            );
+                        });
+                        return processed;
+                    });
+                });
+
+                // 本文クリック時のイベントデリゲーション
+                const handleTextClick = (event) => {
+                    const target = event.target;
+                    if (target.classList.contains('interactive-word')) {
+                        const idx = target.getAttribute('data-idx');
+                        activeAnnotation.value = ANNOTATIONS[idx];
+                    }
+                };
+
+                // キーワードリストの開閉
+                const toggleKeyword = (kwd) => {
+                    kwd.isOpen = !kwd.isOpen;
+                };
+
+                // 要素詳細モーダルを開く
+                const openElementModal = (elm) => {
+                    activeModalElement.value = elm;
+                };
+
+                // キーワードから本文へジャンプ（簡易実装：本文ビューへ移動するだけ）
+                const jumpToText = (term) => {
+                    changeView('read');
+                    // 検索ロジックはスクロール復元と競合するため、今回はビュー切り替えのみとする
+                    // 本格実装する場合はnextTick後に要素検索してscrollIntoViewを使う
+                };
+
+                // 定期的なスクロール位置保存 (離脱時だけでなくスクロール中も保存したい場合)
+                // 今回は要件通り「離脱して戻ってきた際」を重視するためchangeViewで制御しているが、
+                // ブラウザ閉じ対策としてbeforeunloadイベントも追加。
+                onMounted(() => {
+                    window.addEventListener('beforeunload', () => {
+                        if (currentView.value === 'read') {
+                            localStorage.setItem('fireworks_scroll_pos', window.scrollY);
+                        }
+                    });
+                });
+
+                return {
+                    currentView,
+                    views,
+                    workTitle,
+                    authorName,
+                    overviewTags,
+                    structureParts,
+                    elements,
+                    keywords,
+                    processedParagraphs,
+                    activeAnnotation,
+                    activeModalElement,
+                    scrollSavedMessage,
+                    changeView,
+                    handleTextClick,
+                    toggleKeyword,
+                    openElementModal,
+                    jumpToText
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
