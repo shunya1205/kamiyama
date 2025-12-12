@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>桜蝶 - 田丸 雅智 | 深層読解・鑑賞</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome (Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* 基本設定 */
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 小説本文用のフォント設定 */
+        .novel-text {
+            font-family: 'Noto Serif JP', serif;
+            line-height: 2.2;
+            letter-spacing: 0.08em;
+            font-size: 1.15rem;
+            text-align: justify;
+        }
+
+        /* キーワードハイライト */
+        .keyword-highlight {
+            border-bottom: 2px solid #818cf8;
+            background-color: rgba(129, 140, 248, 0.15);
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0 2px 2px 2px;
+            border-radius: 2px;
+            font-weight: 500;
+        }
+        .keyword-highlight:hover {
+            background-color: rgba(129, 140, 248, 0.5);
+            color: #1e1b4b;
+        }
+
+        /* ユーティリティ */
+        .hidden-section {
+            display: none !important;
+        }
+
+        /* タブのアクティブ状態 */
+        .tab-active {
+            border-bottom: 3px solid #4f46e5;
+            color: #4f46e5;
+            font-weight: 700;
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+        .tab-inactive {
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-inactive:hover {
+            color: #374151;
+            background-color: rgba(0,0,0,0.03);
+        }
+
+        /* カスタムスクロールバー */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ヘッダー -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-md transition-all duration-300">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                <h1 class="text-lg md:text-xl font-serif text-gray-800 tracking-wide truncate">
+                    <span id="header-title" class="font-bold"></span>
+                    <span class="mx-2 text-gray-300">|</span>
+                    <span id="header-author" class="text-sm md:text-base text-gray-600"></span>
+                </h1>
+            </div>
+
+            <nav class="flex overflow-x-auto no-scrollbar">
+                <button onclick="app.switchTab('overview')" id="btn-overview" class="flex-1 py-3 px-4 text-sm font-medium whitespace-nowrap text-center transition-colors border-r border-gray-50 last:border-0">
+                    <i class="fa-solid fa-layer-group mr-1.5"></i>構成・構造
+                </button>
+                <button onclick="app.switchTab('characters')" id="btn-characters" class="flex-1 py-3 px-4 text-sm font-medium whitespace-nowrap text-center transition-colors border-r border-gray-50 last:border-0">
+                    <i class="fa-solid fa-users-viewfinder mr-1.5"></i>人物・視点
+                </button>
+                <button onclick="app.switchTab('keywords')" id="btn-keywords" class="flex-1 py-3 px-4 text-sm font-medium whitespace-nowrap text-center transition-colors border-r border-gray-50 last:border-0">
+                    <i class="fa-solid fa-book-open-reader mr-1.5"></i>語句・象徴
+                </button>
+                <button onclick="app.switchTab('read')" id="btn-read" class="flex-1 py-3 px-4 text-sm font-medium whitespace-nowrap text-center transition-colors bg-indigo-50/50">
+                    <i class="fa-solid fa-glasses mr-1.5"></i>本文を読む
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="flex-grow max-w-6xl mx-auto w-full px-4 py-8 pb-40">
+
+        <!-- 1. 構成・要約 -->
+        <section id="view-overview" class="hidden-section">
+            <div class="bg-white p-6 rounded-xl shadow-sm border-l-8 border-indigo-600 mb-8">
+                <h2 class="text-2xl font-bold mb-3 text-gray-800">物語の二重構造分析</h2>
+                <p class="text-gray-600 leading-relaxed">
+                    この物語は、同一の時間軸・出来事を<strong class="text-indigo-700">「観察者（白石さん）」</strong>と<strong class="text-indigo-700">「当事者（倉橋くん）」</strong>という二つの異なる視点から描くことで、事実の裏に隠された心理的背景を浮き彫りにしています。
+                    <br>Aパートでは「不思議な現象への驚き」が、Bパートでは「現象に託された切実な願い」が描かれます。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Aパート -->
+                <div>
+                    <div class="flex items-center gap-3 mb-4 pb-2 border-b-2 border-pink-200">
+                        <span class="bg-pink-100 text-pink-700 font-bold px-3 py-1 rounded text-sm">Part A</span>
+                        <h3 class="text-xl font-bold text-gray-800">白石さんの視点 <span class="text-sm font-normal text-gray-500">（客観・現象）</span></h3>
+                    </div>
+                    <div class="space-y-4 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-gray-200 before:-z-10" id="overview-container-a"></div>
+                </div>
+
+                <!-- Bパート -->
+                <div>
+                    <div class="flex items-center gap-3 mb-4 pb-2 border-b-2 border-blue-200">
+                        <span class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded text-sm">Part B</span>
+                        <h3 class="text-xl font-bold text-gray-800">倉橋くんの視点 <span class="text-sm font-normal text-gray-500">（主観・心理）</span></h3>
+                    </div>
+                    <div class="space-y-4 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-gray-200 before:-z-10" id="overview-container-b"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 登場人物 -->
+        <section id="view-characters" class="hidden-section">
+            <div class="grid grid-cols-1 gap-8" id="characters-container"></div>
+        </section>
+
+        <!-- 3. キーワード -->
+        <section id="view-keywords" class="hidden-section">
+            <div class="bg-white p-5 rounded-xl shadow-sm mb-8 flex items-start gap-4">
+                <div class="bg-indigo-100 p-3 rounded-full text-indigo-600">
+                    <i class="fa-solid fa-magnifying-glass-chart text-xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">象徴と文脈の読解</h2>
+                    <p class="text-gray-600 text-sm mt-1">物語中の語句が持つ本来の意味に加え、文脈におけるメタファー（隠喩）を解説しています。</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="keywords-list-container"></div>
+        </section>
+
+        <!-- 4. 本文 -->
+        <section id="view-read" class="hidden-section">
+            <div class="bg-white px-6 py-12 md:px-16 md:py-20 rounded-xl shadow-md max-w-4xl mx-auto border border-gray-100">
+                <div id="novel-content" class="novel-text text-gray-800"></div>
+            </div>
+            <div class="text-center mt-12 mb-8">
+                <span class="inline-block px-4 py-1 border-t border-b border-gray-300 text-gray-400 text-sm tracking-widest">読了</span>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 注釈パネル -->
+    <div id="annotation-panel" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-indigo-100 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] transform translate-y-full transition-transform duration-300 ease-out z-[100] px-4 py-6 md:px-8 max-h-[60vh] overflow-y-auto">
+        <div class="max-w-4xl mx-auto relative">
+            <button onclick="app.closeAnnotation()" class="absolute -top-2 right-0 bg-gray-100 hover:bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center text-gray-500 transition-colors">
+                <i class="fa-solid fa-times"></i>
+            </button>
+            <div class="flex flex-col md:flex-row gap-4 md:gap-6">
+                <div class="flex-shrink-0">
+                    <span id="anno-type" class="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-bold rounded-full tracking-wider"></span>
+                </div>
+                <div class="flex-grow">
+                    <div class="flex items-baseline gap-3 mb-2">
+                        <h3 id="anno-term" class="text-2xl font-bold text-gray-900 font-serif"></h3>
+                        <p id="anno-yomi" class="text-sm text-gray-500 font-mono"></p>
+                    </div>
+                    <p id="anno-desc" class="text-base md:text-lg text-gray-700 leading-relaxed"></p>
+                    <div id="anno-context" class="mt-4 p-4 bg-indigo-50 rounded-lg border border-indigo-100 text-indigo-900 text-sm leading-relaxed"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // データ定義
+        const DATA = {
+            meta: {
+                title: "桜蝶",
+                author: "田丸 雅智"
+            },
+            content: [
+                {
+                    id: "part-a",
+                    label: "Ａパート（白石さんの視点）",
+                    text: `　白石さんが学校帰りに公園の前を通りかかると、同じクラスの倉橋君が一本の桜の木の前に立っていた。
+「何やってるの？」
+　白石さんが尋ねると、倉橋君は振り返ってこう言った。
+「桜蝶の旅立ちを見守ってて。」
+　そして、倉橋君はこんな話をし始めた。
+「春が来ると南から北へ、桜の木に留まりながら旅をする蝶がいて。それが、桜蝶っていう蝶で。この蝶がやってくると桜が一斉に咲き始めるから、桜の開花を告げる蝶だとも言われててね。僕はここで偶然見つけて毎日観察してたんだけど、そろそろ次の目的地に向かって飛び立つ気配を見せてるんだ。」
+　その時、倉橋君が「あっ。」と叫んだ。それと同時に信じられないことが起こった。目の前の桜の木から一斉に花びらが散ったかと思うと、地面に落ちることもなく、そのまま宙を飛び始めたのだ。よく見ると、それは花びらのような羽を持った淡いピンクの蝶だった。
+　蝶は渦を巻きながら天高く昇っていく。夕空を、ピンクの靄が北に向かって移動していく。
+　その美しい光景に見惚れながらも、白石さんはこう呟いた。
+「春とはもう、お別れなんだね……。」
+　なんだか寂しい思いにとらわれていると、倉橋君が口にした。
+「そうだね。でも、ほら、見てみなよ。」
+　その指さす方——南の空に目をやって、白石さんは声をあげた。緑の靄が飛んできているのが見えたのだ。
+　倉橋君はほほえんだ。
+「桜蝶はいなくなってしまうけど、今度は葉桜蝶が新しい季節を運んできてくれたみたいだね。」`
+                },
+                {
+                    id: "part-b",
+                    label: "Ｂパート（僕／倉橋君の視点）",
+                    text: `「何やってるの？」
+　声をかけられ振り返ると、クラスメイトの白石さんが立っていた。
+　僕は言った。
+「桜蝶の旅立ちを見守ってて。」
+　首をかしげる白石さんに、僕は桜蝶のことを教えてあげる。
+　僕が親の転勤でこの町にやってきたのは、春先のことだった。生まれ育った故郷を離れるのは寂しくて、特に友達との別れは本当につらかった。
+　そんな折、僕はこの公園で偶然にも桜蝶を見つけた。桜蝶——それは春が来ると南から北へと桜の木に留まりながら旅する蝶だ。この蝶がやってくると桜が一斉に咲き始めるので、桜の開花を告げる蝶だとも言われている……そう教えてくれたのは、故郷にいる親友だった。
+　僕は蝶を発見したその日から、公園へと毎日通った。そして、南の町から来た自分の境遇を桜蝶に重ねては、勝手に孤独を分け合ってきた。
+　けれど、そんな日々も、まもなく終わる——。
+　桜蝶が一斉に宙へと飛び上がったのは、次の瞬間のことだった。蝶はこれから旅立つのだ。さらに北の方へ向かって。
+　その時、飛んでいくピンクの靄を見つめながら、白石さんがポツリと言った。
+「春とはもう、お別れなんだね……。」
+　それを聞いて、ハッとなった。僕の頭に別れぎわの親友の言葉がよみがえってきたからだ。
+　——別れは終わりなんかじゃない。始まりなんだよ——。
+　僕は白石さんにこう言った。
+「そうだね。でも、ほら、見てみなよ。」
+　視線の先、南の空には緑の靄が浮かんでいる。
+「桜蝶はいなくなってしまうけど、今度は葉桜蝶が新しい季節を運んできてくれたみたいだね。」`
+                }
+            ],
+            structure: {
+                partA: [
+                    {
+                        title: "日常への介入",
+                        desc: "学校帰りというありふれた日常風景の中に、一本の桜の木と倉橋君という「立ち止まる存在」が描かれる。",
+                        tags: ["日常", "遭遇"]
+                    },
+                    {
+                        title: "幻想的な解説",
+                        desc: "倉橋君から「桜蝶」という不思議な存在について教えられる。読者と白石さんは同時にこの世界の非日常なルールを知る。",
+                        tags: ["ファンタジー", "伝承"]
+                    },
+                    {
+                        title: "可視化される別れ",
+                        desc: "桜蝶が一斉に飛び立つ現象を目の当たりにする。美しいが、同時に春の終わり（喪失）を強烈に意識させる。",
+                        tags: ["クライマックス", "喪失感"]
+                    },
+                    {
+                        title: "視点の誘導と再生",
+                        desc: "倉橋君に促され、去りゆくもの（北）から来るもの（南）へ視線を移すことで、新しい季節（葉桜蝶）を発見する。",
+                        tags: ["転換", "希望"]
+                    }
+                ],
+                partB: [
+                    {
+                        title: "孤独な観測者",
+                        desc: "白石さんに声をかけられる前、僕は一人で桜蝶を見ていた。転校生としての孤独な背景が明かされる。",
+                        tags: ["回想", "孤独"]
+                    },
+                    {
+                        title: "自己の投影",
+                        desc: "「南から北へ旅する蝶」に、転勤で故郷を離れた自分の境遇を重ね合わせ、孤独を慰めていた心理が語られる。",
+                        tags: ["共感", "投影"]
+                    },
+                    {
+                        title: "他者による気づき",
+                        desc: "白石さんの「春とはもうお別れ」という言葉がトリガーとなり、親友の「別れは始まり」という言葉がフラッシュバックする。",
+                        tags: ["覚醒", "記憶"]
+                    },
+                    {
+                        title: "意味の再構築",
+                        desc: "別れを単なる終わりではなく、次の始まりとして受け入れ直す。葉桜蝶の出現は、僕の内面的な成長と受容を象徴している。",
+                        tags: ["成長", "受容"]
+                    }
+                ]
+            },
+            characters: [
+                {
+                    name: "白石さん",
+                    role: "観察者 / 触媒",
+                    desc: "この物語の最初の視点人物。彼女は特別な背景を持たず、純粋な「驚き手」として機能する。彼女の「お別れなんだね」という無垢な呟きは、単なる感想に見えて、実は倉橋君の深層心理（親友との記憶）を呼び覚ます重要なスイッチの役割を果たしている。彼女自身もまた、倉橋君を通して「終わりは始まり」という新しい世界の見方を獲得する。",
+                    quote: "「春とはもう、お別れなんだね……。」",
+                    theme: "純粋な感受性と、変化への立ち会い"
+                },
+                {
+                    name: "倉橋君（僕）",
+                    role: "語り手 / 旅人",
+                    desc: "転勤族の少年。物理的な移動（転校）に伴う喪失感を抱えている。「桜蝶」を観察することは、現実逃避であると同時に、自分の境遇を肯定するための儀式だった。物語を通じて、彼は「過去を懐かしむだけの存在」から「未来（次の季節）を受け入れる存在」へと変容する。彼にとって葉桜蝶は、新しい町での生活を受け入れる準備ができた合図でもある。",
+                    quote: "「桜蝶の旅立ちを見守ってて。」",
+                    theme: "喪失の受容と、孤独からの脱却"
+                },
+                {
+                    name: "故郷の親友",
+                    role: "不在の賢者",
+                    desc: "回想の中にのみ登場する重要人物。倉橋君に桜蝶の知識を与え、精神的な支柱となっている。「別れは終わりなんかじゃない」という言葉は、本作全体のテーマを凝縮したメッセージであり、時間と距離を超えて倉橋君を救済する。",
+                    quote: "「別れは終わりなんかじゃない。始まりなんだよ」",
+                    theme: "記憶による救済"
+                }
+            ],
+            annotations: [
+                {
+                    key: "桜蝶",
+                    yomi: "さくらちょう",
+                    desc: "本作独自の幻想的な蝶。桜の花びらに擬態し、群れで移動することで開花や散り際を演出する。",
+                    context: "【文脈的意味】<br>「可視化された時間」の象徴。桜の花は通常、散って土に還る（消滅する）ものだが、桜蝶は「飛び立つ（移動する）」存在であるため、「死や終わり」ではなく「継続する命」として描かれている。これは倉橋君の転校（移動）とリンクする。",
+                    type: "象徴・幻想"
+                },
+                {
+                    key: "葉桜蝶",
+                    yomi: "はざくらちょう",
+                    desc: "桜蝶が去った後に飛来する、若葉色の蝶。季節が春から初夏へ移り変わることを告げる。",
+                    context: "【文脈的意味】<br>「再生と循環」の象徴。ピンク（春・過去・別れ）が去った後に、緑（新緑・未来・出会い）が必ずやってくるという自然の摂理を示す。悲しみのあとには必ず回復が訪れるという希望のメタファー。",
+                    type: "象徴・希望"
+                },
+                {
+                    key: "南から北へ",
+                    yomi: "みなみからきたへ",
+                    desc: "桜前線の移動ルートであり、桜蝶の渡りのルート。",
+                    context: "【文脈的意味】<br>倉橋君自身の移動経路（南の故郷→北のこの町）と重なる。また、心理的には「南＝温かい過去・親友のいる場所」から「北＝厳しい現実・未知の場所」へのベクトルを表すが、最後に葉桜蝶が南から来ることで、南との繋がりが断絶していないことが示唆される。",
+                    type: "地理・心理"
+                },
+                {
+                    key: "靄",
+                    yomi: "もや",
+                    desc: "無数の蝶が群れをなして飛ぶ様子。個々の輪郭が曖昧になり、一つの大きな色の塊として認識される状態。",
+                    context: "【文脈的意味】<br>現実と幻想の境界が曖昧になっている状態を示す。圧倒的な美しさとともに、掴みどころのない「季節の移ろい」そのものを視覚化している。",
+                    type: "表現・比喩"
+                },
+                {
+                    key: "境遇",
+                    yomi: "きょうぐう",
+                    desc: "その人が置かれている身の上や状況。",
+                    context: "【文脈的意味】<br>倉橋君は蝶に自分を重ねる（同一視する）ことで、自らの孤独を正当化しようとしていた。「蝶も旅をしているのだから、僕も旅をしているのだ」と言い聞かせるための投影対象。",
+                    type: "語彙・心理"
+                },
+                {
+                    key: "別れは終わりなんかじゃない",
+                    yomi: "わかれはおわりなんかじゃない",
+                    desc: "故郷の親友が別れ際に残した言葉。",
+                    context: "【文脈的意味】<br>物語の核心的テーマ（Core Message）。直線的な時間感覚（終わり＝THE END）を否定し、循環的な時間感覚（終わり＝NEXT START）を提示するパラダイムシフトの言葉。",
+                    type: "主題・名言"
+                },
+                {
+                    key: "視線の先",
+                    yomi: "しせんのさき",
+                    desc: "目が見ている方向。物理的な視線の移動。",
+                    context: "【文脈的意味】<br>過去（去りゆく桜蝶・北）から未来（やってくる葉桜蝶・南）への意識の切り替え（Switching）を表すアクション。倉橋君が白石さんに視線を誘導することで、彼自身も前を向くことができた。",
+                    type: "動作・変化"
+                },
+                {
+                    key: "一斉に",
+                    yomi: "いっせいに",
+                    desc: "多くのものが同時に行動を起こすさま。",
+                    context: "【文脈的意味】<br>静止していた時間が動き出す瞬間（Momentum）を強調する。溜め込まれていた感情や季節のエネルギーが一気に開放されるカタルシスを演出する語。",
+                    type: "修飾語"
+                },
+                {
+                    key: "偶然",
+                    yomi: "ぐうぜん",
+                    desc: "思いがけず起こること。",
+                    context: "【文脈的意味】<br>白石さんが通りかかったのも、倉橋君が蝶を見つけたのも「偶然」だが、物語においてはそれが必然的な救いへと繋がる。日常の中に潜む小さな奇跡（Serendipity）を示唆する。",
+                    type: "語彙"
+                }
+            ]
+        };
+
+        const app = {
+            state: {
+                currentTab: 'overview', 
+                scrollPositions: {}
+            },
+
+            init() {
+                this.renderHeader();
+                this.renderOverview();
+                this.renderCharacters();
+                this.renderKeywords();
+                this.renderNovelText();
+
+                const savedScroll = localStorage.getItem('sakuracho_scroll_pos');
+                if (savedScroll) {
+                    this.state.scrollPositions['read'] = parseInt(savedScroll, 10);
+                }
+
+                this.switchTab(this.state.currentTab);
+            },
+
+            renderHeader() {
+                document.getElementById('header-title').textContent = DATA.meta.title;
+                document.getElementById('header-author').textContent = DATA.meta.author;
+            },
+
+            switchTab(tabId) {
+                if (this.state.currentTab === 'read') {
+                    const currentY = window.scrollY;
+                    this.state.scrollPositions['read'] = currentY;
+                    localStorage.setItem('sakuracho_scroll_pos', currentY);
+                }
+
+                this.state.currentTab = tabId;
+
+                const tabs = ['overview', 'characters', 'keywords', 'read'];
+                tabs.forEach(t => {
+                    const section = document.getElementById(`view-${t}`);
+                    const btn = document.getElementById(`btn-${t}`);
+                    
+                    if (t === tabId) {
+                        section.classList.remove('hidden-section');
+                        btn.classList.add('tab-active');
+                        btn.classList.remove('tab-inactive');
+                    } else {
+                        section.classList.add('hidden-section');
+                        btn.classList.remove('tab-active');
+                        btn.classList.add('tab-inactive');
+                    }
+                });
+
+                if (tabId === 'read' && this.state.scrollPositions['read']) {
+                    setTimeout(() => {
+                        window.scrollTo(0, this.state.scrollPositions['read']);
+                    }, 0);
+                } else {
+                    window.scrollTo(0, 0);
+                }
+                this.closeAnnotation();
+            },
+
+            renderOverview() {
+                const renderList = (items, containerId, colorClass) => {
+                    const container = document.getElementById(containerId);
+                    let html = '';
+                    items.forEach((item, index) => {
+                        html += `
+                            <div class="relative pl-8 pb-4 group">
+                                <div class="absolute left-0 top-1 w-8 h-8 rounded-full bg-white border-2 border-${colorClass}-200 text-${colorClass}-600 flex items-center justify-center font-bold text-sm z-10 shadow-sm group-hover:scale-110 transition-transform">
+                                    ${index + 1}
+                                </div>
+                                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                                    <h4 class="font-bold text-gray-800 mb-1 flex items-center gap-2">
+                                        ${item.title}
+                                    </h4>
+                                    <p class="text-gray-600 text-sm mb-2 leading-relaxed">${item.desc}</p>
+                                    <div class="flex flex-wrap gap-1.5">
+                                        ${item.tags.map(tag => `<span class="px-2 py-0.5 bg-gray-50 text-gray-500 text-xs rounded border border-gray-200">#${tag}</span>`).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    container.innerHTML = html;
+                };
+
+                renderList(DATA.structure.partA, 'overview-container-a', 'pink');
+                renderList(DATA.structure.partB, 'overview-container-b', 'blue');
+            },
+
+            renderCharacters() {
+                const container = document.getElementById('characters-container');
+                let html = '';
+                DATA.characters.forEach(char => {
+                    html += `
+                        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 flex flex-col md:flex-row">
+                            <div class="bg-gradient-to-br from-indigo-50 to-white p-6 md:w-1/3 border-b md:border-b-0 md:border-r border-gray-100 flex flex-col justify-center">
+                                <div class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1">${char.role}</div>
+                                <h3 class="text-2xl font-bold text-gray-800 mb-3">${char.name}</h3>
+                                <div class="mt-auto">
+                                    <div class="text-xs text-gray-400 font-bold mb-1">THEME</div>
+                                    <div class="text-sm text-gray-700 font-medium">${char.theme}</div>
+                                </div>
+                            </div>
+                            <div class="p-6 md:w-2/3">
+                                <p class="text-gray-700 leading-relaxed mb-6 text-sm md:text-base">
+                                    ${char.desc}
+                                </p>
+                                <blockquote class="relative bg-gray-50 p-4 rounded-lg border-l-4 border-indigo-400">
+                                    <i class="fa-solid fa-quote-left absolute top-2 left-2 text-gray-200 text-xl"></i>
+                                    <p class="italic text-gray-700 relative z-10 pl-4 font-serif">
+                                        ${char.quote}
+                                    </p>
+                                </blockquote>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            },
+
+            renderKeywords() {
+                const container = document.getElementById('keywords-list-container');
+                let html = '';
+                DATA.annotations.forEach(anno => {
+                    html += `
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer group" onclick="app.showAnnotation('${anno.key}', false)">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="px-2 py-0.5 rounded text-xs font-bold bg-gray-100 text-gray-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">${anno.type}</span>
+                                <i class="fa-solid fa-arrow-up-right-from-square text-gray-300 text-sm group-hover:text-indigo-400"></i>
+                            </div>
+                            <h4 class="font-bold text-lg text-gray-800 mb-1 group-hover:text-indigo-700">${anno.key}</h4>
+                            <p class="text-xs text-gray-500 font-mono mb-2">読み：${anno.yomi}</p>
+                            <p class="text-sm text-gray-600 line-clamp-2">${anno.desc}</p>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            },
+
+            renderNovelText() {
+                const container = document.getElementById('novel-content');
+                let fullHtml = '';
+
+                DATA.content.forEach(part => {
+                    fullHtml += `<div class="mt-12 mb-8 pb-3 border-b-2 border-indigo-100 text-xl font-bold text-indigo-900 font-sans tracking-wider">${part.label}</div>`;
+                    
+                    // シンプルなエスケープ処理
+                    let safeText = part.text
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;");
+
+                    const sortedKeys = [...DATA.annotations].sort((a, b) => b.key.length - a.key.length);
+                    const replacements = [];
+
+                    // 1. キーワードを一時的なプレースホルダーに置換（長い順）
+                    sortedKeys.forEach((anno, index) => {
+                        const regex = new RegExp(anno.key, "g");
+                        const placeholder = `___PH${index}___`;
+                        
+                        if (safeText.match(regex)) {
+                            safeText = safeText.replace(regex, placeholder);
+                            replacements.push({
+                                ph: placeholder,
+                                // isSimple = true で呼び出し（本文中は簡易解説）
+                                html: `<span class="keyword-highlight" onclick="app.showAnnotation('${anno.key}', true)">${anno.key}</span>`
+                            });
+                        }
+                    });
+
+                    // 2. プレースホルダーをHTMLタグに復元
+                    replacements.forEach(rep => {
+                        safeText = safeText.split(rep.ph).join(rep.html);
+                    });
+
+                    const paragraphs = safeText.split(/\n/);
+                    let pHtml = '';
+                    paragraphs.forEach(line => {
+                        if (line.trim() === "") {
+                            pHtml += '<br class="my-4">'; 
+                        } else {
+                            pHtml += `<p class="mb-5 leading-loose">${line}</p>`;
+                        }
+                    });
+
+                    fullHtml += pHtml;
+                });
+
+                container.innerHTML = fullHtml;
+            },
+
+            showAnnotation(key, isSimple = false) {
+                const anno = DATA.annotations.find(a => a.key === key);
+                if (!anno) return;
+
+                document.getElementById('anno-term').textContent = anno.key;
+                document.getElementById('anno-yomi').textContent = anno.yomi;
+                document.getElementById('anno-desc').textContent = anno.desc;
+                document.getElementById('anno-type').textContent = anno.type;
+                
+                const contextEl = document.getElementById('anno-context');
+                
+                if (isSimple) {
+                    // 本文読書中は文脈解説（詳細）を隠す
+                    contextEl.style.display = 'none';
+                } else {
+                    // 語句・象徴タブからは文脈解説（詳細）を表示
+                    contextEl.style.display = 'block';
+                    contextEl.innerHTML = anno.context;
+                }
+
+                const panel = document.getElementById('annotation-panel');
+                panel.classList.remove('translate-y-full');
+            },
+
+            closeAnnotation() {
+                const panel = document.getElementById('annotation-panel');
+                panel.classList.add('translate-y-full');
+            }
+        };
+
+        // DOMロード後に初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
