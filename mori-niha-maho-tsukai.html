@@ -3,525 +3,633 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>森には魔法つかいがいる - 読解学習サイト</title>
-    <!-- Tailwind CSS (スタイリング用フレームワーク) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Noto Serif JP (明朝体: 本文の可読性向上のため) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    <title>森には魔法つかいがいる - 畠山 重篤</title>
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        serif: ['"Noto Serif JP"', 'serif'],
-                        sans: ['"Helvetica Neue"', 'Arial', 'sans-serif'],
-                    },
-                    colors: {
-                        forest: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            600: '#16a34a',
-                            800: '#166534',
-                            900: '#14532d',
-                        },
-                        sea: {
-                            50: '#f0f9ff',
-                            600: '#0284c7',
-                            900: '#0c4a6e',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-        /* カスタムスタイル */
+        :root {
+            --font-sans: 'Noto Sans JP', sans-serif;
+            --font-serif: 'Noto Serif JP', serif;
+        }
         body {
-            /* ダークモード対応のような目に優しい背景色 */
+            font-family: var(--font-sans);
             background-color: #f8fafc;
-            color: #1e293b;
+            color: #334155;
+            overflow: hidden; /* Prevent body scroll, handle in #app */
         }
         
-        /* 読書用テキストのスタイル */
+        /* Typography for the main text */
         .prose-text {
-            font-feature-settings: "palt";
-            line-height: 2.0;
-            text-align: justify;
+            font-family: var(--font-serif);
+            line-height: 2.2;
+            letter-spacing: 0.05em;
+            font-size: 1.125rem;
         }
 
-        /* アコーディオンアニメーション */
-        .accordion-content {
-            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
-        }
-        .accordion-content.open {
-            max-height: 1000px; /* 十分な高さ */
-            opacity: 1;
-        }
-
-        /* 重要な語句のハイライト（本文中） */
-        .highlight-word {
-            border-bottom: 2px solid #16a34a;
-            background-color: rgba(22, 163, 74, 0.1);
+        /* Interactive terms in text */
+        .interactive-term {
+            border-bottom: 2px solid #60a5fa; /* 青色の下線 */
+            color: #2563eb; /* 青文字 */
+            font-weight: 700;
             cursor: pointer;
-            padding: 0 2px;
-            border-radius: 4px;
             transition: all 0.2s;
+            padding: 0 2px; /* 背景色のためのパディング */
+            background-color: rgba(37, 99, 235, 0.05); /* 薄い青背景 */
+            border-radius: 2px;
         }
-        .highlight-word:hover {
-            background-color: rgba(22, 163, 74, 0.3);
-            color: #14532d;
+        .interactive-term:hover {
+            background-color: #dbeafe; /* ホバー時の濃い背景 */
+            color: #1d4ed8;
+            border-bottom-color: #1d4ed8;
         }
 
-        /* ヘッダーのタブのスクロール（モバイル用） */
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
         }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Transitions */
+        /* .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+        .fade-enter-from, .fade-leave-to {
+            opacity: 0;
+        } */
+
+        .slide-up-enter-active, .slide-up-leave-active {
+            transition: transform 0.3s ease-out;
+        }
+        .slide-up-enter-from, .slide-up-leave-to {
+            transform: translateY(100%);
         }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen flex flex-col">
+<body class="h-screen w-screen bg-slate-50">
 
-    <!-- 
-    ========================================
-    グローバルヘッダー (固定表示)
-    ========================================
-    -->
-    <header class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur shadow-md z-50 border-b border-gray-200">
-        <div class="max-w-4xl mx-auto">
-            <!-- タイトルエリア -->
-            <div class="px-4 py-3 text-center border-b border-gray-100">
-                <h1 class="text-xl font-bold text-forest-900 font-serif" id="header-title">Loading...</h1>
-                <p class="text-sm text-gray-500" id="header-author">Loading...</p>
+    <div id="app" class="flex flex-col h-full w-full max-w-5xl mx-auto bg-white shadow-2xl overflow-hidden relative">
+
+        <!-- Header -->
+        <header class="bg-white/95 backdrop-blur z-30 border-b border-slate-200 flex-none">
+            <div class="px-4 py-3">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <!-- Title -->
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-800 tracking-wide font-serif leading-tight">{{ data.meta.title }}</h1>
+                        <p class="text-sm text-slate-500">{{ data.meta.author }}</p>
+                    </div>
+                    
+                    <!-- Nav -->
+                    <nav class="flex bg-slate-100 p-1 rounded-lg overflow-x-auto no-scrollbar">
+                        <button 
+                            v-for="item in navItems" 
+                            :key="item.id"
+                            @click="switchView(item.id)"
+                            :class="['px-3 py-2 text-sm rounded-md whitespace-nowrap transition-all flex items-center gap-2 flex-shrink-0', 
+                                currentView === item.id 
+                                ? 'bg-white text-blue-700 shadow-sm font-bold' 
+                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                            ]"
+                        >
+                            <i :data-lucide="item.icon" class="w-4 h-4"></i>
+                            {{ item.label }}
+                        </button>
+                    </nav>
+                </div>
             </div>
-            <!-- ナビゲーションメニュー -->
-            <nav class="flex overflow-x-auto hide-scrollbar">
-                <button onclick="switchTab('overview')" class="nav-btn flex-1 min-w-[100px] py-3 text-sm font-medium text-gray-500 hover:text-forest-600 border-b-2 border-transparent transition-colors" data-tab="overview">
-                    大まかな内容
-                </button>
-                <button onclick="switchTab('characters')" class="nav-btn flex-1 min-w-[100px] py-3 text-sm font-medium text-gray-500 hover:text-forest-600 border-b-2 border-transparent transition-colors" data-tab="characters">
-                    登場人物・要素
-                </button>
-                <button onclick="switchTab('keywords')" class="nav-btn flex-1 min-w-[100px] py-3 text-sm font-medium text-gray-500 hover:text-forest-600 border-b-2 border-transparent transition-colors" data-tab="keywords">
-                    キーワード
-                </button>
-                <button onclick="switchTab('read')" class="nav-btn flex-1 min-w-[100px] py-3 text-sm font-medium text-gray-500 hover:text-forest-600 border-b-2 border-transparent transition-colors" data-tab="read">
-                    本文を読む
-                </button>
-            </nav>
+        </header>
+
+        <!-- Main Content (Scrollable) -->
+        <main ref="scrollContainer" class="flex-1 overflow-y-auto custom-scroll relative bg-[#fdfbf7]" @scroll="handleScroll">
+            <div class="max-w-3xl mx-auto px-4 py-8 md:py-12 min-h-full">
+
+                <!-- VIEW 1: Overview (Timeline Infographic) -->
+                <div v-if="currentView === 'overview'" key="overview" class="space-y-8">
+                    <div class="flex items-center gap-3 border-b-2 border-slate-100 pb-3 mb-8">
+                        <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                            <i data-lucide="git-commit-vertical" class="w-6 h-6"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800">物語の時系列・構成</h2>
+                    </div>
+
+                    <!-- Timeline Container -->
+                    <div class="relative pl-6 md:pl-8 space-y-12 before:content-[''] before:absolute before:left-[11px] md:before:left-[15px] before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-200">
+                        
+                        <div v-for="(part, index) in data.structure" :key="index" class="relative group">
+                            <!-- Timeline Node -->
+                            <div class="absolute -left-[34px] md:-left-[39px] top-0 w-8 h-8 md:w-10 md:h-10 rounded-full border-4 border-white bg-blue-500 shadow-md z-10 flex items-center justify-center text-white font-bold text-sm md:text-base">
+                                {{ index + 1 }}
+                            </div>
+
+                            <!-- Connector Line (visual aid for active item) -->
+                            <div class="absolute top-4 -left-4 w-4 h-0.5 bg-blue-200 hidden md:block"></div>
+
+                            <!-- Content Card -->
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-300 relative group-hover:border-blue-300">
+                                
+                                <!-- Card Header -->
+                                <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                                    <h3 class="font-bold text-lg md:text-xl text-slate-800 flex items-center gap-2">
+                                        {{ part.title }}
+                                    </h3>
+                                    <div class="flex gap-1">
+                                         <span v-for="tag in part.tags" :key="tag" class="text-[10px] uppercase tracking-wider px-2 py-1 bg-white text-slate-500 border border-slate-200 rounded font-bold">
+                                            {{ tag }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="p-6">
+                                    <p class="text-slate-600 leading-relaxed font-serif text-base md:text-lg">
+                                        {{ part.summary }}
+                                    </p>
+                                </div>
+                                
+                                <!-- Decorative triangular pointer on the left -->
+                                <div class="absolute top-3 md:top-4 -left-1.5 w-3 h-3 bg-slate-50 border-l border-b border-slate-200 transform rotate-45 group-hover:border-blue-300 transition-colors"></div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline End Dot -->
+                         <div class="relative">
+                            <div class="absolute -left-[27px] md:-left-[31px] top-0 w-4 h-4 rounded-full border-2 border-white bg-slate-300"></div>
+                            <span class="text-xs text-slate-400 pl-2">現在へと続く未来</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- VIEW 2: Elements/Characters -->
+                <div v-else-if="currentView === 'elements'" key="elements" class="space-y-8">
+                    <div class="flex items-center gap-3 border-b-2 border-slate-100 pb-3 mb-6">
+                        <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800">登場人物・要素分析</h2>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-5">
+                        <div v-for="(item, index) in data.elements" :key="index" 
+                                class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+                                @click="openModal('element', item)">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="font-bold text-xl text-slate-800 group-hover:text-blue-600 transition-colors">{{ item.name }}</h3>
+                                <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded border border-slate-200">{{ item.role }}</span>
+                            </div>
+                            <p class="text-sm text-slate-600 line-clamp-3 mb-4 leading-relaxed">{{ item.description }}</p>
+                            <div class="pt-3 border-t border-slate-100 flex items-center text-blue-600 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
+                                分析を見る <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 3: Keywords -->
+                <div v-else-if="currentView === 'keywords'" key="keywords" class="space-y-8">
+                        <div class="flex items-center gap-3 border-b-2 border-slate-100 pb-3 mb-6">
+                        <div class="p-2 bg-amber-100 text-amber-600 rounded-lg">
+                            <i data-lucide="key" class="w-6 h-6"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800">重要なキーワード・象徴</h2>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+                        <p class="text-slate-500 mb-6 text-sm">以下のキーワードをタップすると、作品内での意味や定義が表示されます。</p>
+                        <div class="flex flex-wrap gap-3">
+                            <button v-for="(kw, index) in data.keywords" :key="index"
+                                    @click="openModal('keyword', kw)"
+                                    class="px-4 py-3 bg-slate-50 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-200 text-slate-700 border border-slate-200 rounded-lg transition-all text-sm font-bold shadow-sm">
+                                {{ kw.term }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 4: Read Text -->
+                <div v-else-if="currentView === 'read'" key="read" class="pb-32">
+                    <div class="max-w-2xl mx-auto bg-white p-8 md:p-12 shadow-sm rounded-none md:rounded-lg">
+                            <h2 class="text-3xl font-serif font-bold text-center text-slate-800 mb-2">{{ data.meta.title }}</h2>
+                            <p class="text-center text-slate-500 font-serif mb-12">{{ data.meta.author }}</p>
+
+                        <!-- Text Rendering -->
+                        <div v-for="(paragraph, index) in processedText" :key="index" 
+                                class="prose-text text-slate-800 mb-8 text-justify leading-loose"
+                                @click="handleTextClick($event)"
+                                v-html="paragraph">
+                        </div>
+                        
+                        <div class="mt-16 pt-8 border-t border-slate-100 text-center text-slate-400 text-sm">
+                            [ 完 ]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Sheet (Inline Annotation) -->
+        <transition name="slide-up">
+            <div v-if="activeAnnotation" 
+                 class="fixed bottom-0 left-0 right-0 z-40 p-4 md:p-6 flex justify-center pointer-events-none">
+                <div class="bg-white/95 backdrop-blur-md shadow-2xl border border-slate-200 rounded-2xl w-full max-w-2xl pointer-events-auto p-6 relative ring-1 ring-black/5">
+                    <button @click="activeAnnotation = null" class="absolute right-4 top-4 p-1 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full hover:bg-slate-200 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    
+                    <div class="pr-8">
+                        <div class="flex flex-col mb-2">
+                            <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded w-fit mb-1 uppercase tracking-wider">Keyword</span>
+                            <span class="text-xs text-slate-500 font-bold">{{ activeAnnotation.reading }}</span>
+                            <h3 class="text-xl font-bold text-slate-900">{{ activeAnnotation.term }}</h3>
+                        </div>
+                        <p class="text-slate-700 text-sm leading-relaxed">{{ activeAnnotation.description }}</p>
+                        <div class="mt-3 pt-3 border-t border-slate-100">
+                             <p class="text-xs text-slate-500">{{ activeAnnotation.explanation }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Detailed Modal -->
+        <div v-if="modalData" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" @click="closeModal"></div>
+            <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[85vh] overflow-y-auto relative z-10 animate-in zoom-in-95 duration-200 flex flex-col">
+                
+                <!-- Modal Header -->
+                <div class="sticky top-0 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between z-10">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                        {{ modalType === 'element' ? 'Character / Element' : 'Keyword Analysis' }}
+                    </span>
+                    <button @click="closeModal" class="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <div class="p-8 overflow-y-auto">
+                    <!-- Element Modal Content -->
+                    <div v-if="modalType === 'element'" class="space-y-6">
+                        <div>
+                            <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold mb-3 shadow-sm border border-emerald-200">{{ modalData.role }}</span>
+                            <h3 class="text-3xl font-bold text-slate-800 font-serif">{{ modalData.name }}</h3>
+                        </div>
+                        
+                        <p class="text-slate-700 leading-relaxed">{{ modalData.description }}</p>
+                        
+                        <div class="bg-slate-50 p-6 rounded-xl border-l-4 border-emerald-400 relative">
+                            <i data-lucide="quote" class="w-8 h-8 text-emerald-200 absolute top-4 right-4"></i>
+                            <p class="italic text-slate-700 font-serif relative z-10">"{{ modalData.quote }}"</p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                                <i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i>
+                                変化・特徴
+                            </h4>
+                            <p class="text-sm text-slate-600 leading-relaxed">{{ modalData.evolution }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Keyword Modal Content -->
+                    <div v-if="modalType === 'keyword'" class="space-y-6">
+                        <div>
+                            <span class="text-sm text-slate-500 font-bold block mb-1">{{ modalData.reading }}</span>
+                            <h3 class="text-2xl font-bold text-slate-800 mb-1">{{ modalData.term }}</h3>
+                            <div class="h-1 w-16 bg-amber-400 rounded-full"></div>
+                        </div>
+                        
+                        <p class="text-lg text-slate-700 leading-relaxed">{{ modalData.explanation }}</p>
+                        
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
+                                <i data-lucide="book-open" class="w-3 h-3"></i>
+                                文脈
+                            </h4>
+                            <p class="text-sm text-slate-600 font-serif">...{{ modalData.context }}...</p>
+                        </div>
+
+                         <div class="pt-4 border-t border-slate-100">
+                             <h4 class="text-xs font-bold text-slate-400 uppercase mb-1">基本定義</h4>
+                             <p class="text-sm text-slate-500">{{ modalData.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </header>
 
-    <!-- ヘッダーの高さ分のスペーサー -->
-    <div class="h-[110px]"></div>
-
-    <!-- 
-    ========================================
-    メインコンテンツエリア
-    ========================================
-    -->
-    <main class="flex-grow max-w-3xl mx-auto w-full px-4 py-6 pb-24">
-
-        <!-- 1. 大まかな内容 (Overview) -->
-        <section id="view-overview" class="hidden animate-fade-in">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-l-4 border-forest-600 pl-4">構成とあらすじ</h2>
-            <div id="overview-list" class="space-y-4">
-                <!-- JSで生成 -->
-            </div>
-        </section>
-
-        <!-- 2. 登場人物・要素分析 (Characters) -->
-        <section id="view-characters" class="hidden animate-fade-in">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-l-4 border-sea-600 pl-4">登場人物・要素分析</h2>
-            <div id="character-list" class="grid gap-4 md:grid-cols-2">
-                <!-- JSで生成 -->
-            </div>
-        </section>
-
-        <!-- 3. キーワード・象徴 (Keywords) -->
-        <section id="view-keywords" class="hidden animate-fade-in">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 border-l-4 border-yellow-600 pl-4">重要なキーワード</h2>
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                <p class="text-sm text-gray-500 mb-4">※項目をタップして詳細を確認できます</p>
-                <div id="keyword-list" class="space-y-2">
-                    <!-- JSで生成 -->
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. 本文 (Read Text) -->
-        <section id="view-read" class="hidden animate-fade-in">
-            <div class="bg-white p-6 md:p-10 rounded-lg shadow-md border border-gray-100">
-                <h2 class="text-3xl font-bold mb-8 text-center font-serif text-gray-900" id="read-title"></h2>
-                <div id="text-content" class="prose-text text-lg text-gray-800 font-serif">
-                    <!-- JSで生成 -->
-                </div>
-            </div>
-            <!-- 読書位置保存の通知 -->
-            <div id="scroll-toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-2 px-4 rounded-full opacity-0 transition-opacity pointer-events-none">
-                読書位置を保存しました
-            </div>
-        </section>
-
-    </main>
-
-    <!-- 
-    ========================================
-    注釈・用語解説モーダル (本文閲覧時に下部から表示)
-    ========================================
-    -->
-    <div id="annotation-modal" class="fixed inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] transform translate-y-full transition-transform duration-300 z-50 border-t border-forest-100">
-        <div class="p-6 max-w-3xl mx-auto relative">
-            <button onclick="closeAnnotation()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 bg-gray-100 rounded-full p-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-            <div class="pr-8">
-                <div class="flex items-baseline gap-3 mb-2">
-                    <h3 id="modal-term" class="text-2xl font-bold text-forest-800 font-serif"></h3>
-                    <span id="modal-reading" class="text-sm text-gray-500"></span>
-                </div>
-                <p id="modal-desc" class="text-gray-700 leading-relaxed"></p>
-            </div>
-        </div>
     </div>
 
-    <!-- JavaScript ロジック -->
     <script>
-        /**
-         * ======================================================================================
-         * 1. 作品データ（ここを編集することで内容を差し替え可能）
-         * ======================================================================================
-         */
-        const STORY_DATA = {
-            title: "森には魔法つかいがいる",
-            author: "畠山 重篤",
-            // 本文データ: 配列の各要素が段落になります
-            textParagraphs: [
-                "　もう六十年以上も昔、私が中学生の頃のことです。私が住む宮城県の気仙沼湾の静かな入り江、舞根に「かき研究所」が設立されました。所長は世界的に有名なカキ博士、東北大学の今井丈夫先生です。今井先生は、「世界中のカキを集めてカキの種（カキの赤ちゃん）をタンクの中で産卵させ、育てたい。それを、カキ養殖をする漁師さんの生活に役立てたい。」と考えていました。",
-                "　私は毎日のように、学校から帰ると研究所に遊びに行き、若い研究者たちからいろいろなことを教わりました。",
-                "　ある日のことです。いつものように研究所を訪ねると、カキの赤ちゃんに食べさせる植物プランクトンの培養がうまくいかないと、皆、深刻な顔をしていました。",
-                "　そこへ今井先生がやってきて、こう言ったのです。「雑木林へ行って、腐葉土を集めてきなさい。」若い海の研究者たちはびっくりしています。「えっ、山に行くんですか。」「腐葉土を水に溶かしてろ過しなさい。そして、殺菌してプランクトンの培養タンクに入れてみなさい。」と、先生は指示しました。",
-                "　二、三日して研究所に行ってみると、「プランクトンが増えたよ。」と、研究者たちがにこにこしていました。",
-                "　今井先生が語ってくれました。「若い頃、アメリカに勉強に行って、同じようなことがあった。先生に、〝それが何なのかはわからないが、森には魔法つかいがいる〟と教えられたんだよ。」",
-                "　〝森には魔法つかいがいる〟――。魔法つかいとは何か、その正体がわかったのは、それから三十年後のことです。",
-                "　昭和三十年代から四十年代は工業優先の時代でした。干潟は埋め立てられて工場が建ち、工場廃水が海にたれ流しにされました。川の流域も開発が進み、そのしわ寄せは、川が海に流れ込む汽水域、つまり河口に集中するようになっていました。",
-                "　カキの養殖場は、日本中、いえ、世界中どこでも汽水域、つまり河口です。そこで育つカキの好きな植物プランクトンは、「珪藻」という種類です。ところが、海が汚れて「渦鞭毛藻」という赤潮を起こすプランクトンが大発生するようになりました。こうなると、カキの成長が悪くなり、ときには死んでしまいます。",
-                "　一九六二（昭和三十七）年、水産高校を卒業した私は、家業のカキ養殖業を継いで、漁師になっていました。きれいな海を取り戻すにはどうしたらいいのだろう。――仲間たちと話し合っていて思い出したのは、中学生の時に聞いた〝森には魔法つかいがいる〟という今井先生の言葉です。",
-                "　私は、はっとしました。今まで海のほうばかり向いて考えていましたが、森を見なければいけないのではないかと気がついたのです。",
-                "　そこで、気仙沼湾に注ぐ大川の河口から上流に向かって歩いてみました。",
-                "　やはり山が荒れていました。山には、手入れのされていない杉林が広がっています。間伐されない杉林には日の光が入らず、下草が生えていません。そのようなところには虫や鳥もいません。土はぱさぱさに乾いています。大雨が降るとたちまち海に泥水が流れてくるのは、このためだとわかりました。",
-                "　水田地帯に行ってみると、しいんとしています。生き物の気配が感じられません。レイチェル＝カーソンが書いた『沈黙の春』という本を思い出しました。農薬や除草剤を大量に使うようになった農地から生き物が姿を消し、静かになってしまったというストーリーです。",
-                "　私はそこで、川の流域に暮らしている人たちと、海で仕事をする漁師たちとの間で、「森と川と海は一つなのだ。」という価値観を共有しなければならないと思いました。",
-                "　そのためにはどうすればいいのか、いろいろ考えて始めたのが、漁師による森づくり〝森は海の恋人〟です。大川上流の室根山に、落葉広葉樹を植える運動です。一九八九（平成元）年九月のことでした。",
-                "　そしてその翌年、北海道大学の松永勝彦先生と出会い、森と海とをつなぐ科学的なメカニズムを知ることができたのです。",
-                "「森林は海に鉄を供給する役目をしています。」と、松永先生は話し始めました。「えっ、鉄？」意外なキーワードの登場です。それはこういうことでした。",
-                "　皆さんも、鉄が人間にとって大切な栄養素であることは知っていますよね。",
-                "　血液中にある赤血球は、鉄を含んだ細胞です。赤血球はその鉄に酸素をつけて、体のすみずみまで運んでいます。鉄は酸素と仲よしなのです。酸素のおかげで、私たちは脳をはたらかせ、体を動かすことができます。酸素を届けた赤血球は、今度は不要になった二酸化炭素を受け取り、肺から放出します。これが呼吸の仕組みです。",
-                "　酸素や二酸化炭素をつけたり放したり、……こんな芸当をこれほどまで効率よくできるのは鉄だけです。",
-                "　では、植物と鉄とは、どのような関係にあるのでしょう。",
-                "　皆さんは、植物が光合成をしているのは知っていますね。植物の緑色のもとである葉緑素が光合成を行っています。その葉緑素を作るのには、鉄が必要なのだそうです。",
-                "　それから、植物が育つためには、肥料の中の窒素やリン酸などを取り込まなければなりません。そのときにも、鉄の助けが不可欠です。",
-                "　鉄は、岩石や土の中に含まれています。実は、地球の目方の三分の一は鉄なのだそうです。地球は鉄の惑星なのです。",
-                "　ところが、水に溶けだした鉄は、酸素と出会うと粒子（粒々の塊）となって沈んでしまいます。ですから、海にはもともと鉄が少なく、そのために植物プランクトンが少ないのです。",
-                "「けれど、沈まない鉄があることがわかったのですよ！」\nと、松永先生は言いました。",
-                "　カキの餌となる植物プランクトンも植物です。カキの養殖場である河口では、周りの海に比べ、植物プランクトンがたくさん発生しています。ということは、そう！　川の水が、沈まない鉄を運んでいるということではないでしょうか。",
-                "「森林の腐葉土では、『フルボ酸』という物質が生まれます。フルボ酸が鉄に結びつくと、重い粒子にはならずに『フルボ酸鉄』となって、川の水に流されてきて、海中に浮遊するのです。」",
-                "　〝森には魔法つかいがいる〟――魔法つかいの正体は、「フルボ酸鉄」だったのです。",
-                "　そして、それからまた三十年が過ぎました。漁師による森づくりは現在まで続き、森は大きくなり、川もきれいになりました。流域の人々が同じ気持ちで川を汚さないように取り組んだ結果、豊かな海がよみがえっていました。",
-                "　しかし、活動を続けて二十三年めの二〇一一（平成二十三）年三月、東日本大震災が起きました。津波によって海は壊滅的な被害を受け、海から生き物の姿が全く消えてしまったのです。",
-                "　海は死んだと思いました。ところが、五月になると少しずつ生き物が戻ってきました。大津波のあとの環境調査に来られた京都大学の田中克先生が、顕微鏡をのぞいておっしゃったのです。",
-                "「海の中には、カキが食べきれないほど植物プランクトンがいます。これは、長年、海の背景にある森と川の環境を整えてきたことが功を奏しています。」と。",
-                "　これで、養殖業は再開できると、確信した瞬間でした。震災でも、森は壊れませんでした。そして川は、森の鉄を海へと届け続けていました。",
-                "　やはり、森には魔法つかいがいたのです。"
-            ],
-            // 構成データ
+        // Data Source
+        const siteData = {
+            meta: {
+                title: "森には魔法つかいがいる",
+                author: "畠山 重篤"
+            },
             structure: [
-                { title: "序章：中学生時代の記憶", summary: "著者が中学生の頃、カキ研究所で今井先生から「森には魔法つかいがいる」という不思議な言葉を聞く。" },
-                { title: "問題提起：海の汚染と気づき", summary: "カキ養殖を継いだ著者は、海の汚染と赤潮に悩む。森の荒廃が海に悪影響を与えていることに気づき、「森と海は一つ」と考える。" },
-                { title: "行動：森づくり運動の開始", summary: "「森は海の恋人」運動を開始し、植樹を行う。後に松永先生と出会い、鉄と腐葉土の科学的関係を知る。" },
-                { title: "科学的解明：魔法つかいの正体", summary: "森の腐葉土で作られる「フルボ酸」が鉄と結びつき、「フルボ酸鉄」として海へ運ばれるメカニズムが解明される。" },
-                { title: "結び：震災と森の力", summary: "東日本大震災で海は被害を受けたが、森からの栄養供給は続き、海は再生へ向かう。森の力（魔法）が再確認される。" }
+                {
+                    title: "魔法つかいの謎",
+                    summary: "筆者の中学時代、カキ研究所で今井博士から「森には魔法つかいがいる」という言葉を聞く。当時は意味が分からなかったが、プランクトン培養に腐葉土が役立つという経験をする。",
+                    tags: ["回想", "今井博士", "腐葉土"]
+                },
+                {
+                    title: "海の汚染と気づき",
+                    summary: "高度経済成長期、海が汚染され赤潮が発生。漁師となった筆者は、カキのために森を見る必要性に気づき、荒れた山や農薬の影響を受けた田畑を目にする。",
+                    tags: ["環境汚染", "赤潮", "流域"]
+                },
+                {
+                    title: "行動と科学的裏付け",
+                    summary: "「森は海の恋人」運動（植林）を開始。北海道大学の松永博士により、森の腐葉土から出る「フルボ酸鉄」が海に鉄分を運び、植物プランクトンを育てるという科学的メカニズムを知る。",
+                    tags: ["植林運動", "フルボ酸鉄", "光合成"]
+                },
+                {
+                    title: "震災を越えて",
+                    summary: "東日本大震災で海は壊滅したと思われたが、森からの栄養供給によりプランクトンが豊富に発生し、カキ養殖の再開が可能となる。森の魔法つかいの実在を再確認する。",
+                    tags: ["東日本大震災", "復興", "自然の回復力"]
+                }
             ],
-            // 登場人物・要素データ
-            characters: [
-                { name: "私（筆者）", detail: "畠山重篤。気仙沼のカキ養殖漁師。「森は海の恋人」運動の提唱者。", quote: "今まで海のほうばかり向いて考えていましたが、森を見なければいけないのではないかと気がついたのです。" },
-                { name: "今井丈夫", detail: "東北大学の名誉教授・カキ博士。「森には魔法つかいがいる」という言葉を残し、筆者に大きな影響を与えた。", quote: "雑木林へ行って、腐葉土を集めてきなさい。" },
-                { name: "松永勝彦", detail: "北海道大学教授。森と海の科学的なつながり（鉄の役割）を筆者に解説した。", quote: "森林は海に鉄を供給する役目をしています。" },
-                { name: "森", detail: "単なる樹木の集合ではなく、海へ鉄分を供給する「魔法つかい」の住処として描かれる。", quote: "森は壊れませんでした。そして川は、森の鉄を海へと届け続けていました。" },
-                { name: "鉄", detail: "地球の重量の1/3を占める物質。生物（赤血球や葉緑素）にとって不可欠な元素。", quote: "地球は鉄の惑星なのです。" }
+            elements: [
+                {
+                    name: "畠山 重篤（私）",
+                    role: "語り手・カキ漁師",
+                    description: "気仙沼のカキ養殖漁師。少年時代に今井博士の影響を受け、海を守るために森に木を植える活動を始める。",
+                    quote: "今まで海のほうばかり向いて考えていましたが、森を見なければいけないのではないかと気がついたのです。",
+                    evolution: "ただの漁師から、森・川・海の連環を理解し、環境保護活動の実践者へと成長した。"
+                },
+                {
+                    name: "今井 丈夫",
+                    role: "カキ博士・東北大学教授",
+                    description: "筆者の師匠的存在。「森には魔法つかいがいる」という重要な言葉を残し、筆者の活動の原点となる。",
+                    quote: "それが何なのかはわからないが、森には魔法つかいがいる",
+                    evolution: "科学的直感によって、エコロジーの真髄を若き筆者に伝えた導き手。"
+                },
+                {
+                    name: "松永 勝彦",
+                    role: "北海道大学教授",
+                    description: "森と海の科学的つながり（鉄分の役割）を解明した研究者。筆者の活動に科学的根拠を与える。",
+                    quote: "森林は海に鉄を供給する役目をしています。",
+                    evolution: "「魔法つかい」の正体を科学的に証明した人物。"
+                },
+                {
+                    name: "カキ（牡蠣）",
+                    role: "海の指標生物",
+                    description: "物語の中心となる生物。植物プランクトンを食べて育つ。環境の変化に敏感。",
+                    quote: "それを、カキ養殖をする漁師さんの生活に役立てたい。",
+                    evolution: "単なる商品ではなく、森と海の豊かさを示すバロメーターとしての存在。"
+                }
             ],
-            // キーワード・注釈データ（本文でハイライトされ、クリック可能になる）
-            // text: 本文中の表記, reading: ふりがな, desc: 解説
             keywords: [
-                { text: "腐葉土", reading: "ふようど", desc: "落ち葉などがミミズや微生物によって分解され、土のようになったもの。森の栄養分を豊富に含んでいる。" },
-                { text: "植物プランクトン", reading: "しょくぶつぷらんくとん", desc: "水中を漂って生活する微細な植物。カキなどの魚介類の重要な餌となる。" },
-                { text: "汽水域", reading: "きすいいき", desc: "川の真水と海の海水が混じり合う場所（河口付近）。栄養が豊富で多くの生物が生息する。" },
-                { text: "珪藻", reading: "けいそう", desc: "植物プランクトンの一種。良質なプランクトンで、カキの好物。" },
-                { text: "渦鞭毛藻", reading: "うずべんもうそう", desc: "植物プランクトンの一種。大量発生すると赤潮を引き起こし、魚介類に害を与えることがある。" },
-                { text: "赤潮", reading: "あかしお", desc: "プランクトンが異常発生して海の色が赤褐色になる現象。海中の酸素が減り、魚が死ぬ原因となる。" },
-                { text: "間伐", reading: "かんばつ", desc: "木が密集しすぎないように、一部の木を切って間引く作業。これにより日光が地面まで届くようになる。" },
-                { text: "レイチェル＝カーソン", reading: "れいちぇる・かーそん", desc: "アメリカの生物学者。著書『沈黙の春』で農薬による環境汚染を警告した。" },
-                { text: "落葉広葉樹", reading: "らくようこうようじゅ", desc: "ブナやナラなど、秋に葉を落とす木。落ち葉が良い腐葉土を作る。" },
-                { text: "フルボ酸鉄", reading: "ふるぼさんてつ", desc: "腐葉土の中の「フルボ酸」と「鉄」が結合した物質。水に溶けやすく、海まで鉄分を運ぶことができる。" },
-                { text: "培養", reading: "ばいよう", desc: "生物（ここではプランクトン）を人工的な環境で育てること。" },
-                { text: "葉緑素", reading: "ようりょくそ", desc: "植物の葉に含まれる緑色の色素。光合成を行う中心的な役割を果たす。" },
-                { text: "光合成", reading: "こうごうせい", desc: "植物が光のエネルギーを使って、水と二酸化炭素からデンプンなどの栄養分を作ること。" }
+                {
+                    term: "汽水域",
+                    reading: "きすいいき",
+                    description: "川の水（淡水）と海水が混じり合う場所。河口付近。",
+                    explanation: "塩分濃度が変化しやすく、カキなどの生物にとって重要な生息地。",
+                    context: "カキの養殖場は、日本中、いえ、世界中どこでも汽水域、つまり河口です。"
+                },
+                {
+                    term: "珪藻",
+                    reading: "けいそう",
+                    description: "植物プランクトンの一種。カキの良質な餌となる。",
+                    explanation: "茶色っぽい色をした植物プランクトン。光合成を行い、海の生態系の基礎となる。",
+                    context: "カキの好きな植物プランクトンは、「珪藻」という種類です。"
+                },
+                {
+                    term: "渦鞭毛藻",
+                    reading: "うずべんもうそう",
+                    description: "赤潮の原因となるプランクトン。",
+                    explanation: "2本の鞭毛を持って泳ぐプランクトン。富栄養化した海で異常発生し、赤潮を引き起こす。",
+                    context: "海が汚れて「渦鞭毛藻」という赤潮を起こすプランクトンが大発生するようになりました。"
+                },
+                {
+                    term: "腐葉土",
+                    reading: "ふようど",
+                    description: "落ち葉などがミミズや微生物によって分解され、土状になったもの。",
+                    explanation: "栄養分やフルボ酸を豊富に含み、保水力が高い。",
+                    context: "雑木林へ行って、腐葉土を集めてきなさい。"
+                },
+                {
+                    term: "フルボ酸鉄",
+                    reading: "ふるぼさんてつ",
+                    description: "腐葉土の「フルボ酸」と「鉄」が結びついたもの。",
+                    explanation: "この物語における「魔法つかい」の正体。海中でも沈殿せず、植物プランクトンに鉄分を届ける。",
+                    context: "フルボ酸が鉄に結びつくと、重い粒子にはならずに『フルボ酸鉄』となって..."
+                },
+                {
+                    term: "光合成",
+                    reading: "こうごうせい",
+                    description: "植物が光を使って栄養を作る働き。",
+                    explanation: "この過程を行う葉緑素を作るために「鉄」が必要となる。",
+                    context: "皆さんは、植物が光合成をしているのは知っていますね。"
+                },
+                {
+                    term: "森は海の恋人",
+                    reading: "もりはうみのこいびと",
+                    description: "漁師たちが山に木を植える運動のキャッチフレーズ。",
+                    explanation: "「森と川と海は一つ」という思想を表した言葉。",
+                    context: "いろいろ考えて始めたのが、漁師による森づくり〝森は海の恋人〟です。"
+                },
+                {
+                    term: "食物連鎖",
+                    reading: "しょくもつれんさ",
+                    description: "食べる・食べられるという生物同士のつながり。",
+                    explanation: "森の養分→川→海のプランクトン→カキ→人間、という命のつながり。",
+                    context: "（全体のテーマとして）"
+                },
+                {
+                    term: "間伐",
+                    reading: "かんばつ",
+                    description: "木が密集しすぎないように、一部の木を切ること。",
+                    explanation: "これを行わないと森の中に光が入らず、土壌が痩せてしまう。",
+                    context: "間伐されない杉林には日の光が入らず、下草が生えていません。"
+                },
+                {
+                    term: "レイチェル＝カーソン",
+                    reading: "れいちぇる・かーそん",
+                    description: "アメリカの生物学者。『沈黙の春』著者。",
+                    explanation: "農薬による生態系への影響を警告した。",
+                    context: "レイチェル＝カーソンが書いた『沈黙の春』という本を思い出しました。"
+                }
+            ],
+            text: [
+                "もう六十年以上も昔、私が中学生の頃のことです。私が住む宮城県の気仙沼湾の静かな入り江、舞根に「かき研究所」が設立されました。所長は世界的に有名なカキ博士、東北大学の今井丈夫先生です。今井先生は、「世界中のカキを集めてカキの種（カキの赤ちゃん）をタンクの中で産卵させ、育てたい。それを、カキ養殖をする漁師さんの生活に役立てたい。」と考えていました。",
+                "私は毎日のように、学校から帰ると研究所に遊びに行き、若い研究者たちからいろいろなことを教わりました。",
+                "ある日のことです。いつものように研究所を訪ねると、カキの赤ちゃんに食べさせる植物プランクトンの培養がうまくいかないと、皆、深刻な顔をしていました。",
+                "そこへ今井先生がやってきて、こう言ったのです。「雑木林へ行って、腐葉土を集めてきなさい。」若い海の研究者たちはびっくりしています。「えっ、山に行くんですか。」「腐葉土を水に溶かしてろ過しなさい。そして、殺菌してプランクトンの培養タンクに入れてみなさい。」と、先生は指示しました。",
+                "二、三日して研究所に行ってみると、「プランクトンが増えたよ。」と、研究者たちがにこにこしていました。",
+                "今井先生が語ってくれました。「若い頃、アメリカに勉強に行って、同じようなことがあった。先生に、〝それが何なのかはわからないが、森には魔法つかいがいる〟と教えられたんだよ。」",
+                "〝森には魔法つかいがいる〟――。魔法つかいとは何か、その正体がわかったのは、それから三十年後のことです。",
+                "昭和三十年代から四十年代は工業優先の時代でした。干潟は埋め立てられて工場が建ち、工場廃水が海にたれ流しにされました。川の流域も開発が進み、そのしわ寄せは、川が海に流れ込む汽水域、つまり河口に集中するようになっていました。",
+                "カキの養殖場は、日本中、いえ、世界中どこでも汽水域、つまり河口です。そこで育つカキの好きな植物プランクトンは、「珪藻」という種類です。ところが、海が汚れて「渦鞭毛藻」という赤潮を起こすプランクトンが大発生するようになりました。こうなると、カキの成長が悪くなり、ときには死んでしまいます。",
+                "一九六二（昭和三十七）年、水産高校を卒業した私は、家業のカキ養殖業を継いで、漁師になっていました。きれいな海を取り戻すにはどうしたらいいのだろう。――仲間たちと話し合っていて思い出したのは、中学生の時に聞いた〝森には魔法つかいがいる〟という今井先生の言葉です。",
+                "私は、はっとしました。今まで海のほうばかり向いて考えていましたが、森を見なければいけないのではないかと気がついたのです。",
+                "そこで、気仙沼湾に注ぐ大川の河口から上流に向かって歩いてみました。",
+                "やはり山が荒れていました。山には、手入れのされていない杉林が広がっています。間伐されない杉林には日の光が入らず、下草が生えていません。そのようなところには虫や鳥もいません。土はぱさぱさに乾いています。大雨が降るとたちまち海に泥水が流れてくるのは、このためだとわかりました。",
+                "水田地帯に行ってみると、しいんとしています。生き物の気配が感じられません。レイチェル＝カーソンが書いた『沈黙の春』という本を思い出しました。農薬や除草剤を大量に使うようになった農地から生き物が姿を消し、静かになってしまったというストーリーです。",
+                "私はそこで、川の流域に暮らしている人たちと、海で仕事をする漁師たちとの間で、「森と川と海は一つなのだ。」という価値観を共有しなければならないと思いました。",
+                "そのためにはどうすればいいのか、いろいろ考えて始めたのが、漁師による森づくり〝森は海の恋人〟です。大川上流の室根山に、落葉広葉樹を植える運動です。一九八九（平成元）年九月のことでした。",
+                "そしてその翌年、北海道大学の松永勝彦先生と出会い、森と海とをつなぐ科学的なメカニズムを知ることができたのです。",
+                "「森林は海に鉄を供給する役目をしています。」と、松永先生は話し始めました。「えっ、鉄？」意外なキーワードの登場です。それはこういうことでした。",
+                "皆さんも、鉄が人間にとって大切な栄養素であることは知っていますよね。",
+                "血液中にある赤血球は、鉄を含んだ細胞です。赤血球はその鉄に酸素をつけて、体のすみずみまで運んでいます。鉄は酸素と仲よしなのです。酸素のおかげで、私たちは脳をはたらかせ、体を動かすことができます。酸素を届けた赤血球は、今度は不要になった二酸化炭素を受け取り、肺から放出します。これが呼吸の仕組みです。",
+                "酸素や二酸化炭素をつけたり放したり、……こんな芸当をこれほどまで効率よくできるのは鉄だけです。",
+                "では、植物と鉄とは、どのような関係にあるのでしょう。",
+                "皆さんは、植物が光合成をしているのは知っていますね。植物の緑色のもとである葉緑素が光合成を行っています。その葉緑素を作るのには、鉄が必要なのだそうです。",
+                "それから、植物が育つためには、肥料の中の窒素やリン酸などを取り込まなければなりません。そのときにも、鉄の助けが不可欠です。",
+                "鉄は、岩石や土の中に含まれています。実は、地球の目方の三分の一は鉄なのだそうです。地球は鉄の惑星なのです。",
+                "ところが、水に溶けだした鉄は、酸素と出会うと粒子（粒々の塊）となって沈んでしまいます。ですから、海にはもともと鉄が少なく、そのために植物プランクトンが少ないのです。",
+                "「けれど、沈まない鉄があることがわかったのですよ！」と、松永先生は言いました。",
+                "カキの餌となる植物プランクトンも植物です。カキの養殖場である河口では、周りの海に比べ、植物プランクトンがたくさん発生しています。ということは、そう！　川の水が、沈まない鉄を運んでいるということではないでしょうか。",
+                "「森林の腐葉土では、『フルボ酸』という物質が生まれます。フルボ酸が鉄に結びつくと、重い粒子にはならずに『フルボ酸鉄』となって、川の水に流されてきて、海中に浮遊するのです。」",
+                "〝森には魔法つかいがいる〟――魔法つかいの正体は、「フルボ酸鉄」だったのです。",
+                "そして、それからまた三十年が過ぎました。漁師による森づくりは現在まで続き、森は大きくなり、川もきれいになりました。流域の人々が同じ気持ちで川を汚さないように取り組んだ結果、豊かな海がよみがえっていました。",
+                "しかし、活動を続けて二十三年めの二〇一一（平成二十三）年三月、東日本大震災が起きました。津波によって海は壊滅的な被害を受け、海から生き物の姿が全く消えてしまったのです。",
+                "海は死んだと思いました。ところが、五月になると少しずつ生き物が戻ってきました。大津波のあとの環境調査に来られた京都大学の田中克先生が、顕微鏡をのぞいておっしゃったのです。",
+                "「海の中には、カキが食べきれないほど植物プランクトンがいます。これは、長年、海の背景にある森と川の環境を整えてきたことが功を奏しています。」と。",
+                "これで、養殖業は再開できると、確信した瞬間でした。震災でも、森は壊れませんでした。そして川は、森の鉄を海へと届け続けていました。",
+                "やはり、森には魔法つかいがいたのです。"
             ]
         };
 
-        // DOM要素の参照
-        const els = {
-            headerTitle: document.getElementById('header-title'),
-            headerAuthor: document.getElementById('header-author'),
-            readTitle: document.getElementById('read-title'),
-            navBtns: document.querySelectorAll('.nav-btn'),
-            views: {
-                overview: document.getElementById('view-overview'),
-                characters: document.getElementById('view-characters'),
-                keywords: document.getElementById('view-keywords'),
-                read: document.getElementById('view-read'),
-            },
-            lists: {
-                overview: document.getElementById('overview-list'),
-                characters: document.getElementById('character-list'),
-                keywords: document.getElementById('keyword-list'),
-                text: document.getElementById('text-content'),
-            },
-            modal: {
-                self: document.getElementById('annotation-modal'),
-                term: document.getElementById('modal-term'),
-                reading: document.getElementById('modal-reading'),
-                desc: document.getElementById('modal-desc'),
-            },
-            scrollToast: document.getElementById('scroll-toast')
-        };
+        const { createApp, ref, computed, onMounted, nextTick, watch } = Vue;
 
-        /**
-         * ======================================================================================
-         * 2. アプリケーションの初期化とレンダリング
-         * ======================================================================================
-         */
-        function init() {
-            // 基本情報のセット
-            els.headerTitle.textContent = STORY_DATA.title;
-            els.headerAuthor.textContent = STORY_DATA.author;
-            els.readTitle.textContent = STORY_DATA.title;
-
-            // 各セクションのレンダリング
-            renderOverview();
-            renderCharacters();
-            renderKeywords();
-            renderText();
-
-            // 初期タブの表示（LocalStorageに保存があれば復元、なければoverview）
-            const lastTab = localStorage.getItem('lastTab') || 'overview';
-            switchTab(lastTab);
-        }
-
-        // 1. 概要のレンダリング
-        function renderOverview() {
-            const html = STORY_DATA.structure.map((item, index) => `
-                <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-                    <button class="w-full text-left px-6 py-4 bg-gray-50 hover:bg-forest-50 flex justify-between items-center transition-colors" onclick="toggleAccordion('ov-${index}')">
-                        <span class="font-bold text-gray-700">${item.title}</span>
-                        <span class="text-forest-600 transform transition-transform" id="icon-ov-${index}">▼</span>
-                    </button>
-                    <div id="ov-${index}" class="accordion-content bg-white px-6">
-                        <div class="py-4 text-gray-600 leading-relaxed border-t border-gray-100">
-                            ${item.summary}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            els.lists.overview.innerHTML = html;
-        }
-
-        // 2. 登場人物のレンダリング
-        function renderCharacters() {
-            const html = STORY_DATA.characters.map((char, index) => `
-                <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer" onclick="toggleAccordion('char-${index}')">
-                    <div class="flex justify-between items-center mb-2">
-                        <h3 class="text-lg font-bold text-sea-900 border-b-2 border-sea-100 pb-1 inline-block">${char.name}</h3>
-                        <span class="text-xs text-gray-400">詳細を見る</span>
-                    </div>
-                    <div id="char-${index}" class="accordion-content">
-                        <p class="text-gray-700 mt-2 mb-3 text-sm">${char.detail}</p>
-                        <div class="bg-gray-50 p-3 rounded text-sm italic text-gray-600 border-l-4 border-gray-300">
-                            "${char.quote}"
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            els.lists.characters.innerHTML = html;
-        }
-
-        // 3. キーワード一覧のレンダリング
-        function renderKeywords() {
-            const html = STORY_DATA.keywords.map((kw, index) => `
-                <div class="border-b border-gray-100 last:border-0">
-                    <button class="w-full text-left py-3 px-2 hover:bg-yellow-50 rounded flex items-center gap-3 transition-colors" onclick="openAnnotation('${kw.text}')">
-                        <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                        <span class="font-bold text-gray-700">${kw.text}</span>
-                        <span class="text-xs text-gray-400 ml-auto">タップで解説</span>
-                    </button>
-                </div>
-            `).join('');
-            els.lists.keywords.innerHTML = html;
-        }
-
-        // 4. 本文のレンダリング（ハイライト処理含む）
-        function renderText() {
-            let fullHtml = "";
-            
-            STORY_DATA.textParagraphs.forEach(paragraph => {
-                let processedText = paragraph;
-
-                // キーワードを検索してハイライト用のタグで囲む
-                // 貪欲マッチを防ぐため、長いキーワードから順に処理する等の工夫が必要だが、
-                // 今回は単純置換を行う。重複マッチを避けるため、すでにタグ付けされたものは除外する簡易ロジック。
+        createApp({
+            setup() {
+                const currentView = ref('overview');
+                const activeAnnotation = ref(null);
+                const modalType = ref(null);
+                const modalData = ref(null);
+                const scrollContainer = ref(null);
                 
-                // キーワードを文字数順（長い順）にソート
-                const sortedKeywords = [...STORY_DATA.keywords].sort((a, b) => b.text.length - a.text.length);
+                // Scroll Position Memory Key
+                const STORAGE_KEY = 'mori_maho_scroll_pos';
+                // Throttle timer
+                let scrollTimeout = null;
 
-                sortedKeywords.forEach(kw => {
-                    // 単純な置換だとHTMLタグ内の属性などを壊す可能性があるため、
-                    // 実際の実装ではテキストノードのみを操作するのが安全ですが、
-                    // ここでは制約上、innerHTML操作用にプレースホルダー的な置換を行います。
-                    const regex = new RegExp(kw.text, 'g');
-                    // 一時的に特別なトークンに置き換える（無限ループ防止）
-                    // ここでは簡易的にspanタグへ直接変換
-                    processedText = processedText.replace(regex, `<span class="highlight-word" onclick="openAnnotation('${kw.text}')">${kw.text}</span>`);
+                const navItems = [
+                    { id: 'overview', label: '大まかな内容', icon: 'map' },
+                    { id: 'elements', label: '要素分析', icon: 'users' },
+                    { id: 'keywords', label: '重要語句', icon: 'key' },
+                    { id: 'read', label: '本文を読む', icon: 'book-open' }
+                ];
+
+                // Process text to inject interactive spans
+                const processedText = computed(() => {
+                    return siteData.text.map(paragraph => {
+                        let processed = paragraph;
+                        siteData.keywords.forEach(kw => {
+                            const regex = new RegExp(`(${kw.term})`, 'g');
+                            // Avoid re-wrapping or breaking existing tags (simple check)
+                            if(!processed.includes(`data-term="${kw.term}"`)){
+                                processed = processed.replace(regex, `<span class="interactive-term" data-term="${kw.term}">$1</span>`);
+                            }
+                        });
+                        return processed;
+                    });
                 });
 
-                fullHtml += `<p class="mb-6 indent-1">${processedText}</p>`;
-            });
+                // Scroll Handling
+                const handleScroll = (e) => {
+                    // Only save scroll position if we are in 'read' view
+                    if (currentView.value === 'read') {
+                        if (scrollTimeout) return;
+                        scrollTimeout = setTimeout(() => {
+                            localStorage.setItem(STORAGE_KEY, e.target.scrollTop);
+                            scrollTimeout = null;
+                        }, 200); // Save every 200ms at most
+                    }
+                };
 
-            els.lists.text.innerHTML = fullHtml;
-        }
+                const switchView = (viewId) => {
+                    currentView.value = viewId;
 
-        /**
-         * ======================================================================================
-         * 3. インタラクション制御
-         * ======================================================================================
-         */
+                    if (viewId === 'read') {
+                        // Restore scroll position
+                        nextTick(() => {
+                            const saved = localStorage.getItem(STORAGE_KEY);
+                            if (scrollContainer.value && saved) {
+                                scrollContainer.value.scrollTop = parseInt(saved);
+                            } else if (scrollContainer.value) {
+                                scrollContainer.value.scrollTop = 0;
+                            }
+                        });
+                    } else {
+                        // Reset scroll for other views
+                        if (scrollContainer.value) {
+                            scrollContainer.value.scrollTop = 0;
+                        }
+                    }
+                };
 
-        // タブ切り替え
-        function switchTab(tabId) {
-            // 状態更新
-            Object.values(els.views).forEach(el => el.classList.add('hidden'));
-            els.views[tabId].classList.remove('hidden');
+                const handleTextClick = (event) => {
+                    const term = event.target.getAttribute('data-term');
+                    if (term) {
+                        const data = siteData.keywords.find(k => k.term === term);
+                        if (data) {
+                            activeAnnotation.value = data;
+                        }
+                    }
+                };
 
-            els.navBtns.forEach(btn => {
-                if (btn.dataset.tab === tabId) {
-                    btn.classList.add('text-forest-600', 'border-forest-600');
-                    btn.classList.remove('text-gray-500', 'border-transparent');
-                } else {
-                    btn.classList.remove('text-forest-600', 'border-forest-600');
-                    btn.classList.add('text-gray-500', 'border-transparent');
-                }
-            });
+                const openModal = (type, item) => {
+                    modalType.value = type;
+                    modalData.value = item;
+                };
 
-            // LocalStorageに現在のタブを保存
-            localStorage.setItem('lastTab', tabId);
+                const closeModal = () => {
+                    modalData.value = null;
+                };
 
-            // 「本文を読む」タブに来た場合、スクロール位置を復元
-            if (tabId === 'read') {
-                restoreScrollPosition();
-                // スクロール監視を開始
-                window.addEventListener('scroll', handleScrollDebounced);
-            } else {
-                // 他のタブではスクロール位置をトップへ（またはそのタブの記憶位置へ）
-                window.scrollTo(0, 0);
-                window.removeEventListener('scroll', handleScrollDebounced);
-            }
-        }
-
-        // アコーディオン開閉
-        function toggleAccordion(id) {
-            const el = document.getElementById(id);
-            const icon = document.getElementById(`icon-${id}`);
-            
-            if (el.classList.contains('open')) {
-                el.classList.remove('open');
-                if(icon) icon.style.transform = 'rotate(0deg)';
-                el.style.marginBottom = '0';
-            } else {
-                el.classList.add('open');
-                if(icon) icon.style.transform = 'rotate(180deg)';
-                el.style.marginBottom = '1rem';
-            }
-        }
-
-        // 注釈モーダル表示
-        function openAnnotation(term) {
-            const data = STORY_DATA.keywords.find(k => k.text === term);
-            if (!data) return;
-
-            els.modal.term.textContent = data.text;
-            els.modal.reading.textContent = data.reading;
-            els.modal.desc.textContent = data.desc;
-
-            els.modal.self.classList.remove('translate-y-full');
-        }
-
-        function closeAnnotation() {
-            els.modal.self.classList.add('translate-y-full');
-        }
-
-        /**
-         * ======================================================================================
-         * 4. 読書位置の記憶ロジック (LocalStorage)
-         * ======================================================================================
-         */
-        
-        let scrollTimeout;
-        function handleScrollDebounced() {
-            if (scrollTimeout) clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                // 現在のタブがreadの場合のみ保存
-                const currentTab = localStorage.getItem('lastTab');
-                if (currentTab === 'read') {
-                    localStorage.setItem('readScrollY', window.scrollY);
-                    
-                    // 保存したことをユーザーにさりげなく通知
-                    showScrollToast();
-                }
-            }, 500); // 0.5秒停止したら保存
-        }
-
-        function restoreScrollPosition() {
-            const y = localStorage.getItem('readScrollY');
-            if (y) {
-                // DOM描画待ちのためにわずかに遅延
-                setTimeout(() => {
-                    window.scrollTo({
-                        top: parseInt(y, 10),
-                        behavior: 'auto' // アニメーションなしで即移動
+                const initIcons = () => {
+                    nextTick(() => {
+                        if (window.lucide) lucide.createIcons();
                     });
-                }, 10);
+                };
+                
+                watch(currentView, initIcons);
+
+                onMounted(() => {
+                    initIcons();
+                    // Initial load: if user was reading, maybe we should start there?
+                    // For now, start at overview as per typical UX, but reading pos is saved.
+                });
+
+                return {
+                    data: siteData,
+                    navItems,
+                    currentView,
+                    processedText,
+                    activeAnnotation,
+                    modalData,
+                    modalType,
+                    scrollContainer,
+                    switchView,
+                    handleTextClick,
+                    openModal,
+                    closeModal,
+                    handleScroll
+                };
             }
-        }
-
-        function showScrollToast() {
-            els.scrollToast.classList.remove('opacity-0');
-            setTimeout(() => {
-                els.scrollToast.classList.add('opacity-0');
-            }, 2000);
-        }
-
-        // 初期化実行
-        document.addEventListener('DOMContentLoaded', init);
-
+        }).mount('#app');
     </script>
 </body>
 </html>
