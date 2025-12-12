@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習用Webサイト: 言葉がつなぐ世界遺産</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Noto Sans JP, Noto Serif JP) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- アイコンセット (Lucide Icons) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* カスタムフォント設定 */
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .font-serif { font-family: 'Noto Serif JP', serif; }
+        
+        /* 読書用ハイライトスタイル */
+        .term-highlight {
+            border-bottom: 2px solid #a3e635; /* lime-400 */
+            background-color: rgba(163, 230, 53, 0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .term-highlight:hover {
+            background-color: rgba(163, 230, 53, 0.4);
+        }
+        .term-highlight.active {
+            background-color: #bef264; /* lime-300 */
+            font-weight: bold;
+        }
+
+        /* アコーディオンアニメーション */
+        .accordion-content {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 500px; /* 十分な高さ */
+            opacity: 1;
+        }
+        
+        /* スクロールバー非表示（モバイル用） */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased pb-32 md:pb-10">
+
+    <!-- =========================================================================
+         1. グローバルヘッダー
+    ========================================================================== -->
+    <header class="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-sm shadow-sm z-50 border-b border-gray-100 transition-all duration-300" id="global-header">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- タイトルエリア -->
+                <div class="flex flex-col">
+                    <h1 id="book-title" class="text-lg font-bold text-gray-900 leading-tight"></h1>
+                    <span id="book-author" class="text-xs text-gray-500"></span>
+                </div>
+                
+                <!-- PC用ナビゲーション (タブレット以上で表示) -->
+                <nav class="hidden md:flex space-x-1">
+                    <button onclick="app.switchView('structure')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors" data-target="structure">構成・要約</button>
+                    <button onclick="app.switchView('elements')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors" data-target="elements">人物・要素</button>
+                    <button onclick="app.switchView('keywords')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors" data-target="keywords">キーワード</button>
+                    <button onclick="app.switchView('read')" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors" data-target="read">
+                        <i data-lucide="book-open" class="inline w-4 h-4 mr-1"></i>本文を読む
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- モバイル用ナビゲーション (画面下部に固定) -->
+        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-50 pb-safe">
+            <div class="flex justify-around items-center h-16">
+                <button onclick="app.switchView('structure')" class="nav-btn-mobile flex flex-col items-center justify-center w-full h-full text-xs text-gray-500" data-target="structure">
+                    <i data-lucide="layout-list" class="w-6 h-6 mb-1"></i>構成
+                </button>
+                <button onclick="app.switchView('elements')" class="nav-btn-mobile flex flex-col items-center justify-center w-full h-full text-xs text-gray-500" data-target="elements">
+                    <i data-lucide="users" class="w-6 h-6 mb-1"></i>分析
+                </button>
+                <button onclick="app.switchView('keywords')" class="nav-btn-mobile flex flex-col items-center justify-center w-full h-full text-xs text-gray-500" data-target="keywords">
+                    <i data-lucide="key" class="w-6 h-6 mb-1"></i>語句
+                </button>
+                <button onclick="app.switchView('read')" class="nav-btn-mobile flex flex-col items-center justify-center w-full h-full text-xs text-blue-600 font-bold bg-blue-50/50" data-target="read">
+                    <i data-lucide="book-open" class="w-6 h-6 mb-1"></i>本文
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- メインコンテンツエリア (ヘッダーの高さ分padding確保) -->
+    <main class="pt-20 max-w-3xl mx-auto px-4 sm:px-6 mb-20">
+
+        <!-- ビュー1: 大まかな内容 (Structure) -->
+        <section id="view-structure" class="view-section hidden">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                <i data-lucide="map" class="mr-2 text-blue-600"></i>大まかな構成
+            </h2>
+            <div id="structure-container" class="space-y-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー2: 登場人物・要素分析 (Elements) -->
+        <section id="view-elements" class="view-section hidden">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                <i data-lucide="user-check" class="mr-2 text-green-600"></i>登場人物・要素分析
+            </h2>
+            <div id="elements-container" class="grid grid-cols-1 gap-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー3: 重要なキーワード (Keywords) -->
+        <section id="view-keywords" class="view-section hidden">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center">
+                <i data-lucide="lightbulb" class="mr-2 text-yellow-500"></i>重要キーワード・象徴
+            </h2>
+            <p class="text-sm text-gray-500 mb-4 ml-1">※各カードをタップすると、文脈上の詳細な意味を確認できます。</p>
+            <div id="keywords-container" class="grid grid-cols-1 gap-4">
+                <!-- JSで生成（グリッドレイアウトを1カラムに変更して詳細を見やすく） -->
+            </div>
+        </section>
+
+        <!-- ビュー4: 本文を読む (Read Text) -->
+        <section id="view-read" class="view-section">
+            <div class="flex justify-between items-end mb-6 border-b pb-4">
+                <h2 class="text-2xl font-bold text-gray-800 font-serif">本文</h2>
+                <div class="text-sm text-gray-500">
+                    <span id="reading-progress">0</span>% 読了
+                </div>
+            </div>
+            
+            <!-- 本文表示エリア -->
+            <div id="text-content" class="font-serif text-lg leading-loose text-gray-900 tracking-wide text-justify">
+                <!-- JSで生成（spanタグによるハイライト含む） -->
+            </div>
+            
+            <!-- 読了時のメッセージ -->
+            <div class="mt-12 p-8 bg-stone-100 rounded-lg text-center font-serif">
+                <p class="text-gray-600">読了お疲れ様でした。</p>
+                <div class="mt-4 flex justify-center space-x-4">
+                    <button onclick="app.switchView('structure')" class="text-blue-600 hover:underline">構成を見直す</button>
+                    <button onclick="app.switchView('keywords')" class="text-blue-600 hover:underline">キーワードを確認</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 4. 本文の読解支援機能（解説パネル） -->
+    <div id="definition-panel" class="fixed bottom-16 md:bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg transform translate-y-full transition-transform duration-300 z-40 p-4 md:p-6 rounded-t-xl md:rounded-none md:max-w-4xl md:mx-auto md:border-x">
+        <div class="flex justify-between items-start mb-2">
+            <div>
+                <h3 id="panel-term" class="text-xl font-bold text-gray-900 font-serif flex items-center">
+                    <!-- 語句 -->
+                </h3>
+                <p id="panel-reading" class="text-sm text-gray-500"></p>
+            </div>
+            <button onclick="app.closePanel()" class="text-gray-400 hover:text-gray-600 p-1">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        <!-- 本文読解時はここには短いdescのみを表示する -->
+        <p id="panel-desc" class="text-gray-700 leading-relaxed text-sm md:text-base mb-2"></p>
+        <div id="panel-note" class="text-xs text-gray-500 bg-gray-50 p-2 rounded border border-gray-100 hidden"></div>
+    </div>
+
+
+    <!-- =========================================================================
+         JavaScript Logic
+    ========================================================================== -->
+    <script>
+        // ---------------------------------------------------------
+        // 1. 作品データ（ここを編集することでコンテンツを差し替え可能）
+        // ---------------------------------------------------------
+        const BOOK_DATA = {
+            title: "言葉がつなぐ世界遺産",
+            author: "橋本 典明",
+            // 本文データ（段落ごとの配列）
+            text: [
+                "東照宮に代表される日光の社寺は、その装飾が絢爛豪華なことで知られている。この日光の社寺が世界遺産に登録されたのは、一九九九年十二月のことである。対象は、東照宮と二荒山神社、輪王寺の二社一寺にある百三棟の建造物群と、これらを取り巻く境内や参道、そして山林などの、いわゆる文化的景観を含む地域だった。",
+                "この一帯は、高い山々の間に位置するため、雨が多く、冬になると雪に閉ざされてしまう。文化財にとっては、一年をとおして厳しい自然環境だといえるだろう。雨や雪による湿気は、建物や彫刻を容赦なくむしばむ。色鮮やかな漆や絵の具は、歳月を経るうちに剥落し、輝きを失っていくのである。",
+                "そこで日光では、江戸時代初期の創建時から、建物や彫刻を守るために、二十年ごとに定期的な修復が続けられてきた。",
+                "世界遺産登録に先立つ一九九八年十二月、審査をするイコモスの専門家たちが、日光の現地調査を行った。その際、彼らは、社寺や景観のすばらしさを称賛するとともに、建造物を修復し保存するための方法に対して、そろって舌を巻いたという。専門家たちが驚いたその方法とは、どんなものなのだろうか。",
+                "その一つは、「修復記録の蓄積」である。",
+                "日光社寺文化財保存会の浅尾和年さんに、その一部を見せていただいた。目の前に広げられたのは、一匹の竜が描かれた、畳一畳ほどの大きさの和紙だった。見取り図と呼ばれるものである。浅尾さんによると、実物の彫刻と同じ大きさや色合いで描かれているという。迫力に満ちた、色鮮やかな竜である。",
+                "そして、余白には、修復のための指示が細かな筆文字で書きこまれていた。確かに、彫刻の絵を正確に描くことで、形や色は描き留めることができる。しかし、細かな技法や微妙な色合いなどの表現方法は、絵だけで完全に伝えることは難しい。絵で伝えることの困難な情報を、後世の職人が見たときにもわかるよう、丁寧に文字で書き留めていたのである。",
+                "見取り図の一枚には、五重塔の軒下に据えられた、十二支のとらが描かれていた。余白の指示は、鼻、目、耳と、部分ごとに二十あまりに及んでいる。",
+                "「目　朱ノクヽリ」（目の外側の輪郭は、朱色で囲む。）",
+                "「中　白群地ニ元ヨリ群青ヲフカス」（目の白い部分は、水色地に濃い青で縁をぼかす。）",
+                "「ヒトミ　朱土、クヽリ星　墨」（瞳は茶色で塗り、輪郭と中心の部分は黒色で塗る。）",
+                "書き記された情報に従えば、完全に元どおりのものを描くことができるという。その指示が、職人にとっては何よりも頼りになる修復の手がかりなのだ。",
+                "「例えば、色の境目をぼかしながらグレーから白に徐々に変えていくというような技法がありますが、そうした技法で描かれていることを、ここに書きこんでいきます。絵の具を何度も塗り重ねて盛り上げ、立体感を出す置き上げという技法などもそうです。この絵だけですと、平面的な彩色なのか、置き上げなのかわからないわけです。ですから、これは立体的な模様だということを、情報として書きこまなくてはならないのです。」",
+                "先人から私たちへ、そして私たちから未来へと受け渡していくために、言葉による情報が欠かせないのだと、浅尾さんは語ってくれた。",
+                "木造の社寺建築では、建物そのものの修復保全は容易なことではない。それにもまして難しいのが、建物の装飾を修復しながら後世に伝えていくことである。日光では創建当時から修復のたびに、職人たちが、彫刻そのものとその技法を一枚一枚の見取り図に記録し続けてきた。今、保存されているのは明治期以降に描かれた数千枚であるという。これが、まさに「修復記録の蓄積」なのである。",
+                "しかし、どんなにすばらしい見取り図があっても、それをもとに修復できる技術者がいなければ、日光の世界遺産を保存し続けることはできない。",
+                "そこで二つめにあげられるのが、「世代を超えた技術の伝承」である。",
+                "現代では、日光ほどの装飾を社寺に施すことはきわめて少ない。加えて、継承者が減少し、昔ながらの材料も確保しにくいため、技術の伝承はいっそう難しくなっている。そうした中、日光では、日光社寺文化財保存会の技術者たちが、まさに口移しで彩色技術の詳細を伝えながら、修復を行っている。",
+                "手塚茂幸さんは、彩色を始めて六年めになるという。この道四十年近くになる澤田了司さんの指導を受けながら、彫刻の細部に丁寧に色をつけていた。",
+                "日光では、創建当時から彩色に岩絵の具や金箔が使われてきた。多彩に見えるが、実際に使われている絵の具は、十種類にも満たない。微妙に混ぜ合わせ、また、立体的な置き上げ技法による陰影などを利用して、複雑な色彩を生み出している。さらに、その日の湿度や温度によっても、絵の具の溶き方をきめ細かく変え、微妙な色合いを確かめながら、彫刻の一つ一つの部分を丁寧に塗らなければならない。実に繊細な技術は、師匠から弟子に、丁寧に説明され受け継がれていく。この日も、師匠である澤田さんの言葉を、噛みしめながら聞いている手塚さんの姿があった。ここでもまた、技術を受け渡していくのは、言葉なのである。",
+                "「（教えられたことを）自分の肌でつかんで、初めてできるようになると思います。それまではまだまだ修行です。」と、作業の手を止めることなく、手塚さんは語った。",
+                "言葉で教えられたことを自分の技術へと高めていく。彼らが受け継がなければ失われる技術であるだけに、手塚さんの言葉はとても重みのあるものに感じられた。",
+                "もう一つ、二人のやりとりをうかがっていて印象深く感じたことがある。それは、これがただ師弟の間だけで技術を受け渡すのではないということだ。師匠の澤田さんにしても、江戸時代から連綿と技術を伝承してきた職人の連なりの最後尾にいるにすぎない。そしてその連なりは、弟子の手塚さんを経て、おそらく顔を見ることもない幾世代もの後の職人たちへと続いていく。二人は、こうした長い技術伝承の鎖の一つなのだということを、強く意識しているという。",
+                "澤田さんは最後に、「先人から受け継いだ見取り図を使って、同じ色や技法で仕事ができる。本当にうれしいことです。三百年以上も昔の人たちの意気ごみを背負って仕事をしているのですから。」と語ってくれた。",
+                "創建以来、どれほどの職人たちが同じ思いを共有してきたことだろう。こうした思いを胸に、職人たちは、絵や文字で記録を残すとともに、直接言葉で語ることで、技法や技術などを伝えてきた。これこそが、審査に訪れたイコモスの専門家たちを驚かせた「修復記録の蓄積」と「世代を超えた技術の伝承」なのである。"
+            ],
+
+            // 構造分析データ
+            structure: [
+                {
+                    title: "導入：世界遺産への登録",
+                    summary: "日光の社寺の世界遺産登録（1999年）と、その対象範囲について。",
+                    details: "東照宮、二荒山神社、輪王寺（二社一寺）とその周辺環境。華やかな装飾が特徴。",
+                    tags: ["日光", "世界遺産", "1999年"]
+                },
+                {
+                    title: "課題：厳しい自然環境",
+                    summary: "日光特有の気候が文化財に与えるダメージ。",
+                    details: "雨、雪、湿気が建物や彫刻をむしばみ、塗装を劣化させる。これを防ぐため20年ごとの定期修復が必要。",
+                    tags: ["自然環境", "湿気", "劣化"]
+                },
+                {
+                    title: "解決策①：修復記録の蓄積",
+                    summary: "「見取り図」による記録保存。",
+                    details: "実物大の絵に加え、技法や色合いを「言葉（文字）」で詳細に指示。絵だけでは伝わらない情報を補完する。",
+                    tags: ["見取り図", "言葉", "記録"]
+                },
+                {
+                    title: "解決策②：技術の伝承",
+                    summary: "人から人への「口移し」による技術指導。",
+                    details: "師匠から弟子へ、微妙な色合いや絵の具の扱いを言葉と実践で伝える。数百年の歴史の鎖の一部であるという意識。",
+                    tags: ["師弟", "口移し", "伝承"]
+                },
+                {
+                    title: "結論：言葉の役割",
+                    summary: "世界遺産を守り続けてきた核心。",
+                    details: "イコモスを驚かせたのは、絵や文字による記録と、直接の対話による技術伝承。これらをつなぐものが「言葉」である。",
+                    tags: ["イコモス", "言葉の力", "継承"]
+                }
+            ],
+
+            // 登場人物・要素データ
+            elements: [
+                {
+                    name: "イコモス (ICOMOS)",
+                    description: "国際記念物遺跡会議。ユネスコの諮問機関として世界遺産の審査を行う。",
+                    quote: "建造物を修復し保存するための方法に対して、そろって舌を巻いたという。",
+                    features: ["専門家集団", "審査機関", "日光の保存方法を称賛"]
+                },
+                {
+                    name: "浅尾 和年",
+                    description: "日光社寺文化財保存会の人。筆者に見取り図を見せ、解説する。",
+                    quote: "言葉による情報が欠かせないのだと、浅尾さんは語ってくれた。",
+                    features: ["保存会の人物", "見取り図の重要性を解説"]
+                },
+                {
+                    name: "澤田 了司",
+                    description: "この道40年近くになるベテランの彩色職人（師匠）。",
+                    quote: "三百年以上も昔の人たちの意気ごみを背負って仕事をしている",
+                    features: ["師匠", "伝統の継承者", "歴史の重みを理解"]
+                },
+                {
+                    name: "手塚 茂幸",
+                    description: "彩色を始めて6年目の若手技術者（弟子）。",
+                    quote: "自分の肌でつかんで、初めてできるようになると思います。",
+                    features: ["弟子", "修行中", "技術習得への真摯な姿勢"]
+                }
+            ],
+
+            // キーワードデータ (desc: 辞書的意味, context: 文脈上の意味/象徴)
+            glossary: {
+                "世界遺産": {
+                    reading: "せかいいさん",
+                    desc: "人類共通の財産として、将来の世代に伝えていくべき文化財や自然環境。ユネスコ総会で採択された条約に基づく。",
+                    context: "単なる登録リストではなく、厳しい自然環境と闘いながら、人々の努力（記録と伝承）によって守り抜かれてきた「生きた遺産」としての側面が強調されている。"
+                },
+                "東照宮": {
+                    reading: "とうしょうぐう",
+                    desc: "徳川家康をまつる神社。豪華絢爛な装飾と建築美で知られる。",
+                    context: "絢爛豪華な装飾を持つ代表的な建築物であり、その美しさを維持するために、数百年にわたり絶え間ない修復が必要とされる対象。"
+                },
+                "文化的景観": {
+                    reading: "ぶんかてきけいかん",
+                    desc: "人間と自然の共同作業によって生み出された景観のこと。",
+                    context: "社寺という建物単体だけでなく、それを取り巻く厳しい自然（山林）や、そこでの信仰、保存活動も含めた環境全体が、不可分な価値を持っているという視点。"
+                },
+                "イコモス": {
+                    reading: "イコモス",
+                    desc: "International Council on Monuments and Sites。文化遺産保護に関わる国際的な非政府組織。",
+                    context: "日光独自の保存手法（絵と文字の記録、口伝）の有効性を客観的に評価し、世界にその価値を認めた「外部の視点」を象徴する。"
+                },
+                "舌を巻いた": {
+                    reading: "したをまいた",
+                    desc: "非常に驚き、感心することのたとえ。「舌を巻く」。",
+                    context: "現代の先端科学技術ではなく、江戸時代から続くアナログで人間的な保存方法（見取り図と口伝）に対し、世界の専門家たちが深い敬意と驚嘆を抱いたことを示す表現。",
+                    note: "慣用句"
+                },
+                "見取り図": {
+                    reading: "みとりず",
+                    desc: "建物の配置や構造、彫刻の色彩などを記録した図面。ここでは特に修復のために詳細な指示が書き込まれたものを指す。",
+                    context: "単なる設計図ではない。職人から職人へ、絵だけでは伝わらない微細な情報（技法や心意気）を言葉として書き込み、未来へ託すための「タイムカプセル」としての役割を担う。"
+                },
+                "置き上げ": {
+                    reading: "おきあげ",
+                    desc: "絵の具（胡粉など）を盛り上げて、模様に立体感を出す技法。",
+                    context: "平面的な絵だけでは伝わらない情報の具体例。なぜ絵だけでなく「言葉」による補足説明が必要不可欠なのかを裏付ける証拠として挙げられている。"
+                },
+                "口移し": {
+                    reading: "くちうつし",
+                    desc: "本来は口から口へ食べ物を移すことだが、ここでは「人から人へ、言葉で直接詳細に教え伝えること」を指す。",
+                    context: "マニュアル化できない感覚的な技術を、師匠と弟子が膝を突き合わせて共有する、人間味あふれる伝承の姿。機械的なデータ保存との対比。"
+                },
+                "連綿": {
+                    reading: "れんめん",
+                    desc: "長く絶えることなく続いているさま。",
+                    context: "個人の人生を超えて、数百年にわたり途切れることなく続いてきた職人たちの「鎖」としての歴史の重みと、その連続性。"
+                },
+                "意気ごみ": {
+                    reading: "いきごみ",
+                    desc: "何かをしようとして張り切る気持ち。熱意。",
+                    context: "過去の職人たちが仕事に込めた情熱や魂。それは単なる技術情報ではなく、現在の職人が受け継ぐべき精神的なバトンでもある。"
+                },
+                "絢爛豪華": {
+                    reading: "けんらんごうか",
+                    desc: "きらびやかで美しく、贅沢なさま。",
+                    context: "自然環境の厳しさとは対照的な、守られるべき美しさの象徴。極めて装飾的で劣化しやすいからこそ、高度な修復技術と記録が必要となった原因。"
+                },
+                "剥落": {
+                    reading: "はくらく",
+                    desc: "はがれ落ちること。ここでは塗装や金箔が古くなって落ちてしまうことを指す。",
+                    context: "自然の厳しさによる不可避な消滅。この「剥落」という自然の摂理に抗い、美を再生させ続けることこそが、日光における保存活動の原動力である。"
+                }
+            }
+        };
+
+        // ---------------------------------------------------------
+        // 2. アプリケーションロジック
+        // ---------------------------------------------------------
+        const app = {
+            state: {
+                currentView: 'read', // 初期ビュー
+                scrollPositions: {}  // 各ビューのスクロール位置記憶用
+            },
+
+            init() {
+                this.renderHeader();
+                this.renderStructure();
+                this.renderElements();
+                this.renderKeywords();
+                this.renderText();
+                this.setupNavigation();
+                this.setupScrollListener();
+                this.loadSavedPosition(); // 初回ロード時に位置復元
+                lucide.createIcons();
+            },
+
+            // ヘッダー情報の設定
+            renderHeader() {
+                document.getElementById('book-title').textContent = BOOK_DATA.title;
+                document.getElementById('book-author').textContent = BOOK_DATA.author;
+            },
+
+            // 構成ビューのレンダリング
+            renderStructure() {
+                const container = document.getElementById('structure-container');
+                container.innerHTML = BOOK_DATA.structure.map((item, index) => `
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow" onclick="app.toggleAccordion('struct-${index}')">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-bold text-gray-800">${item.title}</h3>
+                            <i data-lucide="chevron-down" class="text-gray-400 w-5 h-5 transform transition-transform" id="icon-struct-${index}"></i>
+                        </div>
+                        <p class="text-gray-600 font-medium">${item.summary}</p>
+                        <div id="struct-${index}" class="accordion-content mt-2">
+                            <div class="pt-4 border-t border-gray-100 mt-2">
+                                <p class="text-gray-700 leading-relaxed text-sm mb-3">${item.details}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    ${item.tags.map(tag => `<span class="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full">#${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            // 要素分析ビューのレンダリング
+            renderElements() {
+                const container = document.getElementById('elements-container');
+                container.innerHTML = BOOK_DATA.elements.map((item, index) => `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-5 cursor-pointer hover:bg-gray-50 transition-colors" onclick="app.toggleAccordion('elem-${index}')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
+                                        ${item.name.charAt(0)}
+                                    </div>
+                                    <h3 class="text-lg font-bold text-gray-800">${item.name}</h3>
+                                </div>
+                                <i data-lucide="chevron-down" class="text-gray-400 transform transition-transform" id="icon-elem-${index}"></i>
+                            </div>
+                        </div>
+                        <div id="elem-${index}" class="accordion-content bg-gray-50/50">
+                            <div class="p-5 border-t border-gray-100">
+                                <p class="mb-4 text-gray-700">${item.description}</p>
+                                <blockquote class="border-l-4 border-green-400 pl-4 italic text-gray-600 mb-4 bg-white p-3 rounded-r">
+                                    "${item.quote}"
+                                </blockquote>
+                                <ul class="list-disc list-inside text-sm text-gray-500 space-y-1">
+                                    ${item.features.map(f => `<li>${f}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            // キーワードビューのレンダリング (文脈上の意味を表示)
+            renderKeywords() {
+                const container = document.getElementById('keywords-container');
+                const keys = Object.keys(BOOK_DATA.glossary);
+                
+                container.innerHTML = keys.map(key => {
+                    const item = BOOK_DATA.glossary[key];
+                    // ここでは辞書的意味(desc)ではなく、文脈的意味(context)を表示する
+                    // contextがない場合はdescへフォールバック
+                    const displayContent = item.context || item.desc;
+                    
+                    return `
+                        <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-100 hover:border-yellow-300 transition-colors">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 class="text-lg font-bold text-gray-900 border-b-2 border-yellow-200 inline-block">${key}</h3>
+                                    <span class="block text-xs text-gray-400 mt-1">${item.reading || ''}</span>
+                                </div>
+                                ${item.note ? `<span class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-500">${item.note}</span>` : ''}
+                            </div>
+                            <div class="bg-yellow-50/50 p-3 rounded-md border border-yellow-100/50">
+                                <h4 class="text-xs font-bold text-yellow-600 mb-1 flex items-center"><i data-lucide="book-open-check" class="w-3 h-3 mr-1"></i>文脈上の意味・象徴</h4>
+                                <p class="text-sm text-gray-800 leading-relaxed">${displayContent}</p>
+                            </div>
+                            <!-- 補足として辞書的な意味も薄く表示 -->
+                            <div class="mt-3 pt-2 border-t border-gray-100">
+                                <p class="text-xs text-gray-500"><span class="font-bold">本来の意味:</span> ${item.desc}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            // 本文のレンダリング（ハイライト処理含む）
+            renderText() {
+                const container = document.getElementById('text-content');
+                const glossaryKeys = Object.keys(BOOK_DATA.glossary);
+                
+                glossaryKeys.sort((a, b) => b.length - a.length);
+
+                const htmlContent = BOOK_DATA.text.map((paragraph, idx) => {
+                    let processedText = paragraph;
+                    
+                    glossaryKeys.forEach(term => {
+                        const regex = new RegExp(`(?<!data-term="[^"]*)${term}(?![^<]*>)`, 'g');
+                        if (processedText.includes(term) && !processedText.includes(`data-term="${term}"`)) {
+                             // 本文閲覧時は辞書的な意味を表示したいので、ここでは特別な引数は渡さない
+                             processedText = processedText.replaceAll(term, `<span class="term-highlight" onclick="event.stopPropagation(); app.showPanel('${term}')">${term}</span>`);
+                        }
+                    });
+
+                    return `<p class="mb-6 indent-1 relative" id="p-${idx}">${processedText}</p>`;
+                }).join('');
+
+                container.innerHTML = htmlContent;
+            },
+
+            // ナビゲーション切り替え
+            switchView(targetId) {
+                this.state.scrollPositions[this.state.currentView] = window.scrollY;
+
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById(`view-${targetId}`).classList.remove('hidden');
+
+                document.querySelectorAll('.nav-btn, .nav-btn-mobile').forEach(btn => {
+                    if(btn.classList.contains('nav-btn')) {
+                         btn.classList.remove('bg-blue-50', 'text-blue-700');
+                    } else {
+                         btn.classList.remove('text-blue-600', 'font-bold', 'bg-blue-50/50');
+                         btn.classList.add('text-gray-500');
+                    }
+                });
+
+                const activeBtns = document.querySelectorAll(`[data-target="${targetId}"]`);
+                activeBtns.forEach(btn => {
+                    if(btn.classList.contains('nav-btn')) {
+                        btn.classList.add('bg-blue-50', 'text-blue-700');
+                    } else {
+                        btn.classList.remove('text-gray-500');
+                        btn.classList.add('text-blue-600', 'font-bold', 'bg-blue-50/50');
+                    }
+                });
+
+                this.state.currentView = targetId;
+                
+                if (targetId === 'read') {
+                    const savedY = localStorage.getItem('readScrollY');
+                    if (savedY) {
+                        setTimeout(() => window.scrollTo(0, parseInt(savedY)), 0);
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
+                } else {
+                    const memY = this.state.scrollPositions[targetId] || 0;
+                    setTimeout(() => window.scrollTo(0, memY), 0);
+                }
+
+                lucide.createIcons();
+                this.updateProgress();
+            },
+
+            toggleAccordion(id) {
+                const content = document.getElementById(id);
+                const icon = document.getElementById(`icon-${id}`);
+                
+                if (content.classList.contains('open')) {
+                    content.classList.remove('open');
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    content.classList.add('open');
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            },
+
+            // 解説パネル表示（本文閲覧用）
+            showPanel(term) {
+                const data = BOOK_DATA.glossary[term];
+                if (!data) return;
+
+                document.getElementById('panel-term').textContent = term;
+                document.getElementById('panel-reading').textContent = data.reading || '';
+                // 本文閲覧時は、読みを阻害しない「短い辞書的意味(desc)」を表示
+                document.getElementById('panel-desc').textContent = data.desc;
+                
+                const noteEl = document.getElementById('panel-note');
+                if (data.note) {
+                    noteEl.textContent = data.note;
+                    noteEl.classList.remove('hidden');
+                } else {
+                    noteEl.classList.add('hidden');
+                }
+
+                const panel = document.getElementById('definition-panel');
+                panel.classList.remove('translate-y-full');
+            },
+
+            closePanel() {
+                document.getElementById('definition-panel').classList.add('translate-y-full');
+            },
+
+            setupNavigation() {
+                this.switchView('read');
+            },
+
+            setupScrollListener() {
+                let timeout;
+                window.addEventListener('scroll', () => {
+                    if (timeout) return;
+                    timeout = setTimeout(() => {
+                        if (this.state.currentView === 'read') {
+                            localStorage.setItem('readScrollY', window.scrollY);
+                            this.updateProgress();
+                        }
+                        timeout = null;
+                    }, 200);
+                });
+            },
+
+            loadSavedPosition() {
+                const savedY = localStorage.getItem('readScrollY');
+                if (savedY && this.state.currentView === 'read') {
+                    setTimeout(() => window.scrollTo(0, parseInt(savedY)), 100);
+                }
+            },
+
+            updateProgress() {
+                if (this.state.currentView !== 'read') return;
+                
+                const scrollTop = window.scrollY;
+                const docHeight = document.body.scrollHeight - window.innerHeight;
+                let percent = Math.round((scrollTop / docHeight) * 100);
+                if (percent > 100) percent = 100;
+                if (percent < 0) percent = 0;
+                
+                document.getElementById('reading-progress').textContent = percent;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
