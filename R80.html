@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R80自動アドバイスシステム</title>
+    <!-- Tailwind CSSの読み込み -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- フォント設定 -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
+            background-color: #F5F5F7; /* Apple系ライトグレー */
+            color: #1D1D1F; /* Apple系ブラック */
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* メインカード */
+        .main-card {
+            background-color: #FFFFFF;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+        }
+
+        /* テキストエリア */
+        #r80Input {
+            background-color: #F5F5F7;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        #r80Input:focus {
+            background-color: #FFFFFF;
+            border-color: #0071E3; /* Apple Blue */
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+            outline: none;
+        }
+
+        /* タブナビゲーション */
+        .tab-btn {
+            position: relative;
+            font-weight: 500;
+            color: #86868B;
+            transition: color 0.3s;
+        }
+        .tab-btn:hover {
+            color: #1D1D1F;
+        }
+        .tab-active {
+            color: #1D1D1F;
+            font-weight: 700;
+        }
+        .tab-active::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 3px;
+            background-color: #1D1D1F;
+            border-radius: 2px;
+        }
+
+        /* ボタン */
+        .btn-primary {
+            background-color: #0071E3;
+            color: white;
+            border-radius: 9999px;
+            transition: all 0.2s;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: #0077ED;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        }
+        .btn-primary:disabled {
+            background-color: #E5E5EA;
+            color: #86868B;
+            cursor: not-allowed;
+        }
+
+        /* ステータスカード */
+        .status-card {
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .bg-success { background-color: #F2FCF5; color: #1F7A43; }
+        .bg-warning { background-color: #FFF9E6; color: #9A6B00; }
+        .bg-error { background-color: #FEF2F2; color: #CC3300; }
+        .bg-info { background-color: #F0F8FF; color: #0066CC; }
+
+        /* 接続詞バッジ */
+        .connector-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-weight: 700;
+            margin-right: 8px;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        /* 履歴リスト */
+        .history-item {
+            background: #FFFFFF;
+            border-bottom: 1px solid #E5E5EA;
+            transition: background 0.2s;
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-item:hover { background: #F5F5F7; }
+
+        /* フェードインアニメーション */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8 flex justify-center items-start">
+
+    <div class="max-w-4xl w-full main-card p-8 sm:p-12 my-8 fade-in">
+        
+        <!-- ヘッダーエリア -->
+        <header class="mb-10 text-center">
+            <h1 class="text-4xl sm:text-5xl font-bold mb-3 tracking-tight text-gray-900">
+                R80 確認ツール
+            </h1>
+            <p class="text-gray-500 font-medium text-lg">
+                論理的思考力を向上しよう
+            </p>
+        </header>
+
+        <!-- タブナビゲーション -->
+        <div class="flex justify-center gap-12 mb-12 border-b border-gray-200 pb-2">
+            <button onclick="switchTab('practice')" id="btn-practice" class="tab-btn tab-active text-lg pb-2 focus:outline-none">
+                トレーニング
+            </button>
+            <button onclick="switchTab('connectors')" id="btn-connectors" class="tab-btn text-lg pb-2 focus:outline-none">
+                接続詞リスト
+            </button>
+        </div>
+
+        <!-- タブコンテンツ：トレーニング (メイン) -->
+        <div id="tab-practice" class="space-y-10 fade-in">
+            
+            <!-- ガイドセクション -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- ルール -->
+                <div class="bg-gray-50 rounded-3xl p-8">
+                    <h3 class="font-bold text-xl mb-4 text-gray-900 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        R80のルール
+                    </h3>
+                    <ul class="space-y-3 text-gray-600 font-medium">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">●</span>80字前後で書く
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">●</span>必ず「2文」で書く（句点は2つ）
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2">●</span>2文目の最初に「接続詞」を置く
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 接続詞例 -->
+                <div class="bg-gray-50 rounded-3xl p-8">
+                    <h3 class="font-bold text-xl mb-4 text-gray-900 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        使用する接続詞の例
+                    </h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-center">
+                            <span class="connector-badge bg-blue-100 text-blue-700">順接</span>
+                            <span class="text-gray-600">したがって、ゆえに、だから</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="connector-badge bg-red-100 text-red-700">逆接</span>
+                            <span class="text-gray-600">しかし、だが、ところが</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="connector-badge bg-green-100 text-green-700">並列</span>
+                            <span class="text-gray-600">また、ならびに、かつ</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="connector-badge bg-purple-100 text-purple-700">対比</span>
+                            <span class="text-gray-600">一方</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="connector-badge bg-yellow-100 text-yellow-700">換言</span>
+                            <span class="text-gray-600">つまり、すなわち</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="connector-badge bg-orange-100 text-orange-700">理由</span>
+                            <span class="text-gray-600">なぜなら</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 入力セクション -->
+            <div class="relative group">
+                <textarea id="r80Input" 
+                          placeholder="ここに文章を入力してください" 
+                          oninput="checkR80()" 
+                          rows="5"
+                          class="w-full p-6 outline-none resize-none placeholder-gray-400"></textarea>
+                
+                <div class="absolute bottom-4 right-4 text-sm font-bold text-gray-400">
+                    <span id="charCount" class="text-blue-600 text-lg">0</span> / 80
+                </div>
+            </div>
+
+            <!-- アクションボタン -->
+            <div class="flex justify-end items-center gap-4">
+                <span id="autoSaveStatus" class="text-xs text-gray-400 opacity-0 transition-opacity duration-500 font-medium">下書き保存済み</span>
+                <button onclick="saveR80()" id="saveButton" class="btn-primary py-3 px-8 text-sm font-bold flex items-center gap-2" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                    履歴に保存
+                </button>
+            </div>
+
+            <!-- アドバイスエリア -->
+            <div id="adviceArea" class="status-card bg-gray-50 text-gray-500 text-center py-10">
+                入力を始めると、ここにアドバイスが表示されます
+            </div>
+
+            <!-- 履歴セクション -->
+            <section class="pt-10 border-t border-gray-100">
+                <div class="flex justify-between items-end mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">過去の記録</h2>
+                    <button onclick="clearHistory()" class="text-xs text-red-500 hover:text-red-700 font-medium transition">履歴をすべて消去</button>
+                </div>
+                <div id="historyList" class="rounded-2xl border border-gray-200 overflow-hidden">
+                    <p class="text-gray-400 text-center py-8 text-sm">保存された履歴はありません</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- タブコンテンツ：接続詞リスト (非表示) -->
+        <div id="tab-connectors" class="hidden fade-in">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">📚 接続詞リスト</h2>
+                <p class="text-gray-500 text-sm">文脈に合わせて最適な言葉を選びましょう</p>
+            </div>
+            
+            <div id="connector-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- JavaScriptで生成 -->
+            </div>
+
+            <div class="mt-12 text-center">
+                 <button onclick="switchTab('practice')" class="text-blue-600 font-bold hover:underline transition">
+                    ← トレーニングに戻る
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 接続詞データの定義 ---
+        const CONNECTORS_DATA = [
+            {
+                id: 'conclusion',
+                title: '順接',
+                desc: '前の文の結果を言う',
+                basic: ['したがって', 'ゆえに', 'だから'],
+                advanced: ['そのため', 'その結果', 'よって', '以上のことから', 'このように', 'こうして'],
+                color: "bg-blue-50 text-blue-800 border-blue-100",
+                icon: "➡️"
+            },
+            {
+                id: 'reverse',
+                title: '逆接',
+                desc: '反対のことを言う',
+                basic: ['しかし', 'だが', 'ところが'],
+                advanced: ['それでも', 'とはいえ', 'ただし', 'しかしながら', 'そうは言っても'],
+                color: "bg-red-50 text-red-800 border-red-100",
+                icon: "⚡"
+            },
+            {
+                id: 'parallel',
+                title: '並列・付加',
+                desc: '別のことをつけ加える',
+                basic: ['また', 'ならびに', 'かつ'],
+                advanced: ['さらに', '加えて', 'しかも', 'その上', 'あわせて'],
+                color: "bg-green-50 text-green-800 border-green-100",
+                icon: "➕"
+            },
+            {
+                id: 'contrast',
+                title: '対比',
+                desc: '前の文と比べる',
+                basic: ['一方'],
+                advanced: ['他方', 'それに対して', '反対に', '逆に', '対照的に'],
+                color: "bg-purple-50 text-purple-800 border-purple-100",
+                icon: "⚖️"
+            },
+            {
+                id: 'rephrase',
+                title: '換言・整理',
+                desc: 'わかりやすく言いかえる',
+                basic: ['つまり', 'すなわち'],
+                advanced: ['要するに', 'まとめると', '言い換えると'],
+                color: "bg-yellow-50 text-yellow-800 border-yellow-100",
+                icon: "🔄"
+            },
+            {
+                id: 'reason',
+                title: '理由・説明',
+                desc: 'わけや理由を言う',
+                basic: ['なぜなら'],
+                advanced: ['というのも', 'その理由は', 'なぜかというと'],
+                // 判定用キーワード：Basic、Advancedに加え、「理由は」を追加
+                checkKeywords: ['なぜなら', 'というのも', 'その理由は', 'なぜかというと', '理由は'],
+                color: "bg-orange-50 text-orange-800 border-orange-100",
+                icon: "💡"
+            },
+            {
+                id: 'concrete',
+                title: '具体化',
+                desc: 'くわしい例を出す',
+                basic: [],
+                advanced: ['例えば', '具体的には', '例を挙げると', '実際に'],
+                color: "bg-teal-50 text-teal-800 border-teal-100",
+                icon: "🔍"
+            },
+            {
+                id: 'condition',
+                title: '条件・仮定',
+                desc: 'もしもの話をする',
+                basic: [],
+                advanced: ['もし〜なら', '仮に〜とすると'],
+                checkKeywords: ['もし', '仮に'],
+                color: "bg-gray-100 text-gray-800 border-gray-200",
+                icon: "❓"
+            }
+        ];
+
+        // 判定用フラットリストの生成
+        let CONNECTORS_FLAT = [];
+        CONNECTORS_DATA.forEach(cat => {
+            // 基本
+            CONNECTORS_FLAT = CONNECTORS_FLAT.concat(cat.basic);
+            // 拡張 or 判定用キーワード
+            if (cat.checkKeywords) {
+                CONNECTORS_FLAT = CONNECTORS_FLAT.concat(cat.checkKeywords);
+            } else {
+                CONNECTORS_FLAT = CONNECTORS_FLAT.concat(cat.advanced);
+            }
+        });
+        CONNECTORS_FLAT = [...new Set(CONNECTORS_FLAT)];
+
+        // --- 接続詞一覧の生成 ---
+        function renderConnectorList() {
+            const container = document.getElementById('connector-list-container');
+            if (!container) return; 
+            container.innerHTML = "";
+
+            let html = "";
+            CONNECTORS_DATA.forEach(cat => {
+                if (!cat.advanced || cat.advanced.length === 0) return;
+
+                const chips = cat.advanced.map(word => `<span class="inline-block bg-white px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 text-sm font-medium mr-2 mb-2 shadow-sm">${word}</span>`).join("");
+                
+                html += `
+                    <div class="rounded-3xl p-6 border ${cat.color.split(' ')[2]} ${cat.color.split(' ')[0]} bg-opacity-30">
+                        <h4 class="font-bold text-lg mb-4 flex items-center ${cat.color.split(' ')[1]}">
+                            <span class="mr-3 text-xl">${cat.icon}</span> ${cat.title} 
+                            <span class="text-sm font-normal ml-2 opacity-80 bg-white bg-opacity-50 px-2 py-0.5 rounded-md"> ${cat.desc}</span>
+                        </h4>
+                        <div class="flex flex-wrap">
+                            ${chips}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+        
+        // --- タブ切り替え機能 ---
+        function switchTab(tabName) {
+            const tabPractice = document.getElementById('tab-practice');
+            const tabConnectors = document.getElementById('tab-connectors');
+            const btnPractice = document.getElementById('btn-practice');
+            const btnConnectors = document.getElementById('btn-connectors');
+
+            if (tabName === 'practice') {
+                tabPractice.classList.remove('hidden');
+                tabConnectors.classList.add('hidden');
+                btnPractice.classList.add('tab-active');
+                btnConnectors.classList.remove('tab-active');
+                setTimeout(() => {
+                    const input = document.getElementById('r80Input');
+                    if(input) input.focus();
+                }, 100);
+            } else {
+                tabPractice.classList.add('hidden');
+                tabConnectors.classList.remove('hidden');
+                btnPractice.classList.remove('tab-active');
+                btnConnectors.classList.add('tab-active');
+                renderConnectorList();
+            }
+        }
+
+        const MAX_CHARS = 80;
+        let isCurrentR80Valid = false; 
+
+        // 入力時に実行されるメインのチェック関数
+        function checkR80() {
+            const inputElement = document.getElementById('r80Input');
+            const input = inputElement.value.trim();
+            const adviceArea = document.getElementById('adviceArea');
+            const charCountSpan = document.getElementById('charCount');
+            const saveButton = document.getElementById('saveButton');
+            const autoSaveStatus = document.getElementById('autoSaveStatus');
+            
+            // --- オートセーブ ---
+            if (input !== localStorage.getItem('r80Draft')) {
+                localStorage.setItem('r80Draft', inputElement.value);
+                autoSaveStatus.classList.remove('opacity-0');
+                setTimeout(() => {
+                    autoSaveStatus.classList.add('opacity-0');
+                }, 2000);
+            }
+
+            // 文字数更新
+            charCountSpan.textContent = input.length;
+            
+            // 空の場合のリセット
+            if (input.length === 0) {
+                adviceArea.innerHTML = '入力を始めると、ここにアドバイスが表示されます';
+                adviceArea.className = 'status-card bg-gray-50 text-gray-500 text-center py-10';
+                saveButton.disabled = true;
+                isCurrentR80Valid = false;
+                return;
+            }
+
+            let adviceHTML = '';
+            let isPerfect = true;
+            let statusClass = 'bg-success'; 
+
+            // --- 1. 文字数チェック ---
+            if (input.length > MAX_CHARS + 20) { 
+                adviceHTML += '<div class="mb-2 font-bold text-red-600">⚠️ 文字数が多すぎます</div><div class="text-sm text-red-800">もっと短く、鋭くまとめてみましょう。</div>';
+                isPerfect = false;
+                statusClass = 'bg-warning';
+            } else if (input.length > MAX_CHARS) {
+                adviceHTML += '<div class="mb-2 font-bold text-yellow-600">💡 もう少しで80字です</div><div class="text-sm text-yellow-800">言葉を削ぎ落として、推敲（より良い文章に直すこと）をしてみましょう。</div>';
+                isPerfect = false;
+                if (statusClass === 'bg-success') statusClass = 'bg-warning';
+            } else if (input.length >= 72) {
+                adviceHTML += '<div class="mb-2 font-bold text-green-700">✅ 文字数はバッチリです！</div>';
+            } else if (input.length >= 64) {
+                adviceHTML += '<div class="mb-2 font-bold text-green-700">✅ 文字数はOKです</div><div class="text-sm text-green-800">（さらに詳しく書いても良いですね）</div>';
+            } else if (input.length > 40) {
+                 adviceHTML += '<div class="mb-2 font-bold text-blue-600">💡 あともう少し</div><div class="text-sm text-blue-800">64文字以上を目指して詳しく書いてみましょう。</div>';
+                 isPerfect = false; 
+                 if (statusClass === 'bg-success') statusClass = 'bg-info';
+            } else { // 40文字以下
+                adviceHTML += '<div class="mb-2 font-bold text-yellow-600">⚠️ 文字数が少なめです</div><div class="text-sm text-yellow-800">もう少し詳しく書いてみましょう！</div>';
+                isPerfect = false; 
+                if (statusClass === 'bg-success') statusClass = 'bg-warning';
+            }
+
+            // --- 2. 2文構成チェック ---
+            const periodCount = (input.match(/。/g) || []).length;
+            if (periodCount === 2) {
+                adviceHTML += '<hr class="my-3 border-black/5"><div class="mb-2 font-bold text-green-700">✅ 2文で書けています！バッチリです！</div>';
+            } else if (periodCount < 2) {
+                adviceHTML += '<hr class="my-3 border-black/5"><div class="mb-2 font-bold text-red-600">❌ 「。」が足りません</div><div class="text-sm text-red-800">事実と考察を分けて、2文にしましょう。</div>';
+                isPerfect = false;
+                if (statusClass !== 'bg-error') statusClass = 'bg-error';
+            } else {
+                adviceHTML += '<hr class="my-3 border-black/5"><div class="mb-2 font-bold text-yellow-600">⚠️ 「。」が多すぎます</div><div class="text-sm text-yellow-800">言いたいことを2つに絞りましょう。</div>';
+                if (statusClass === 'bg-success') statusClass = 'bg-warning';
+            }
+
+            // --- 3. 接続詞チェック ---
+            let foundConnector = null;
+            let connectorIndex = -1;
+            const firstPeriodIndex = input.indexOf('。');
+
+            if (periodCount >= 2 && firstPeriodIndex !== -1) {
+                const secondSentenceStart = input.substring(firstPeriodIndex + 1).trim();
+                foundConnector = CONNECTORS_FLAT.find(c => secondSentenceStart.startsWith(c));
+                
+                if (foundConnector) {
+                    connectorIndex = firstPeriodIndex + 1 + input.substring(firstPeriodIndex + 1).indexOf(foundConnector);
+                }
+            }
+
+            if (!foundConnector) {
+                adviceHTML += '<hr class="my-3 border-black/5"><div class="mb-2 font-bold text-red-600">❌ 接続詞が必要です</div><div class="text-sm text-red-800">2文目の最初に、文をつなぐ言葉を置きましょう。</div>';
+                isPerfect = false;
+                if (statusClass !== 'bg-error') statusClass = 'bg-error';
+            } else {
+                adviceHTML += `<hr class="my-3 border-black/5"><div class="mb-2 font-bold text-green-700">✅ 接続詞「${foundConnector}」が使われています</div>`;
+
+                // 読点チェック
+                const textAfterConnector = input.substring(connectorIndex + foundConnector.length).trim();
+                if (!textAfterConnector.startsWith('、')) {
+                     adviceHTML += '<div class="text-sm text-yellow-700 mt-1 bg-yellow-50 p-2 rounded">💡 接続詞の後に「、」を入れると、もっと読みやすくなりますよ。</div>';
+                }
+
+                // 先生のアドバイス
+                let checkQuestion = '';
+                const cat = CONNECTORS_DATA.find(c => {
+                    const list = c.checkKeywords ? c.checkKeywords : c.advanced.concat(c.basic);
+                    return list.includes(foundConnector);
+                });
+
+                if (cat) {
+                    if (cat.id === 'reason') checkQuestion = '1文目の「根拠」がしっかりと書けていますか？';
+                    else if (cat.id === 'conclusion') checkQuestion = '1文目の事実から、無理なく導ける「結論」になっていますか？';
+                    else if (cat.id === 'reverse') checkQuestion = '予想外の結果や、反対の意見を鮮やかに切り出せていますか？';
+                    else if (cat.id === 'contrast') checkQuestion = '2つの事柄を綺麗に対比できていますか？';
+                    else if (cat.id === 'parallel') checkQuestion = '前の文の内容に、重要な情報を積み上げられていますか？';
+                    else if (cat.id === 'rephrase') checkQuestion = '前の文を、もっと分かりやすい言葉で言い換えられていますか？';
+                    else if (cat.id === 'concrete') checkQuestion = '抽象的な話を、具体的なイメージができる例に落とし込めていますか？';
+                    else if (cat.id === 'condition') checkQuestion = '思考実験として、仮定の話を展開できていますか？';
+                }
+
+                if (checkQuestion) {
+                    adviceHTML += `
+                        <div class="mt-4 p-5 bg-white rounded-2xl shadow-sm border border-gray-100 text-left">
+                            <div class="mb-3 pb-3 border-b border-gray-100">
+                                <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">あなたが使用した接続詞</span>
+                                <div class="text-lg font-bold text-blue-600 mt-1">「${foundConnector}」</div>
+                            </div>
+                            <div class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">セルフチェック</div>
+                            <div class="flex items-start gap-3">
+                               <span class="text-2xl">🤔</span>
+                               <div class="font-bold text-gray-800 text-sm leading-relaxed pt-1">${checkQuestion}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // --- 最終評価 & 保存ボタン制御 ---
+            if (isPerfect && input.length > 0) {
+                const successMsg = `
+                    <div class="text-center pb-4">
+                        <div class="text-5xl mb-3">🎉</div>
+                        <h3 class="text-xl font-bold text-green-800 mb-1">素晴らしい！R80完成です！</h3>
+                        <p class="text-green-700 text-sm opacity-80">
+                            基本的なルールはバッチリです。<br>
+                            次は、読み手に「なるほど！」と思わせるような、<br>
+                            深い考察ができているか見直してみましょう。
+                        </p>
+                    </div>
+                `;
+                adviceHTML = successMsg + '<div class="mt-4 border-t border-green-200 pt-4 opacity-80 text-sm text-left">' + adviceHTML + '</div>';
+                
+                adviceArea.className = 'status-card bg-green-50 border-green-200';
+                saveButton.disabled = false;
+                isCurrentR80Valid = true;
+            } else {
+                 adviceArea.className = `status-card text-left ${statusClass}`;
+                 saveButton.disabled = true;
+                 isCurrentR80Valid = false;
+            }
+
+            adviceArea.innerHTML = adviceHTML;
+        }
+
+        // --- 保存機能 (LocalStorage) ---
+        function saveR80() {
+            if (!isCurrentR80Valid) return;
+
+            const input = document.getElementById('r80Input').value;
+            const now = new Date();
+            const dateStr = `${now.getMonth() + 1}/${now.getDate()} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            
+            const record = {
+                text: input,
+                date: dateStr,
+                id: Date.now()
+            };
+
+            let history = JSON.parse(localStorage.getItem('r80History') || '[]');
+            history.unshift(record);
+            localStorage.setItem('r80History', JSON.stringify(history));
+
+            localStorage.removeItem('r80Draft');
+            document.getElementById('r80Input').value = '';
+            
+            checkR80(); 
+            loadHistory();
+            
+            alert('履歴に保存しました');
+        }
+
+        function loadHistory() {
+            const historyList = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem('r80History') || '[]');
+
+            if (history.length === 0) {
+                historyList.innerHTML = '<p class="text-gray-400 text-center py-8 text-sm">保存された履歴はありません</p>';
+                return;
+            }
+
+            let html = '';
+            history.forEach(item => {
+                html += `
+                    <div class="history-item p-6 flex flex-col sm:flex-row justify-between items-start gap-4">
+                        <div class="flex-1">
+                            <div class="text-xs font-bold text-gray-400 mb-1">${item.date}</div>
+                            <p class="text-gray-800 font-medium whitespace-pre-wrap leading-relaxed">${escapeHtml(item.text)}</p>
+                        </div>
+                        <button onclick="deleteItem(${item.id})" class="text-gray-300 hover:text-red-500 transition p-2" title="削除">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+            });
+            historyList.innerHTML = html;
+        }
+
+        function deleteItem(id) {
+            if(!confirm('この履歴を削除しますか？')) return;
+            let history = JSON.parse(localStorage.getItem('r80History') || '[]');
+            history = history.filter(item => item.id !== id);
+            localStorage.setItem('r80History', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function clearHistory() {
+            if(!confirm('履歴をすべて削除してもよろしいですか？')) return;
+            localStorage.removeItem('r80History');
+            loadHistory();
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderConnectorList();
+
+            const draft = localStorage.getItem('r80Draft');
+            const inputElement = document.getElementById('r80Input');
+            if (draft && inputElement) {
+                inputElement.value = draft;
+            }
+            
+            if(inputElement) inputElement.focus();
+            checkR80();
+            loadHistory();
+        });
+    </script>
+</body>
+</html>
