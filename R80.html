@@ -465,7 +465,7 @@
                 isPerfect = false;
                 statusClass = 'bg-warning';
             } else if (input.length > MAX_CHARS) {
-                adviceHTML += '<div class="mb-2 font-bold text-yellow-600">💡 もう少しで80字です</div><div class="text-sm text-yellow-800">言葉を削ぎ落として、推敲（より良い文章に直すこと）をしてみましょう。</div>';
+                adviceHTML += '<div class="mb-2 font-bold text-red-600">⚠️ 80字を超えています！</div><div class="text-sm text-red-800">言葉を削ぎ落として、80字以内にまとめましょう。</div>';
                 isPerfect = false;
                 if (statusClass === 'bg-success') statusClass = 'bg-warning';
             } else if (input.length >= 72) {
