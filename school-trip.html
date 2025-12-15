@@ -420,13 +420,7 @@
     }
     
     .print-title {
-      font-size: 24pt;
-      text-align: center;
-      margin-bottom: 40px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #000;
-      font-family: sans-serif;
-      font-weight: bold;
+      display: none; /* タイトルを非表示に */
     }
 
     .print-group-info {
@@ -613,7 +607,6 @@
     saveGroupInfo();
     
     let html = `
-      <div class="print-title">旅のしおり</div>
       <div class="print-group-info">
         <div>班名： ${groupInfo.name}</div>
         <div>メンバー： ${groupInfo.members}</div>
