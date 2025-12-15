@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習点＆成績管理</title>
+    
+    <!-- React & ReactDOM (バージョン18.2.0を指定) -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel (JSX変換用) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Prop-types (Rechartsの依存関係として追加) -->
+    <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Recharts (グラフ描画用: バージョン2.12.7を指定して安定化) -->
+    <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- ライブラリの展開 ---
+        const { useState, useEffect, useMemo } = React;
+        
+        // Rechartsの読み込み確認と展開 (読み込み失敗時のクラッシュ防止)
+        const RechartsObj = window.Recharts || {};
+        const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip: RechartsTooltip, Legend, ResponsiveContainer } = RechartsObj;
+
+        // --- アイコンコンポーネント (Lucideの代わり) ---
+        const IconBase = ({ size = 24, className = "", children }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+
+        const Calculator = (props) => (
+            <IconBase {...props}>
+                <rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>
+            </IconBase>
+        );
+        const TrendingUp = (props) => (
+            <IconBase {...props}>
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+            </IconBase>
+        );
+        const Save = (props) => (
+            <IconBase {...props}>
+                <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/>
+            </IconBase>
+        );
+        const Trash2 = (props) => (
+            <IconBase {...props}>
+                <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>
+            </IconBase>
+        );
+        const Plus = (props) => (
+            <IconBase {...props}>
+                <path d="M5 12h14"/><path d="M12 5v14"/>
+            </IconBase>
+        );
+        const ArrowUp = (props) => (
+            <IconBase {...props}>
+                <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>
+            </IconBase>
+        );
+        const ArrowDown = (props) => (
+            <IconBase {...props}>
+                <path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>
+            </IconBase>
+        );
+        const Minus = (props) => (
+            <IconBase {...props}>
+                <path d="M5 12h14"/>
+            </IconBase>
+        );
+        const Info = (props) => (
+            <IconBase {...props}>
+                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+            </IconBase>
+        );
+        const ListIcon = (props) => (
+            <IconBase {...props}>
+                <line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/>
+            </IconBase>
+        );
+        const XIcon = (props) => (
+            <IconBase {...props}>
+                <path d="M18 6 6 18"/><path d="M6 6 18 18"/>
+            </IconBase>
+        );
+
+        // --- 定数・型定義 ---
+        const SUBJECTS_9 = ['国語', '社会', '数学', '理科', '音楽', '美術', '保体', '技家', '英語'];
+        const SUBJECTS_5 = ['国語', '数学', '社会', '理科', '英語'];
+
+        const RANK_TABLE = [
+            { rank: 'A', min: 296, max: 315 },
+            { rank: 'B', min: 276, max: 295 },
+            { rank: 'C', min: 256, max: 275 },
+            { rank: 'D', min: 236, max: 255 },
+            { rank: 'E', min: 216, max: 235 },
+            { rank: 'F', min: 196, max: 215 },
+            { rank: 'G', min: 176, max: 195 },
+            { rank: 'H', min: 156, max: 175 },
+            { rank: 'I', min: 136, max: 155 },
+            { rank: 'J', min: 116, max: 135 },
+            { rank: 'K', min: 96,  max: 115 },
+            { rank: 'L', min: 76,  max: 95 },
+            { rank: 'M', min: 63,  max: 75 },
+        ];
+
+        const INITIAL_GRADES = {
+            g1: Array(9).fill(3),
+            g2: Array(9).fill(3),
+            g3: Array(9).fill(3),
+        };
+
+        const TEST_TYPES = ['定期テスト', '学力テスト'];
+
+        // --- メインコンポーネント ---
+        const App = () => {
+            const [activeTab, setActiveTab] = useState('rank'); // 'rank' or 'tracker'
+            const [showRankTable, setShowRankTable] = useState(false); // ランク表モーダル表示用
+
+            // --- State for Rank Calculator ---
+            const [grades, setGrades] = useState(INITIAL_GRADES);
+
+            // --- State for Test Tracker ---
+            const [tests, setTests] = useState([]);
+            
+            // 日本時間での日付初期値設定
+            const initialDate = useMemo(() => {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }, []);
+
+            const [newTest, setNewTest] = useState({
+                name: '',
+                type: '定期テスト',
+                date: initialDate,
+                scores: { 国語: '', 数学: '', 社会: '', 理科: '', 英語: '' }
+            });
+
+            // --- データの読み込み/保存 ---
+            useEffect(() => {
+                const savedGrades = localStorage.getItem('hokkaido_grades');
+                const savedTests = localStorage.getItem('hokkaido_tests');
+                
+                if (savedGrades) {
+                    try {
+                        setGrades(JSON.parse(savedGrades));
+                    } catch (e) {
+                        console.error("Grade data load error", e);
+                    }
+                }
+                
+                if (savedTests) {
+                    try {
+                        const parsedTests = JSON.parse(savedTests);
+                        // データサニタイズ: 壊れたデータや異常値を除外して読み込む
+                        if (Array.isArray(parsedTests)) {
+                            const validTests = parsedTests.filter(t => {
+                                // オブジェクトかつ合計点が正常範囲内(0-500)のデータのみ許可
+                                const total = Number(t.total);
+                                return t && typeof t === 'object' && !isNaN(total) && total >= 0 && total <= 500;
+                            });
+                            setTests(validTests);
+                        }
+                    } catch (e) {
+                        console.error("Test data load error", e);
+                    }
+                }
+            }, []);
+
+            useEffect(() => {
+                localStorage.setItem('hokkaido_grades', JSON.stringify(grades));
+            }, [grades]);
+
+            useEffect(() => {
+                localStorage.setItem('hokkaido_tests', JSON.stringify(tests));
+            }, [tests]);
+
+            // --- ランク計算ロジック ---
+            const rankResult = useMemo(() => {
+                const sum1 = grades.g1.reduce((a, b) => a + (parseInt(b) || 0), 0);
+                const sum2 = grades.g2.reduce((a, b) => a + (parseInt(b) || 0), 0);
+                const sum3 = grades.g3.reduce((a, b) => a + (parseInt(b) || 0), 0);
+
+                const score1 = sum1 * 2;
+                const score2 = sum2 * 2;
+                const score3 = sum3 * 3;
+                const totalScore = score1 + score2 + score3;
+
+                // 現在のランクを探す
+                const currentRankIndex = RANK_TABLE.findIndex(r => totalScore >= r.min && totalScore <= r.max);
+                const rankObj = currentRankIndex !== -1 ? RANK_TABLE[currentRankIndex] : { rank: '-', min: 0, max: 0 };
+                
+                // 上のランク (indexが小さい方が上位ランク)
+                const nextRankObj = currentRankIndex > 0 ? RANK_TABLE[currentRankIndex - 1] : null;
+                const pointsToNext = nextRankObj ? nextRankObj.min - totalScore : 0;
+
+                // 下のランク (indexが大きい方が下位ランク)
+                const prevRankObj = (currentRankIndex !== -1 && currentRankIndex < RANK_TABLE.length - 1) 
+                ? RANK_TABLE[currentRankIndex + 1] 
+                : null;
+                // 現在のスコアから下のランクの最大値を引く = 余裕点
+                const pointsToPrev = prevRankObj ? totalScore - prevRankObj.max : 0;
+
+                return { 
+                totalScore, 
+                rank: rankObj.rank, 
+                score1, score2, score3, 
+                nextRankObj, pointsToNext,
+                prevRankObj, pointsToPrev
+                };
+            }, [grades]);
+
+            // --- グラフ用データ処理 (差分計算含む) ---
+            const processTestData = (rawTests, type) => {
+                const sorted = rawTests
+                .filter(t => t.type === type)
+                .sort((a, b) => a.id - b.id);
+
+                return sorted.map((test, index) => {
+                const prev = index > 0 ? sorted[index - 1] : null;
+                const subjectDiffs = {};
+                // 平均点を計算してデータに追加
+                const average = (test.total / 5).toFixed(1);
+                
+                SUBJECTS_5.forEach(sub => {
+                    const currentScore = parseInt(test.scores[sub]) || 0;
+                    const prevScore = prev ? (parseInt(prev.scores[sub]) || 0) : null;
+                    
+                    if (prevScore !== null) {
+                    const diff = currentScore - prevScore;
+                    subjectDiffs[sub] = diff > 0 ? `+${diff}` : `${diff}`;
+                    subjectDiffs[sub + '_val'] = diff; 
+                    } else {
+                    subjectDiffs[sub] = null;
+                    subjectDiffs[sub + '_val'] = null;
+                    }
+                });
+
+                return { ...test, subjectDiffs, average };
+                });
+            };
+
+            const regularTests = useMemo(() => processTestData(tests, '定期テスト'), [tests]);
+            const academicTests = useMemo(() => processTestData(tests, '学力テスト'), [tests]);
+
+
+            // --- ハンドラ ---
+            const handleGradeChange = (yearKey, index, val) => {
+                const num = parseInt(val);
+                if (isNaN(num) || num < 1 || num > 5) return;
+                const newGrades = { ...grades };
+                newGrades[yearKey][index] = num;
+                setGrades(newGrades);
+            };
+
+            const addTest = () => {
+                try {
+                    if (!newTest.name || newTest.name.trim() === '') {
+                        alert('テスト名を入力してください。\n(例: 1学期期末、第1回道コン)');
+                        return;
+                    }
+                    
+                    // バリデーションと合計計算
+                    let calculatedTotal = 0;
+                    let hasError = false;
+
+                    for (const sub of SUBJECTS_5) {
+                        const val = newTest.scores[sub];
+                        
+                        // 空入力・null・undefinedは0点扱いとして許容してスキップ
+                        if (val === '' || val === null || val === undefined) continue;
+                        
+                        // 文字列の場合はトリムして空文字チェック
+                        const strVal = String(val).trim();
+                        if (strVal === '') continue;
+                        
+                        const num = Number(strVal);
+                        
+                        // 数値チェック
+                        if (isNaN(num)) {
+                            alert(`【${sub}】の点数が正しくありません。\n半角数字で入力してください。`);
+                            hasError = true;
+                            break;
+                        }
+                        // 範囲チェック (0〜100)
+                        if (num < 0 || num > 100) {
+                            alert(`【${sub}】の点数が ${num}点 になっています。\n0点〜100点の間で入力してください。`);
+                            hasError = true;
+                            break;
+                        }
+                        calculatedTotal += num;
+                    }
+
+                    if (hasError) return;
+
+                    const testEntry = {
+                        id: Date.now(),
+                        ...newTest,
+                        total: calculatedTotal
+                    };
+
+                    setTests([...tests, testEntry]);
+                    setNewTest({
+                        name: '',
+                        type: '定期テスト',
+                        date: initialDate,
+                        scores: { 国語: '', 数学: '', 社会: '', 理科: '', 英語: '' }
+                    });
+                } catch (e) {
+                    console.error(e);
+                    alert("保存中にエラーが発生しました。");
+                }
+            };
+
+            const deleteTest = (id) => {
+                if(confirm('この記録を削除しますか？')) {
+                setTests(tests.filter(t => t.id !== id));
+                }
+            };
+
+            const getPreviousTest = (currentTest) => {
+                const sameTypeTests = tests
+                .filter(t => t.type === currentTest.type && t.id < currentTest.id)
+                .sort((a, b) => b.id - a.id);
+                return sameTypeTests.length > 0 ? sameTypeTests[0] : null;
+            };
+
+            // --- UI Components ---
+
+            const CustomTooltip = ({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                const data = payload[0].payload;
+                return (
+                    <div className="bg-white p-3 border border-slate-200 shadow-xl rounded-lg text-sm z-50">
+                    <p className="font-bold mb-2 text-slate-800 border-b pb-1 flex justify-between gap-4">
+                        <span>{data.name}</span>
+                        <span className="text-slate-500 text-xs font-normal mt-0.5">{data.date}</span>
+                    </p>
+                    <div className="space-y-1">
+                        {SUBJECTS_5.map(sub => {
+                        const score = data.scores[sub];
+                        const diffStr = data.subjectDiffs[sub];
+                        const diffVal = data.subjectDiffs[sub + '_val'];
+                        
+                        let diffColor = 'text-slate-300';
+                        if (diffVal > 0) diffColor = 'text-red-500';
+                        else if (diffVal < 0) diffColor = 'text-blue-500';
+
+                        return (
+                            <div key={sub} className="flex items-center gap-3">
+                            <span className="text-slate-500 w-4 font-bold">{sub.charAt(0)}</span>
+                            <span className="font-bold text-slate-800 w-8 text-right">{score}</span>
+                            <span className={`font-bold w-10 text-right ${diffColor}`}>
+                                {diffStr !== null ? diffStr : '-'}
+                            </span>
+                            </div>
+                        );
+                        })}
+                    </div>
+                    <div className="mt-2 pt-2 border-t flex justify-between items-end">
+                        <div className="text-slate-500 text-xs font-bold">
+                        平均 <span className="text-slate-700 text-sm">{data.average}</span> 点
+                        </div>
+                        <div className="text-right font-bold">
+                        <span className="text-xs text-slate-400 mr-1">合計</span>
+                        <span className="text-indigo-600 text-lg">{data.total}</span>
+                        </div>
+                    </div>
+                    </div>
+                );
+                }
+                return null;
+            };
+
+            const GradeInputRow = ({ label, yearKey, multiplier }) => (
+                <div className="mb-6 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-bold text-slate-700 flex items-center gap-2">
+                    {label} <span className="text-xs font-normal text-slate-500 bg-slate-100 px-2 py-1 rounded">×{multiplier}倍</span>
+                    </h3>
+                    <div className="text-right text-sm text-slate-600">
+                    小計: <span className="font-bold text-blue-600 text-lg">
+                        {(grades[yearKey].reduce((a, b) => a + (parseInt(b) || 0), 0) * multiplier)}
+                    </span> 
+                    <span className="text-xs text-slate-400"> / {45 * multiplier}</span>
+                    </div>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2">
+                    {SUBJECTS_9.map((sub, idx) => (
+                    <div key={idx} className="flex flex-col items-center">
+                        <label className="text-xs text-slate-500 mb-1">{sub}</label>
+                        <select
+                        value={grades[yearKey][idx]}
+                        onChange={(e) => handleGradeChange(yearKey, idx, e.target.value)}
+                        className="w-full p-2 text-center bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none font-bold text-slate-700"
+                        >
+                        {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                    </div>
+                    ))}
+                </div>
+                </div>
+            );
+
+            const ChartSection = ({ title, data, color }) => {
+                // Rechartsが読み込まれていない場合は描画しない (安全性確保)
+                if (!LineChart) {
+                    return (
+                        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6">
+                            <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                                <TrendingUp size={20} className="text-slate-400" /> {title}
+                            </h3>
+                            <div className="text-center text-slate-400 py-10 bg-slate-50 rounded-lg text-sm">
+                                グラフライブラリを読み込み中です...<br/>
+                                (表示されない場合はページを再読み込みしてください)
+                            </div>
+                        </div>
+                    );
+                }
+
+                // 教科ごとの平均点を算出
+                const subjectAverages = useMemo(() => {
+                if (!data || data.length === 0) return null;
+                const sums = {};
+                SUBJECTS_5.forEach(s => sums[s] = 0);
+                
+                data.forEach(d => {
+                    SUBJECTS_5.forEach(s => {
+                    sums[s] += parseInt(d.scores[s]) || 0;
+                    });
+                });
+
+                const avgs = {};
+                SUBJECTS_5.forEach(s => {
+                    avgs[s] = (sums[s] / data.length).toFixed(1);
+                });
+                return avgs;
+                }, [data]);
+
+                return (
+                <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                    <TrendingUp size={20} className={color} /> {title}
+                    </h3>
+                    <div className="h-56 w-full">
+                    {data.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={data}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                            <XAxis dataKey="name" tick={{fontSize: 10}} interval={0} stroke="#94a3b8" />
+                            <YAxis domain={[0, 500]} stroke="#94a3b8" />
+                            <RechartsTooltip content={<CustomTooltip />} />
+                            <Legend />
+                            <Line 
+                            type="monotone" 
+                            dataKey="total" 
+                            name="合計点" 
+                            stroke={color === 'text-indigo-500' ? '#6366f1' : '#f97316'} 
+                            strokeWidth={3} 
+                            activeDot={{ r: 8 }} 
+                            />
+                        </LineChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-lg">
+                        データがありません
+                        </div>
+                    )}
+                    </div>
+
+                    {/* 教科別平均点表示エリア */}
+                    {subjectAverages && (
+                    <div className="mt-4 pt-3 border-t border-slate-100">
+                        <div className="text-xs font-bold text-slate-400 mb-2 flex items-center gap-2">
+                        <span>教科別平均点</span>
+                        <span className="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">全{data.length}回</span>
+                        </div>
+                        <div className="grid grid-cols-5 gap-1">
+                        {SUBJECTS_5.map(sub => (
+                            <div key={sub} className="text-center bg-slate-50 rounded-lg py-2 px-1 border border-slate-100">
+                            <div className="text-[10px] text-slate-500 mb-0.5">{sub}</div>
+                            <div className={`font-bold ${color.includes('indigo') ? 'text-indigo-600' : 'text-orange-600'}`}>
+                                {subjectAverages[sub]}
+                            </div>
+                            </div>
+                        ))}
+                        </div>
+                    </div>
+                    )}
+                </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-slate-50 text-slate-800 font-sans">
+                {/* Header */}
+                <header className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-4 shadow-lg sticky top-0 z-10">
+                    <div className="max-w-4xl mx-auto flex items-center justify-between">
+                    <h1 className="text-xl font-bold flex items-center gap-2">
+                        <Calculator size={24} />
+                        学習点＆成績管理
+                    </h1>
+                    </div>
+                </header>
+
+                {/* Navigation */}
+                <div className="max-w-4xl mx-auto p-4">
+                    <div className="flex bg-white rounded-lg p-1 shadow-sm mb-6">
+                    <button
+                        onClick={() => setActiveTab('rank')}
+                        className={`flex-1 py-3 rounded-md font-bold transition-all flex justify-center items-center gap-2 ${
+                        activeTab === 'rank' 
+                            ? 'bg-blue-100 text-blue-700 shadow-sm' 
+                            : 'text-slate-500 hover:bg-slate-50'
+                        }`}
+                    >
+                        <Calculator size={18} /> ランク計算
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('tracker')}
+                        className={`flex-1 py-3 rounded-md font-bold transition-all flex justify-center items-center gap-2 ${
+                        activeTab === 'tracker' 
+                            ? 'bg-green-100 text-green-700 shadow-sm' 
+                            : 'text-slate-500 hover:bg-slate-50'
+                        }`}
+                    >
+                        <TrendingUp size={18} /> 成績推移
+                    </button>
+                    </div>
+
+                    {/* Content: Rank Calculator */}
+                    {activeTab === 'rank' && (
+                    <div className="space-y-6 animate-in fade-in duration-300">
+                        
+                        {/* Result Card */}
+                        <div className="bg-white rounded-2xl shadow-lg border-2 border-indigo-100 overflow-hidden relative">
+                        <button 
+                            onClick={() => setShowRankTable(true)}
+                            className="absolute top-4 right-4 text-xs font-bold bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full flex items-center gap-1 hover:bg-indigo-200 transition-colors"
+                        >
+                            <ListIcon size={14} /> ランク基準表
+                        </button>
+
+                        <div className="bg-indigo-50 p-4 border-b border-indigo-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                            <h2 className="font-bold text-indigo-800 flex items-center gap-2">
+                            <Calculator size={20} /> 現在の学習点 (内申点)
+                            </h2>
+                        </div>
+                        <div className="p-6 flex flex-col md:flex-row items-center justify-around gap-6 text-center">
+                            <div>
+                            <div className="text-sm text-slate-500 mb-1">合計学習点</div>
+                            <div className="text-5xl font-black text-slate-800 tracking-tighter">
+                                {rankResult.totalScore} <span className="text-lg font-medium text-slate-400">/ 315</span>
+                            </div>
+                            </div>
+                            <div className="md:border-l md:border-r border-slate-100 w-full md:w-px h-px md:h-16 bg-slate-100"></div>
+                            <div>
+                            <div className="text-sm text-slate-500 mb-1">現在のランク</div>
+                            <div className="text-6xl font-black text-indigo-600 leading-none">
+                                {rankResult.rank}
+                            </div>
+                            </div>
+                        </div>
+                        
+                        {/* 前後のランクとの差を表示 */}
+                        <div className="grid grid-cols-2 border-t border-slate-100 divide-x divide-slate-100">
+                            <div className="p-3 text-center bg-slate-50">
+                            <div className="text-xs text-slate-500 mb-1">上位ランク ({rankResult.nextRankObj ? rankResult.nextRankObj.rank : '-'}) まで</div>
+                            {rankResult.nextRankObj ? (
+                                <div className="font-bold text-slate-700">
+                                あと <span className="text-lg text-indigo-600">{rankResult.pointsToNext}</span> 点
+                                </div>
+                            ) : (
+                                <div className="text-sm font-bold text-indigo-400">最高ランク到達！</div>
+                            )}
+                            </div>
+                            <div className="p-3 text-center bg-slate-50">
+                            <div className="text-xs text-slate-500 mb-1">下位ランク ({rankResult.prevRankObj ? rankResult.prevRankObj.rank : '-'}) との差</div>
+                            {rankResult.prevRankObj ? (
+                                <div className="font-bold text-slate-700">
+                                <span className="text-lg text-green-600">{rankResult.pointsToPrev}</span> 点
+                                </div>
+                            ) : (
+                                <div className="text-sm font-bold text-slate-400">-</div>
+                            )}
+                            </div>
+                        </div>
+                        </div>
+
+                        {/* ランク早見表 モーダル */}
+                        {showRankTable && (
+                        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                            <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full max-h-[80vh] overflow-y-auto">
+                            <div className="p-4 border-b flex justify-between items-center sticky top-0 bg-white">
+                                <h3 className="font-bold text-lg">ランク基準表</h3>
+                                <button onClick={() => setShowRankTable(false)} className="p-1 hover:bg-slate-100 rounded-full">
+                                <XIcon size={20} />
+                                </button>
+                            </div>
+                            <div className="p-4">
+                                <table className="w-full text-sm text-center">
+                                <thead className="bg-slate-100 font-bold text-slate-600">
+                                    <tr>
+                                    <th className="py-2 rounded-l-lg">ランク</th>
+                                    <th className="py-2 rounded-r-lg">点数範囲 (315点満点)</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {RANK_TABLE.map((r) => (
+                                    <tr key={r.rank} className={r.rank === rankResult.rank ? "bg-indigo-50 font-bold text-indigo-700" : ""}>
+                                        <td className="py-2">{r.rank}</td>
+                                        <td className="py-2">{r.max} ～ {r.min}</td>
+                                    </tr>
+                                    ))}
+                                </tbody>
+                                </table>
+                            </div>
+                            <div className="p-4 border-t bg-slate-50">
+                                <button 
+                                onClick={() => setShowRankTable(false)}
+                                className="w-full py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700"
+                                >
+                                閉じる
+                                </button>
+                            </div>
+                            </div>
+                        </div>
+                        )}
+
+                        <div className="text-sm text-slate-500 bg-slate-100 p-3 rounded-lg flex gap-2">
+                        <Info size={16} className="shrink-0 mt-0.5" />
+                        <p>1年生・2年生の9教科評定合計は2倍、3年生は3倍で計算されます。まだ成績が出ていない学年は、予想の数値を入力してシミュレーションしてください。</p>
+                        </div>
+
+                        {/* Inputs */}
+                        <div>
+                        <GradeInputRow label="中学1年生" yearKey="g1" multiplier={2} />
+                        <GradeInputRow label="中学2年生" yearKey="g2" multiplier={2} />
+                        <GradeInputRow label="中学3年生" yearKey="g3" multiplier={3} />
+                        </div>
+                    </div>
+                    )}
+
+                    {/* Content: Test Tracker */}
+                    {activeTab === 'tracker' && (
+                    <div className="space-y-8 animate-in fade-in duration-300">
+                        
+                        {/* Input Form */}
+                        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                        <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2">
+                            <Plus size={20} className="text-green-500" /> 新しいテスト結果を記録
+                        </h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                            <label className="block text-xs font-bold text-slate-500 mb-1">テスト名</label>
+                            <input 
+                                type="text" 
+                                placeholder="例: 1学期中間、4月学力テスト" 
+                                className="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
+                                value={newTest.name}
+                                onChange={e => setNewTest({...newTest, name: e.target.value})}
+                            />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 mb-1">種類</label>
+                                <select 
+                                className="w-full p-2 border border-slate-300 rounded-lg"
+                                value={newTest.type}
+                                onChange={e => setNewTest({...newTest, type: e.target.value})}
+                                >
+                                {TEST_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 mb-1">日付</label>
+                                <input 
+                                type="date" 
+                                className="w-full p-2 border border-slate-300 rounded-lg"
+                                value={newTest.date}
+                                onChange={e => setNewTest({...newTest, date: e.target.value})}
+                                />
+                            </div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-5 gap-2 mb-4">
+                            {SUBJECTS_5.map(sub => (
+                            <div key={sub}>
+                                <label className="block text-xs text-center text-slate-500 mb-1">{sub}</label>
+                                <input 
+                                type="number" 
+                                inputMode="numeric"
+                                placeholder="0"
+                                className="w-full p-2 text-center border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-400 outline-none font-bold"
+                                value={newTest.scores[sub]}
+                                onChange={e => setNewTest({
+                                    ...newTest, 
+                                    scores: { ...newTest.scores, [sub]: e.target.value }
+                                })}
+                                />
+                            </div>
+                            ))}
+                        </div>
+
+                        <button 
+                            onClick={addTest}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors flex justify-center items-center gap-2"
+                        >
+                            <Save size={18} /> 保存する
+                        </button>
+                        </div>
+
+                        {/* Charts Section */}
+                        {(tests.length > 0) && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <ChartSection 
+                            title="定期テスト推移" 
+                            data={regularTests} 
+                            color="text-indigo-500" 
+                            />
+                            <ChartSection 
+                            title="学力テスト推移" 
+                            data={academicTests} 
+                            color="text-orange-500" 
+                            />
+                        </div>
+                        )}
+
+                        {/* History List */}
+                        <div className="space-y-4">
+                        <h3 className="font-bold text-slate-700 ml-1">履歴詳細</h3>
+                        {tests.length === 0 && (
+                            <div className="text-center py-10 text-slate-400 bg-white rounded-xl border border-dashed border-slate-300">
+                            まだ記録がありません
+                            </div>
+                        )}
+                        
+                        {[...tests].sort((a, b) => b.id - a.id).map(test => {
+                            const prevTest = getPreviousTest(test);
+                            const diffTotal = prevTest ? test.total - prevTest.total : 0;
+                            
+                            return (
+                            <div key={test.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 relative group transition-transform hover:-translate-y-1 duration-200">
+                                <button 
+                                onClick={() => deleteTest(test.id)}
+                                className="absolute top-4 right-4 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                <Trash2 size={18} />
+                                </button>
+
+                                <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                    <span className={`text-xs px-2 py-0.5 rounded text-white font-bold ${
+                                        test.type === '定期テスト' ? 'bg-indigo-500' : 'bg-orange-500'
+                                    }`}>
+                                        {test.type}
+                                    </span>
+                                    <span className="text-xs text-slate-400">{test.date}</span>
+                                    </div>
+                                    <h4 className="font-bold text-lg text-slate-800">{test.name}</h4>
+                                </div>
+                                
+                                <div className="text-right">
+                                    <div className="text-3xl font-black text-slate-800 tracking-tight leading-none">
+                                    {test.total}<span className="text-sm font-normal text-slate-500 ml-1">点</span>
+                                    </div>
+                                    {prevTest && (
+                                    <div className={`text-sm font-bold flex items-center justify-end gap-1 ${
+                                        diffTotal > 0 ? 'text-red-500' : diffTotal < 0 ? 'text-blue-500' : 'text-slate-400'
+                                    }`}>
+                                        {diffTotal > 0 ? <ArrowUp size={14} /> : diffTotal < 0 ? <ArrowDown size={14} /> : <Minus size={14} />}
+                                        {diffTotal > 0 ? `+${diffTotal}` : diffTotal} 
+                                        <span className="text-xs font-normal text-slate-400">vs 前回</span>
+                                    </div>
+                                    )}
+                                </div>
+                                </div>
+
+                                <div className="grid grid-cols-5 gap-1 border-t border-slate-100 pt-3">
+                                {SUBJECTS_5.map(sub => {
+                                    // 教科ごとの差分計算
+                                    const currentScore = parseInt(test.scores[sub]) || 0;
+                                    const prevScore = prevTest && prevTest.scores[sub] ? parseInt(prevTest.scores[sub]) : null;
+                                    const diffSub = prevScore !== null ? currentScore - prevScore : null;
+
+                                    return (
+                                    <div key={sub} className="text-center flex flex-col items-center justify-start">
+                                        <div className="text-xs text-slate-400 mb-0.5">{sub}</div>
+                                        <div className="font-bold text-slate-700 text-lg leading-none mb-1">
+                                        {test.scores[sub] || '-'}
+                                        </div>
+                                        
+                                        {/* 教科ごとの増減表示 */}
+                                        {diffSub !== null && diffSub !== 0 ? (
+                                        <div className={`text-[10px] font-bold flex items-center ${
+                                            diffSub > 0 ? 'text-red-500' : 'text-blue-500'
+                                        }`}>
+                                            {diffSub > 0 ? '+' : ''}{diffSub}
+                                        </div>
+                                        ) : (
+                                        <div className="h-4"></div> // レイアウト崩れ防止のスペーサー
+                                        )}
+                                    </div>
+                                    );
+                                })}
+                                </div>
+                            </div>
+                            );
+                        })}
+                        </div>
+
+                    </div>
+                    )}
+                </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
