@@ -3,51 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>修学旅行 自主研修プランナー</title>
+<title>旅のしおり</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
-
+  /* System Fonts & Modern Reset */
   :root {
-    --primary-color: #4A90E2;
-    --accent-color: #FF6B6B;
-    --bg-color: #F5F7FA;
-    --card-bg: #FFFFFF;
-    --text-color: #333333;
-    --border-radius: 12px;
-    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --text-main: #1d1d1f;       /* ほぼ黒 */
+    --text-sub: #86868b;        /* グレー */
+    --bg-body: #f5f5f7;         /* Apple系ライトグレー背景 */
+    --bg-card: #ffffff;         /* カード背景 */
+    --accent-color: #ff6b6b;    /* アクセント（コーラルピンク） */
+    --accent-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+    --button-bg: #1d1d1f;       /* ボタン背景（黒） */
+    --button-text: #ffffff;
+    --border-radius: 20px;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.04);
+    --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
   }
 
   body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Yu Gothic", YuGothic, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
     margin: 0;
-    padding: 20px;
+    padding: 60px 20px;
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: 0.03em;
   }
 
   .container {
-    max-width: 600px;
+    max-width: 740px;
     margin: 0 auto;
   }
 
+  /* タイトル周り */
   h1 {
     text-align: center;
-    color: var(--primary-color);
-    margin-bottom: 20px;
-    font-size: 1.8rem;
+    color: var(--text-main);
+    margin-bottom: 50px;
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    position: relative;
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  h1::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: var(--accent-color);
+    margin: 15px auto 0;
+    border-radius: 2px;
   }
 
-  /* 班情報入力エリア */
-  .group-info-card {
-    background: var(--card-bg);
-    padding: 15px;
+  /* カードスタイル */
+  .card {
+    background: var(--bg-card);
     border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 20px;
+    box-shadow: var(--shadow-soft);
+    padding: 40px;
+    margin-bottom: 30px;
+    transition: var(--transition);
+    border: 1px solid rgba(0,0,0,0.02);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  /* フォーム要素 */
+  .group-info-card {
     display: flex;
+    gap: 20px;
     flex-wrap: wrap;
-    gap: 15px;
   }
 
   .group-info-item {
@@ -55,338 +89,374 @@
     min-width: 200px;
   }
 
-  .group-info-item label {
-    display: block;
-    font-size: 0.85rem;
-    color: #666;
-    margin-bottom: 4px;
-  }
-
-  .group-info-item input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-  }
-
-  button.print-btn {
-    display: block;
-    width: 200px;
-    margin: 0 auto 30px auto;
-    background-color: #2ECC71;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-
-  button.print-btn:hover {
-    background-color: #27AE60;
-  }
-  
-  /* 印刷用コンテナ（画面上は非表示） */
-  #print-container {
-    display: none;
-  }
-
-  @media print {
-    /* 通常のコンテンツを全て非表示 */
-    .container, .input-card, h2 {
-      display: none !important;
-    }
-    
-    body {
-      background: white;
-      margin: 0;
-      padding: 0;
-      font-size: 10pt;
-      color: #000;
-      -webkit-print-color-adjust: exact;
-    }
-
-    /* 印刷用コンテナを表示 */
-    #print-container {
-      display: block;
-      width: 100%;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-
-    .print-title {
-      text-align: center;
-      font-size: 16pt;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #333;
-    }
-
-    .print-group-info {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      font-size: 11pt;
-      font-weight: bold;
-    }
-
-    .print-group-info div {
-      border-bottom: 1px solid #999;
-      padding-bottom: 5px;
-      min-width: 200px;
-    }
-
-    /* 印刷用テーブル */
-    .print-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 9pt;
-    }
-
-    .print-table th, .print-table td {
-      border: 1px solid #333;
-      padding: 6px 8px;
-      vertical-align: top;
-    }
-
-    .print-table th {
-      background-color: #f0f0f0 !important;
-      text-align: center;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .print-table td.time-col {
-      text-align: center;
-      white-space: nowrap;
-      font-weight: bold;
-      width: 15%; 
-    }
-
-    .print-table td.place-col {
-      font-weight: bold;
-      width: 35%;
-    }
-
-    .print-table td.memo-col {
-      white-space: pre-wrap;
-      width: 50%;
-    }
-  }
-
-  .input-card {
-    background: var(--card-bg);
-    padding: 20px;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 30px;
-  }
-
-  .form-group {
-    margin-bottom: 15px;
-  }
-
   label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    color: #666;
+    font-size: 0.85rem;
+    color: var(--text-sub);
+    margin-bottom: 8px;
+    font-weight: 600;
   }
 
   input, textarea {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    box-sizing: border-box;
+    padding: 16px;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background-color: #f0f0f2;
+    color: var(--text-main);
+    font-size: 1rem;
     font-family: inherit;
-    transition: border-color 0.3s;
+    box-sizing: border-box;
+    transition: var(--transition);
   }
 
   input:focus, textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
+    background-color: #fff;
+    border-color: var(--text-main); /* フォーカス時は黒枠で引き締める */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   }
 
   textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 100px;
+  }
+
+  /* ボタン */
+  button {
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    transition: var(--transition);
+  }
+
+  button.print-btn {
+    display: block;
+    margin: 0 auto 50px;
+    background: transparent;
+    color: var(--text-sub);
+    font-size: 0.9rem;
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: 1px solid #e0e0e0;
+  }
+
+  button.print-btn:hover {
+    color: var(--text-main);
+    border-color: var(--text-main);
+    background: #fff;
   }
 
   button.add-btn {
     width: 100%;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    padding: 18px;
+    border-radius: 14px;
+    font-size: 1.1rem;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   }
 
   button.add-btn:hover {
-    background-color: #357ABD;
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    background-color: #000;
   }
 
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  /* 見出し2 */
   h2 {
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 60px 0 30px;
+    padding-left: 10px;
+    border-left: 4px solid var(--text-main);
   }
 
-  /* Timeline Styles */
+  /* タイムライン */
   .timeline {
     position: relative;
-    padding-left: 20px;
+    padding-left: 40px;
   }
 
   .timeline::before {
     content: '';
     position: absolute;
-    left: 7px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: #ddd;
+    left: 12px;
+    top: 15px;
+    bottom: 15px;
+    width: 1px;
+    background: #d1d1d6; /* 非常に細い線 */
     z-index: 0;
   }
 
   .plan-item {
     position: relative;
-    background: var(--card-bg);
+    background: var(--bg-card);
     border-radius: var(--border-radius);
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition);
     z-index: 1;
   }
 
   .plan-item:hover {
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-3px);
   }
 
+  /* タイムラインのドット */
   .plan-item::before {
     content: '';
     position: absolute;
-    left: -24px;
-    top: 20px;
-    width: 12px;
-    height: 12px;
-    background: var(--primary-color);
+    left: -32px;
+    top: 35px;
+    width: 9px;
+    height: 9px;
+    background: var(--bg-body);
+    border: 2px solid var(--text-main);
     border-radius: 50%;
-    border: 2px solid #fff;
-    box-shadow: 0 0 0 2px var(--primary-color);
+    z-index: 2;
   }
 
-  /* 所要時間表示のスタイル */
-  .travel-time {
-    font-size: 0.85rem;
-    color: #666;
-    background-color: #f0f4f8;
-    padding: 4px 10px;
-    border-radius: 20px;
-    margin-bottom: 10px;
-    display: inline-block;
-    border: 1px solid #dbe2e8;
-  }
-
+  /* ヘッダーエリア（時間・場所・削除） */
   .plan-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
   }
 
-  /* 編集可能な時刻入力のスタイル */
+  .time-place-wrapper {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 15px;
+    flex: 1;
+  }
+
+  /* 時間入力 */
   .time-edit-input {
-    font-family: 'Noto Sans JP', sans-serif;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: var(--primary-color);
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 2rem; /* 時間を大きく強調 */
+    font-weight: 200; /* 細いフォントで上品に */
+    color: var(--text-main);
     background: transparent;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: 0 4px;
-    cursor: pointer;
+    border: none;
+    padding: 0;
     width: auto;
-    /* デフォルトのinputスタイルを少しリセット */
-    display: inline-block;
-  }
-  
-  .time-edit-input:hover, .time-edit-input:focus {
-    background: #fff;
-    border-color: #ddd;
-    outline: none;
-    color: var(--text-color);
+    cursor: pointer;
+    line-height: 1;
   }
 
-  .plan-place {
-    font-weight: bold;
-    font-size: 1.1rem;
+  /* 場所入力 */
+  .plan-place-input {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-main);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid transparent;
+    border-radius: 0;
+    padding: 0 0 2px 0;
+    width: auto;
+    flex-grow: 1;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .plan-place-input:focus, .plan-place-input:hover {
+    background: transparent;
+    border-bottom-color: var(--text-sub);
+    box-shadow: none;
+  }
+
+  .delete-btn {
+    background: #fff0f0;
+    color: var(--accent-color);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    transition: var(--transition);
+  }
+
+  .delete-btn:hover {
+    background: var(--accent-color);
+    color: white;
+  }
+
+  /* リンク類 */
+  .plan-links {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
   }
 
   .plan-links a {
-    display: inline-block;
-    color: var(--primary-color);
     text-decoration: none;
-    font-size: 0.9rem;
-    margin-right: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    background: #f0f0f2;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: var(--transition);
   }
 
   .plan-links a:hover {
-    text-decoration: underline;
+    background: #e0e0e2;
+    transform: translateY(-1px);
   }
 
+  /* 詳細情報（移動時間・交通費） */
+  .plan-details-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fafafa;
+    border-radius: 12px;
+  }
+
+  .plan-detail {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .plan-detail label {
+    margin: 0 10px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-sub);
+    white-space: nowrap;
+  }
+
+  .plan-detail-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    text-align: right;
+    font-weight: 600;
+    border-radius: 0;
+  }
+  
+  .plan-detail-input:focus {
+    background: transparent;
+    box-shadow: none;
+    border-bottom: 1px solid var(--text-main);
+  }
+
+  /* メモ */
   .plan-memo {
     width: 100%;
-    box-sizing: border-box;
-    background: #f9f9f9;
-    padding: 8px;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    color: #555;
-    margin-top: 10px;
-    resize: vertical;
-    font-family: inherit;
+    background: transparent; /* カード背景に馴染ませる */
+    border: none;
+    /* border-top: 1px solid #f0f0f0; */
+    padding: 10px 0 0 0;
+    border-radius: 0;
+    font-size: 0.95rem;
+    color: var(--text-sub);
+    line-height: 1.8;
     min-height: 60px;
   }
 
   .plan-memo:focus {
-    background: #fff;
-    border-color: var(--primary-color);
-    outline: none;
-  }
-
-  .delete-btn {
     background: transparent;
-    border: 1px solid #ddd;
-    color: #888;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    margin-left: 10px;
+    box-shadow: none;
+    color: var(--text-main);
   }
 
-  .delete-btn:hover {
-    background: #fee;
-    color: var(--accent-color);
-    border-color: var(--accent-color);
+  .plan-memo::placeholder {
+    color: #d1d1d6;
+  }
+
+  /* 移動時間の表示（縦軸） */
+  .travel-time-indicator {
+    font-size: 0.75rem;
+    color: var(--text-sub);
+    background: #fff;
+    padding: 4px 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: inline-block;
+    font-weight: 500;
   }
 
   .empty-state {
     text-align: center;
-    color: #888;
-    padding: 40px 0;
+    color: var(--text-sub);
+    padding: 100px 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  /* 印刷設定 */
+  #print-container { display: none; }
+
+  @media print {
+    .container, .input-card, h2, button { display: none !important; }
+    body { background: #fff; color: #000; padding: 0; font-family: serif; }
+    
+    #print-container {
+      display: block;
+      width: 100%;
+      padding: 30px;
+      box-sizing: border-box;
+    }
+    
+    .print-title {
+      font-size: 24pt;
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #000;
+      font-family: sans-serif;
+      font-weight: bold;
+    }
+
+    .print-group-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      font-size: 12pt;
+    }
+
+    .print-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .print-table th {
+      border-bottom: 2px solid #000;
+      padding: 10px;
+      text-align: left;
+      font-weight: bold;
+    }
+
+    .print-table td {
+      border-bottom: 1px solid #ccc;
+      padding: 15px 10px;
+      vertical-align: top;
+    }
+    
+    .print-table td.time-col { width: 15%; font-weight: bold; }
+    .print-table td.place-col { width: 30%; font-weight: bold; font-size: 1.1em; }
+    .print-table td.memo-col { width: 55%; font-size: 0.9em; color: #444; }
   }
 </style>
 </head>
@@ -396,9 +466,10 @@
 <div id="print-container"></div>
 
 <div class="container">
-  <h1>✈️ 修学旅行 旅程表</h1>
+  <h1>旅のしおり</h1>
+  <button class="print-btn" onclick="prepareAndPrint()">🖨️ 印刷 / PDF保存</button>
   
-  <div class="group-info-card">
+  <div class="group-info-card card">
     <div class="group-info-item">
       <label for="group-name">班名</label>
       <input type="text" id="group-name" placeholder="例：1班、いちご班" onchange="saveGroupInfo()">
@@ -409,16 +480,14 @@
     </div>
   </div>
 
-  <button class="print-btn" onclick="prepareAndPrint()">📄 PDF保存 / 印刷</button>
-
-  <div class="input-card">
+  <div class="input-card card">
     <div class="form-group">
       <label for="time">時刻</label>
       <input type="time" id="time">
     </div>
     <div class="form-group">
-      <label for="place">場所・目的地</label>
-      <input type="text" id="place" placeholder="例：札幌市時計台、テレビ塔">
+      <label for="place">目的地・場所</label>
+      <input type="text" id="place" placeholder="例：札幌市時計台">
     </div>
     <div class="form-group">
       <label for="url">Googleマップ URL</label>
@@ -426,9 +495,9 @@
     </div>
     <div class="form-group">
       <label for="memo">メモ</label>
-      <textarea id="memo" placeholder="集合場所の詳細、食べたいものなど"></textarea>
+      <textarea id="memo" placeholder="集合場所の詳細、食べたいもの、やりたいことなど"></textarea>
     </div>
-    <button class="add-btn" onclick="addPlan()">＋ リストに追加</button>
+    <button class="add-btn" onclick="addPlan()">リストに追加</button>
   </div>
 
   <h2>スケジュール</h2>
@@ -436,7 +505,7 @@
 </div>
 
 <script>
-  // DOM要素の取得
+  // DOM要素
   const timeInput = document.getElementById('time');
   const placeInput = document.getElementById('place');
   const urlInput = document.getElementById('url');
@@ -445,11 +514,11 @@
   const groupNameInput = document.getElementById('group-name');
   const membersInput = document.getElementById('members');
 
-  // ローカルストレージからデータを読み込み
+  // データ読み込み
   let plans = JSON.parse(localStorage.getItem("plans")) || [];
   let groupInfo = JSON.parse(localStorage.getItem("groupInfo")) || { name: "", members: "" };
 
-  // 班情報の初期表示
+  // 初期表示
   groupNameInput.value = groupInfo.name;
   membersInput.value = groupInfo.members;
 
@@ -460,9 +529,8 @@
   }
 
   function addPlan() {
-    // 入力チェック
     if (!timeInput.value || !placeInput.value) {
-      alert("時刻と場所は必須入力です！");
+      alert("時刻と場所は必須です");
       return;
     }
 
@@ -470,16 +538,16 @@
       time: timeInput.value,
       place: placeInput.value,
       url: urlInput.value,
-      memo: memoInput.value
+      memo: memoInput.value,
+      travelTime: "", 
+      transportCost: "" 
     };
 
     plans.push(plan);
-    // 時刻順にソート
     sortPlans();
-    
     saveAndRender();
     
-    // 入力フォームをクリア
+    // クリア
     timeInput.value = "";
     placeInput.value = "";
     urlInput.value = "";
@@ -487,24 +555,37 @@
   }
 
   function removePlan(index) {
-    if(confirm('この予定を削除しますか？')) {
+    if(confirm('削除しますか？')) {
       plans.splice(index, 1);
       saveAndRender();
     }
   }
   
-  // 時刻更新処理
   function updateTime(index, newTime) {
     if (!newTime) return;
     plans[index].time = newTime;
-    sortPlans(); // 時刻変更後に再ソート
+    sortPlans();
     saveAndRender();
   }
 
-  // メモ更新処理
+  function updatePlace(index, val) {
+    if (!val) return;
+    plans[index].place = val;
+    saveAndRender(); 
+  }
+
   function updateMemo(index, val) {
     plans[index].memo = val;
-    // 再描画はせずデータ保存のみ（入力中のフォーカス外れを防ぐため）
+    localStorage.setItem("plans", JSON.stringify(plans));
+  }
+
+  function updateTravelTime(index, val) {
+    plans[index].travelTime = val;
+    localStorage.setItem("plans", JSON.stringify(plans));
+  }
+
+  function updateTransportCost(index, val) {
+    plans[index].transportCost = val;
     localStorage.setItem("plans", JSON.stringify(plans));
   }
 
@@ -517,37 +598,22 @@
     render();
   }
 
-  // 時間差分を計算するヘルパー関数
   function getDiffTime(startTime, endTime) {
     const [startH, startM] = startTime.split(':').map(Number);
     const [endH, endM] = endTime.split(':').map(Number);
-    
-    const startTotal = startH * 60 + startM;
-    const endTotal = endH * 60 + endM;
-    
-    let diff = endTotal - startTotal;
-    
-    // 日またぎの計算は簡易的に今回は考慮せず、単純な差分（マイナスなら0にする等も可だが、並び替え済み前提）
-    if (diff < 0) return null; // 基本ありえないが念のため
-
+    let diff = (endH * 60 + endM) - (startH * 60 + startM);
+    if (diff < 0) return null; 
     const h = Math.floor(diff / 60);
     const m = diff % 60;
-    
-    if (h > 0) {
-      return `${h}時間${m}分`;
-    }
-    return `${m}分`;
+    return h > 0 ? `${h}時間${m}分` : `${m}分`;
   }
 
-  // 印刷用HTML生成関数
   function prepareAndPrint() {
     const printContainer = document.getElementById('print-container');
-    
-    // 現在の入力内容を確実に保存
     saveGroupInfo();
     
     let html = `
-      <div class="print-title">修学旅行 旅程表</div>
+      <div class="print-title">旅のしおり</div>
       <div class="print-group-info">
         <div>班名： ${groupInfo.name}</div>
         <div>メンバー： ${groupInfo.members}</div>
@@ -556,31 +622,32 @@
         <thead>
           <tr>
             <th style="width:15%">時刻</th>
-            <th style="width:35%">場所</th>
-            <th style="width:50%">目的・手段・費用</th>
+            <th style="width:30%">場所</th>
+            <th style="width:55%">詳細</th>
           </tr>
         </thead>
         <tbody>
     `;
     
     plans.forEach((p, i) => {
-      // 改行を <br> に変換
+      let metaInfo = '';
+      if (p.travelTime) metaInfo += `⏳ 移動時間: ${p.travelTime}`;
+      if (p.travelTime && p.transportCost) metaInfo += '　　';
+      if (p.transportCost) metaInfo += `💰 交通費: ${p.transportCost}`;
+      if (metaInfo) metaInfo += '<br>';
+
       const memoContent = p.memo ? p.memo.replace(/\n/g, '<br>') : '';
       
       html += `
         <tr>
           <td class="time-col">${p.time}</td>
           <td class="place-col">${p.place}</td>
-          <td class="memo-col">${memoContent}</td>
+          <td class="memo-col">${metaInfo}${memoContent}</td>
         </tr>
       `;
     });
     
-    html += `
-        </tbody>
-      </table>
-    `;
-    
+    html += `</tbody></table>`;
     printContainer.innerHTML = html;
     window.print();
   }
@@ -589,36 +656,42 @@
     plansContainer.innerHTML = "";
     
     if (plans.length === 0) {
-      plansContainer.innerHTML = '<div class="empty-state">予定がまだありません。<br>上のフォームから追加してください。</div>';
+      plansContainer.innerHTML = '<div class="empty-state">予定がありません。<br>上のフォームから追加してください。</div>';
       return;
     }
-    
 
     plans.forEach((p, i) => {
-      // URLがある場合のみリンクを表示
       const mapLink = p.url 
-        ? `<a href="${p.url}" target="_blank">📍 マップを開く</a>` 
+        ? `<a href="${p.url}" target="_blank">場所 ↗</a>` 
         : '';
       
-      // 前の場所からのルート検索リンク
       let routeLink = '';
       if (i > 0) {
         const prevPlace = encodeURIComponent(plans[i-1].place);
         const currPlace = encodeURIComponent(p.place);
-        // Google Maps Directions API形式
         const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${prevPlace}&destination=${currPlace}&travelmode=transit`;
-        routeLink = `<a href="${directionsUrl}" target="_blank" style="margin-left: 10px; color: #E67E22;">🚶 ルート検索</a>`;
+        routeLink = `<a href="${directionsUrl}" target="_blank">行き方 ↗</a>`;
       }
       
-      // メモエリアを編集可能なtextareaに変更
-      const memoBlock = `<textarea class="plan-memo" onchange="updateMemo(${i}, this.value)" placeholder="目的（何のために）、手段（何をするか）、費用（お金はいくらかかるか）を記入">${p.memo || ''}</textarea>`;
+      const travelTimeBlock = `
+        <div class="plan-detail">
+          <label>⏳ 移動時間</label>
+          <input type="text" class="plan-detail-input" value="${p.travelTime || ''}" placeholder="30分" onchange="updateTravelTime(${i}, this.value)">
+        </div>`;
+      
+      const transportCostBlock = `
+        <div class="plan-detail">
+          <label>💰 交通費</label>
+          <input type="text" class="plan-detail-input" value="${p.transportCost || ''}" placeholder="500円" onchange="updateTransportCost(${i}, this.value)">
+        </div>`;
 
-      // 前の予定との時間差を表示
+      const memoBlock = `<textarea class="plan-memo" onchange="updateMemo(${i}, this.value)" placeholder="メモを入力...">${p.memo || ''}</textarea>`;
+
       let timeDiffHtml = '';
       if (i > 0) {
         const diffText = getDiffTime(plans[i-1].time, p.time);
         if (diffText) {
-          timeDiffHtml = `<div class="travel-time">↓ 前の場所から ${diffText}</div>`;
+          timeDiffHtml = `<div class="travel-time-indicator">↓ 約 ${diffText}</div>`;
         }
       }
 
@@ -626,18 +699,23 @@
         <div class="plan-item">
           ${timeDiffHtml}
           <div class="plan-header">
-            <div style="display: flex; align-items: center;">
-              <!-- 時刻を編集可能なinputに変更 -->
-              <input type="time" class="time-edit-input" value="${p.time}" onchange="updateTime(${i}, this.value)" title="時刻を変更すると自動で並び替わります">
-              <span style="margin: 0 8px; color:#ddd;">|</span>
-              <span class="plan-place">${p.place}</span>
+            <div class="time-place-wrapper">
+              <input type="time" class="time-edit-input" value="${p.time}" onchange="updateTime(${i}, this.value)" title="時間を変更">
+              <input type="text" class="plan-place-input" value="${p.place}" onchange="updatePlace(${i}, this.value)" title="場所を編集">
             </div>
             <button class="delete-btn" onclick="removePlan(${i})">削除</button>
           </div>
+          
           <div class="plan-links">
             ${mapLink}
             ${routeLink}
           </div>
+
+          <div class="plan-details-line">
+            ${travelTimeBlock}
+            ${transportCostBlock}
+          </div>
+          
           ${memoBlock}
         </div>`;
     });
