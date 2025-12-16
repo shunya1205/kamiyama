@@ -89,6 +89,9 @@
         const Download = ({ className }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         );
+        const Save = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        );
 
         // --- 定数・モデルデータ ---
 
@@ -128,31 +131,77 @@
             return 41.0; 
         };
 
+        // ローカルストレージキー
+        const STORAGE_KEY = 'TEACHER_ASSET_SIMULATOR_V1';
+
+        // ローカルストレージからデータを読み込むヘルパー関数
+        const loadState = (key, defaultValue) => {
+            try {
+                const savedData = localStorage.getItem(STORAGE_KEY);
+                if (savedData) {
+                    const parsed = JSON.parse(savedData);
+                    return parsed[key] !== undefined ? parsed[key] : defaultValue;
+                }
+            } catch (e) {
+                console.error("Failed to load data", e);
+            }
+            return defaultValue;
+        };
+
         // --- Main Component ---
         const App = () => {
-            // State
-            const [currentSavings, setCurrentSavings] = useState(100); // 現在の預貯金
-            const [initialInvestment, setInitialInvestment] = useState(0); // 現在の運用資産 (時価)
-            const [monthlyInvestment, setMonthlyInvestment] = useState(3);
-            const [bonusInvestment, setBonusInvestment] = useState(0);
-            const [interestRate, setInterestRate] = useState(5);
+            // State (初期値をローカルストレージから読み込み、なければデフォルト値)
+            const [currentSavings, setCurrentSavings] = useState(() => loadState('currentSavings', 100)); 
+            const [initialInvestment, setInitialInvestment] = useState(() => loadState('initialInvestment', 0)); 
+            const [monthlyInvestment, setMonthlyInvestment] = useState(() => loadState('monthlyInvestment', 3));
+            const [bonusInvestment, setBonusInvestment] = useState(() => loadState('bonusInvestment', 0));
+            const [interestRate, setInterestRate] = useState(() => loadState('interestRate', 5));
             
-            const [startAge, setStartAge] = useState(22);
-            const [currentAge, setCurrentAge] = useState(30);
-            const [retireAge, setRetireAge] = useState(60);
-            const [salaryMode, setSalaryMode] = useState('auto');
-            const [manualMonthlySalary, setManualMonthlySalary] = useState(35);
-            const [retirementReason, setRetirementReason] = useState('company');
+            const [startAge, setStartAge] = useState(() => loadState('startAge', 22));
+            const [currentAge, setCurrentAge] = useState(() => loadState('currentAge', 30));
+            const [retireAge, setRetireAge] = useState(() => loadState('retireAge', 60));
+            const [salaryMode, setSalaryMode] = useState(() => loadState('salaryMode', 'auto'));
+            const [manualMonthlySalary, setManualMonthlySalary] = useState(() => loadState('manualMonthlySalary', 35));
+            const [retirementReason, setRetirementReason] = useState(() => loadState('retirementReason', 'company'));
 
             // 取り崩し・退職金設定
-            const [retirementMoneyDest, setRetirementMoneyDest] = useState('invest'); // 'invest' | 'savings'
-            const [withdrawalStartAge, setWithdrawalStartAge] = useState(60);
-            const [withdrawalMode, setWithdrawalMode] = useState('rate'); // 'rate' | 'fixed'
-            const [withdrawalRate, setWithdrawalRate] = useState(4.0); // %
-            const [withdrawalMonthlyAmount, setWithdrawalMonthlyAmount] = useState(10); // 万円
-            const [simulationEndAge, setSimulationEndAge] = useState(100); // シミュレーション終了年齢
+            const [retirementMoneyDest, setRetirementMoneyDest] = useState(() => loadState('retirementMoneyDest', 'invest')); 
+            const [withdrawalStartAge, setWithdrawalStartAge] = useState(() => loadState('withdrawalStartAge', 60));
+            const [withdrawalMode, setWithdrawalMode] = useState(() => loadState('withdrawalMode', 'rate')); 
+            const [withdrawalRate, setWithdrawalRate] = useState(() => loadState('withdrawalRate', 4.0)); 
+            const [withdrawalMonthlyAmount, setWithdrawalMonthlyAmount] = useState(() => loadState('withdrawalMonthlyAmount', 10)); 
+            const [simulationEndAge, setSimulationEndAge] = useState(() => loadState('simulationEndAge', 100)); 
 
             const [activeTab, setActiveTab] = useState('simulation');
+            
+            // データ保存用エフェクト (ステートが変更されるたびに保存)
+            useEffect(() => {
+                const dataToSave = {
+                    currentSavings,
+                    initialInvestment,
+                    monthlyInvestment,
+                    bonusInvestment,
+                    interestRate,
+                    startAge,
+                    currentAge,
+                    retireAge,
+                    salaryMode,
+                    manualMonthlySalary,
+                    retirementReason,
+                    retirementMoneyDest,
+                    withdrawalStartAge,
+                    withdrawalMode,
+                    withdrawalRate,
+                    withdrawalMonthlyAmount,
+                    simulationEndAge
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+            }, [
+                currentSavings, initialInvestment, monthlyInvestment, bonusInvestment, interestRate,
+                startAge, currentAge, retireAge, salaryMode, manualMonthlySalary, retirementReason,
+                retirementMoneyDest, withdrawalStartAge, withdrawalMode, withdrawalRate, 
+                withdrawalMonthlyAmount, simulationEndAge
+            ]);
 
             // 退職年齢が変わったら取り崩し開始年齢も連動させる
             useEffect(() => {
@@ -370,6 +419,11 @@
                             <div className="flex items-center gap-2">
                                 <School className="h-6 w-6" />
                                 <h1 className="text-xl font-bold">北海道・札幌市教員のための積立＆退職金シミュレーター</h1>
+                            </div>
+                            {/* 保存インジケーター（自動保存されたことを示す） */}
+                            <div className="hidden md:flex items-center gap-1 text-xs text-sky-200">
+                                <Save className="w-3 h-3" />
+                                自動保存ON
                             </div>
                         </div>
                     </header>
