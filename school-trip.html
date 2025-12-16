@@ -97,7 +97,13 @@
     font-weight: 600;
   }
 
-  input, textarea {
+  .input-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  input, textarea, select {
     width: 100%;
     padding: 16px;
     border: 2px solid transparent;
@@ -108,9 +114,21 @@
     font-family: inherit;
     box-sizing: border-box;
     transition: var(--transition);
+    appearance: none; /* OS標準のスタイルをリセット */
   }
 
-  input:focus, textarea:focus {
+  .time-select-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .time-select-group select {
+    width: 80px;
+    text-align: center;
+  }
+
+  input:focus, textarea:focus, select:focus {
     outline: none;
     background-color: #fff;
     border-color: var(--text-main); /* フォーカス時は黒枠で引き締める */
@@ -244,18 +262,37 @@
     flex: 1;
   }
 
-  /* 時間入力 */
-  .time-edit-input {
+  /* 編集用の時間・分セレクトボックスのスタイル */
+  .time-edit-container {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  
+  .time-edit-select {
     font-family: "Helvetica Neue", Arial, sans-serif;
     font-size: 2rem; /* 時間を大きく強調 */
-    font-weight: 200; /* 細いフォントで上品に */
+    font-weight: 200;
     color: var(--text-main);
     background: transparent;
     border: none;
     padding: 0;
-    width: auto;
     cursor: pointer;
     line-height: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    text-align: center;
+  }
+  
+  .time-edit-select:hover {
+    color: var(--text-sub);
+  }
+
+  .time-separator {
+    font-size: 2rem;
+    font-weight: 200;
+    line-height: 1;
+    margin: 0 2px 5px 2px; /* 少し位置調整 */
   }
 
   /* 場所入力 */
@@ -272,6 +309,7 @@
     flex-grow: 1;
     cursor: pointer;
     transition: var(--transition);
+    margin-left: 10px;
   }
 
   .plan-place-input:focus, .plan-place-input:hover {
@@ -358,6 +396,12 @@
     background: transparent;
     box-shadow: none;
     border-bottom: 1px solid var(--text-main);
+  }
+  
+  /* 追加: プレースホルダーのスタイル */
+  .plan-detail-input::placeholder {
+    color: #d1d1d6;
+    font-weight: 400;
   }
 
   /* メモ */
@@ -465,8 +509,8 @@
   
   <div class="group-info-card card">
     <div class="group-info-item">
-      <label for="group-name">班名</label>
-      <input type="text" id="group-name" placeholder="例：1班、いちご班" onchange="saveGroupInfo()">
+      <label for="group-name">班名・タイトル</label>
+      <input type="text" id="group-name" placeholder="例：1班、〇〇旅行" onchange="saveGroupInfo()">
     </div>
     <div class="group-info-item">
       <label for="members">メンバー</label>
@@ -477,7 +521,11 @@
   <div class="input-card card">
     <div class="form-group">
       <label for="time">時刻</label>
-      <input type="time" id="time">
+      <div class="time-select-group">
+        <select id="hour"></select>
+        <span>:</span>
+        <select id="minute"></select>
+      </div>
     </div>
     <div class="form-group">
       <label for="place">目的地・場所</label>
@@ -500,7 +548,8 @@
 
 <script>
   // DOM要素
-  const timeInput = document.getElementById('time');
+  const hourInput = document.getElementById('hour');
+  const minuteInput = document.getElementById('minute');
   const placeInput = document.getElementById('place');
   const urlInput = document.getElementById('url');
   const memoInput = document.getElementById('memo');
@@ -516,6 +565,47 @@
   groupNameInput.value = groupInfo.name;
   membersInput.value = groupInfo.members;
 
+  // 時刻選択肢の生成ヘルパー (時間)
+  function generateHourOptions(selectedHour) {
+    let options = "";
+    // selectedHourがもし一桁できても0埋めして比較・表示する
+    const normalizedSelected = selectedHour ? selectedHour.toString().padStart(2, '0') : "";
+    
+    for (let h = 0; h < 24; h++) {
+      const hh = h.toString().padStart(2, '0');
+      const selected = hh === normalizedSelected ? " selected" : "";
+      options += `<option value="${hh}"${selected}>${hh}</option>`;
+    }
+    return options;
+  }
+
+  // 時刻選択肢の生成ヘルパー (分)
+  function generateMinuteOptions(selectedMinute) {
+    let options = "";
+    let found = false;
+    // selectedMinuteもゼロ埋めして正規化
+    const normalizedSelected = selectedMinute ? selectedMinute.toString().padStart(2, '0') : "";
+
+    for (let m = 0; m < 60; m += 5) { // 5分刻み
+      const mm = m.toString().padStart(2, '0');
+      const selected = mm === normalizedSelected;
+      if (selected) found = true;
+      options += `<option value="${mm}"${selected ? " selected" : ""}>${mm}</option>`;
+    }
+    // 5分刻み以外が含まれていた場合のフォールバック（手動入力データなどへの対応）
+    if (!found && normalizedSelected) {
+        options = `<option value="${normalizedSelected}" selected>${normalizedSelected}</option>` + options;
+    }
+    return options;
+  }
+  
+  // メインの時刻入力に選択肢をセット
+  // 現在の時刻を取得してデフォルト値とする
+  const now = new Date();
+  // 現在時刻の初期設定時にもゼロ埋めを確実に行う
+  hourInput.innerHTML = generateHourOptions(now.getHours().toString().padStart(2, '0'));
+  minuteInput.innerHTML = generateMinuteOptions((Math.floor(now.getMinutes() / 5) * 5).toString().padStart(2, '0'));
+
   function saveGroupInfo() {
     groupInfo.name = groupNameInput.value;
     groupInfo.members = membersInput.value;
@@ -523,13 +613,13 @@
   }
 
   function addPlan() {
-    if (!timeInput.value || !placeInput.value) {
+    if (!hourInput.value || !minuteInput.value || !placeInput.value) {
       alert("時刻と場所は必須です");
       return;
     }
 
     const plan = {
-      time: timeInput.value,
+      time: `${hourInput.value}:${minuteInput.value}`,
       place: placeInput.value,
       url: urlInput.value,
       memo: memoInput.value,
@@ -542,17 +632,30 @@
     saveAndRender();
     
     // クリア
-    timeInput.value = "";
     placeInput.value = "";
     urlInput.value = "";
     memoInput.value = "";
   }
 
   function removePlan(index) {
-    if(confirm('削除しますか？')) {
+    if(confirm('この予定を削除しますか？')) {
       plans.splice(index, 1);
       saveAndRender();
     }
+  }
+  
+  // 時間だけ更新する関数
+  function updateHour(index, newHour) {
+    const currentMinute = plans[index].time.split(':')[1];
+    const newTime = `${newHour}:${currentMinute}`;
+    updateTime(index, newTime);
+  }
+
+  // 分だけ更新する関数
+  function updateMinute(index, newMinute) {
+    const currentHour = plans[index].time.split(':')[0];
+    const newTime = `${currentHour}:${newMinute}`;
+    updateTime(index, newTime);
   }
   
   function updateTime(index, newTime) {
@@ -563,9 +666,10 @@
   }
 
   function updatePlace(index, val) {
-    if (!val) return;
+    // 空文字になっても編集可能にするためチェックを緩める、または削除はさせない
+    if (val === null) return;
     plans[index].place = val;
-    saveAndRender(); 
+    saveAndRender(); // 場所変更は即座に反映
   }
 
   function updateMemo(index, val) {
@@ -596,10 +700,16 @@
     const [startH, startM] = startTime.split(':').map(Number);
     const [endH, endM] = endTime.split(':').map(Number);
     let diff = (endH * 60 + endM) - (startH * 60 + startM);
-    if (diff < 0) return null; 
+    
+    // 日付またぎは単純化のため考慮しない（マイナスの場合は表示しない）
+    if (diff <= 0) return null; 
+    
     const h = Math.floor(diff / 60);
     const m = diff % 60;
-    return h > 0 ? `${h}時間${m}分` : `${m}分`;
+    
+    if (h > 0 && m > 0) return `${h}時間${m}分`;
+    if (h > 0) return `${h}時間`;
+    return `${m}分`;
   }
 
   function prepareAndPrint() {
@@ -608,8 +718,8 @@
     
     let html = `
       <div class="print-group-info">
-        <div>班名： ${groupInfo.name}</div>
-        <div>メンバー： ${groupInfo.members}</div>
+        <div><strong>班名：</strong> ${groupInfo.name}</div>
+        <div><strong>メンバー：</strong> ${groupInfo.members}</div>
       </div>
       <table class="print-table">
         <thead>
@@ -623,19 +733,18 @@
     `;
     
     plans.forEach((p, i) => {
-      let metaInfo = '';
-      if (p.travelTime) metaInfo += `⏳ 移動時間: ${p.travelTime}`;
-      if (p.travelTime && p.transportCost) metaInfo += '　　';
-      if (p.transportCost) metaInfo += `💰 交通費: ${p.transportCost}`;
-      if (metaInfo) metaInfo += '<br>';
-
+      let metaInfo = [];
+      if (p.travelTime) metaInfo.push(`⏳ ${p.travelTime}`);
+      if (p.transportCost) metaInfo.push(`💰 ${p.transportCost}`);
+      
+      const metaInfoStr = metaInfo.length > 0 ? `<div style="margin-bottom:5px; font-size:0.85em; color:#666;">${metaInfo.join('　')}</div>` : '';
       const memoContent = p.memo ? p.memo.replace(/\n/g, '<br>') : '';
       
       html += `
         <tr>
           <td class="time-col">${p.time}</td>
           <td class="place-col">${p.place}</td>
-          <td class="memo-col">${metaInfo}${memoContent}</td>
+          <td class="memo-col">${metaInfoStr}${memoContent}</td>
         </tr>
       `;
     });
@@ -660,8 +769,10 @@
       
       let routeLink = '';
       if (i > 0) {
+        // 直前の場所からのルート検索リンク生成
         const prevPlace = encodeURIComponent(plans[i-1].place);
         const currPlace = encodeURIComponent(p.place);
+        // Google Mapsのルート検索URL (公共交通機関)
         const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${prevPlace}&destination=${currPlace}&travelmode=transit`;
         routeLink = `<a href="${directionsUrl}" target="_blank">行き方 ↗</a>`;
       }
@@ -669,13 +780,13 @@
       const travelTimeBlock = `
         <div class="plan-detail">
           <label>⏳ 移動時間</label>
-          <input type="text" class="plan-detail-input" value="${p.travelTime || ''}" placeholder="30分" onchange="updateTravelTime(${i}, this.value)">
+          <input type="text" class="plan-detail-input" value="${p.travelTime || ''}" placeholder="例: 30分" onchange="updateTravelTime(${i}, this.value)">
         </div>`;
       
       const transportCostBlock = `
         <div class="plan-detail">
           <label>💰 交通費</label>
-          <input type="text" class="plan-detail-input" value="${p.transportCost || ''}" placeholder="500円" onchange="updateTransportCost(${i}, this.value)">
+          <input type="text" class="plan-detail-input" value="${p.transportCost || ''}" placeholder="例: 500円" onchange="updateTransportCost(${i}, this.value)">
         </div>`;
 
       const memoBlock = `<textarea class="plan-memo" onchange="updateMemo(${i}, this.value)" placeholder="メモを入力...">${p.memo || ''}</textarea>`;
@@ -688,12 +799,25 @@
         }
       }
 
+      // 時間を分割してゼロ埋めを保証
+      let [pHour, pMinute] = p.time.split(':');
+      pHour = pHour ? pHour.padStart(2, '0') : "00";
+      pMinute = pMinute ? pMinute.padStart(2, '0') : "00";
+
       plansContainer.innerHTML += `
         <div class="plan-item">
           ${timeDiffHtml}
           <div class="plan-header">
             <div class="time-place-wrapper">
-              <input type="time" class="time-edit-input" value="${p.time}" onchange="updateTime(${i}, this.value)" title="時間を変更">
+              <div class="time-edit-container">
+                <select class="time-edit-select" onchange="updateHour(${i}, this.value)">
+                  ${generateHourOptions(pHour)}
+                </select>
+                <span class="time-separator">:</span>
+                <select class="time-edit-select" onchange="updateMinute(${i}, this.value)">
+                  ${generateMinuteOptions(pMinute)}
+                </select>
+              </div>
               <input type="text" class="plan-place-input" value="${p.place}" onchange="updatePlace(${i}, this.value)" title="場所を編集">
             </div>
             <button class="delete-btn" onclick="removePlan(${i})">削除</button>
