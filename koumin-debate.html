@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公民ディベート準備ナビ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js (Rechartsの代わりとしてHTMLで扱いやすいライブラリを使用) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-100 font-sans text-slate-900 pb-20">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white py-10 px-4 shadow-xl text-center">
+        <h1 class="text-4xl md:text-5xl font-black mb-3 tracking-tighter">公民ディベート準備ナビ</h1>
+        <p class="text-slate-400 max-w-2xl mx-auto font-bold underline decoration-blue-500 decoration-4 underline-offset-4">公民分野のディベートを通して入試対策！！</p>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-lg">
+        <div class="max-w-6xl mx-auto flex overflow-x-auto scrollbar-hide border-b" id="tab-headers">
+            <button onclick="switchTab('home')" id="btn-home" class="tab-btn flex items-center gap-2 px-6 py-4 font-bold transition-all border-b-2 bg-white text-blue-600 border-blue-600">
+                <i data-lucide="book-open" class="w-5 h-5"></i><span>ガイド</span>
+            </button>
+            <button onclick="switchTab('theme1')" id="btn-theme1" class="tab-btn flex items-center gap-2 px-6 py-4 font-bold transition-all border-b-2 text-gray-500 border-transparent hover:bg-gray-200">
+                <i data-lucide="trophy" class="w-5 h-5"></i><span>テーマ1: 競争</span>
+            </button>
+            <button onclick="switchTab('theme2')" id="btn-theme2" class="tab-btn flex items-center gap-2 px-6 py-4 font-bold transition-all border-b-2 text-gray-500 border-transparent hover:bg-gray-200">
+                <i data-lucide="scale" class="w-5 h-5"></i><span>テーマ2: 消費税</span>
+            </button>
+            <button onclick="switchTab('theme3')" id="btn-theme3" class="tab-btn flex items-center gap-2 px-6 py-4 font-bold transition-all border-b-2 text-gray-500 border-transparent hover:bg-gray-200">
+                <i data-lucide="landmark" class="w-5 h-5"></i><span>テーマ3: 税金</span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto py-8 px-4">
+        
+        <!-- HOME TAB -->
+        <div id="home" class="tab-content active space-y-6">
+            <div class="bg-white p-8 rounded-3xl border-4 border-amber-400 shadow-xl">
+                <h2 class="text-3xl font-black mb-6 flex items-center gap-2 text-amber-600"><i data-lucide="lightbulb" class="w-8 h-8"></i> 勝つためのデータ活用法</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="p-6 bg-slate-50 rounded-2xl border-2 border-blue-200">
+                        <h4 class="text-xl font-black mb-3 text-blue-700">1. 自分の意見にひきつける</h4>
+                        <p class="text-sm text-slate-600 font-bold leading-relaxed">ただ数字を言うだけじゃダメ！「この数字があるから、私の意見が正しいんです」と、自分のことばを付け加えよう。</p>
+                    </div>
+                    <div class="p-6 bg-slate-50 rounded-2xl border-2 border-red-200">
+                        <h4 class="text-xl font-black mb-3 text-red-700">2. 相手のデータの「弱点」を探す</h4>
+                        <p class="text-sm text-slate-600 font-bold leading-relaxed">同じ数字でも、立場が違えば見え方が変わるよ。「その数字は、地域で困っている人のことを無視していませんか？」と質問してみよう。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THEME 1 TAB -->
+        <div id="theme1" class="tab-content space-y-8">
+            <div class="bg-blue-600 text-white p-6 rounded-2xl mb-8 shadow-lg">
+                <h2 class="text-2xl font-black">テーマ1：「競争がある社会ほど、人々は幸せになれる」</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="theme1-content">
+                <!-- Content will be injected by JavaScript or statically written -->
+            </div>
+        </div>
+
+        <!-- THEME 2 TAB -->
+        <div id="theme2" class="tab-content space-y-8">
+            <div class="bg-emerald-600 text-white p-6 rounded-2xl mb-8 shadow-lg">
+                <h2 class="text-2xl font-black">テーマ2：「消費税は、最も公平な税である」</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="theme2-content"></div>
+        </div>
+
+        <!-- THEME 3 TAB -->
+        <div id="theme3" class="tab-content space-y-8">
+            <div class="bg-indigo-600 text-white p-6 rounded-2xl mb-8 shadow-lg">
+                <h2 class="text-2xl font-black">テーマ3：「税金は、できるだけ少ない方がよい」</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8" id="theme3-content"></div>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-900 py-16 px-4 text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h3 class="text-2xl font-black mb-10 border-b-2 border-blue-500 pb-4 italic">最強のディベート戦術</h3>
+            <div class="grid md:grid-cols-2 gap-8 text-left">
+                <div class="bg-white/10 p-6 rounded-2xl border border-white/20">
+                    <h4 class="font-black text-blue-400 mb-4 flex items-center gap-2 underline decoration-blue-800">★ メリットの裏を突く</h4>
+                    <p class="text-sm text-slate-300 font-bold italic">
+                        「相手は税金で助け合えると言いましたが、データ④のように不公平な分け方が進むと、みんなのやる気がなくなる問題はどう解決しますか？」
+                    </p>
+                </div>
+                <div class="bg-white/10 p-6 rounded-2xl border border-white/20">
+                    <h4 class="font-black text-red-400 mb-4 flex items-center gap-2 underline decoration-red-800">★ 弱者の視点で攻める</h4>
+                    <p class="text-sm text-slate-300 font-bold italic">
+                        「効率がいい社会は幸せと言いましたが、データ③にあるような効率ばかりを求めると、ゆとりがなくなって不幸になる人が増えませんか？」
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Utility to generate cards
+        function createCard(id, title, dataHTML, explanation, pos, neg) {
+            return `
+                <div class="p-5 rounded-xl border-l-8 shadow-md mb-6 bg-white border-slate-300 hover:border-blue-400 transition-all">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-black px-3 py-1 rounded-full bg-slate-800 text-white shadow-sm">証拠 ${id}</span>
+                        <h4 class="text-xl font-black text-slate-800 flex-1 ml-3 border-b-2 border-slate-100 pb-1">${title}</h4>
+                    </div>
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="bg-slate-50 p-6 rounded-2xl flex items-center justify-center min-h-[180px] border border-slate-200 relative overflow-hidden">
+                            ${dataHTML}
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <div class="bg-blue-50/50 border-2 border-blue-100 p-4 rounded-xl">
+                                <div class="text-sm text-slate-700 leading-relaxed"><span class="text-blue-700 font-black">【解説】</span> ${explanation}</div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="bg-blue-600 p-3 rounded-xl shadow-sm">
+                                    <p class="text-xs text-blue-100 font-bold flex items-center gap-1 mb-1"><i data-lucide="smile" class="w-3 h-3 text-white"></i>賛成側のキメ台詞</p>
+                                    <p class="text-[13px] text-white leading-snug font-bold italic">「${pos}」</p>
+                                </div>
+                                <div class="bg-red-600 p-3 rounded-xl shadow-sm">
+                                    <p class="text-xs text-red-100 font-bold flex items-center gap-1 mb-1"><i data-lucide="frown" class="w-3 h-3 text-white"></i>反対側のキメ台詞</p>
+                                    <p class="text-[13px] text-white leading-snug font-bold italic">「${neg}」</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Tab Logic ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-blue-600', 'border-blue-600');
+                btn.classList.add('text-gray-500', 'border-transparent');
+            });
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('bg-white', 'text-blue-600', 'border-blue-600');
+            activeBtn.classList.remove('text-gray-500', 'border-transparent');
+            
+            // Re-render Lucide icons for new content
+            lucide.createIcons();
+        }
+
+        // --- Rendering Content ---
+        window.onload = function() {
+            // Theme 1
+            const t1 = document.getElementById('theme1-content');
+            t1.innerHTML += createCard('①', '相対的貧困率', '<canvas id="chart-poverty" class="max-w-[150px]"></canvas>', '日本の約7人に1人は、平均の半分以下の生活費で暮らしています。', '競争で社会全体を豊かにすれば、困っている人を助ける余裕も生まれる！', '競争が激しいと必ず「負ける人」が出る。格差を放置したままでは幸せとは言えない。');
+            t1.innerHTML += createCard('②', '厚岸のカキ販売額', '<div class="text-center font-black text-4xl text-blue-900 underline decoration-blue-300">14億円</div>', 'ライバルに負けたくないという競争心が、ブランド化と成功を生みました。', '競争こそが最高のやる気スイッチ。カキのように町を元気にする力がある！', 'もし失敗していたら町はボロボロ。競争に全てを賭けるのはあまりに危険だ。');
+            t1.innerHTML += createCard('③', '仕事の効率（生産性）', '<div class="w-full space-y-5 px-2"><div class="relative h-10 bg-slate-200 rounded-full overflow-hidden border border-slate-300"><div class="absolute top-0 left-0 h-full bg-blue-600 flex items-center px-4" style="width: 95%"><span class="text-white font-black text-xs">米国 (効率バツグン)</span></div></div><div class="relative h-10 bg-slate-200 rounded-full overflow-hidden border border-slate-300"><div class="absolute top-0 left-0 h-full bg-slate-500 flex items-center px-4" style="width: 60%"><span class="text-white font-black text-xs">日本 (ダラダラ？)</span></div></div></div>', '日本は他国より長く働いているのに、稼ぐ効率が先進国で最低レベルです。', '適度な競争がないから無駄な仕事が残る。競争で効率を上げ、自由な時間を増やすべきだ！', '効率を競わされるからみんな疲弊している。心の幸せには「ゆとり」が必要だ。');
+            t1.innerHTML += createCard('④', '格差の数字（ジニ係数）', '<div class="flex flex-col items-center justify-center w-full space-y-3"><div class="flex items-end gap-2 h-20"><div class="w-12 bg-red-500 rounded-t-lg h-full relative"><span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-black">富</span></div><div class="w-12 bg-slate-300 rounded-t-lg h-1/4"></div><div class="w-12 bg-slate-300 rounded-t-lg h-1/6"></div></div><div class="text-center"><div class="text-xs font-black text-red-600">ジニ係数＝ケーキの分け方の不公平さ</div><div class="text-[10px] text-slate-500 mt-1">※1人に集中するほど数字が大きくなる</div></div></div>', '所得の格差（ジニ係数）は、過去最大級に広がっています。つまり「ケーキを独り占めする人」が増えている状態です。', '頑張って大きなケーキを手に入れるのは自由。それが努力のガソリンになるんだ！', '独り占めがすぎると、食べられない人が出て社会が壊れる。これは不幸せな状態だ。');
+            t1.innerHTML += createCard('⑤', '道内バス路線の赤字', '<div class="text-center text-5xl font-black text-red-600 italic">82％ボツ</div>', '利益（競争）だけで考えると、北海道のバス路線のほとんどは廃止対象になります。', '赤字を垂れ流す古いやり方はおわり。民間の新しい移動手段を競わせるべきだ！', '競争に負けた地域の人は病院にも行けなくなる。幸せは都会の人だけのものか？');
+            t1.innerHTML += createCard('⑥', '特許（新技術）の数', '<div class="text-center text-4xl font-black text-amber-500">29万個の発明</div>', '他社に勝とうとする競争から、毎年多くの発明が生まれています。', '不治の病を治す薬もスマホも競争の成果。未来の幸せは競争から生まれる！', '新しいものを作る競争の陰で、地道な中小企業が潰されている。これも幸せか？');
+            t1.innerHTML += createCard('⑦', 'ストレスの労災', '<div class="text-center"><i data-lucide="activity" class="mx-auto text-red-500 mb-2 w-10 h-10"></i><div class="text-3xl font-black text-red-600 underline">710人がダウン</div></div>', '競争によるストレスで、心が壊れてしまったと認められた人の数です。', 'それは過度な働き方の問題。正しく競えば社会はもっと明るくなるはずだ！', '豊かさを目指して競っているのに、健康を壊しては本末転倒。幸せとは遠い。');
+            t1.innerHTML += createCard('⑧', 'スマホの普及', '<div class="text-center text-4xl font-black text-indigo-600">中学生の95％</div>', '世界的なIT企業の競争のおかげで、高性能な道具が誰でも使えるようになりました。', '競争が便利な生活を安く届けてくれた。これこそが全人類の幸せに貢献している！', '便利になった分、SNSトラブルなど新しい不幸も増えた。競争のツケを払わされている。');
+
+            // Theme 2
+            const t2 = document.getElementById('theme2-content');
+            t2.innerHTML += createCard('①', '所得別のダメージ', '<div class="w-full space-y-4 px-4"><div class="flex justify-between items-center p-2 bg-red-100 rounded-lg border-l-4 border-red-500"><span class="text-xs font-bold text-slate-800">年収200万未満</span><span class="text-lg font-black text-red-600">負担 5.4%</span></div><div class="flex justify-between items-center p-2 bg-blue-100 rounded-lg border-l-4 border-blue-500"><span class="text-xs font-bold text-slate-800">年収1500万以上</span><span class="text-lg font-black text-blue-600">負担 2.0%</span></div></div>', '年収が低い人ほど、生活費に占める消費税の割合が大きくなってしまいます。', 'お買い物が多いお金持ちほど、払う「合計金額」は多い。額でみれば十分公平だ！', '同じ100円の税金でも、貧しい人には重みが違う。一律10％は弱者に不公平だ。');
+            t2.innerHTML += createCard('②', '税収の安定感', '<div class="text-center font-black text-5xl text-emerald-700">23.8 兆円</div>', '不景気でも買い物は止まらないため、国の財源として非常に安定しています。', 'お年寄りの福祉を支え続けるには、この「安定」こそが社会への公平な責任だ。', 'みんなが苦しい時でも容赦なく取られるということ。不況を無視するのは冷酷だ。');
+            t2.innerHTML += createCard('③', '食べ物は8％', '<div class="flex items-center gap-3 justify-center font-black"><div class="bg-green-100 border-2 border-green-500 p-2 rounded">食べ物 8%</div><span class="text-xl text-gray-300">←→</span><div class="bg-slate-100 border-2 border-slate-400 p-2 rounded">標準 10%</div></div>', '生活に絶対必要な食べ物は税率を低くして、負担を減らす工夫をしています。', '弱者のための配慮がある今の仕組みは、十分に公平と言えるはずだ！', '線引きが複雑なだけで、たった2％の差。本当の救済にはなっておらず、手抜きだ。');
+            t2.innerHTML += createCard('④', '所得のバレやすさ', '<div class="w-full space-y-5 px-2"><div class="relative h-10 bg-slate-200 rounded-full overflow-hidden border border-slate-300"><div class="absolute top-0 left-0 h-full bg-blue-600 flex items-center px-4" style="width: 90%"><span class="text-white font-black text-xs">会社員 (9割バレる)</span></div></div><div class="relative h-10 bg-slate-200 rounded-full overflow-hidden border border-slate-300"><div class="absolute top-0 left-0 h-full bg-orange-600 flex items-center px-4" style="width: 40%"><span class="text-white font-black text-xs">農林漁業 (4割バレる)</span></div></div></div>', '職業によって「ごまかし」ができる所得税に対し、消費税は誰からも確実に徴収できます。', '「ズル」を許さない消費税こそ、最も正直者が報われる公平な税制だ！', '国が調査をサボって全員から取るのは「手抜き」。サボりの公平に過ぎない。');
+            t2.innerHTML += createCard('⑤', '北欧の税率', '<div class="text-center font-black text-purple-600 text-4xl">北欧は 25%</div>', '消費税は高いですが、その分大学や病院が無料という国もあります。', 'みんなで高く払い、みんなで恩恵を受ける。これこそが究極の公平だ！', 'サービスレベルが違う国を比べるのは無意味。日本でただ上げるのは不公平。');
+            t2.innerHTML += createCard('⑥', '地方への配分', '<div class="text-center text-blue-500 font-black text-3xl">全体の約2割</div>', '集まった消費税の一部は、厚岸町などの地方自治体の運営費として配られます。', '都会も地方も全員で「町を支える会費」を出し合う、公平な連帯の仕組みだ。', '都会で買い物される分、都会に金が吸い上げられる。地域格差を広げる不公平だ。');
+            t2.innerHTML += createCard('⑦', '北海道の灯油代', '<div class="text-center text-red-600 font-black text-4xl underline decoration-red-200">全国の10倍</div>', '北海道では生きるために灯油が不可欠。この「命の支払い」にも10％課税されます。', 'ルールのシンプルさが大事。一律10％こそが混乱を招かない公平なルールだ。', '住む場所で「絶対に払う税」に差が出るのは、地域を無視した不公平な税制だ。');
+            t2.innerHTML += createCard('⑧', '世代間の公平', '<div class="flex items-center justify-around w-full font-black"><div class="text-center"><i data-lucide="users" class="text-blue-500 mx-auto"></i><div class="text-xs">若者</div></div><span class="text-2xl text-slate-300">=</span><div class="text-center"><i data-lucide="users" class="text-orange-500 mx-auto"></i><div class="text-xs">高齢者</div></div></div>', '現役世代だけでなく、高齢者も買い物を通じて社会を支える仕組みです。', '若者だけに重荷を背負わせない。全員で支え合う今の時代に合った公平さだ。', '年金生活の高齢者からも容赦なく取るのは冷酷。弱者への配慮に欠けている。');
+
+            // Theme 3
+            const t3 = document.getElementById('theme3-content');
+            t3.innerHTML += createCard('①', '中学校のコスト', '<div class="text-center font-black text-indigo-700 text-4xl underline decoration-indigo-200">月 約9万円</div>', '中学生1人に年間112万円の税金が使われています。税がないと各自の負担です。', '税は「みんなの塾代」。減らしたら、お金がない子は学校に行けなくなる！', '国が決めた教育に無理やり払わされるより、自分で塾を選べる方が効率的だ。');
+            t3.innerHTML += createCard('②', '厚岸町の自腹分', '<div class="text-center text-blue-600 font-black text-5xl">たった9％</div>', '厚岸町の予算の9割以上は、国が他から集めた税金でまかなわれています。', '全国の助け合いがあるから厚岸の生活は守られている。税は平和の維持費だ。', '他人の税金に頼りすぎると町が自立できない。減税して無駄を省くべきだ。');
+            t3.innerHTML += createCard('③', '雪国の除雪', '<div class="text-center font-black text-blue-700 text-4xl underline">道内 800億円</div>', '個人の力では無理な道路維持に、膨大な税金が使われています。', '税は「安全への会費」。減税は、冬に病院に行けなくなる命を増やすだけだ。', '除雪も民間競争に任せれば安くなる。お役所仕事だから高くつくんだ。');
+            t3.innerHTML += createCard('④', '国民負担率', '<div class="text-center font-black text-indigo-600 text-5xl">45.1 %</div>', '稼いだお金から税金や社会保険料で引かれる割合です。', 'これで「安心」を買っている。病気で破産するような社会は怖いでしょ？', '努力しても半分取られるなら、誰も頑張らなくなる。自由な金を増やすべきだ。');
+            t3.innerHTML += createCard('⑤', '将来への借金', '<div class="text-center text-red-600 font-black animate-pulse text-4xl underline">1,052 兆円</div>', '税金だけでは足りず、将来の君たちが返さなければならない借金がたまっています。', '今は投資の時期。教育やインフラを整えることが、将来の日本を強くする！', 'これ以上の税投入は破綻への道。支出を絞って借金を増やさないのが責任だ。');
+            t3.innerHTML += createCard('⑥', '厚岸の子育て支援', '<div class="bg-pink-100 p-3 rounded-lg border-2 border-pink-400 text-pink-700 font-black text-center">医療費・給食費の補助</div>', '厚岸町では税金を使って、家族の負担を直接減らすサービスをしています。', '税は「助け合い」。子育てをみんなで支えるのは最高にカッコいい社会だ。', '一律のサービスより、減税して各家庭が好きな習い事に使う方が自由でいい。');
+            t3.innerHTML += createCard('⑦', '米国の無保険者', '<div class="text-center text-red-700 font-black text-3xl">4,500 万人</div>', '税が安い米国では、私的な保険に入れない人が病気で破産するケースが多いです。', '税は「安心の盾」。税が少ない社会は、一度の病気が人生の終わりになる。', '競争があるから最新医療が生まれる。みんなで支える仕組みは甘えを生む。');
+            t3.innerHTML += createCard('⑧', 'ふるさと納税', '<div class="text-center text-emerald-600 font-black text-4xl underline">厚岸に14億円</div>', '自分の意思で「応援したい町」にお金を出し、町がサービスを競っています。', '税は「取られる」から「応援」へ。使い方を競えば町はもっと元気になる。', '結局は物（返礼品）目当て。税の本来の役割である公平な配分を壊している。');
+
+            // --- Charts Initialization ---
+            const ctx = document.getElementById('chart-poverty').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [84.6, 15.4],
+                        backgroundColor: ['#cbd5e1', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '60%',
+                    plugins: { tooltip: { enabled: false } }
+                }
+            });
+
+            // Init Icons
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
