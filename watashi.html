@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>市民対応 - 三崎 亜記 | 読解・分析アーカイブ</title>
+    <!-- Tailwind CSS (スタイリング用フレームワーク) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (可読性の高いフォント) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- カスタム設定とスタイル -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        serif: ['"Noto Serif JP"', 'serif'],
+                    },
+                    colors: {
+                        primary: '#334155', // Slate 700
+                        accent: '#d97706',  // Amber 600
+                        paper: '#f8fafc',   // Slate 50
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* カスタムスタイル */
+        body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+        /* 本文のハイライト装飾 */
+        .keyword-highlight {
+            border-bottom: 2px solid #fbbf24;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .keyword-highlight:hover {
+            background-color: #fef3c7;
+        }
+        /* アコーディオンのアニメーション */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+        /* 読み込み時のフェードイン */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- 1. グローバルヘッダー (Sticky固定) -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-200">
+        <div class="max-w-4xl mx-auto px-4 py-3">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <!-- タイトルエリア -->
+                <div id="header-title" class="font-serif font-bold text-xl text-primary truncate">
+                    <!-- JSで挿入 -->
+                </div>
+                <!-- ナビゲーションメニュー -->
+                <nav class="flex space-x-1 md:space-x-4 overflow-x-auto pb-1 md:pb-0 text-sm font-medium">
+                    <button onclick="switchTab('structure')" class="nav-btn px-3 py-2 rounded-md hover:bg-gray-100 transition whitespace-nowrap text-gray-600" data-target="structure">構成・概要</button>
+                    <button onclick="switchTab('characters')" class="nav-btn px-3 py-2 rounded-md hover:bg-gray-100 transition whitespace-nowrap text-gray-600" data-target="characters">登場人物</button>
+                    <button onclick="switchTab('keywords')" class="nav-btn px-3 py-2 rounded-md hover:bg-gray-100 transition whitespace-nowrap text-gray-600" data-target="keywords">キーワード</button>
+                    <button onclick="switchTab('read')" class="nav-btn px-3 py-2 rounded-md bg-primary text-white hover:bg-slate-700 transition whitespace-nowrap shadow-sm" data-target="read">本文を読む</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 py-8 relative">
+
+        <!-- ビュー1: 大まかな内容 (Structure) -->
+        <section id="view-structure" class="tab-content hidden fade-in space-y-6">
+            <h2 class="text-2xl font-bold text-primary border-l-4 border-accent pl-4">作品構成と概要</h2>
+            <div id="structure-list" class="space-y-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー2: 登場人物・要素分析 (Characters) -->
+        <section id="view-characters" class="tab-content hidden fade-in space-y-6">
+            <h2 class="text-2xl font-bold text-primary border-l-4 border-accent pl-4">登場人物・要素分析</h2>
+            <div id="characters-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー3: キーワード・象徴 (Keywords) -->
+        <section id="view-keywords" class="tab-content hidden fade-in space-y-6">
+            <h2 class="text-2xl font-bold text-primary border-l-4 border-accent pl-4">重要語句・象徴</h2>
+            <p class="text-gray-600 text-sm mb-4">タップして解説を確認できます。</p>
+            <div id="keywords-list" class="space-y-3">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー4: 本文を読む (Read Text) -->
+        <section id="view-read" class="tab-content hidden fade-in">
+            <div class="bg-white p-6 md:p-12 rounded-lg shadow-sm font-serif leading-loose text-lg text-gray-800 tracking-wide">
+                <div id="story-text" class="whitespace-pre-wrap text-justify">
+                    <!-- JSで生成 -->
+                </div>
+            </div>
+            <!-- 注釈表示エリア (固定フッター的に表示、またはトースト) -->
+            <div id="annotation-box" class="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:w-96 bg-gray-900/95 text-white p-4 rounded-lg shadow-xl transform translate-y-full transition-transform duration-300 z-50">
+                <div class="flex justify-between items-start mb-2">
+                    <span id="anno-word" class="font-bold text-accent text-lg"></span>
+                    <button onclick="closeAnnotation()" class="text-gray-400 hover:text-white">✕</button>
+                </div>
+                <p id="anno-desc" class="text-sm leading-relaxed"></p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- フッター -->
+    <footer class="bg-gray-100 text-center py-6 text-gray-500 text-sm mt-8">
+        <p>&copy; 2024 Interactive Literature Archive. Designed for Learning.</p>
+    </footer>
+
+    <!-- ========================================== -->
+    <!--  以下、JavaScript ロジックおよびデータ定義   -->
+    <!-- ========================================== -->
+    <script>
+        /**
+         * 1. 作品データ（本文、解説、注釈）の定義
+         * ここを編集することで、別の作品に差し替え可能です。
+         */
+        const storyData = {
+            title: "市民対応",
+            author: "三崎 亜記",
+            // 本文データ（改行はそのまま反映されます）
+            text: `　十二時五十五分。午後からの業務の五分前には、必ず机に着くことにしている。私はいつもどおり、午後から処理すべき案件をメモ帳に書き出し、それぞれの処理に必要な時間と、優先順位とを頭の中で組み立てる。
+　——不確定要素。督促状の問い合わせ対応——
+　昨日、市内の未納者宛てに督促状を発送した。そろそろ問い合わせの電話がかかってくるはずだ。
+　午後一番の市民対応は、電話ではなく、来庁した若い女性だった。
+　近づく彼女の速度を見きわめ、私は椅子から立ち上がり、窓口に向かう。彼女が窓口に到着するのにちょうど一拍遅れて、前に立つ。待ち構えていたような圧迫感もなく、相手を待たせるでもない、経験によって導き出された絶妙なる時間差だ。
+「この通知が、家に届いたのですが……。」
+　彼女がバッグから取り出したのは、昨日発送したばかりの督促状だった。
+「なにか、手違いがございましたでしょうか？」
+　通常の市民対応に、二割ほど「謝意」のニュアンスを上積みして、私はそう尋ねた。「督促状」という性質上、問い合わせに来る市民の八割がたは「苦情」での来庁だ。自然に、対応もそれを前提としたものになる。なにしろ私は、「模範とされる市民対応」で、五年連続で庁内表彰されているのだ。対応に抜かりはない。
+「どうも、私宛てではないような気がするのですが……。」
+「それは……、大変申し訳ございません。」
+　言葉には最大限の謝意を込め、心中にはさざ波すら立てず、頭を下げる。角度、スピード、時間ともに、申し分ないお辞儀だ。
+　何十万人もの市民の情報を処理しているのであるから、間違いは当然起こりうる。私は頭を下げる数秒のうちに、さまざまなケースを考えていた。彼女の手元に届き、彼女宛てではないということは、住所情報と氏名の情報がずれてしまったのだろうか。もしくは、特殊な氏名に特有の「異体字」がうまく印字されなかった事例だろうか。
+「失礼ですが、なにか身分証明書をお持ちでしたら、確認させていただいてもよろしいでしょうか？」
+　女性はバッグから免許証と保険証とパスポートを取り出した。どれか一つでいいのだが、経験上、こんな場合は何も言わずに三つとも受け取っておいたほうがいい。
+　まずは免許証の写真と目の前の本人が一致していることを視線の動きだけで確認し、次に、督促状と免許証を照合する。
+　住所も、名前も一致していた。
+　確認の意味で、保険証とパスポートも開いてみる。旧字体や異体字なども考えられるので、字画の一本にいたるまで、詳細に見比べる。
+　違いは、見つけられなかった。
+「失礼ですが、ご本人様宛てではない、ということでしょうか？」
+「はい。」
+「大変申し訳ないのですが、私には、ご住所やお名前に、間違いを発見することができないのですが……。」
+「間違いがない」と言い切らず、「発見することができない」とすることで、問題の責を相手ではなくこちらに帰する言い回しのテクニックだ。
+「はい、間違いはありません。」
+　内心の当惑を抑え込み、相手の様子を観察する。彼女は、私が「当惑」するなどとは考えてもいないかのように、なんらかの「対応」を待つそぶりだ。
+　過去の市民対応の積み重ねから、相手のタイプを推し量る。「無理難題タイプ」か「論理矛盾タイプ」であると推察された。この傾向の来庁者には、意味はなくとも、なんらかの「対応」を行ったという「誠意」を見せることで、「解決」へのハードルを下げられる場合が多い。「解決」とはもちろん、「相手が満足する」という意味合いであって、実際に問題が解決されるかどうかは重視されない。
+「少々お待ちいただけますか。調べてみますので。」
+　私は彼女を待たせて自席に戻り、情報管理課に内線電話で確認する。応対したのは幸い、同期の山中だった。
+「ああ、ちょっと確認してほしいんだけど、住民番号ＫＯ—１３７９６５のデータなんだけど、最近なにか変更を加えたりした記録があるかい？」
+「ＫＯ—１３７９６５ね。ちょっと待って、調べてみるから。」
+受話器から、すばやくキーボードを叩く音が聞こえてくる。
+「入力内容の変更はないよ。ただ……。」
+「ただ、なんだい？」
+「いや、たいしたことじゃないんだ。先週データ更新をした際に、間違って二重登録した市民データが二百件ほどあってね。エラーになったから、手作業でデータの一方を消去したんだ。ＫＯ—１３７９６５も、その対象だったんだよ。」
+「だけど、それで入力内容が変わったわけじゃないんだろう？」
+「ああ、単なる二重登録だから。データの内容自体には、何も手をつけていないよ。」
+「わかった、ありがとう。」
+　私は電話を切って、カウンターに戻り、心配顔で待っていた女性に、事情を説明した。
+「というわけで、情報が二重登録されていたので、一方のデータを消したという実績はあります。ですが、データ自体は……。」
+「つまり、二つあった私のデータの、一つを消したということですね。」
+　彼女は、私の言葉を遮るように勢い込んで尋ねた。
+「……ええ、そうなります。」
+「消されたのは、私のデータなのです。」
+　まるで、存在自体が消されてしまったかのように、彼女は心細げであった。私は彼女の心に寄り添う姿勢を見せるべく、大きくうなずいた。
+「確かに、あなたの情報は消去されました。ですがそれは、二つ存在した全く同じ情報のうちの一つなのです。どちらが消されても、残った情報はあなた自身のものですよ。」
+　身ぶりを交え、親身になっていることを強調した私の説明に、彼女は悲しそうに首を振るばかりだ。
+「経験していない人には、わからないでしょうね。」
+　督促状に印字された名前に、彼女は敵意のこもった視線を落とす。危険な兆候だ。その「敵意」が、こちらに向けられないよう、対応は更に慎重を期さねばならない。
+「字面が一緒というだけで、ここに記されているのは、『私』の名前ではないんです……。」
+「わかりました。それでは、どういった解決策が取れるかを、一緒に考えてみましょう。」
+　歩み寄りの姿勢を見せることで、相手に、問題をともに解決する「味方」として認識させることが肝要だ。だが、彼女は私の言葉など聞こえなかったかのように、自ら「解決策」を口にした。
+「その、消してしまったデータというのが、本当の私の名前なんです。お願いします。消去したデータのほうを復元してもらえますか。」
+　こうした場合、代替策の提示には効果がない。「処理としては難しいが、対応は可能である」という姿勢を見せる必要がある。
+「なるほど、おっしゃるとおりです。それでは、少々お待ちいただけますか。」
+　私は再び自席へ取って返し、情報管理課に内線電話をかけた。
+「何度もすまない。さっきの件だけど、二重になって削除したデータのほうも、作業履歴の中にはまだ蓄積されてるはずだよな？」
+「ああ、履歴のクリアは月末にするから、まだ消去はしてない。」
+「すまないが、そちらのデータを復元して、今のデータを削除してもらえないだろうか。」
+「え？　……ああ、まあ、いいけどな。」
+　役所の仕事とは、「効率」や「合理性」は最優先されない。市民に「納得していただく」ために、無意味でもやらなければいけない業務というものは日常的に発生する。山中もそれは十分に理解している。不審げな声ではあったが、すぐに対応してくれた。
+「よし、こちらの住民データは置き換えたぞ。そちらの個別システムの情報を更新しろ。それでデータは置き換わるから。」
+「ああ、ありがとう。」
+　私は電話を切り、「お待たせして申し訳ありません。」と女性に断りながら、個別システムの住民データを更新した。画面上には、先ほどまでとは置き換えられた……、だが、内容的にはなんら変わりはない、彼女の督促データが表示された。
+　そのデータを元に、私は督促状を印刷し直した。
+「こちらでいかがでしょうか。」
+　新しい督促状を差し出すと、彼女は不安そうな面持ちで、そこに印字された文字を見つめた。もちろん、今までの督促状と一字一句変わらないものではあったが……。
+「ああ！　確かに私の名前です！」
+　彼女は、心の底から安堵したように言うと、嬉しそうに督促状を胸に抱え込んだ。
+「古いほうの督促状は、シュレッダーにかけてもらえますか。」
+　未納料金を払った彼女は、立ち去りかけて振り返り、そう念押しした。
+「かしこまりました。」
+　彼女が立ち去ってから、私はフロアの片隅のシュレッダーに向かった。ちょうど他にも廃棄書類が溜まっていたところだ。個人情報関連の書類をシュレッダーにかけながら、今の「市民対応」を振り返る。
+　相手の言わんとするところに理解を示し、対処法を筋道立て、臨機応変に対応し、納得して帰ってもらう。我ながら満足のいく「模範的な市民対応」であった。
+　今回の事例は、私一人で把握しておけばいい案件ではなかった。「重複データ消去時の、住民データの個人との同一希薄性発生時の対応」として市民対応マニュアルに追加し、課題と解決策とを課内で共有化しなければならない。
+　それにしても、住民情報データと個人が、これほど密接に結びついているとは、思ってもみなかった。考えてみれば、私が「私」であるということを証明できるのは、こうして役所にデータがあるからこそだ。もしかしたら、それら全てのデータがなくなってしまったら、「私」という存在そのものも消えてしまうのではないだろうか？
+　シュレッダーで無数の「個人情報」を裁断しながら、私はつい、そんな想像をしてしまった。
+　　　　◇
+　当初の業務予定のとおりに午後の業務を終えた私は、五時半に庁舎を出て、帰り道に図書館に立ち寄った。予約していた新刊本が一冊用意できたと連絡が入っていたからだ。
+　予約本を受け取り、他にもめぼしい本がないか、館内を一周する。貸出は一人十冊までだ。まだ読み切れていない本が家に三冊あるので、七冊までなら借りることができる。二十分ほど見てまわり、五冊の本を手に、カウンターに向かった。
+　窓口の女性司書は、端末画面の貸出履歴を一瞥し、私の置いた五冊の本を確認すると、バーコードを読み取ろうとする手を止めた。
+「既に六冊借りられていますので、本日は四冊までしか貸し出すことはできません。」
+「一週間前に、三冊しか借りていないはずですが。」
+　借りた冊数に間違いはない。貸出カードは常に財布に入れて持ち歩いているので、親族の誰かが利用して借りることもありえない。
+「それでは、二重になっているようですね。」
+　司書の女性は、間髪を容れずに答える。それで私も、ようやく納得できた。
+「ああ、貸出データが二重になっているんですね。それでは、そのデータを正して、貸出ができるようにしてもらえますか。」
+　無感動な表情が私に向けられる。
+「いえ、二重になっているのは、データではなく、あなた自身です。」
+「どういうことですか？」
+「貸出データによると、あなたは一週間前に三冊借りて、一昨日も三冊借りられています。一昨日に借りられた記憶がないということでしたら、あなた自身が二重になって借りられたものと思われます。」
+　よくあることだとばかりに、彼女の説明はよどみなかった。
+「なるほど……。」
+　私はようやく合点がいった。入力ミスで個人情報データが二重になることがあるのだ。逆に、「私」の存在そのものが二重になることもあるだろう。もう一人の「私」が、一昨日図書館で三冊の本を借りたにちがいない。
+「一昨日、本を借りられたのも、今日借りられるのも、同じあなたですから、十冊という制限を超えて貸し出すことはできませんよ。」
+　まるで私が無理な要求をしているとでもいうように、彼女はすげなかった。立場こそ違え、彼女も「市民サービス」の向上を目ざすべき立場のはずだ。「模範とされる市民対応」からはほど遠いと言わざるをえない。
+「納得できません。同じ『私』とはいえ、私自身は与り知らぬかたちで貸出が行われたのですから、私にはこの五冊を借りる権利があるはずです。」
+　はっきり言って、そこまで本を借りることに執着しているわけではない。だが私は、自分が「無理難題タイプ」でも、「論理矛盾タイプ」でもなく、「正当な主張」をする利用者であることを彼女に理解させるために、貸出を強要した。
+「わかりました。それでは少々お待ちいただけますか。」
+　彼女はそう言って、いったん奥の事務所に入った。担当部署に電話をかけているようだ。
+　しばらくして、彼女は相変わらず無感動な表情のまま、カウンターに戻ってきた。
+「確認が取れました。正常な状態に戻すということです。五分ほどで二重状態が解消されるそうですから、もう少々お待ちいただけますか。」
+「わかりました。」
+　適切な対応が取られたことに満足し、私はカウンターを離れた。
+　すぐにしかるべき部署が、どちらかを、「削除」するだろう。どちらが消えようが、同じ「私」なのだ。何の問題もない。`,
+
+            // 構成分析データ
+            structure: [
+                {
+                    title: "発端 - 午後の窓口",
+                    summary: "市役所職員の「私」が、督促状の誤りを訴える若い女性に対応する。",
+                    tags: ["日常", "クレーム対応"]
+                },
+                {
+                    title: "展開 - 二重登録の謎",
+                    summary: "調査の結果、女性のデータは二重登録されており、片方が削除されていたことが判明する。女性は「消された方が本物の私だ」と主張し、復元を懇願する。",
+                    tags: ["不可解な論理", "データの復元"]
+                },
+                {
+                    title: "転換 - 模範的対応の完遂",
+                    summary: "「私」は無意味と思いつつデータを入れ替える作業を行い、女性を満足させる。その後、シュレッダーをかけながら「データと個人の存在」について思索する。",
+                    tags: ["満足", "哲学的問い"]
+                },
+                {
+                    title: "結末 - 図書館での反転",
+                    summary: "図書館で本を借りようとした「私」は、「あなた自身が二重になっている」と告げられる。彼はそれを淡々と受け入れ、自分が削除されるのを待つ。",
+                    tags: ["不条理", "受容", "アイロニー"]
+                }
+            ],
+
+            // 登場人物データ
+            characters: [
+                {
+                    name: "私（主人公）",
+                    role: "市役所職員",
+                    description: "「模範とされる市民対応」で表彰されるほど、完璧かつ冷静沈着な公務員。感情を表に出さず、マニュアルと経験に基づいて効率的に処理を行う。物語後半で自身の存在の危機に直面するが、それすらも「事務的」に受け入れる。",
+                    quote: "どちらが消えようが、同じ「私」なのだ。何の問題もない。"
+                },
+                {
+                    name: "若い女性",
+                    role: "来庁者",
+                    description: "督促状の間違いを訴える女性。データ上の区別に異常な執着を見せ、「消されたデータこそが自分」という主観的な真実を訴える。主人公とは対照的に、データに感情やアイデンティティを重ねている。",
+                    quote: "消されたのは、私のデータなのです。"
+                },
+                {
+                    name: "図書館の司書",
+                    role: "カウンター職員",
+                    description: "主人公の鏡像のような存在。無感動な表情で事務的に対応する。「あなた自身が二重になっている」という異常事態を、あたかも日常茶飯事のように処理する。",
+                    quote: "いえ、二重になっているのは、データではなく、あなた自身です。"
+                }
+            ],
+
+            // キーワード・注釈データ（本文ハイライト用）
+            keywords: [
+                {
+                    term: "督促状",
+                    yomi: "とくそくじょう",
+                    desc: "支払いや履行を催促するための通知書。本作では物語のきっかけとなる物理的な証拠であり、個人のデータが記号化されたものの象徴。",
+                    context: "日常的な行政手続きの一部だが、女性にとってはアイデンティティの危機をもたらすもの。"
+                },
+                {
+                    term: "模範とされる市民対応",
+                    yomi: "もはんとされるしみんたいおう",
+                    desc: "主人公の誇りであり、行動原理。相手の感情に配慮しているように見せかけて、実際はトラブルを回避し円滑に処理するためのテクニックに過ぎないことが示唆される。",
+                    context: "主人公の機械的・非人間的な側面を強調するフレーズ。"
+                },
+                {
+                    term: "二重登録",
+                    yomi: "にじゅうとうろく",
+                    desc: "同一のデータが誤って二つ登録されるシステムエラー。本作ではこれが「人間の存在の重複」へと飛躍し、現実と非現実の境界を曖昧にするギミックとして機能する。",
+                    context: "前半はコンピュータ上のミス、後半は実存的な現象として扱われる。"
+                },
+                {
+                    term: "異体字",
+                    yomi: "いたいじ",
+                    desc: "標準的な字体とは異なるが、同じ意味・発音を持つ漢字（例：『高』と『髙』）。役所の窓口業務ならではのリアリティあるディテール。",
+                    context: "主人公の専門性と観察眼を示す描写。"
+                },
+                {
+                    term: "シュレッダー",
+                    yomi: "しゅれっだー",
+                    desc: "文書細断機。個人情報を物理的に抹消する装置。ラストシーンにおいて、主人公自身が社会システムから「削除」されることの暗喩となる。",
+                    context: "データの消去＝存在の消去というテーマを視覚化する道具。"
+                },
+                {
+                    term: "不確定要素",
+                    yomi: "ふかくていようそ",
+                    desc: "予測できない事柄。主人公はこれを極力排除しようと努めているが、物語全体が巨大な不確定要素（ドッペルゲンガー現象）に飲み込まれていく。",
+                    context: "冒頭の合理的思考と結末の不条理な状況との対比。"
+                },
+                 {
+                    term: "論理矛盾タイプ",
+                    yomi: "ろんりむじゅんたいぷ",
+                    desc: "主人公が分類する市民のパターンのひとつ。理屈が通らない要求をする人々。主人公は彼らを「処理対象」として冷徹に分析している。",
+                    context: "人間をタイプ分けして管理しようとする官僚的な視点。"
+                },
+                {
+                    term: "個人情報",
+                    yomi: "こじんじょうほう",
+                    desc: "氏名、住所、生年月日など個人を識別する情報。現代社会において、これこそが「私」を証明する唯一の根拠となりつつあることへの皮肉。",
+                    context: "肉体よりもデータが優先される世界の不気味さ。"
+                },
+                 {
+                    term: "解決",
+                    yomi: "かいけつ",
+                    desc: "主人公にとっての解決とは「真実の究明」ではなく、「相手が納得して帰ること」。",
+                    context: "お役所仕事の本質を突くアイロニー。"
+                },
+                {
+                    term: "削除",
+                    yomi: "さくじょ",
+                    desc: "不要なデータを消すこと。物語の最後では、人間そのものを消すという意味に変容する。",
+                    context: "デジタル用語が人間の生死に関わる言葉として使われる恐怖。"
+                },
+                {
+                    term: "一瞥",
+                    yomi: "いちべつ",
+                    desc: "ちらっと見ること。わずかな時間で対象を確認する動作。",
+                    context: "図書館の司書が、主人公の貸出履歴を事務的に確認する際の動作。感情のなさを強調する。"
+                },
+                {
+                    term: "間髪を容れずに",
+                    yomi: "かんはつをいれずに",
+                    desc: "少しの時間も置かずに。即座に。",
+                    context: "司書の反応の速さ。彼女もまた、主人公と同様にマニュアル化された、あるいは機械的な存在であることを示唆する。"
+                },
+                {
+                    term: "与り知らぬ",
+                    yomi: "あずかりしらぬ",
+                    desc: "自分には関係のないことだ。関与していない。",
+                    context: "「もう一人の私」の行動に対する主人公の責任逃れのような感覚、あるいは自己の分断。"
+                },
+                {
+                    term: "さざ波すら立てず",
+                    yomi: "さざなみすらたてず",
+                    desc: "心が全く動揺しないさま。水面が静かであることに例えている。",
+                    context: "主人公の感情制御の完璧さ。人間味の欠如とも取れる冷静さ。"
+                },
+                {
+                    term: "肝要",
+                    yomi: "かんよう",
+                    desc: "非常に重要であること。",
+                    context: "市民対応におけるテクニックとして、相手を味方につけることの重要性を説いている。"
+                },
+                {
+                    term: "臨機応変",
+                    yomi: "りんきおうへん",
+                    desc: "その場の状況の変化に応じて、適切な処置をとること。",
+                    context: "マニュアル通りではなく、現場の状況に合わせて柔軟に対応する主人公の自負。"
+                },
+                {
+                    term: "合点がいった",
+                    yomi: "がてんがいった",
+                    desc: "事情を理解して納得すること。",
+                    context: "異常な事態（自分が二重になっている）を、システムエラーのアナロジーであっさりと納得してしまう主人公の異常性。"
+                },
+                {
+                     term: "すげなかった",
+                     yomi: "すげなかった",
+                     desc: "「すげない（素っ気ない）」の過去形。思いやりがなく、冷淡であること。",
+                     context: "司書の冷淡な対応。前半の主人公の「丁寧な（ふりをした）対応」との対比。"
+                }
+            ]
+        };
+
+        // ==========================================
+        //  UI操作・ロジック
+        // ==========================================
+
+        const STORAGE_KEY_SCROLL = 'readerScrollPosition';
+
+        // 初期化処理
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHeader();
+            renderStructure();
+            renderCharacters();
+            renderKeywords();
+            renderTextWithHighlights();
+            
+            // デフォルトタブを表示
+            switchTab('structure');
+
+            // 読書ビューのスクロール監視（位置保存用）
+            window.addEventListener('scroll', () => {
+                if (currentTab === 'read') {
+                    // 頻繁な書き込みを防ぐためdebounce等は省略していますが、
+                    // 本番環境ではlodash.debounce等を推奨
+                    localStorage.setItem(STORAGE_KEY_SCROLL, window.scrollY);
+                }
+            });
+        });
+
+        let currentTab = 'structure';
+
+        // タブ切り替え関数
+        function switchTab(targetId) {
+            // 現在が読書タブなら、離れる前に位置を念のため保存
+            if (currentTab === 'read') {
+                localStorage.setItem(STORAGE_KEY_SCROLL, window.scrollY);
+            }
+
+            // すべてのコンテンツを非表示
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // ナビゲーションのスタイルリセット
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white', 'shadow-sm');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+            });
+
+            // ターゲットを表示
+            const targetContent = document.getElementById(`view-${targetId}`);
+            targetContent.classList.remove('hidden');
+
+            // アクティブなボタンのスタイル適用
+            const activeBtn = document.querySelector(`.nav-btn[data-target="${targetId}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+                activeBtn.classList.add('bg-primary', 'text-white', 'shadow-sm');
+            }
+
+            currentTab = targetId;
+
+            // 2. 読書位置の復元ロジック
+            if (targetId === 'read') {
+                const savedPos = localStorage.getItem(STORAGE_KEY_SCROLL);
+                if (savedPos) {
+                    // レンダリングと表示のタイミング調整のためにわずかに遅延
+                    setTimeout(() => {
+                        window.scrollTo({
+                            top: parseInt(savedPos, 10),
+                            behavior: 'auto' // 'smooth'だと長くスクロールする場合に見にくいので即時移動
+                        });
+                    }, 10);
+                } else {
+                    window.scrollTo(0, 0);
+                }
+            } else {
+                // 他のタブはトップから表示
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // ヘッダータイトルの描画
+        function renderHeader() {
+            const titleEl = document.getElementById('header-title');
+            titleEl.innerHTML = `${storyData.title} <span class="text-sm font-normal text-gray-500 ml-2">by ${storyData.author}</span>`;
+        }
+
+        // 構成（Structure）の描画
+        function renderStructure() {
+            const listEl = document.getElementById('structure-list');
+            let html = '';
+            storyData.structure.forEach((item, index) => {
+                html += `
+                    <div class="bg-white p-5 rounded-lg shadow border-l-4 border-slate-300 hover:border-accent transition duration-300">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg text-primary">Chapter ${index + 1}: ${item.title}</h3>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed mb-3">${item.summary}</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${item.tags.map(tag => `<span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">#${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            listEl.innerHTML = html;
+        }
+
+        // 登場人物（Characters）の描画
+        function renderCharacters() {
+            const gridEl = document.getElementById('characters-grid');
+            let html = '';
+            storyData.characters.forEach(char => {
+                html += `
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                            <h3 class="font-bold text-lg text-primary">${char.name}</h3>
+                            <span class="text-xs font-mono bg-white px-2 py-1 rounded border border-slate-300">${char.role}</span>
+                        </div>
+                        <div class="p-4">
+                            <details class="group">
+                                <summary class="cursor-pointer text-sm font-medium text-accent hover:text-orange-700 flex items-center justify-between">
+                                    <span>詳細を見る</span>
+                                    <span class="transition group-open:rotate-180">▼</span>
+                                </summary>
+                                <div class="mt-3 text-sm text-gray-700 space-y-3 animation-fade-in">
+                                    <p>${char.description}</p>
+                                    <blockquote class="border-l-2 border-slate-300 pl-3 italic text-gray-500">
+                                        "${char.quote}"
+                                    </blockquote>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+                `;
+            });
+            gridEl.innerHTML = html;
+        }
+
+        // キーワード（Keywords）の描画
+        function renderKeywords() {
+            const listEl = document.getElementById('keywords-list');
+            let html = '';
+            storyData.keywords.forEach(kw => {
+                html += `
+                    <details class="bg-white rounded-lg shadow group overflow-hidden">
+                        <summary class="px-4 py-3 cursor-pointer hover:bg-slate-50 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <span class="font-bold text-primary">${kw.term}</span>
+                                <span class="text-xs text-gray-400">(${kw.yomi})</span>
+                            </div>
+                            <span class="text-gray-400 group-open:rotate-180 transition">▼</span>
+                        </summary>
+                        <div class="px-4 py-3 border-t border-gray-100 bg-slate-50 text-sm text-gray-700">
+                            <p class="mb-2"><span class="font-bold text-slate-500">意味:</span> ${kw.desc}</p>
+                            <p><span class="font-bold text-slate-500">文脈:</span> ${kw.context}</p>
+                        </div>
+                    </details>
+                `;
+            });
+            listEl.innerHTML = html;
+        }
+
+        // 本文の描画とハイライト処理
+        function renderTextWithHighlights() {
+            const textContainer = document.getElementById('story-text');
+            let rawText = storyData.text;
+
+            // HTML特殊文字のエスケープ（簡易）
+            rawText = rawText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            // キーワードをハイライトタグに置換
+            // 注意: 単純置換なので、短い単語が長い単語の一部に含まれる場合は順序に注意が必要ですが、
+            // 今回は長さ順にソートして処理することで部分一致の問題を軽減します。
+            const sortedKeywords = [...storyData.keywords].sort((a, b) => b.term.length - a.term.length);
+
+            // 一時的にプレースホルダーに置き換えて、HTMLタグの入れ子を防ぐ
+            let processedText = rawText;
+            const map = {};
+
+            sortedKeywords.forEach((kw, index) => {
+                const placeholder = `__KEYWORD_${index}__`;
+                map[placeholder] = kw;
+                // グローバル置換
+                const regex = new RegExp(kw.term, "g");
+                processedText = processedText.replace(regex, `<span class="keyword-highlight" onclick="showAnnotation('${placeholder}')">${kw.term}</span>`);
+            });
+
+            // プレースホルダーから実際のデータ属性キーへ戻す必要はない（onclickで渡しているため）
+            // ただし、onclick引数でオブジェクトを渡せないので、placeholderをキーにして検索する
+
+            // グローバルスコープに関数を公開してHTMLから呼び出せるようにする
+            window.showAnnotation = (key) => {
+                const kw = map[key];
+                if (!kw) return;
+                
+                const box = document.getElementById('annotation-box');
+                document.getElementById('anno-word').innerHTML = `${kw.term} <span class="text-xs font-normal text-gray-300 ml-2">(${kw.yomi})</span>`;
+                document.getElementById('anno-desc').textContent = kw.desc;
+                
+                box.classList.remove('translate-y-full');
+            };
+
+            window.closeAnnotation = () => {
+                document.getElementById('annotation-box').classList.add('translate-y-full');
+            };
+
+            textContainer.innerHTML = processedText;
+        }
+
+    </script>
+</body>
+</html>
