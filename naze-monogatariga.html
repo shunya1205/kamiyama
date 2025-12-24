@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>なぜ物語が必要なのか - 小川洋子 | Interactive Reader</title>
+    
+    <!-- Tailwind CSS (スタイリング用フレームワーク) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Vue.js 3 (UIフレームワーク) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Google Fonts (Noto Serif JP: 明朝体) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- カスタムスタイル設定 -->
+    <style>
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background-color: #f8fafc; /* 少しグレーがかった白 */
+            color: #334155;
+        }
+        
+        /* 本文用の明朝体設定 */
+        .font-serif-jp {
+            font-family: 'Noto Serif JP', serif;
+        }
+
+        /* アコーディオンアニメーション */
+        .slide-enter-active, .slide-leave-active {
+            transition: all 0.3s ease;
+            max-height: 500px;
+            opacity: 1;
+            overflow: hidden;
+        }
+        .slide-enter-from, .slide-leave-to {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        /* 重要な語句のハイライト装飾 */
+        .text-highlight {
+            border-bottom: 2px solid #fbbf24; /* アンダーライン色 */
+            background: linear-gradient(transparent 70%, #fef3c7 70%);
+            cursor: pointer;
+            transition: background 0.2s;
+            padding: 0 2px;
+            font-weight: 700;
+        }
+        .text-highlight:hover {
+            background-color: #fcd34d;
+        }
+
+        /* スクロールバーのカスタマイズ */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="antialiased h-screen flex flex-col overflow-hidden">
+
+    <div id="app" class="flex flex-col h-full relative">
+
+        <!-- ==========================================
+             1. グローバルヘッダー (固定表示)
+             ========================================== -->
+        <header class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm flex-none">
+            <div class="max-w-5xl mx-auto px-4 py-3">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <!-- タイトルエリア -->
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-800">{{ bookData.title }}</h1>
+                        <p class="text-sm text-slate-500">{{ bookData.author }}</p>
+                    </div>
+
+                    <!-- ナビゲーションメニュー -->
+                    <nav class="flex space-x-1 bg-slate-100 p-1 rounded-lg overflow-x-auto">
+                        <button 
+                            v-for="tab in tabs" 
+                            :key="tab.id"
+                            @click="switchTab(tab.id)"
+                            :class="[
+                                'px-3 py-1.5 text-sm rounded-md whitespace-nowrap transition-all duration-200 font-medium',
+                                currentTab === tab.id 
+                                    ? 'bg-white text-indigo-600 shadow-sm' 
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                            ]"
+                        >
+                            {{ tab.label }}
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- ==========================================
+             メインコンテンツエリア (スクロール可能領域)
+             ========================================== -->
+        <main 
+            ref="mainScrollArea" 
+            class="flex-1 overflow-y-auto scroll-smooth pb-24"
+            @scroll="handleScroll"
+        >
+            <div class="max-w-4xl mx-auto px-4 py-8 md:py-12">
+                
+                <!-- 
+                  ビュー1: 大まかな内容 (Structure) 
+                -->
+                <section v-show="currentTab === 'structure'" class="space-y-6">
+                    <div class="bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r">
+                        <h2 class="text-lg font-bold text-indigo-900 mb-2">作品の構成と流れ</h2>
+                        <p class="text-indigo-800 text-sm">各セクションをタップして、詳細な要約を確認しましょう。</p>
+                    </div>
+
+                    <div v-for="(part, index) in bookData.structure" :key="index" class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                        <button 
+                            @click="toggleAccordion('struct', index)"
+                            class="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50 transition-colors"
+                        >
+                            <div class="flex items-start gap-4">
+                                <span class="flex-none bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                                    {{ index + 1 }}
+                                </span>
+                                <div>
+                                    <h3 class="font-bold text-slate-800">{{ part.heading }}</h3>
+                                    <p class="text-xs text-slate-500 mt-1 line-clamp-1">{{ part.summary }}</p>
+                                </div>
+                            </div>
+                            <span :class="{'rotate-180': openAccordions.struct === index}" class="transition-transform duration-300 text-slate-400">▼</span>
+                        </button>
+                        
+                        <transition name="slide">
+                            <div v-if="openAccordions.struct === index" class="bg-slate-50 p-5 border-t border-slate-100">
+                                <p class="text-slate-700 leading-relaxed text-sm mb-4">{{ part.detail }}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span v-for="tag in part.tags" class="text-xs bg-white border border-slate-200 text-slate-500 px-2 py-1 rounded">
+                                        #{{ tag }}
+                                    </span>
+                                </div>
+                            </div>
+                        </transition>
+                    </div>
+                </section>
+
+                <!-- 
+                  ビュー2: 登場人物・要素分析 (Elements) 
+                -->
+                <section v-show="currentTab === 'elements'" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div v-for="(char, index) in bookData.elements" :key="index" 
+                             class="bg-white rounded-xl shadow-sm border border-slate-100 p-5 hover:shadow-md transition-shadow cursor-pointer"
+                             @click="toggleAccordion('elem', index)"
+                        >
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-2xl">{{ char.icon }}</span>
+                                    <h3 class="font-bold text-lg text-slate-800">{{ char.name }}</h3>
+                                </div>
+                                <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">{{ char.role }}</span>
+                            </div>
+                            
+                            <p class="text-sm text-slate-600 mb-3">{{ char.description }}</p>
+                            
+                            <transition name="slide">
+                                <div v-if="openAccordions.elem === index" class="pt-3 border-t border-slate-100 mt-3">
+                                    <p class="text-xs font-bold text-slate-500 mb-1">ポイント</p>
+                                    <p class="text-sm text-slate-700 leading-relaxed">{{ char.analysis }}</p>
+                                </div>
+                            </transition>
+                            <div v-else class="text-center text-xs text-slate-400 mt-2">タップで詳細を表示</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 
+                  ビュー3: キーワード・象徴 (Keywords) 
+                -->
+                <section v-show="currentTab === 'keywords'" class="space-y-4">
+                    <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r mb-6">
+                        <h2 class="text-lg font-bold text-amber-900 mb-1">重要なキーワード</h2>
+                        <p class="text-amber-800 text-sm">タップすると文脈における意味が表示されます。</p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <button 
+                            v-for="(kw, index) in bookData.keywords" 
+                            :key="index"
+                            @click="selectedKeyword = kw"
+                            class="px-4 py-2 bg-white border border-slate-200 shadow-sm rounded-lg hover:border-indigo-300 hover:text-indigo-600 transition-colors text-left"
+                        >
+                            <span class="font-bold text-slate-700 block">{{ kw.term }}</span>
+                        </button>
+                    </div>
+
+                    <!-- キーワード詳細モーダル (インライン表示) -->
+                    <transition name="slide">
+                        <div v-if="selectedKeyword" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm" @click.self="selectedKeyword = null">
+                            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-fade-in-up">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 class="text-2xl font-bold text-indigo-900">{{ selectedKeyword.term }}</h3>
+                                        <p class="text-xs text-slate-400 mt-1">CONTEXT</p>
+                                    </div>
+                                    <button @click="selectedKeyword = null" class="text-slate-400 hover:text-slate-600">✕</button>
+                                </div>
+                                <p class="text-slate-700 leading-relaxed mb-4">{{ selectedKeyword.definition }}</p>
+                                <div class="bg-slate-100 p-3 rounded-lg text-sm text-slate-600 italic">
+                                    "{{ selectedKeyword.context }}"
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </section>
+
+                <!-- 
+                  ビュー4: 本文を読む (Read Text) 
+                  ※ v-html を使用してハイライト付きテキストを描画
+                -->
+                <section v-show="currentTab === 'read'" class="relative">
+                    <div class="max-w-2xl mx-auto">
+                        <div class="bg-white shadow-sm border border-slate-100 p-8 md:p-12 rounded-sm">
+                            <!-- タイトル部分 -->
+                            <div class="mb-10 text-center border-b pb-8">
+                                <h2 class="text-2xl md:text-3xl font-serif-jp font-bold text-slate-900 mb-3">{{ bookData.title }}</h2>
+                                <p class="text-lg font-serif-jp text-slate-600">{{ bookData.author }}</p>
+                            </div>
+                            
+                            <!-- 本文描画エリア -->
+                            <div 
+                                class="font-serif-jp text-lg leading-9 md:leading-loose text-slate-800 tracking-wide space-y-8"
+                                v-html="processedText"
+                                @click="handleTextClick"
+                            >
+                                <!-- JavaScriptでパースされたHTMLがここに挿入されます -->
+                            </div>
+
+                            <!-- 読了時のフッター -->
+                            <div class="mt-16 pt-8 border-t text-center text-slate-400 text-sm">
+                                <p>読了</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- ==========================================
+             4. 読解支援機能 (フッター固定パネル)
+             ※ ハイライトされた単語をクリックした時に表示
+             ========================================== -->
+        <transition 
+            enter-active-class="transition ease-out duration-300"
+            enter-from-class="transform translate-y-full opacity-0"
+            enter-to-class="transform translate-y-0 opacity-100"
+            leave-active-class="transition ease-in duration-200"
+            leave-from-class="transform translate-y-0 opacity-100"
+            leave-to-class="transform translate-y-full opacity-0"
+        >
+            <div 
+                v-if="activeAnnotation" 
+                class="fixed bottom-0 left-0 right-0 bg-white border-t border-indigo-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 p-4 md:px-8"
+            >
+                <div class="max-w-4xl mx-auto flex items-start justify-between gap-4">
+                    <div>
+                        <div class="flex items-baseline gap-3 mb-1">
+                            <h4 class="text-lg font-bold text-indigo-900">{{ activeAnnotation.term }}</h4>
+                            <span class="text-xs text-slate-500">{{ activeAnnotation.yomi }}</span>
+                        </div>
+                        <p class="text-sm md:text-base text-slate-700 leading-relaxed">
+                            {{ activeAnnotation.desc }}
+                        </p>
+                    </div>
+                    <button 
+                        @click="activeAnnotation = null"
+                        class="p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors text-slate-500"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </transition>
+
+    </div>
+
+    <!-- ==========================================
+         アプリケーションロジック (Vue.js)
+         ========================================== -->
+    <script>
+        /**
+         * 1. 作品データ（編集エリア）
+         * ここを書き換えることで、コンテンツを差し替えられます。
+         */
+        const sourceData = {
+            title: "なぜ物語が必要なのか",
+            author: "小川 洋子",
+            // 本文データ: 段落ごとに配列に入れます。強調したい単語は {{term}} で囲みます。
+            paragraphs: [
+                "小説を書いていると、時おり、不思議に思うことがあります。なぜ人は繰り返し物語を生み出し続けているのだろう。言葉、というものを獲得した人間が、初めてお話を語り始めた時、そこで何が起こったのだろう。",
+                "私は勝手にある場面を思い浮かべます。狩りから帰ってきた男が、途中で出会った動物がどんなに恐ろしかったか、植物や空や水辺がどんなに美しかったか、家族たちに語って聞かせる。皆、その声に耳を澄ませる。見たこともない世界に{{想像}}をめぐらせながら、お互い離れ離れになっていた時間を共有し、彼が無事に帰ってきた喜びをかみしめ合う。彼らの顔を焚火の明かりが照らしている。そんな場面です。",
+                "{{神話}}の時代から人間は物語とともに生きてきました。人が生きている限り、物語の歴史が途切れたことはありません。理屈では説明のつかない{{理不尽}}、いくら求めても答えの出ない疑問、人間の力を{{超越}}した自然、言葉など必要としない圧倒的な感動……。そうしたもろもろを物語の形に変え、自分なりに受け止めることで、困難の多い人生を少しでも実り豊かなものにしようとしてきたのだと思います。いくら{{辻褄}}が合わなくても、{{奇想天外}}でも、物語の器は黙って受け止めてくれます。辛抱強く、{{魂の混沌}}に寄り添ってくれるのです。",
+                "苦しい現実を受け入れるための、物語の役割について考える時、ある一人の青年を思い出します。『犠牲（サクリファイス）わが息子・脳死の11日』（柳田邦男著）に登場する洋二郎さんです。文学を愛する{{感受性}}豊かな洋二郎さんは、精神の病に苦しみながらも、懸命に生きるための光を見いだそうとします。ある日の日記にこう記しています。",
+                "<blockquote>……ぼくは行きの電車で、孤独な自分を励ますかのように、「樹木」が人為的な創造物の間から「まだいるからね」と声を発するかのように、その緑の光を世界に向け発しているのを感じた。</blockquote>",
+                "どこにも居場所を見つけられず、不安に押しつぶされそうになっている青年が、電車の窓に映る樹木と声にならない声で会話を交わしている。言葉を持たないものの声によって自らを励ましている。",
+                "その様子を想像するだけで胸がいっぱいになります。洋二郎さんの心の内には、彼だけの物語が生み出されていたはずです。彼と現実をつなぎとめるために、どうしても必要な物語だったのでしょう。",
+                "残念ながら洋二郎さんは自ら命を絶ってしまいます。脳死状態だった十一日間、父の柳田さんはベッドサイドで息子の日記を読み、樹木との会話の一節に、涙が止まらなくなります。それはこれまで理解してやることができなかった、息子の苦しみの真実にふれる体験でした。洋二郎さんの物語が、死者と生者に別れた親子を、つないだのです。",
+                "さて、私に初めて物語の力を教えてくれたのは、中学生の時に出会った『{{アンネの日記}}』でした。{{ナチス・ドイツ}}に占領されたオランダで、アンネ＝フランクは十三歳の誕生日に、父オットーから赤い格子模様の日記帳をプレゼントされます。ほどなく、{{ユダヤ人狩り}}から逃れるため、家族とともにアムステルダム市内の中心部にある隠れ家へ身を潜めたアンネは、密告により{{強制収容所}}へ送られるまでの二年あまり、そこで日記を書き続けることになります。",
+                "当然ながら、隠れ家での生活は不自由なものでした。学校へ通うことはおろか、外へ出ることさえできず、昼間は分厚いカーテンを引いて、物音を立てないようにしなければいけません。限られた空間での、まさに息のつまるような毎日です。しかも発見されれば命の危険にさらされるという恐怖が、常につきまとっていました。",
+                "そうした状況で書かれたアンネの日記は、普通の日記とは少し異なっていました。単に毎日の出来事を記すのではなく、感情を書きなぐるのでもなく、架空の友人、{{キティー}}に宛てた手紙として、自らの思いを綴るのです。",
+                "アンネは現実には存在しない人物を創造し、日記の中で彼女と会話を交わします。まるでキティーからの返事を受け取ったかのような気持ちで、新たなページを自分の言葉で埋めてゆきます。母親への不満、支援者への感謝、ペーターへの恋心、死の恐怖、将来の夢……。胸にわき上がってくる全てを、キティーに語ります。",
+                "窮屈な生活の中、日記帳を開いている間だけは、思う存分、自由を味わうことができました。隠れ家に閉じ込められたアンネにとって、キティーのいる物語は、果てしない自由の世界そのものでした。",
+                "日記を読んだ時、書くことがこんなにも人の心を解き放つのかと、私は衝撃を受けました。書くという方法を使えば、自分も自由を得られるのだ。そう思い、早速、大学ノートを買ってきました。それが作家の原点になったと言えるでしょう。",
+                "私は彼女がキティーに語りかけたのを真似し、アンネに向かって悩みを打ち明けるように、友達関係の難しさや両親とのいざこざを、大学ノートに書きはじめました。時代も立場も飛び越えて、同世代の悩みを共有している気分でした。彼女との間に交わした空想の友情が、どれほど私の救いになってくれたか知れません。当時、私にとっての親友は、自分なりにこしらえた物語の世界に住む、決して会うことのできない少女だったのです。",
+                "十三歳から十五歳まで、隠れ家生活にあっても、アンネ＝フランクの心は成長してゆきました。ただ反抗心をむき出しにするばかりでなく、こうありたいと願う自分の、本来の姿を静かに模索するようになっていました。たとえ肉体は狭い場所に閉じ込められていようとも、心はどこまでも豊かに深まってゆくのです。その事実を、アンネの日記は証明しています。",
+                "一九四四年八月四日、何者かの{{密告}}により、隠れ家の人々は連行されます。一九四五年、アンネはドイツの強制収容所ベルゲン＝ベルゼンで、{{チフス}}のため命を落としました。家族の中で生き残ったのは、父のオットー一人きりでした。アンネの日記は一九四四年八月一日、火曜日が最後です。いつものとおり、親愛なるキティーへ、で始まり、じゃあまた、アンネ＝Ｍ＝フランクより、で終わっています。",
+                "樹木の声を聴いた洋二郎さん、空想の友人と会話したアンネ。二人とも自分だけの物語を作った、という意味で共通しているように思えます。論理的ではない、理性では説明できない世界が、彼らの{{安全地帯}}になっています。更に不思議なのは、最初は彼らだけの物語だったものが、時を経て、無関係なはずの私にも深い感動をもたらしている、ということです。物語には時空を超え、人の心をつなぐ役割があるのでしょう。だからこそ、個人の物語は文学へと生まれ変われるのです。",
+                "物語は作家だけが書いているのではありません。本当に大切な{{真実}}は、混沌とした内面の暗闇に沈んでいます。その目に見えない何かに光を当てる一つの方法が、物語に身を置くことなのだと思います。底知れない自由と許しを持つ物語という器を持ってさえいれば、人間は魂を解放することができます。他者の物語にふれれば、どんなに立場が異なっていても、その人の心に深く寄り添えます。",
+                "人間は誰しも、自分の物語を作りながら生きています。そうでなければ、生きてゆけないのです。"
+            ],
+
+            // 注釈・解説データ: {{term}}に対応するデータ
+            annotations: {
+                "想像": { yomi: "そうぞう", desc: "実際には経験していない事柄を、心の中に思い浮かべること。ここでは、離れている間の出来事や感情を共有するための力として描かれている。" },
+                "神話": { yomi: "しんわ", desc: "古くから語り継がれてきた、神々や英雄にまつわる物語。人類が太古から物語と共にあったことを示す言葉。" },
+                "理不尽": { yomi: "りふじん", desc: "道理に合わないこと。矛盾していて筋が通らないこと。人生において避けて通れない困難の象徴。" },
+                "超越": { yomi: "ちょうえつ", desc: "普通の程度や水準をはるかに超えること。人間の力ではどうにもならない自然の圧倒的な力の形容。" },
+                "辻褄": { yomi: "つじつま", desc: "物事の道理。一貫性。「辻褄が合わない」とは、論理的に矛盾していること。物語は矛盾さえも受け入れる器であるとされる。" },
+                "奇想天外": { yomi: "きそうてんがい", desc: "普通では思いつかないような、変わった思いつきのこと。" },
+                "魂の混沌": { yomi: "たましいのこんとん", desc: "心の中にある整理されていない感情、不安、恐れ、言葉にならない思いなどが入り混じった状態。" },
+                "感受性": { yomi: "かんじゅせい", desc: "外界からの刺激や印象を感じ取る心の働き。洋二郎さんの繊細で豊かな内面を表す言葉。" },
+                "アンネの日記": { yomi: "あんねのにっき", desc: "ユダヤ系ドイツ人の少女アンネ・フランクが、第二次世界大戦中の隠れ家生活を綴った日記。世界的ベストセラー。" },
+                "ナチス・ドイツ": { yomi: "なちす・どいつ", desc: "アドルフ・ヒトラー率いるナチ党政権下のドイツ。ユダヤ人迫害や第二次世界大戦を引き起こした。" },
+                "ユダヤ人狩り": { yomi: "ゆだやじんがり", desc: "ナチスによるユダヤ人の捜索・検挙のこと。見つかれば強制収容所へ送られる極限状況。" },
+                "強制収容所": { yomi: "きょうせいしゅうようじょ", desc: "ナチス・ドイツがユダヤ人などを隔離・拘禁するために建設した施設。" },
+                "キティー": { yomi: "きてぃー", desc: "アンネが日記の中で作り出した架空の友人。日記の宛名として使われた。" },
+                "密告": { yomi: "みっこく", desc: "こっそりと相手の秘密などを告げ口すること。アンネたちの隠れ家が発見される原因となった。" },
+                "チフス": { yomi: "ちふす", desc: "発疹チフスのこと。劣悪な衛生環境で感染する高熱を伴う伝染病。アンネの死因となった。" },
+                "安全地帯": { yomi: "あんぜんちたい", desc: "危険がなく、心安らかにいられる場所。論理や理性の及ばない物語の世界が、魂を守る場所として機能すること。" },
+                "真実": { yomi: "しんじつ", desc: "うそ偽りのない本当のこと。ここでは、表面的な事実ではなく、心の内奥に隠された切実な思いや痛みのことを指す。" }
+            },
+
+            // 構成分析データ
+            structure: [
+                { heading: "物語の起源への問い", summary: "なぜ人は物語を生み出し続けるのか？", detail: "言葉を持った人間が最初に物語を語った瞬間の想像から始まる。狩りから帰った男が家族に語る場面を通して、物語が「離れていた時間を共有し、安堵を確認する」機能を持つことが示唆される。", tags: ["導入", "起源", "共有"] },
+                { heading: "物語の役割", summary: "理不尽な現実を受け入れるための器", detail: "神話の時代から続く物語の役割は、人生の理不尽や答えのない問いを、物語という形に変えて受け止めることにある。物語は矛盾や混沌を黙って受け入れ、人に寄り添う。", tags: ["役割", "救済", "混沌"] },
+                { heading: "事例1：洋二郎さん", summary: "孤独な魂を励ます樹木との対話", detail: "柳田邦男著『犠牲』に登場する青年。精神の病に苦しむ中で、電車の窓に映る樹木と「声にならない会話」を交わす。これは彼が生存のために作り出した彼だけの物語であり、死後、父との心を繋ぐ架け橋となった。", tags: ["具体例", "孤独", "救い"] },
+                { heading: "事例2：アンネ・フランク", summary: "不自由な隠れ家での無限の自由", detail: "過酷な隠れ家生活の中で、架空の友人「キティー」に手紙を書く形式で日記を綴った。現実には存在しない相手との対話（物語）が、彼女に精神的な自由を与え、心の成長をもたらした。", tags: ["具体例", "自由", "成長"] },
+                { heading: "筆者の体験", summary: "書くことによる解放", detail: "アンネの日記に衝撃を受け、自らも大学ノートに悩みや空想を書き始める。物語の世界に住む友人が現実の救いとなり、作家としての原点となった。", tags: ["体験", "影響", "原点"] },
+                { heading: "結論：物語の普遍性", summary: "誰もが自分の物語を生きている", detail: "洋二郎さんやアンネのように、論理を超えた物語の世界が安全地帯となる。個人の物語は時空を超えて他者の心に届き（文学への昇華）、魂を解放する。人間は生きるために物語を必要としている。", tags: ["結論", "普遍性", "魂の解放"] }
+            ],
+
+            // 登場人物・要素分析データ
+            elements: [
+                { name: "狩りから帰った男", role: "象徴", icon: "🏹", description: "物語の起源として想像された人物。", analysis: "恐怖や美しさを家族に伝える行為は、単なる情報伝達ではなく「体験と感情の共有」であり、これが物語の原初的な機能であることを示している。" },
+                { name: "洋二郎", role: "実例人物", icon: "🌳", description: "『犠牲』に登場する、精神の病に苦しむ青年。", analysis: "樹木と会話するという「彼だけの物語」を持つことで、過酷な現実との繋がりを保っていた。論理では説明できない物語の力が、個人の生存にいかに不可欠かを示す例。" },
+                { name: "アンネ・フランク", role: "実例人物", icon: "📓", description: "『アンネの日記』の著者。", analysis: "物理的な幽閉状態にあっても、物語（日記中のキティーとの対話）を通じて精神的な自由を獲得できることを証明した存在。筆者の作家としての原点でもある。" },
+                { name: "キティー", role: "物語装置", icon: "✉️", description: "アンネが作り出した架空の友人。", analysis: "実在しない聞き手。しかし、この「物語の中の他者」がいるからこそ、アンネは本音を語り、自己を客観視し、成長することができた。" }
+            ],
+
+            // キーワードデータ
+            keywords: [
+                { term: "物語", definition: "出来事や経験を言葉で紡いだもの。ここでは単なるフィクションではなく、現実を受け入れ生きるための精神的な支柱として定義される。", context: "人間は誰しも、自分の物語を作りながら生きています。" },
+                { term: "言葉", definition: "意思疎通の手段だが、ここでは現実を物語へと変換するための道具。アンネや筆者にとっては「自由」への鍵。", context: "書くという方法を使えば、自分も自由を得られるのだ。" },
+                { term: "安全地帯", definition: "心が傷つかず、安らげる場所。論理や理屈が通用しない、物語の中の世界。", context: "理性では説明できない世界が、彼らの安全地帯になっています。" },
+                { term: "魂の解放", definition: "抑圧された感情や苦しみから解き放たれること。物語に身を置くことで得られる効果。", context: "人間は魂を解放することができます。" },
+                { term: "文学", definition: "個人の物語が時空を超えて他者に共有され、普遍的な価値を持ったもの。", context: "個人の物語は文学へと生まれ変われるのです。" },
+                { term: "焚火の明かり", definition: "太古の家族団欒の象徴。安心感と共有の場を表すイメージ。", context: "彼らの顔を焚火の明かりが照らしている。" },
+                { term: "樹木", definition: "洋二郎さんが対話した相手。言葉を持たないが、彼の孤独を受け止める存在。", context: "電車の窓に映る樹木と声にならない声で会話を交わしている。" },
+                { term: "自由", definition: "物理的な拘束に関わらず、心が何にも縛られない状態。物語を書く・読むことで得られる感覚。", context: "キティーのいる物語は、果てしない自由の世界そのものでした。" },
+                { term: "架空の友人", definition: "現実にはいない対話相手。自分自身との対話（内省）を可能にする装置。", context: "空想の友人が、どれほど私の救いになってくれたか知れません。" },
+                { term: "他者", definition: "自分以外の存在。物語を通じて、立場を超えて深く理解し合える対象。", context: "他者の物語にふれれば、その人の心に深く寄り添えます。" }
+            ]
+        };
+
+        const { createApp, ref, computed, watch, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                // リアクティブな状態定義
+                const bookData = ref(sourceData);
+                const currentTab = ref('structure'); // 初期タブ
+                const openAccordions = ref({ struct: null, elem: null });
+                const selectedKeyword = ref(null);
+                const activeAnnotation = ref(null);
+                const mainScrollArea = ref(null);
+
+                // タブ設定
+                const tabs = [
+                    { id: 'structure', label: '大まかな内容' },
+                    { id: 'elements', label: '登場人物・要素' },
+                    { id: 'keywords', label: 'キーワード' },
+                    { id: 'read', label: '本文を読む' }
+                ];
+
+                // 2. 読書位置の記憶ロジック (LocalStorage)
+                // ----------------------------------------------------
+                const STORAGE_KEY = 'reader_scroll_pos_' + bookData.value.title;
+
+                watch(currentTab, async (newTab, oldTab) => {
+                    // 「本文を読む」タブから離れる時、スクロール位置を保存
+                    if (oldTab === 'read' && mainScrollArea.value) {
+                        localStorage.setItem(STORAGE_KEY, mainScrollArea.value.scrollTop);
+                    }
+
+                    // DOM更新を待つ
+                    await nextTick();
+
+                    // 「本文を読む」タブに来た時、スクロール位置を復元
+                    if (newTab === 'read') {
+                        const savedPos = localStorage.getItem(STORAGE_KEY);
+                        if (savedPos && mainScrollArea.value) {
+                            mainScrollArea.value.scrollTop = parseInt(savedPos);
+                        }
+                    } else {
+                        // 他のタブならトップへ戻す
+                        if (mainScrollArea.value) {
+                            mainScrollArea.value.scrollTop = 0;
+                        }
+                    }
+                    
+                    // UI状態のリセット
+                    activeAnnotation.value = null;
+                });
+
+                // 初期化時に保存された位置があれば読み込む準備（タブ切り替え時に発火するのでここではキー確認のみ）
+                onMounted(() => {
+                    // もしユーザーが前回「本文」で閉じていた場合などの拡張も可能だが、
+                    // 今回はシンプルにデフォルトタブから開始とする。
+                });
+
+                // テキスト処理ロジック
+                // {{word}} を <span ...>word</span> に変換してHTML化
+                const processedText = computed(() => {
+                    return bookData.value.paragraphs.map(p => {
+                        let html = p;
+                        
+                        // 引用ブロックの処理 (<blockquote>タグがある場合)
+                        if (html.includes('<blockquote>')) {
+                            html = html.replace('<blockquote>', '<div class="pl-4 border-l-4 border-slate-300 italic text-slate-600 my-4">').replace('</blockquote>', '</div>');
+                        } else {
+                            html = `<p>${html}</p>`;
+                        }
+
+                        // {{word}} の置換
+                        return html.replace(/\{\{(.+?)\}\}/g, (match, term) => {
+                            // 注釈データにあるか確認
+                            const hasAnnotation = bookData.value.annotations[term];
+                            if (hasAnnotation) {
+                                return `<span class="text-highlight" data-term="${term}">${term}</span>`;
+                            }
+                            return `<span class="font-bold border-b border-slate-300">${term}</span>`;
+                        });
+                    }).join('');
+                });
+
+                // アコーディオン開閉
+                const toggleAccordion = (type, index) => {
+                    if (openAccordions.value[type] === index) {
+                        openAccordions.value[type] = null;
+                    } else {
+                        openAccordions.value[type] = index;
+                    }
+                };
+
+                // タブ切り替え
+                const switchTab = (tabId) => {
+                    currentTab.value = tabId;
+                };
+
+                // 本文中のクリックハンドラ（イベント委譲）
+                const handleTextClick = (event) => {
+                    const target = event.target;
+                    // highlightクラスを持つspanがクリックされたか
+                    if (target.classList.contains('text-highlight')) {
+                        const term = target.dataset.term;
+                        const annotation = bookData.value.annotations[term];
+                        if (annotation) {
+                            activeAnnotation.value = {
+                                term: term,
+                                ...annotation
+                            };
+                        }
+                    } else {
+                        // 空白クリックで閉じる
+                        activeAnnotation.value = null;
+                    }
+                };
+
+                // スクロールイベント（任意：現在位置を細かく保存したい場合など）
+                const handleScroll = () => {
+                    // 頻繁な書き込みを避けるため、ここでは実装しないが、
+                    // 必要であればデバウンスして保存することも可能。
+                };
+
+                return {
+                    bookData,
+                    tabs,
+                    currentTab,
+                    switchTab,
+                    openAccordions,
+                    toggleAccordion,
+                    selectedKeyword,
+                    processedText,
+                    activeAnnotation,
+                    handleTextClick,
+                    mainScrollArea,
+                    handleScroll
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
