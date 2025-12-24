@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立ってくる春 - 学習ビューア</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: 読みやすさのために明朝体とゴシック体をロード -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&family=Zen+Old+Mincho:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Zen Kaku Gothic New"', 'sans-serif'],
+                        serif: ['"Zen Old Mincho"', 'serif'],
+                    },
+                    colors: {
+                        theme: {
+                            light: '#fdfbf7', // 紙のような白
+                            dark: '#1f2937',  // 読みやすいダークグレー
+                            accent: '#8b5e3c', // 文学的な茶色
+                            highlight: '#fff3cd', // マーカー色
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* カスタムスタイル */
+        body {
+            background-color: #fdfbf7;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        /* 読書用ハイライト（アンダーライン風） */
+        .text-highlight {
+            background: linear-gradient(transparent 60%, #ffeeba 60%);
+            cursor: pointer;
+            transition: background 0.2s;
+            padding-bottom: 2px;
+            font-weight: 600;
+        }
+        .text-highlight:hover, .text-highlight.active {
+            background: #ffeeba;
+            color: #000;
+        }
+
+        /* アコーディオンアニメーション */
+        .accordion-content {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            opacity: 1;
+        }
+
+        /* スクロールバー装飾（Webkit） */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #aaa;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased leading-relaxed min-h-screen flex flex-col">
+
+    <!-- 
+    ========================================================================
+    1. グローバルヘッダー
+    ========================================================================
+    -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-100">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
+            <!-- タイトルエリア -->
+            <div class="text-center md:text-left">
+                <h1 id="header-title" class="text-xl font-bold font-serif text-gray-800"></h1>
+                <p id="header-author" class="text-xs text-gray-500 tracking-wider"></p>
+            </div>
+
+            <!-- ナビゲーションメニュー -->
+            <nav class="flex overflow-x-auto w-full md:w-auto gap-2 pb-1 md:pb-0 no-scrollbar">
+                <button onclick="switchView('overview')" id="nav-overview" class="nav-btn px-4 py-2 text-sm font-bold rounded-full transition-colors whitespace-nowrap bg-gray-100 text-gray-600 hover:bg-theme-accent hover:text-white">
+                    大まかな内容
+                </button>
+                <button onclick="switchView('characters')" id="nav-characters" class="nav-btn px-4 py-2 text-sm font-bold rounded-full transition-colors whitespace-nowrap bg-gray-100 text-gray-600 hover:bg-theme-accent hover:text-white">
+                    登場人物・要素
+                </button>
+                <button onclick="switchView('keywords')" id="nav-keywords" class="nav-btn px-4 py-2 text-sm font-bold rounded-full transition-colors whitespace-nowrap bg-gray-100 text-gray-600 hover:bg-theme-accent hover:text-white">
+                    キーワード
+                </button>
+                <button onclick="switchView('read')" id="nav-read" class="nav-btn px-4 py-2 text-sm font-bold rounded-full transition-colors whitespace-nowrap bg-theme-accent text-white shadow-md">
+                    本文を読む
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 
+    ========================================================================
+    メインコンテンツエリア
+    JavaScriptで表示/非表示を切り替えます
+    ========================================================================
+    -->
+    <main class="flex-grow max-w-3xl mx-auto w-full px-5 py-8 pb-32">
+        
+        <!-- ビュー1: 大まかな内容 (Overview) -->
+        <section id="view-overview" class="view-section hidden space-y-6">
+            <h2 class="text-2xl font-bold border-l-4 border-theme-accent pl-4 mb-6">作品構成と要約</h2>
+            <div id="overview-container" class="space-y-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー2: 登場人物・要素 (Characters) -->
+        <section id="view-characters" class="view-section hidden space-y-6">
+            <h2 class="text-2xl font-bold border-l-4 border-theme-accent pl-4 mb-6">登場人物・要素分析</h2>
+            <div id="characters-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー3: キーワード (Keywords) -->
+        <section id="view-keywords" class="view-section hidden space-y-6">
+            <h2 class="text-2xl font-bold border-l-4 border-theme-accent pl-4 mb-6">重要なキーワード・象徴</h2>
+            <div class="bg-yellow-50 p-4 rounded-lg text-sm text-yellow-800 mb-4">
+                <i class="mr-1">💡</i> キーワードをタップすると文脈解説が表示されます
+            </div>
+            <div id="keywords-container" class="space-y-3">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー4: 本文を読む (Read Text) -->
+        <section id="view-read" class="view-section">
+            <div class="flex justify-between items-end mb-8 border-b pb-4">
+                <h2 class="text-3xl font-serif font-bold text-gray-900">本文</h2>
+                <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">自動しおり機能ON</span>
+            </div>
+            
+            <!-- 本文コンテナ -->
+            <article id="text-body" class="font-serif text-lg md:text-xl leading-loose text-gray-800 tracking-wide text-justify">
+                <!-- JSで生成 -->
+            </article>
+
+            <!-- 読了メッセージエリア -->
+            <div class="mt-16 p-8 text-center bg-gray-50 rounded-xl">
+                <p class="text-gray-500 mb-4">読了おつかれさまでした</p>
+                <div class="flex justify-center gap-4">
+                    <button onclick="switchView('overview')" class="px-6 py-2 border border-gray-300 rounded-full text-sm hover:bg-gray-100">構成を確認する</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 
+    ========================================================================
+    解説表示用フローティングパネル (Sticky Bottom)
+    本文中の語句タップ時に表示
+    ========================================================================
+    -->
+    <div id="annotation-box" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] transform translate-y-full transition-transform duration-300 z-40 p-4 md:px-8">
+        <div class="max-w-4xl mx-auto flex items-start justify-between gap-4">
+            <div>
+                <div class="flex items-baseline gap-3 mb-1">
+                    <h3 id="anno-term" class="text-lg font-bold text-theme-accent"></h3>
+                    <span id="anno-reading" class="text-xs text-gray-400"></span>
+                </div>
+                <p id="anno-desc" class="text-sm md:text-base text-gray-700 leading-relaxed"></p>
+            </div>
+            <button onclick="closeAnnotation()" class="text-gray-400 hover:text-gray-600 p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 
+    ========================================================================
+    フッター
+    ========================================================================
+    -->
+    <footer class="bg-gray-100 py-6 text-center text-xs text-gray-400 mt-auto">
+        <p>&copy; Interactive Literature Reader</p>
+    </footer>
+
+    <!-- 
+    ========================================================================
+    JavaScript ロジック
+    ========================================================================
+    -->
+    <script>
+        /**
+         * 1. 作品データ（本文、解説、注釈）を入力・編集する場所
+         * 以下の定数 BOOK_DATA を修正することで、コンテンツ全体を差し替え可能です。
+         */
+        const BOOK_DATA = {
+            title: "立ってくる春",
+            author: "川上 弘美",
+            
+            // 本文データ（段落ごとの配列）
+            paragraphs: [
+                "「もう春ですよ、ひろみちゃん。」と祖母に言われ、驚いた。",
+                "昭和半ばの東京、二月初旬。一昨日は雪が降った。出したばかりの十一月ごろには重いと思っていた布団のその重さが嬉しく、いつまでも朝は布団から出られなかった。つまさきを、もう暖かくないゆたんぽを包むネルの布に、ぐずぐずとくっつけていた。",
+                "ようやく布団から出て、長袖のシャツを着て、ブラウスを着て、セーターを着ても、ちっとも暖かくならない。木造の家は隙間だらけで、このごろの気密性のある家のように、窓に結露を見ることもない。外と中の温度がさほど変わらないので、結露しないのである。吐く息が白い。顔を洗いながら、外国のお姫さまはきっと毎日お湯で洗顔してるんだろうなあ、などと考える。",
+                "私は、日本の小学生で、タイツの膝にはつぎが当たっていて（ひどく貧しいから、というのではない、あのころはストッキングだっていちいち伝線をかがっていたものだった）、指先にはしもやけがあって、宝物は箱根みやげの千代紙貼りの入れ子の箱とタミー人形（着せ替え用の服は高価なので、母が見よう見まねで二着ほど縫ってくれた）、というごく普通の子どもだった。",
+                "「今日から春ですよ。」もう一度、祖母が言った。",
+                "「でもまだ冬なのに。」私は口をとがらして答えた。霜柱はつんつん立っていたし、その朝も水道管が凍った。あおあおとしているのはつわぶきの葉とアオキばかりで、楓も欅も桜も柿もすっかり葉を落としてしんとしていた。寒暖計の赤は下の方にわだかまり、ぜんぜん上がってこない。",
+                "「でも、暦の上では、ほら。立春ですよ。」",
+                "「りっしゅん。」",
+                "「春が立つ、春になるっていうことですよ。」",
+                "祖母の部屋には日めくりの暦が下げてあった。暦には、二月四日、木曜、立春、の字が並んでいた。",
+                "「春って、立つの。」",
+                "「立ちますよ。」そう言って、祖母は真面目に頷いた。以来私は、春は立つものだと思うようになったのである。",
+                "立つ春とは、どんなものなのだろう。学校へのみちみち、考えた。",
+                "人間のかたちをしたものでは、なかろう。空気のようなものか。でも空気は目に見えない。「立つ」と感じるからには、目に見えなくては。本の中にある竜や鬼や妖怪に似た、この世のものではない生き物のかたちをしたものか。それも違う、春はもっと柔らかでのほほんとしているから、火を吐いたり金棒をふるったりするものたちの類いではあるまい。春とは、こまかな生気あるものに満ちた、盛り上がるようなものだ。それならば。",
+                "歩きながら、晴れた冷たい空気の中に見える遠い富士を眺めつつ、私は「立ってくる春」のかたちを、決めた。",
+                "立ってくる春とは、さまざまな小さい生き物でみっしり埋めつくされた一枚の絵のようなものにちがいない。その春が、地平線の向こうにゆっくり上がってくる。最初のころは端っこだけしか地平線近くに見えていないが、太陽がのぼるように、日々次第に高くのぼってゆく。そして四月ともなれば、すっかり全天を覆うようになるのである。",
+                "これだけのことを決め、ようやく私は満足した。よしよし。謎は解けた。なるほど春は立つものであろう。まだあんまり見えないけれど、たしかに、今日、ずっと向こうのあの山のあたりに、春が立った。うんうん。",
+                "勝手に解かれてしまった「春が立つ」謎は、今にいたるまで、じつは私の中に居つづけている。現在も、立春という言葉を聞くと、反射的に、水平線からゆっくりと立ち上がってくる靄のような絵を思い浮かべるのである。",
+                "まだまだ寒い、しかしじきに、春である。"
+            ],
+
+            // 1. 大まかな内容（Structure/Overview）
+            structure: [
+                {
+                    title: "冬の朝と祖母の言葉",
+                    summary: "寒い2月初旬の朝、祖母に「もう春だ」と告げられ、主人公は驚きとともに違和感を覚える。",
+                    tags: ["日常", "冬の寒さ", "対話"],
+                    details: "時代背景は昭和半ば。木造家屋の寒さや湯たんぽ、しもやけといった描写から、当時の生活感が色濃く描かれている。"
+                },
+                {
+                    title: "立春の謎",
+                    summary: "「春が立つ」という言葉の意味を、子供ながらの感性で真剣に考察し始める。",
+                    tags: ["立春", "言葉遊び", "想像"],
+                    details: "祖母の「暦の上では」という言葉に対し、主人公は「立つ」という動詞にこだわり、その視覚的なイメージを模索する。"
+                },
+                {
+                    title: "春の正体の発見",
+                    summary: "登校中、春とは「小さな生き物で埋め尽くされた絵」が地平線から上がってくるものだと結論づける。",
+                    tags: ["解決", "心象風景", "納得"],
+                    details: "「太陽がのぼるように」春が立ち上がってくるという、主人公独自の詩的でダイナミックな世界観が完成する。"
+                },
+                {
+                    title: "現在の視点",
+                    summary: "大人になった現在も、その時に抱いた「春が立つ」イメージを持ち続けている。",
+                    tags: ["回想", "継続", "結び"],
+                    details: "子供時代の空想が、大人になってからの感覚にも影響を与え続けていることを示し、物語を締めくくる。"
+                }
+            ],
+
+            // 2. 登場人物・要素分析（Characters）
+            characters: [
+                {
+                    name: "私（ひろみちゃん）",
+                    role: "主人公・語り手",
+                    desc: "昭和半ばの普通の小学生。感受性が豊かで、大人の言葉を文字通り受け取り、独自の論理で世界を解釈しようとする。",
+                    quote: "「でもまだ冬なのに。」",
+                    evolution: "言葉への疑問から出発し、独自の「春」のイメージを構築することで納得（成長）を得る。"
+                },
+                {
+                    name: "祖母",
+                    role: "導き手",
+                    desc: "主人公に「暦の上の事実」を伝える存在。真面目な性格で、子供の疑問にも真剣に向き合う。",
+                    quote: "「春が立つ、春になるっていうことですよ。」",
+                    evolution: "昔ながらの季節感を大切にしており、寒さの中でも春の到来を確信している。"
+                }
+            ],
+
+            // 3. 重要なキーワード・象徴（Keywords）
+            // 注: ここの `term` が本文中で自動的にハイライトされます
+            keywords: [
+                {
+                    term: "立春",
+                    reading: "りっしゅん",
+                    meaning: "二十四節気の一つ。暦の上で春が始まるとされる日（2月4日頃）。",
+                    context: "本作の核心的なテーマ。寒さが厳しい時期にあるため、体感とのズレが主人公の思索のきっかけとなる。"
+                },
+                {
+                    term: "霜柱",
+                    reading: "しもばしら",
+                    meaning: "地中の水分が凍って地表に柱状に現れた氷。",
+                    context: "現実の「冬の寒さ」を象徴する具体的要素として描かれ、「立つ」というイメージの対比にもなっている。"
+                },
+                {
+                    term: "寒暖計",
+                    reading: "かんだんけい",
+                    meaning: "温度計のこと。",
+                    context: "「赤は下の方にわだかまり」という表現で、気温の低さと、春の気配のなさを視覚的に強調している。"
+                },
+                {
+                    term: "暦",
+                    reading: "こよみ",
+                    meaning: "カレンダー。時の流れや季節を記したもの。",
+                    context: "自然の感覚とは異なる「社会的な時間」や「決まり」の象徴。祖母の世界（大人の理屈）を代表するもの。"
+                },
+                {
+                    term: "ゆたんぽ",
+                    reading: "ゆたんぽ",
+                    meaning: "お湯を入れて暖を取る道具。",
+                    context: "昭和の冬の生活感を出す重要な小道具。「もう暖かくない」ことで朝の時間経過と寒さを演出している。"
+                },
+                {
+                    term: "ネル",
+                    reading: "ねる",
+                    meaning: "フランネルの略。柔らかく起毛した綿織物。",
+                    context: "肌触りの描写を通じて、布団の中の心地よさと外気の寒さのコントラストを描いている。"
+                },
+                {
+                    term: "気密性",
+                    reading: "きみつせい",
+                    meaning: "空気の出入りを防ぐ性能。",
+                    context: "現代の家との比較として用いられ、当時の木造家屋がいかに寒かったか（外と中が変わらない）を説明している。"
+                },
+                {
+                    term: "つわぶき",
+                    reading: "つわぶき",
+                    meaning: "キク科の常緑多年草。冬でも緑の葉を保つ。",
+                    context: "冬枯れの中で数少ない「生」を感じさせる植物として描かれている。"
+                },
+                {
+                    term: "鬼",
+                    reading: "おに",
+                    meaning: "日本の伝承における架空の怪物。",
+                    context: "主人公が「春」を生き物として想像する際、否定的な例（怖いもの）として挙げられている。"
+                },
+                {
+                    term: "富士",
+                    reading: "ふじ",
+                    meaning: "日本一高い山。",
+                    context: "冬の澄んだ空気感を強調する背景。「遠い富士」を見る視点が、思考の広がりを暗示している。"
+                },
+                {
+                    term: "結露",
+                    reading: "けつろ",
+                    meaning: "暖かい空気が冷たい物に触れて、水分が水滴となる現象。",
+                    context: "当時の家屋は隙間が多く、外気と室温の差が小さかったため発生しなかった。家の寒さを逆説的に強調している。"
+                },
+                {
+                    term: "楓",
+                    reading: "かえで",
+                    meaning: "カエデ科の落葉高木。秋に紅葉し、冬には葉を落とす。",
+                    context: "冬の景色として登場。「すっかり葉を落として」いることで、春の生命力がまだ目に見えない静けさを表している。"
+                },
+                {
+                    term: "欅",
+                    reading: "けやき",
+                    meaning: "ニレ科の落葉高木。街路樹や公園樹として一般的。",
+                    context: "楓と同様、冬枯れの風景の一部。寒々とした景色の描写により、主人公が感じる「まだ冬」という感覚を補強する。"
+                },
+                {
+                    term: "靄",
+                    reading: "もや",
+                    meaning: "大気中に浮かぶ微小な水滴により、遠くがかすんで見える現象。",
+                    context: "主人公が心の中で描いた「立ってくる春」のイメージ。形が定まらず、ゆっくりと立ち上る気配のようなものを表現している。"
+                }
+            ]
+        };
+
+        // DOM要素の取得
+        const headerTitle = document.getElementById('header-title');
+        const headerAuthor = document.getElementById('header-author');
+        const textBodyEl = document.getElementById('text-body');
+        const annoBox = document.getElementById('annotation-box');
+        
+        // 状態管理
+        let currentView = 'read'; // 初期ビューは「本文」に設定（要件に合わせて変更可）
+        
+        /**
+         * 初期化処理
+         */
+        function init() {
+            // ヘッダー情報設定
+            headerTitle.textContent = BOOK_DATA.title;
+            headerAuthor.textContent = `作：${BOOK_DATA.author}`;
+
+            // コンテンツのレンダリング
+            renderOverview();
+            renderCharacters();
+            renderKeywords();
+            renderTextBody();
+
+            // 読書位置の復元（初期ロード時）
+            restoreScrollPosition();
+
+            // 初期ビューの表示
+            switchView('read', true); // 初回はアニメーションなし
+        }
+
+        /**
+         * ビュー切り替え関数
+         * @param {string} viewId - 切り替え先のビューID ('overview', 'characters', etc.)
+         * @param {boolean} isInitial - 初期ロードかどうか
+         */
+        function switchView(viewId, isInitial = false) {
+            // 現在が「Read」ビューだった場合、スクロール位置を保存する
+            if (currentView === 'read' && viewId !== 'read') {
+                saveScrollPosition();
+            }
+
+            // ナビゲーションボタンのスタイル更新
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isActive = btn.id === `nav-${viewId}`;
+                btn.className = isActive 
+                    ? 'nav-btn px-4 py-2 text-sm font-bold rounded-full transition-colors whitespace-nowrap bg-theme-accent text-white shadow-md'
+                    : 'nav-btn px-4 py-2 text-sm font-bold rounded-full transition-colors whitespace-nowrap bg-gray-100 text-gray-600 hover:bg-theme-accent hover:text-white';
+            });
+
+            // セクションの表示切り替え（物理遷移なし）
+            document.querySelectorAll('.view-section').forEach(section => {
+                if (section.id === `view-${viewId}`) {
+                    section.classList.remove('hidden');
+                    // アニメーション用に少し遅らせてopacityなどをいじりたい場合はここに記述
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+
+            // 解説ボックスが開いていたら閉じる
+            closeAnnotation();
+
+            currentView = viewId;
+
+            // 「Read」ビューに戻ってきた場合、スクロール位置を復元
+            if (viewId === 'read' && !isInitial) {
+                restoreScrollPosition();
+            } else if (viewId !== 'read') {
+                // 他のビューはトップにスクロール
+                window.scrollTo(0, 0);
+            }
+        }
+
+        /**
+         * 2. 「読書位置の記憶」を行っているロジック部分
+         * LocalStorageを使用してスクロール位置を永続化します。
+         */
+        const STORAGE_KEY = `scroll_pos_${BOOK_DATA.title}`;
+
+        function saveScrollPosition() {
+            const scrollY = window.scrollY;
+            localStorage.setItem(STORAGE_KEY, scrollY);
+            console.log('Saved Position:', scrollY);
+        }
+
+        function restoreScrollPosition() {
+            const savedY = localStorage.getItem(STORAGE_KEY);
+            if (savedY) {
+                // DOM描画のタイミングを考慮してわずかに遅延
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: parseInt(savedY, 10),
+                        behavior: 'auto' // ユーザー体験のため即座に移動
+                    });
+                }, 10);
+            }
+        }
+
+        // ページを閉じる/リロードする直前にも保存
+        window.addEventListener('beforeunload', () => {
+            if (currentView === 'read') {
+                saveScrollPosition();
+            }
+        });
+
+
+        /**
+         * レンダリング: 大まかな内容
+         */
+        function renderOverview() {
+            const container = document.getElementById('overview-container');
+            container.innerHTML = BOOK_DATA.structure.map((item, index) => `
+                <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer" onclick="toggleAccordion('over-${index}')">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-lg text-gray-800"><span class="text-theme-accent mr-2">Scene ${index + 1}</span>${item.title}</h3>
+                        <span class="text-gray-400 text-xl transform transition-transform" id="icon-over-${index}">+</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">${item.summary}</p>
+                    <div class="flex flex-wrap gap-2 mb-2">
+                        ${item.tags.map(tag => `<span class="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded">${tag}</span>`).join('')}
+                    </div>
+                    
+                    <!-- アコーディオン詳細 -->
+                    <div id="over-${index}" class="accordion-content">
+                        <div class="pt-3 mt-3 border-t border-gray-100 text-sm text-gray-700 leading-relaxed bg-gray-50 p-3 rounded">
+                            <strong>詳細解説:</strong><br>
+                            ${item.details}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * レンダリング: 登場人物
+         */
+        function renderCharacters() {
+            const container = document.getElementById('characters-container');
+            container.innerHTML = BOOK_DATA.characters.map((char, index) => `
+                <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-gray-300 hover:border-theme-accent transition-colors cursor-pointer" onclick="toggleAccordion('char-${index}')">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-lg">${char.name}</h3>
+                            <p class="text-xs text-gray-500">${char.role}</p>
+                        </div>
+                        <span class="text-gray-400 transform transition-transform" id="icon-char-${index}">▼</span>
+                    </div>
+                    
+                    <div id="char-${index}" class="accordion-content">
+                        <div class="mt-4 space-y-3 text-sm">
+                            <p class="text-gray-700">${char.desc}</p>
+                            <div class="bg-gray-50 p-3 rounded italic text-gray-600 border-l-2 border-gray-400">
+                                "${char.quote}"
+                            </div>
+                            <div>
+                                <strong class="text-theme-accent">変化・特徴:</strong>
+                                <p class="text-gray-600">${char.evolution}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * レンダリング: キーワード
+         */
+        function renderKeywords() {
+            const container = document.getElementById('keywords-container');
+            container.innerHTML = BOOK_DATA.keywords.map((kw, index) => `
+                <div class="bg-white px-4 py-3 rounded border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors" onclick="toggleAccordion('kw-${index}')">
+                    <div class="flex items-baseline gap-3">
+                        <span class="font-bold text-theme-accent text-lg">${kw.term}</span>
+                        <span class="text-xs text-gray-400">${kw.reading}</span>
+                    </div>
+                    
+                    <div id="kw-${index}" class="accordion-content">
+                        <div class="mt-2 pt-2 border-t border-dashed border-gray-200 text-sm">
+                            <p class="mb-2"><strong>意味:</strong> ${kw.meaning}</p>
+                            <p class="text-gray-600 bg-gray-50 p-2 rounded"><strong>文脈:</strong> ${kw.context}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * レンダリング: 本文（自動ハイライト付き）
+         */
+        function renderTextBody() {
+            // キーワードを長い順にソートするが、元のインデックスを保持しておく
+            // これにより、クリック時に正しいデータを参照できるようにする
+            const sortedKeywords = BOOK_DATA.keywords
+                .map((kw, index) => ({ term: kw.term, originalIndex: index }))
+                .sort((a, b) => b.term.length - a.term.length);
+
+            const htmlContent = BOOK_DATA.paragraphs.map(paragraph => {
+                let processedText = paragraph;
+                
+                // 各キーワードをスキャンしてハイライトタグで囲む
+                sortedKeywords.forEach((kw) => {
+                    // 単純な置換だと既に置換されたHTMLタグの中身まで壊す可能性があるため、
+                    // 本番環境ではより堅牢なパーサー推奨だが、ここでは簡易的に実装
+                    const regex = new RegExp(`(${kw.term})`, 'g');
+                    // showAnnotationには元の配列(BOOK_DATA.keywords)のインデックス(originalIndex)を渡す
+                    processedText = processedText.replace(regex, `<span class="text-highlight" onclick="showAnnotation(${kw.originalIndex}, event)">$1</span>`);
+                });
+
+                return `<p class="mb-6">${processedText}</p>`;
+            }).join('');
+
+            textBodyEl.innerHTML = htmlContent;
+        }
+
+        /**
+         * UIロジック: アコーディオン開閉
+         */
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(`icon-${id}`);
+            const isOpen = content.style.maxHeight;
+
+            // 他のすべてを閉じる動作を入れる場合はここに記述（今回は複数展開可とする）
+
+            if (isOpen) {
+                content.style.maxHeight = null;
+                content.classList.remove('open');
+                if(icon) icon.style.transform = 'rotate(0deg)';
+                if(icon && icon.innerText === '-') icon.innerText = '+';
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+                content.classList.add('open');
+                if(icon) icon.style.transform = 'rotate(180deg)';
+                if(icon && icon.innerText === '+') icon.innerText = '-';
+            }
+        }
+
+        /**
+         * UIロジック: 注釈表示 (Footer Overlay)
+         */
+        function showAnnotation(keywordIndex, event) {
+            event.stopPropagation(); // 親要素へのバブリング防止
+            
+            // 全ハイライトのアクティブ状態解除
+            document.querySelectorAll('.text-highlight').forEach(el => el.classList.remove('active'));
+            // クリックされた要素をアクティブに
+            event.target.classList.add('active');
+
+            const data = BOOK_DATA.keywords[keywordIndex];
+            
+            // データセット
+            document.getElementById('anno-term').textContent = data.term;
+            document.getElementById('anno-reading').textContent = data.reading;
+            document.getElementById('anno-desc').innerHTML = `
+                <span class="font-bold block mb-1">意味: ${data.meaning}</span>
+                <span class="block text-gray-500 text-xs">文脈・解説: ${data.context}</span>
+            `;
+
+            // 表示アニメーション
+            annoBox.classList.remove('translate-y-full');
+        }
+
+        function closeAnnotation() {
+            annoBox.classList.add('translate-y-full');
+            document.querySelectorAll('.text-highlight').forEach(el => el.classList.remove('active'));
+        }
+
+        // 本文以外をクリックしたら注釈を閉じる
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#annotation-box') && !e.target.classList.contains('text-highlight')) {
+                closeAnnotation();
+            }
+        });
+
+        // アプリ起動
+        init();
+
+    </script>
+</body>
+</html>
