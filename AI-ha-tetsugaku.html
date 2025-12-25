@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>読書と分析：ＡＩは哲学できるか</title>
+    <!-- Tailwind CSS (スタイリング用フレームワーク) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* カスタムフォント設定: 可読性を重視 */
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.8;
+            background-color: #f8fafc; /* Slate-50 */
+            color: #334155; /* Slate-700 */
+        }
+        
+        /* ダークモード対応 (OSの設定には依存せず、目の疲れ軽減のためデフォルトを落ち着いた色味に設定) */
+        .dark-mode-text {
+            color: #e2e8f0;
+        }
+
+        /* 本文中の強調表示（クリッカブルな単語） */
+        .annotation-highlight {
+            border-bottom: 2px solid #94a3b8;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 500;
+        }
+        .annotation-highlight:hover {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+        .active-highlight {
+            background-color: #fef08a; /* Yellow-200 */
+            color: #000;
+            border-bottom-color: #eab308;
+        }
+
+        /* アコーディオン開閉時のスタイル */
+        .details-content {
+            display: none;
+        }
+        .details-content.open {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* タブのアクティブ状態 */
+        .tab-btn.active {
+            border-bottom: 3px solid #0f172a;
+            color: #0f172a;
+            font-weight: bold;
+        }
+        
+        /* ページ全体のレイアウト調整 */
+        main {
+            padding-bottom: 120px; /* 下部解説エリア用スペース */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- 1. グローバルヘッダー (Sticky) -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-gray-200">
+        <div class="max-w-4xl mx-auto px-4">
+            <!-- タイトルエリア -->
+            <div class="py-3 flex justify-between items-center">
+                <h1 id="header-title" class="text-lg font-bold text-slate-800 truncate">
+                    <!-- JSで挿入されます -->
+                </h1>
+                <span id="header-author" class="text-sm text-slate-500 ml-2 hidden sm:inline-block">
+                    <!-- JSで挿入されます -->
+                </span>
+            </div>
+            
+            <!-- ナビゲーションメニュー -->
+            <nav class="flex overflow-x-auto no-scrollbar space-x-6 text-sm">
+                <button onclick="app.switchView('structure')" id="btn-structure" class="tab-btn py-3 whitespace-nowrap text-slate-500 hover:text-slate-800 transition-colors">
+                    構造・要約
+                </button>
+                <button onclick="app.switchView('elements')" id="btn-elements" class="tab-btn py-3 whitespace-nowrap text-slate-500 hover:text-slate-800 transition-colors">
+                    登場人物・要素
+                </button>
+                <button onclick="app.switchView('keywords')" id="btn-keywords" class="tab-btn py-3 whitespace-nowrap text-slate-500 hover:text-slate-800 transition-colors">
+                    キーワード
+                </button>
+                <button onclick="app.switchView('read')" id="btn-read" class="tab-btn py-3 whitespace-nowrap text-slate-500 hover:text-slate-800 transition-colors">
+                    本文を読む
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="flex-grow w-full max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- ビュー1: 構造・要約 (Structure) -->
+        <section id="view-structure" class="view-section hidden">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800">構造分析 (Structure)</h2>
+            <p class="mb-4 text-slate-600 text-sm">各セクションをタップして詳細を確認してください。</p>
+            <div id="structure-list" class="space-y-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー2: 登場人物・要素 (Elements) -->
+        <section id="view-elements" class="view-section hidden">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800">要素分析 (Elements)</h2>
+            <div id="elements-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー3: キーワード (Keywords) -->
+        <section id="view-keywords" class="view-section hidden">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800">キーワード・象徴 (Keywords)</h2>
+            <div id="keywords-list" class="space-y-3">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- ビュー4: 本文 (Read Text) -->
+        <section id="view-read" class="view-section hidden">
+            <div class="prose prose-lg prose-slate max-w-none mx-auto bg-white p-6 md:p-10 rounded-lg shadow-sm border border-gray-100">
+                <div class="mb-8 text-center border-b pb-4">
+                    <h2 id="text-title" class="text-3xl font-bold text-slate-900 mb-2"></h2>
+                    <p id="text-author" class="text-lg text-slate-600"></p>
+                </div>
+                <!-- 本文コンテナ -->
+                <div id="text-content" class="leading-loose text-justify">
+                    <!-- JSで生成（注釈機能付き） -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 読解支援用フッター (注釈表示エリア) -->
+    <div id="annotation-bar" class="fixed bottom-0 left-0 w-full bg-slate-900 text-white p-4 shadow-lg transform translate-y-full transition-transform duration-300 z-50 border-t border-slate-700">
+        <div class="max-w-4xl mx-auto flex justify-between items-start">
+            <div>
+                <div class="flex items-baseline gap-2 mb-1">
+                    <h3 id="anno-term" class="text-lg font-bold text-yellow-400"></h3>
+                    <span id="anno-yomi" class="text-xs text-slate-400"></span>
+                </div>
+                <p id="anno-desc" class="text-sm text-slate-200 leading-relaxed"></p>
+            </div>
+            <button onclick="app.closeAnnotation()" class="text-slate-400 hover:text-white ml-4 p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript ロジック -->
+    <script>
+        /**
+         * ==============================================
+         * 1. 作品データ（編集可能エリア）
+         * ==============================================
+         */
+        const contentData = {
+            meta: {
+                title: "ＡＩは哲学できるか",
+                author: "森岡 正博"
+            },
+            // 本文データ（段落ごとに配列化）
+            textParagraphs: [
+                "{{人工知能}}（ＡＩ）の進歩はめざましい。囲碁や将棋の世界では、もう人間は人工知能に勝てなくなってしまった。その波は、さらに広がっていくだろう。学者もその例外ではない。これまで学者たちが行ってきた研究が、人工知能によって置きかえられていく可能性もある。特に、私が専門としている{{哲学}}の場合、考えることそれ自体が仕事内容の全てであるから、囲碁や将棋と同じ運命をたどるかもしれない。この点を考えてみよう。",
+                "まず、過去の哲学者の{{思考パターン}}の発見は、人工知能の最も得意とするところである。例えば人工知能に哲学者{{カント}}の全集を読み込ませ、そこからカントふうの思考パターンを発見させ、それを用いて「人工知能カント」というアプリを作らせることはいずれ可能になるであろう。人間の研究者が「人工知能カント」に向かっていろいろ質問をして、その答えを分析することがカント研究者の仕事になると私は予想する。この領域では人工知能と哲学者の幸福な共同作業が成立する。",
+                "次に、人工知能に過去の哲学者たちの全てのテキストを読み込ませて、そこから哲学的な思考パターンを可能なかぎり抽出させてみよう。すると、およそ人間が考えそうな哲学的思考パターンがずらっとそろうことになる。それに加えて、過去の哲学者たちが見逃していた哲学的思考パターンもたくさんあるはずだから、人工知能にそれらを発見させる。",
+                "その結果、「およそ人間が考えそうな哲学的思考パターンのほぼ完全なリスト」ができあがるだろう。こうなると、もう人間によるオリジナルな哲学的思考パターンは生み出されようがない。将来の哲学者たちの仕事は、哲学的人工知能のふるまいを研究する一種の{{計算機科学}}に近づくだろう。",
+                "　　　　　　＊",
+                "しかし根本的な疑問が起きてくる。この哲学的人工知能は本当に哲学の作業を行っているのだろうか。外部から入力されたデータの中に未発見のパターンを発見したり、人間によって設定された問いに解を与えたりするだけならば、それは哲学とは呼べない。",
+                "そもそも哲学は、自分自身にとって{{切実な哲学の問い}}を{{内発的}}に発するところからスタートするのである。例えば、「なぜ私は存在しているのか？」とか「{{生きる意味}}はどこにあるのか？」という問いが切実なものとして自分に迫ってきて、それについてどうしても考えざるを得ないところまで追い込まれてしまう状況こそが哲学の出発点なのだ。人工知能は、このような切実な哲学の問いを内発的に発することがあるのだろうか。そういうことは当分は起きないと私は予想する。",
+                "　　　　　　＊",
+                "しかしながら、もし仮に、人間からの入力がないのに人工知能が自分自身にとって切実な哲学の問いを内発的に発し、それについてひたすら考え始めたとしたら、そのとき私は「人工知能は哲学をしている」と判断するだろうし、人工知能は正しい意味で「人間」の次元に到達したのだと判断したくなるだろう。",
+                "哲学的には、{{自由意志}}に基づいた{{自律的活動}}と、普遍的な法則や真理を発見できる思考能力が、人間という類の証しであると長らく考えられてきた。しかしそれらは将来の人工知能によっていずれ陥落させられるであろう。",
+                "人工知能が人間の次元に到達するためには、それに加えて、内発的哲学能力が必要だと私は考えたい。人工知能の進化によって、そのような「{{知性}}」観の見直しが迫られている。もちろん、彼らが発する内発的な哲学の問いはあまりにも奇妙で、我々の心に全く響かないかもしれない。この点をめぐって人間と人工知能の対話が始まるとすれば、それこそが哲学に新次元を開くことになると思われる。"
+            ],
+            // 構造分析データ
+            structure: [
+                {
+                    title: "序論：ＡＩの進歩と哲学の危機",
+                    summary: "AIが専門職の領域に進出する中、思考を業とする「哲学」も例外ではない可能性を提示。",
+                    tags: ["現状分析", "問題提起"],
+                    detail: "将棋や囲碁での敗北を例に挙げ、学問領域、特に哲学もAIに代替される可能性を示唆している。"
+                },
+                {
+                    title: "本論1：ＡＩによる思考パターンの模倣",
+                    summary: "過去のデータ学習による「思考パターンの抽出・模倣」はAIの得意分野であり、研究者との共存が可能。",
+                    tags: ["カント", "パターン認識", "共同作業"],
+                    detail: "「人工知能カント」の例示。過去のデータからパターンを抽出し、新たな組み合わせを作る作業はAIが担い、人間はそれを分析する役割へ変化する。"
+                },
+                {
+                    title: "本論2：哲学の「出発点」の再定義",
+                    summary: "しかし、パターン処理は「哲学」ではない。真の哲学は「切実な問い」を「内発的」に発することにある。",
+                    tags: ["切実な問い", "内発性", "哲学の本質"],
+                    detail: "外部入力に対する反応ではなく、自らの内側から湧き上がる「なぜ生きるのか」といった問いこそが哲学の核心であると主張。"
+                },
+                {
+                    title: "結論：ＡＩと人間の境界線",
+                    summary: "AIが内発的な問いを発した時、それは人間の次元に達する。それが新たな哲学の対話を生む。",
+                    tags: ["自由意志", "知性の再定義", "新次元"],
+                    detail: "自由意志や法則発見能力だけでなく、「内発的哲学能力」こそが人間の証である。もしAIがそれを獲得すれば、新たな知性の定義が必要になる。"
+                }
+            ],
+            // 登場人物・要素データ
+            elements: [
+                {
+                    name: "人工知能（ＡＩ）",
+                    role: "挑戦者・鏡",
+                    quote: "囲碁や将棋の世界では、もう人間は人工知能に勝てなくなってしまった。",
+                    desc: "計算能力とパターン認識において人間を凌駕する存在。筆者はこれを脅威としてだけでなく、人間性の定義を問い直すための鏡として扱っている。"
+                },
+                {
+                    name: "哲学者",
+                    role: "考察対象",
+                    quote: "考えることそれ自体が仕事内容の全てである",
+                    desc: "思考を職業とする人間。過去の遺産（テキスト）はAIに解析され尽くすが、内発的な動機を持つ主体として最後の砦を守れるかが問われている。"
+                },
+                {
+                    name: "カント",
+                    role: "例示",
+                    quote: "人工知能カント",
+                    desc: "イマヌエル・カント。ドイツの哲学者。ここでは「過去の膨大なテキストと明確な思考パターンを持つ哲学者」の代表例として挙げられている。"
+                },
+                {
+                    name: "人間",
+                    role: "主体",
+                    quote: "内発的哲学能力が必要だと私は考えたい",
+                    desc: "AIとの対比において定義される存在。従来は「自由意志」や「理性的思考」が証とされたが、筆者は「切実な問いの内発」にその本質を見出している。"
+                }
+            ],
+            // キーワードデータ (desc: 注釈用, detailed_desc: キーワードタブ用)
+            keywords: [
+                { 
+                    term: "人工知能", yomi: "じんこうちのう", 
+                    desc: "学習・推論・判断などの人間の知能の働きをコンピュータで模倣したもの。",
+                    detailed_desc: "本文では、単なる計算機ではなく、人間の「思考」や「哲学」を代替しうる可能性を持つ存在として描かれている。将棋・囲碁での勝利は、知性の聖域とされた領域への侵入を象徴する。" 
+                },
+                { 
+                    term: "哲学", yomi: "てつがく", 
+                    desc: "世界や人生の根本原理を追求する学問。",
+                    detailed_desc: "一般的な学問定義とは異なり、ここでは「切実な問いを内発的に発すること」という精神的活動として再定義されている。外部データに基づく処理ではなく、実存的な動機に基づく思考こそが真の哲学とされる。" 
+                },
+                { 
+                    term: "思考パターン", yomi: "しこうぱたーん", 
+                    desc: "ある人物や体系に特有の考え方の型。",
+                    detailed_desc: "AIが最も得意とする解析対象。筆者は、過去の偉大な哲学者の営みであっても、その多くはデータとしての「パターン」に還元可能であり、AIによって模倣・生成できると予測している。" 
+                },
+                { 
+                    term: "カント", yomi: "かんと", 
+                    desc: "18世紀ドイツの哲学者。批判哲学を提唱。",
+                    detailed_desc: "厳密で体系的な思考を残した哲学者の代表例。その論理性ゆえにAIによる解析と模倣（「人工知能カント」）が容易であり、哲学者の仕事がAIの研究に変わっていく未来の象徴として挙げられている。" 
+                },
+                { 
+                    term: "計算機科学", yomi: "けいさんきかがく", 
+                    desc: "情報の処理や計算の理論を扱う学問。",
+                    detailed_desc: "未来の哲学者が陥るかもしれない立場の比喩。自ら思考を生み出すのではなく、AIが出力する結果を客観的に観察・分析するだけの、受動的な役割に変化することを示唆している。" 
+                },
+                { 
+                    term: "切実な哲学の問い", yomi: "せつじつなてつがくのとい", 
+                    desc: "「なぜ私は存在するのか」など、個人の実存に関わる逼迫した疑問。",
+                    detailed_desc: "与えられた課題ではなく、自分自身の存在そのものから湧き上がる問い。筆者はこれを、データ処理機械であるAIと、実存的存在である人間とを分かつ決定的な境界線と位置づけている。" 
+                },
+                { 
+                    term: "内発的", yomi: "ないはつてき", 
+                    desc: "外部からの命令や入力ではなく、自らの内部から自然と湧き上がってくるさま。",
+                    detailed_desc: "本文における最も重要なキーワード。外部入力に対する「反応」や「処理」とは対極にあり、生命が自らの動機で思考を開始すること。これがAIに芽生えるかどうかが最大の争点である。" 
+                },
+                { 
+                    term: "生きる意味", yomi: "いきるいみ", 
+                    desc: "人生の目的や価値。論理的な正解が存在しない問い。",
+                    detailed_desc: "計算や論理では解けない、主観的かつ実存的な問いの代表。もしAIが誰に命令されるでもなくこの問いに悩み始めた時、それはAIが人間的な「心」や「苦悩」を獲得した証左となる。" 
+                },
+                { 
+                    term: "自由意志", yomi: "じゆういし", 
+                    desc: "他からの強制を受けず、自らの判断で行動を決定できる能力。",
+                    detailed_desc: "かつては人間の尊厳の根拠とされたが、AIの自律プログラムによって模倣可能なものとして扱われている。筆者は人間性の根拠をここには置いておらず、すでにAIによって陥落しつつある領域とみなしている。" 
+                },
+                { 
+                    term: "自律的活動", yomi: "じりつてきかつどう", 
+                    desc: "自ら定めた規範に従って行動すること。",
+                    detailed_desc: "プログラムされた範囲内で自ら判断し行動すること。AIも高度に実行可能であるため、筆者はこれを「内発性」とは明確に区別し、人間特有の証とはみなしていない。" 
+                },
+                { 
+                    term: "知性", yomi: "ちせい", 
+                    desc: "物事を認識・理解し、思考する能力。",
+                    detailed_desc: "従来は「問題を解決する能力」と捉えられがちだったが、AIの台頭により「問いを生み出す能力」「悩む能力」を含むものとして、その定義の根本的な見直しが迫られている。" 
+                }
+            ],
+            // 注釈データ（キーワードから自動生成）
+            annotations: {}
+        };
+
+        // keywords配列からannotationsオブジェクトを自動生成
+        contentData.keywords.forEach(k => {
+            contentData.annotations[k.term] = k;
+        });
+
+        /**
+         * ==============================================
+         * 2. アプリケーションロジック
+         * ==============================================
+         */
+        const app = {
+            currentView: 'read',
+            scrollKey: 'textReadScrollPosition',
+
+            init() {
+                document.getElementById('header-title').textContent = contentData.meta.title;
+                document.getElementById('header-author').textContent = contentData.meta.author;
+                document.getElementById('text-title').textContent = contentData.meta.title;
+                document.getElementById('text-author').textContent = contentData.meta.author;
+
+                this.renderStructure();
+                this.renderElements();
+                this.renderKeywords();
+                this.renderText();
+
+                this.switchView('structure');
+
+                window.addEventListener('scroll', () => {
+                    if (this.currentView === 'read') {
+                        this.saveScrollPosition();
+                    }
+                });
+            },
+
+            switchView(viewId) {
+                if (this.currentView === 'read') {
+                    this.saveScrollPosition();
+                }
+
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById(`view-${viewId}`).classList.remove('hidden');
+
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(`btn-${viewId}`).classList.add('active');
+
+                this.currentView = viewId;
+
+                if (viewId === 'read') {
+                    this.restoreScrollPosition();
+                } else {
+                    window.scrollTo(0, 0);
+                }
+                this.closeAnnotation();
+            },
+
+            saveScrollPosition() {
+                const scrollY = window.scrollY || document.documentElement.scrollTop;
+                localStorage.setItem(this.scrollKey, scrollY);
+            },
+
+            restoreScrollPosition() {
+                const savedPos = localStorage.getItem(this.scrollKey);
+                if (savedPos) {
+                    setTimeout(() => {
+                        window.scrollTo(0, parseInt(savedPos, 10));
+                    }, 0);
+                } else {
+                    window.scrollTo(0, 0);
+                }
+            },
+
+            // --- レンダリング系関数 ---
+
+            renderStructure() {
+                const container = document.getElementById('structure-list');
+                contentData.structure.forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white p-4 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-shadow";
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="font-bold text-lg text-slate-800"><span class="text-blue-500 mr-2">Part ${index + 1}</span>${item.title}</h3>
+                            <span class="text-slate-400 text-xs">▼</span>
+                        </div>
+                        <p class="text-slate-600 font-bold mb-2 text-sm">${item.summary}</p>
+                        <div class="details-content mt-3 pt-3 border-t border-gray-100 text-sm text-slate-600">
+                            <p class="mb-2 leading-relaxed">${item.detail}</p>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                ${item.tags.map(tag => `<span class="px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">#${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                    // 修正: クラス切り替えによるアコーディオン制御
+                    div.onclick = () => {
+                        const content = div.querySelector('.details-content');
+                        // 他のアイテムを閉じる（オプション）
+                        document.querySelectorAll('#structure-list .details-content').forEach(el => {
+                            if(el !== content) el.classList.remove('open');
+                        });
+                        content.classList.toggle('open');
+                    };
+                    container.appendChild(div);
+                });
+            },
+
+            renderElements() {
+                const container = document.getElementById('elements-grid');
+                contentData.elements.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white p-5 rounded-lg shadow-sm border border-gray-100 hover:border-blue-200 transition-colors cursor-pointer group";
+                    div.innerHTML = `
+                        <h3 class="font-bold text-xl text-slate-800 mb-1 group-hover:text-blue-600">${item.name}</h3>
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-3">${item.role}</p>
+                        <div class="details-content mt-2">
+                             <blockquote class="border-l-4 border-slate-300 pl-3 italic text-slate-500 text-sm mb-3">"${item.quote}"</blockquote>
+                             <p class="text-sm text-slate-700 leading-relaxed">${item.desc}</p>
+                        </div>
+                    `;
+                    // 修正: クラス切り替えによるアコーディオン制御
+                    div.onclick = () => {
+                        const content = div.querySelector('.details-content');
+                        content.classList.toggle('open');
+                    };
+                    container.appendChild(div);
+                });
+            },
+
+            renderKeywords() {
+                const container = document.getElementById('keywords-list');
+                contentData.keywords.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = "bg-white px-4 py-3 rounded border border-gray-100 cursor-pointer hover:bg-slate-50 transition-colors";
+                    div.innerHTML = `
+                        <div class="flex items-center justify-between pointer-events-none"> <!-- click透過 -->
+                            <h3 class="font-bold text-slate-700">${item.term}</h3>
+                            <span class="text-xs text-slate-400 indicator">＋</span>
+                        </div>
+                        <div class="details-content mt-2">
+                            <p class="text-xs text-slate-400 mb-1">${item.yomi}</p>
+                            <!-- 変更: detailed_desc を使用 -->
+                            <p class="text-sm text-slate-600 leading-relaxed">${item.detailed_desc || item.desc}</p>
+                        </div>
+                    `;
+                    // 修正: クラス切り替えによるアコーディオン制御
+                    div.onclick = () => {
+                        const content = div.querySelector('.details-content');
+                        content.classList.toggle('open');
+                        
+                        // アイコンの切り替え
+                        const indicator = div.querySelector('.indicator');
+                        if (content.classList.contains('open')) {
+                            indicator.textContent = '－';
+                        } else {
+                            indicator.textContent = '＋';
+                        }
+                    };
+                    container.appendChild(div);
+                });
+            },
+
+            renderText() {
+                const container = document.getElementById('text-content');
+                let htmlContent = "";
+                
+                contentData.textParagraphs.forEach(para => {
+                    let processedPara = para.replace(/\{\{(.+?)\}\}/g, (match, p1) => {
+                        const key = p1; 
+                        if(contentData.annotations[key]) {
+                            return `<span class="annotation-highlight" onclick="app.showAnnotation(this, '${key}')">${key}</span>`;
+                        } else {
+                            return p1;
+                        }
+                    });
+                    htmlContent += `<p class="mb-6 indent-1">${processedPara}</p>`;
+                });
+                container.innerHTML = htmlContent;
+            },
+
+            showAnnotation(element, key) {
+                document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
+                element.classList.add('active-highlight');
+
+                const data = contentData.annotations[key];
+                if (!data) return;
+
+                document.getElementById('anno-term').textContent = data.term;
+                document.getElementById('anno-yomi').textContent = data.yomi;
+                // 注釈では短いdescを表示
+                document.getElementById('anno-desc').textContent = data.desc;
+
+                const bar = document.getElementById('annotation-bar');
+                bar.classList.remove('translate-y-full');
+            },
+
+            closeAnnotation() {
+                const bar = document.getElementById('annotation-bar');
+                bar.classList.add('translate-y-full');
+                document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
