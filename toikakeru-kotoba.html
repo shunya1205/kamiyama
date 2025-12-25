@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>問いかける言葉 - インタラクティブ読解</title>
+    <!-- Tailwind CSS (スタイリング) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vue.js 3 (フレームワーク) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Google Fonts (可読性向上) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons (アイコン) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        .serif-text {
+            font-family: 'Noto Serif JP', serif;
+            line-height: 2.2;
+            letter-spacing: 0.05em;
+        }
+        /* 本文中のハイライト用スタイル（アニメーション削除） */
+        .annotation-highlight {
+            border-bottom: 2px solid #60a5fa; /* Blue-400 */
+            background-color: rgba(219, 234, 254, 0.3);
+            cursor: pointer;
+            font-weight: 600;
+            color: #1e40af;
+        }
+        .annotation-highlight:hover {
+            background-color: rgba(219, 234, 254, 0.8);
+        }
+        /* スクロールバーのカスタマイズ */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="app" v-cloak class="min-h-screen flex flex-col">
+    
+    <!-- ========================================== -->
+    <!-- 1. グローバルヘッダー (Sticky Navigation) -->
+    <!-- ========================================== -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center py-3">
+                <!-- タイトルエリア -->
+                <div class="mb-2 sm:mb-0 text-center sm:text-left">
+                    <h1 class="text-xl font-bold text-slate-800 tracking-wide">{{ contentData.meta.title }}</h1>
+                    <p class="text-sm text-slate-500">{{ contentData.meta.author }}</p>
+                </div>
+                
+                <!-- ナビゲーションメニュー -->
+                <nav class="flex space-x-1 bg-slate-100 p-1 rounded-lg">
+                    <button 
+                        v-for="tab in tabs" 
+                        :key="tab.id"
+                        @click="switchTab(tab.id)"
+                        :class="[
+                            'px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md', 
+                            /* アニメーション関連クラス(transition-colors等)を完全に削除 */
+                            currentTab === tab.id 
+                                ? 'bg-white text-blue-600 shadow-sm' 
+                                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                        ]"
+                    >
+                        {{ tab.label }}
+                    </button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="flex-grow w-full max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <!-- ビュー1: 大まかな内容 (Structure) - アコーディオン方式 -->
+        <section v-show="currentTab === 'structure'" class="space-y-6">
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                <h2 class="font-bold text-blue-900 text-lg mb-1">作品の全体像</h2>
+                <p class="text-sm text-blue-800">キャスターとしての経験を通じ、「問い」が持つ力と、現代社会における対話の重要性を論じた文章。</p>
+            </div>
+
+            <div class="grid gap-4">
+                <div v-for="(section, index) in localContentData.structure" :key="index" 
+                     class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden"
+                     :class="{'ring-2 ring-blue-100': section.isOpen}">
+                    <!-- ヘッダー部分（クリックで開閉） -->
+                    <div class="p-5 cursor-pointer hover:bg-slate-50" @click="toggleItem(section)">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="inline-block px-2 py-1 text-xs font-semibold bg-slate-100 text-slate-600 rounded">Part {{ index + 1 }}</span>
+                            <!-- 開閉アイコン (回転アニメーション削除) -->
+                            <svg :class="{'rotate-180': section.isOpen}" class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-1">{{ section.title }}</h3>
+                        <p class="text-slate-600 text-sm">{{ section.summary }}</p>
+                    </div>
+                    
+                    <!-- 詳細部分（アコーディオン展開） -->
+                    <div v-show="section.isOpen" class="px-5 pb-5 pt-0 bg-slate-50/50 border-t border-slate-100">
+                        <div class="mt-4">
+                            <p class="font-bold text-slate-700 text-sm mb-2">詳細・ポイント</p>
+                            <p class="text-sm text-slate-600 bg-white p-3 rounded border border-slate-100">{{ section.detail }}</p>
+                        </div>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <span v-for="tag in section.tags" :key="tag" class="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">#{{ tag }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ビュー2: 登場人物・要素分析 (Elements) - アコーディオン方式 -->
+        <section v-show="currentTab === 'elements'">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 border-b pb-2">要素・対比分析</h2>
+            <div class="grid grid-cols-1 gap-4">
+                <div v-for="(element, key) in localContentData.analysis" :key="key"
+                     class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+                     :class="{'border-indigo-200 ring-2 ring-indigo-50': element.isOpen}">
+                    
+                    <!-- ヘッダー部分 -->
+                    <div class="p-5 cursor-pointer hover:bg-slate-50 flex items-center justify-between" @click="toggleItem(element)">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-slate-800 leading-tight">{{ element.name }}</h3>
+                                <p class="text-sm text-slate-500">{{ element.desc }}</p>
+                            </div>
+                        </div>
+                         <!-- アイコン回転アニメーション削除 -->
+                         <svg :class="{'rotate-180': element.isOpen}" class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+
+                    <!-- 詳細部分 -->
+                    <div v-show="element.isOpen" class="px-5 pb-5 pt-0 bg-indigo-50/30 border-t border-slate-100">
+                        <div class="mt-4 space-y-3">
+                            <div>
+                                <span class="text-xs font-bold text-indigo-800 uppercase tracking-wide">分析</span>
+                                <p class="text-sm text-slate-700 mt-1">{{ element.analysis }}</p>
+                            </div>
+                            <div class="bg-white p-3 rounded border border-indigo-100">
+                                <span class="text-xs font-bold text-slate-400 block mb-1">引用</span>
+                                <p class="text-sm text-slate-600 italic">"{{ element.quote }}"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ビュー3: キーワード・象徴 (Keywords) - リスト＆アコーディオン方式 -->
+        <section v-show="currentTab === 'keywords'">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 border-b pb-2">重要語句・概念</h2>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="divide-y divide-slate-100">
+                    <div v-for="(kw, index) in localContentData.keywords" :key="index">
+                        <!-- ヘッダー -->
+                        <div class="p-4 cursor-pointer hover:bg-slate-50 flex justify-between items-center" @click="toggleItem(kw)">
+                            <div>
+                                <span class="text-xs text-slate-400 mb-0.5 block">{{ kw.category }}</span>
+                                <span class="font-bold text-slate-800 text-lg">{{ kw.term }}</span>
+                                <span class="text-xs text-slate-500 ml-2">({{ kw.reading }})</span>
+                            </div>
+                             <svg :class="{'rotate-180': kw.isOpen}" class="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                        
+                        <!-- 詳細 -->
+                        <div v-show="kw.isOpen" class="bg-amber-50/30 px-6 py-4 border-t border-slate-50 shadow-inner">
+                            <div class="mb-3">
+                                <span class="text-xs font-bold text-amber-800/70">意味・解説</span>
+                                <p class="text-sm text-slate-800 mt-1">{{ kw.desc }}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-slate-400">文脈</span>
+                                <p class="text-sm text-slate-600 mt-1">{{ kw.context }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ビュー4: 本文を読む (Reader) -->
+        <section v-show="currentTab === 'read'" class="relative">
+            
+            <!-- 読書ツールバー -->
+            <div class="sticky top-16 z-40 flex justify-end mb-4 pointer-events-none">
+                 <div class="bg-white/90 backdrop-blur shadow-sm border border-slate-200 rounded-full px-4 py-1.5 text-xs text-slate-500 pointer-events-auto">
+                    <span v-if="scrollSavedMessage" class="text-green-600 font-bold transition-opacity">
+                        {{ scrollSavedMessage }}
+                    </span>
+                    <span v-else>重要語句をタップして解説を表示</span>
+                 </div>
+            </div>
+
+            <!-- 本文表示エリア -->
+            <article class="bg-white p-6 sm:p-10 rounded-xl shadow-sm border border-slate-100 serif-text text-base sm:text-lg text-slate-800">
+                <!-- indent-4 クラスを削除して、テキスト内の全角スペースのみで字下げするように修正 -->
+                <div v-for="(para, pIndex) in processedParagraphs" :key="pIndex" class="mb-6 text-justify">
+                    <!-- HTMLとして描画 (v-html) -->
+                    <span v-html="para"></span>
+                </div>
+            </article>
+
+            <!-- ページ下部の注釈表示エリア (固定) - ここは読書体験を阻害しないよう固定表示を維持 -->
+            <div v-if="activeAnnotation" class="fixed bottom-0 left-0 right-0 bg-white border-t border-blue-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 p-4 pb-8 sm:pb-4">
+                <div class="max-w-4xl mx-auto flex justify-between items-start gap-4">
+                    <div>
+                        <div class="flex items-baseline gap-2 mb-1">
+                            <h4 class="font-bold text-lg text-blue-900">{{ activeAnnotation.term }}</h4>
+                            <span class="text-xs text-slate-500">({{ activeAnnotation.reading }})</span>
+                        </div>
+                        <p class="text-sm text-slate-700 leading-relaxed">{{ activeAnnotation.desc }}</p>
+                        <p class="text-xs text-slate-400 mt-2 border-t border-slate-100 pt-1">文脈: {{ activeAnnotation.context }}</p>
+                    </div>
+                    <button @click="activeAnnotation = null" class="text-slate-400 hover:text-slate-600 p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+</div>
+
+<script>
+    const { createApp, ref, computed, onMounted, reactive, nextTick } = Vue;
+
+    // ==========================================
+    // 1. 作品データ（本文、解説、注釈）の編集エリア
+    // ==========================================
+    const CONTENT_DATA = {
+        meta: {
+            title: "問いかける言葉",
+            author: "国谷 裕子"
+        },
+        // 本文データ (段落ごとの配列)
+        paragraphs: [
+            "　私は、三十年間、テレビの報道番組のキャスターとして、さまざまな事象を伝え続けてきました。メディアは、情報を不特定の多くの人に伝える役割を担っていますから、キャスターとしての私は、情報と視聴者をつなぐ媒介者でした。いかに情報を的確に伝えるか、それがどんなに難しいテーマであっても、視聴者がそのテーマについての理解を深め、さらにそのあと、そのテーマについて、視聴者の一人一人が考えていくための手がかりを少しでも手渡しをしたい、そういう思いで仕事をしていたように思います。そうした仕事を続ける中で、私の仕事には、情報を伝えるだけでなく、問いを出し続けることがとても重要なことだ、という思いに行きつきました。",
+            "　私は、海外と日本を行き来しながら四つの小学校と二つの中学校に通いました。海外の学校では、「あなたはどう思う？」と、自分の考えを問われることがあたりまえでした。それは、多くの外国人のクラスメイトに囲まれた、一人だけの日本人である私を、きちんと認めてくれているということでした。しかし同時に、その質問は、自分の考えをもっていないと、そこにいない人、存在しない人と見られることにつながるようにも思えました。自分の考えをもち、それを人にわかるように伝えることはとても大事なことです。私は、その問いに必死になって答えようとしました。また、私自身も、何かがおかしいと感じたり、不思議に思えたりしたら、私以外の人はどう考えているのかと、積極的に疑問や問いを投げかけていくことにしたのです。",
+            "　そこから、異なる考え方が飛び交う対話が始まりました。人の考え方、ものの見方は多様であり、皆は同じようには考えていないのだという気づき、その異なる考え方をお互いに尊重しなければならないという認識につながっていきました。人から問われること、人に問いかけることで、自分の存在を意識し、自分というものが次第に形づくられていったように思えます。",
+            "　キャスターの仕事をするようになり、多くのゲストのかたにインタビューをする中で、問いかける言葉の大切さを改めて実感できるようになりました。その中で学んだことは、問いかける言葉は、曖昧なものではなく、具体的なものではなくてはならない、ということでした。具体的な質問は、質問された相手の思考を曖昧なものからより明確な思考へと導き、そのことでコミュニケーションの基盤となるお互いの共通認識の場が形成され、対話が生き生きとしたものになるのです。具体的に問われることで、曖昧だった考えがくっきりとしてくる、思いこみも含めた自分の考えが俯瞰できるようになる、聞き方次第で答えも変わってしまうと語ったゲストのかたもいました。こうした力が問いかける言葉にはあるのです。",
+            "　かつて私たちは、新聞、テレビ、出版物といったマスメディアをとおして多くの情報を得ていました。しかし現在、メディアの種類も多様になり、私たちの世界を取り巻く情報は膨大で、よりスピーディーに行き交うようになっています。こうした中、私たちは、それらの情報について、立ち止まって吟味したり、整理したり、自分にとっての意味や価値を考える時間を失いつつあるように思えます。情報が、かえって人々の考える時間を奪っているのです。立ち止まる時間を失った人々は、わかりやすく、白か黒か、イエスかノーかの手っ取り早い結論を好むようになります。そして、わかったと思った瞬間、そこで人は考えることをやめてしまいます。",
+            "　作家の井上ひさしが「風向きの法則」と呼んでいた現象があります。風が、次第に強くなってくると、その風向きに逆らって歩くのが困難になるように、ある考え方が広まってきて、それに反対する声が出しにくくなると、みんながそう言っているからと同調する声が多くなり、ますますその考え方だけが広まっていってしまう、というのです。",
+            "　問いかける言葉は、その同調の流れをせき止め、「本当にその風向きは正しいのですか？」と、風になびきがちな人々にブレーキをかけ、立ち止まらせます。周りに流されず、自分で考えることをもたらしてくれるのです。",
+            "　もう一つ、問いかける言葉の大事な役割は、異質な世界との出会いをもたらすことです。心理学の用語に「確証バイアス」というものがあります。自分が共感したり、正しいと思えたりする情報だけを重要視して選択し、それに反する、否定する情報を避けようとする傾向のことです。インターネットなどによって一人一人が膨大な情報に直に接するようになって以降、こうしたバイアスが、人々の間に広がっているように思えます。",
+            "　こうした中では、多様な人々の存在、自分とは異なる多様な考え方が存在していることを知る機会、異質なものとの出会いが次第になくなっていきます。それぞれが閉鎖的な情報空間を作り、同じような考え方をもった人々の間だけで対話を行うようになっていきます。そうなれば、異なる情報空間にいる人々との間に分断が起こり、相手に対して不寛容になり、お互いを排除しようとさえするようになります。そこには、異質なものに出会って戸惑い、悩み、考える機会はありません。",
+            "　しかし、現実の世界が抱える課題は、さまざまに入り組み利害対立も複雑になっています。異なる考え方やさまざまな利害を抱えた人々が、社会的合意を求めて対話を積極的に行うことができなければ、課題の解決は不可能です。そのためには、お互いの情報空間を外に開き、自分たちとは異なる世界と出会うことが必要です。そのきっかけを作るのは、問いかける言葉です。",
+            "　海外の学校で、質問すること、問いを出すことで新しい世界が現れることを経験した私は、日本に帰国して、同じようにクラスメイトに単刀直入に疑問を投げかけました。すると、けげんな顔をされることがたびたび起きたのです。皆が同じであることが尊重され、異なる意見をもつこと、異なる意見を出すことはあまり歓迎されない。そういう空気が流れていると思った記憶があります。",
+            "　日本の社会では、周囲の空気を読み取り、それに素早く溶けこむことが、人と人とのコミュニケーションにとって重要な要件であるとされているように思います。そして周囲に素早く溶けこむためには、何でもすぐにわかった気になることが求められているようにも思えます。",
+            "　しかし、わからないものはわからないとして、もやもやが残ったほうがいいのではないでしょうか。何かがおかしい、何か腑に落ちないという思い、そこから疑問が生まれ、問いを発していくことで対話は生まれます。決して結論を押しつけるのではなく、「あなたはどう思いますか？」と投げかける。言葉による問いかけには、閉じた世界に異質なものを投げこみ、新しい風を吹きこむことで、その閉じている世界を開いていく力があるのです。問いを出したり、出されたりすることは、自分の世界とは異なる世界との出会いを生み出すのです。"
+        ],
+        // 構造分析データ
+        structure: [
+            { title: "導入：キャスターとしての気づき", summary: "情報を伝える「媒介者」としての役割から、「問いを出し続けること」の重要性に気づく。", detail: "単なる情報の伝達者から、視聴者に思考の手がかりを手渡す存在への意識の変化。", tags: ["キャスター", "媒介者", "問い"] },
+            { title: "原体験：海外の学校での経験", summary: "「あなたはどう思う？」と問われることで、自己の存在が認められ、形づくられた経験。", detail: "自己の意見を持つことが存在証明となる環境。これに対し、日本では「空気を読む」ことが重視される対比。", tags: ["海外経験", "自己存在", "対話"] },
+            { title: "展開1：具体的な問いの効用", summary: "曖昧な問いではなく具体的な問いが、思考を明確にし、共通認識の場を形成する。", detail: "曖昧な思考をくっきりさせ、俯瞰させる力。コミュニケーションの基盤形成。", tags: ["具体性", "共通認識", "思考の明確化"] },
+            { title: "展開2：現代メディアと「考える時間」の喪失", summary: "情報過多の現代において、人は立ち止まって考える時間を失い、手っ取り早い結論を求める。", detail: "情報の洪水が逆に思考停止を招く逆説。白黒思考への傾倒。", tags: ["情報社会", "思考停止", "即断"] },
+            { title: "展開3：同調圧力と確証バイアス", summary: "「風向きの法則」や「確証バイアス」による同質化に対し、問いかける言葉がブレーキとなる。", detail: "井上ひさしの言葉や心理学用語を用い、異質なものを排除しようとする現代の傾向を指摘。", tags: ["風向きの法則", "確証バイアス", "分断"] },
+            { title: "結論：異質な世界との出会い", summary: "問いかける言葉は閉じた世界を開き、新しい風を吹き込む力を持つ。", detail: "「わからない」ことを許容し、疑問を持つことから対話が生まれる。それが社会課題解決への糸口。", tags: ["異質性", "社会的合意", "新しい風"] }
+        ],
+        // 要素分析データ
+        analysis: {
+            caster: { name: "キャスター", desc: "情報と視聴者をつなぐ媒介者", analysis: "著者の職業的立場。情報の伝達だけでなく、視聴者に「考える手がかり」を手渡す役割へと認識を深めた。", quote: "情報と視聴者をつなぐ媒介者" },
+            foreign_school: { name: "海外の学校", desc: "意見を持つことが存在証明となる場", analysis: "「あなたはどう思う？」と常に問われる環境。個人の確立と思考の言語化が求められる。", quote: "自分の考えをもっていないと、そこにいない人…と見られる" },
+            media: { name: "現代メディア", desc: "膨大な情報が行き交う環境", analysis: "かつてのマスメディア中心から多様化・高速化。情報の速度が人々の「立ち止まって考える時間」を奪っている。", quote: "情報が、かえって人々の考える時間を奪っている" },
+            wind: { name: "風（風向き）", desc: "同調圧力のメタファー", analysis: "社会全体がある方向へ流れる力。これに抗うことは困難だが、「問い」がその流れをせき止めるブレーキとなる。", quote: "風向きに逆らって歩くのが困難になる" }
+        },
+        // キーワード・注釈データ（IDは自動マッチングに使用）
+        keywords: [
+            { term: "媒介者", reading: "ばいかいしゃ", category: "役割", desc: "二つのものの間に立ち、関係を取り持つ人。ここではニュースと視聴者の橋渡し役。", context: "キャスターとしての自己定義。" },
+            { term: "事象", reading: "じしょう", category: "一般", desc: "実際に起きた出来事や現象。", context: "キャスターとして伝えてきたニュースの内容。" },
+            { term: "不特定", reading: "ふとくてい", category: "社会", desc: "相手や範囲が特定されていないこと。", context: "マスメディアが情報を伝える対象の性質。" },
+            { term: "手がかり", reading: "てがかり", category: "一般", desc: "問題を解決するための糸口やヒント。", context: "視聴者が自分で考えるために提供したいもの。" },
+            { term: "俯瞰", reading: "ふかん", category: "思考", desc: "高い所から見下ろすこと。転じて、物事を広い視野で客観的に捉えること。", context: "具体的な問いによって自分の考えを客観視できるようになること。" },
+            { term: "共通認識", reading: "きょうつうにんしき", category: "対話", desc: "複数の人が同じように理解し、共有している事柄。", context: "コミュニケーションの土台となるもの。" },
+            { term: "吟味", reading: "ぎんみ", category: "思考", desc: "物事を詳しく調べ、念入りに選ぶこと。", context: "情報を受け取った際に必要な態度。" },
+            { term: "風向きの法則", reading: "かざむきのほうそく", category: "引用", desc: "作家・井上ひさしの言葉。ある意見が優勢になると、反対意見が出にくくなり、同調圧力が加速する現象。", context: "日本社会における同調圧力の強さを説明する例。" },
+            { term: "同調", reading: "どうちょう", category: "社会", desc: "他人の意見や行動に調子を合わせること。周りに従うこと。", context: "自分の考えを持たずに周りに流される様子。" },
+            { term: "ブレーキ", reading: "ブレーキ", category: "比喩", desc: "物事の進行を抑えるもの。歯止め。", context: "問いかける言葉が、同調の流れを止める役割。" },
+            { term: "確証バイアス", reading: "かくしょうバイアス", category: "心理学", desc: "自分の思い込みや願望を肯定する情報ばかりを集め、反証する情報を無視する心理的傾向。", context: "ネット社会で異なる意見が見えなくなっている原因。" },
+            { term: "閉鎖的", reading: "へいさてき", category: "社会", desc: "外部との交流を拒み、自分たちの殻に閉じこもるさま。", context: "同じ考えの人だけで固まった情報空間の状態。" },
+            { term: "排除", reading: "はいじょ", category: "社会", desc: "邪魔なものとして押しのけて取り除くこと。", context: "異質な相手に対する不寛容な態度。" },
+            { term: "不寛容", reading: "ふかんよう", category: "社会", desc: "自分と異なる意見や立場の人を受け入れようとしないこと。", context: "情報の閉鎖性がもたらす他者への態度。" },
+            { term: "利害対立", reading: "りがいたいりつ", category: "社会", desc: "互いの利益と損害がぶつかり合い、矛盾している状態。", context: "現実社会が抱える複雑な課題の特徴。" },
+            { term: "社会的合意", reading: "しゃかいてきごうい", category: "社会", desc: "利害の異なる人々が、対話を通じて納得し合える結論やルールを見つけること。", context: "複雑な現代社会の課題解決に必要なプロセス。" },
+            { term: "単刀直入", reading: "たんとうちょくにゅう", category: "慣用句", desc: "前置き抜きで、いきなり本題に入ること。", context: "帰国後の著者が日本の学校でとった行動。" },
+            { term: "けげんな顔", reading: "けげんなかお", category: "表現", desc: "納得がいかない、不思議だ、という表情。", context: "疑問を投げかけた著者に対する周囲の反応。" },
+            { term: "マスメディア", reading: "マスメディア", category: "社会", desc: "新聞、テレビ、ラジオなど、大衆に向けて大量の情報を伝達する媒体。", context: "かつての情報源の中心。" },
+            { term: "分断", reading: "ぶんだん", category: "社会", desc: "人々の集団が意見の対立により分かれ、交流が断たれること。", context: "異なる情報空間に閉じこもることで起きる弊害。" },
+            { term: "腑に落ちない", reading: "ふにおちない", category: "慣用句", desc: "納得がいかない。理解できない。", context: "疑問や問いが生まれるきっかけとなる感情。" }
+        ]
+    };
+
+    createApp({
+        setup() {
+            // 状態管理
+            const currentTab = ref('structure');
+            const activeAnnotation = ref(null); // 本文中の選択された注釈
+            const scrollSavedMessage = ref('');
+            
+            // データにアコーディオン開閉状態(isOpen)を注入してリアクティブにする
+            // 注: 編集エリア(CONTENT_DATA)はプレーンなオブジェクトのままにし、ここでラップする
+            const localContentData = reactive(JSON.parse(JSON.stringify(CONTENT_DATA)));
+            
+            // 初期化：すべてのアイテムにisOpen: falseを追加
+            const initializeOpenState = (items) => {
+                if(Array.isArray(items)) {
+                    items.forEach(item => item.isOpen = false);
+                } else if(typeof items === 'object') {
+                    Object.values(items).forEach(item => item.isOpen = false);
+                }
+            };
+            initializeOpenState(localContentData.structure);
+            initializeOpenState(localContentData.analysis);
+            initializeOpenState(localContentData.keywords);
+
+            const contentData = CONTENT_DATA; // テンプレートでのmeta情報表示用などに保持
+
+            const tabs = [
+                { id: 'structure', label: '大まかな内容' },
+                { id: 'elements', label: '登場人物・要素' },
+                { id: 'keywords', label: 'キーワード' },
+                { id: 'read', label: '本文を読む' }
+            ];
+
+            // ------------------------------------------------
+            // 2. 本文のハイライト処理ロジック
+            // ------------------------------------------------
+            const processedParagraphs = computed(() => {
+                return contentData.paragraphs.map(para => {
+                    let processed = para;
+                    const sortedKeywords = [...contentData.keywords].sort((a, b) => b.term.length - a.term.length);
+
+                    sortedKeywords.forEach((kw, index) => {
+                        const regex = new RegExp(kw.term, 'g');
+                        processed = processed.replace(regex, 
+                            `<span class="annotation-highlight" onclick="window.handleAnnotationClick('${kw.term}')">${kw.term}</span>`
+                        );
+                    });
+                    return processed;
+                });
+            });
+
+            // ------------------------------------------------
+            // 3. 読書位置の記憶ロジック (LocalStorage)
+            // ------------------------------------------------
+            const STORAGE_KEY = 'interactive_reader_scroll_pos';
+            
+            const switchTab = (tabId) => {
+                if (currentTab.value === 'read') {
+                    saveScrollPosition();
+                }
+                currentTab.value = tabId;
+                
+                // アニメーションがないため、即座にスクロール処理へ
+                if (tabId === 'read') {
+                    restoreScrollPosition();
+                } else {
+                    window.scrollTo(0, 0);
+                }
+            };
+
+            const saveScrollPosition = () => {
+                const scrollY = window.scrollY;
+                localStorage.setItem(STORAGE_KEY, scrollY);
+            };
+
+            const restoreScrollPosition = async () => {
+                await nextTick();
+                const savedY = localStorage.getItem(STORAGE_KEY);
+                if (savedY) {
+                    window.scrollTo({
+                        top: parseInt(savedY),
+                        // behavior: 'smooth' を削除し、デフォルト(auto)の即時移動に変更
+                    });
+                    scrollSavedMessage.value = '続きから表示しました';
+                    setTimeout(() => scrollSavedMessage.value = '', 3000);
+                }
+            };
+
+            // アコーディオンの開閉トグル
+            const toggleItem = (item) => {
+                item.isOpen = !item.isOpen;
+            };
+
+            onMounted(() => {
+                window.addEventListener('beforeunload', () => {
+                    if (currentTab.value === 'read') {
+                        saveScrollPosition();
+                    }
+                });
+
+                window.handleAnnotationClick = (term) => {
+                    const keywordData = contentData.keywords.find(k => k.term === term);
+                    if (keywordData) {
+                        activeAnnotation.value = keywordData;
+                    }
+                };
+            });
+
+            return {
+                currentTab,
+                tabs,
+                contentData, // 静的データ(Meta等)
+                localContentData, // リアクティブデータ(アコーディオン状態付き)
+                processedParagraphs,
+                activeAnnotation,
+                scrollSavedMessage,
+                switchTab,
+                toggleItem
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
