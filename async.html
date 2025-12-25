@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>async——同期しないこと | Interactive Reader</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Serif JP (本文用) / Noto Sans JP (UI用) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif'],
+                        serif: ['"Noto Serif JP"', 'serif'],
+                    },
+                    colors: {
+                        primary: '#334155', // Slate 700
+                        accent: '#0f766e',  // Teal 700
+                        paper: '#fdfbf7',   // 読書に適した温かみのある白
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* カスタムスタイル */
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        /* 読書ビューのアニメーション無効化 (要件) */
+        .view-section {
+            display: none;
+        }
+        .view-section.active {
+            display: block;
+        }
+
+        /* 本文の強調スタイル */
+        .annotation-trigger {
+            border-bottom: 2px solid #99f6e4; /* Teal 200 */
+            cursor: pointer;
+            transition: background-color 0.2s;
+            padding-bottom: 2px;
+        }
+        .annotation-trigger:hover {
+            background-color: #ccfbf1; /* Teal 100 */
+        }
+        .annotation-trigger.active-word {
+            background-color: #fef08a; /* Yellow 200 */
+            border-bottom-color: #eab308;
+        }
+
+        /* 読書モードの行間と文字設定 */
+        .reading-text {
+            font-family: 'Noto Serif JP', serif;
+            line-height: 2.2;
+            letter-spacing: 0.05em;
+            text-align: justify;
+        }
+        
+        /* 段落の字下げ設定 */
+        .reading-text p {
+            text-indent: 1em;
+            margin-bottom: 1.5em; /* 段落間の視認性向上のため余白も調整 */
+        }
+
+        /* アコーディオンの詳細スタイル */
+        details > summary {
+            list-style: none;
+        }
+        details > summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- グローバルヘッダー (固定) -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-gray-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center h-auto sm:h-16 py-2 sm:py-0">
+                <!-- タイトルエリア -->
+                <div class="mb-2 sm:mb-0 text-center sm:text-left">
+                    <h1 class="text-lg font-bold text-gray-800" id="header-title">タイトル読み込み中...</h1>
+                    <p class="text-xs text-gray-500" id="header-author">作者名</p>
+                </div>
+
+                <!-- ナビゲーションメニュー -->
+                <nav class="flex space-x-1 sm:space-x-4">
+                    <button onclick="switchView('structure')" class="nav-btn px-3 py-1 text-sm font-medium rounded-md hover:bg-gray-100 text-gray-600 transition-colors" data-target="structure">構成</button>
+                    <button onclick="switchView('elements')" class="nav-btn px-3 py-1 text-sm font-medium rounded-md hover:bg-gray-100 text-gray-600 transition-colors" data-target="elements">分析</button>
+                    <button onclick="switchView('keywords')" class="nav-btn px-3 py-1 text-sm font-medium rounded-md hover:bg-gray-100 text-gray-600 transition-colors" data-target="keywords">用語</button>
+                    <button onclick="switchView('reader')" class="nav-btn px-3 py-1 text-sm font-medium rounded-md bg-accent text-white hover:bg-teal-800 shadow-sm transition-colors" data-target="reader">本文を読む</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツエリア -->
+    <main class="flex-grow w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-24">
+        
+        <!-- 1. 大まかな内容 (Structure) -->
+        <section id="view-structure" class="view-section">
+            <h2 class="text-2xl font-bold mb-6 border-b-2 border-accent pb-2">大まかな内容</h2>
+            <div id="structure-container" class="space-y-6">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 2. 登場人物・要素分析 (Elements) -->
+        <section id="view-elements" class="view-section">
+            <h2 class="text-2xl font-bold mb-6 border-b-2 border-accent pb-2">要素分析</h2>
+            <div id="elements-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 3. 重要なキーワード (Keywords) -->
+        <section id="view-keywords" class="view-section">
+            <h2 class="text-2xl font-bold mb-6 border-b-2 border-accent pb-2">キーワード・象徴</h2>
+            <div id="keywords-container" class="space-y-4">
+                <!-- JSで生成 -->
+            </div>
+        </section>
+
+        <!-- 4. 本文を読む (Reader) -->
+        <section id="view-reader" class="view-section bg-paper shadow-sm rounded-lg p-6 sm:p-10 border border-gray-100">
+            <!-- 読書ビューのヘッダー -->
+            <div class="mb-8 text-center">
+                <h2 class="text-3xl font-serif font-bold mb-2" id="reader-title"></h2>
+                <p class="text-sm text-gray-500" id="reader-author"></p>
+            </div>
+            
+            <!-- 本文コンテナ -->
+            <div id="text-content" class="reading-text text-gray-800 text-lg">
+                <!-- JSで生成 -->
+            </div>
+
+            <!-- 読了時のメッセージ -->
+            <div class="mt-16 pt-8 border-t border-gray-200 text-center text-gray-400 italic">
+                <p>End of Text</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 読解支援用固定フッター (注釈表示エリア) -->
+    <div id="annotation-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 shadow-lg transform translate-y-full transition-transform duration-300 z-40 px-4 py-4 sm:px-8">
+        <div class="max-w-4xl mx-auto flex justify-between items-start">
+            <div class="flex-1 pr-4">
+                <h4 id="anno-term" class="text-sm font-bold text-accent mb-1">用語</h4>
+                <p id="anno-desc" class="text-sm text-gray-700 leading-relaxed">解説がここに表示されます。</p>
+            </div>
+            <button onclick="closeAnnotation()" class="text-gray-400 hover:text-gray-600 p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- 
+    ========================================================================
+      DATA & LOGIC AREA
+    ========================================================================
+    -->
+    <script>
+        /* * ==========================================
+         * 1. 作品データ定義 (USER EDITABLE AREA)
+         * ==========================================
+         */
+        const siteData = {
+            metadata: {
+                title: "async——同期しないこと",
+                author: "坂本 龍一"
+            },
+            // 構成セクションのデータ
+            structure: [
+                {
+                    part: "導入",
+                    summary: "津波ピアノとの遭遇",
+                    detail: "2012年、被災地で海水に浸かったピアノに出会う。従来の音楽的基準では「壊れた」楽器だが、作者はその音に強く惹かれる。",
+                    tags: ["3.11", "喪失", "発見"]
+                },
+                {
+                    part: "展開1",
+                    summary: "自然の調律と人工の調律",
+                    detail: "ピアノは本来、自然物（木）を人工的（鉄枠）に無理やり固定したもの。津波により自然の力で「元の形（自然な調律）」に戻ろうとしたと解釈する。",
+                    tags: ["調律", "人工", "自然回帰"]
+                },
+                {
+                    part: "展開2",
+                    summary: "ノイズとサウンドの境界",
+                    detail: "楽器以外の音（環境音、ノイズ）への興味。人間が勝手に決めた「良い音/悪い音」というフィルターを取り払うことで、全ての音が音楽になる。",
+                    tags: ["ノイズ", "フィールドレコーディング", "知覚"]
+                },
+                {
+                    part: "結論",
+                    summary: "非同期（async）な社会へ",
+                    detail: "人間は放っておくと同期（同調）してしまう。音楽も社会も、異なるテンポや音が共存する「非同期」の状態こそが、不寛容な時代に必要であるという提言。",
+                    tags: ["同期", "共存", "寛容"]
+                }
+            ],
+            // 登場要素の分析データ
+            elements: [
+                {
+                    name: "津波ピアノ",
+                    desc: "宮城県の高校で被災したピアノ。海水に浸かり、弦が錆び、鍵盤が沈んでいる。",
+                    quote: "自然が調律した元の形に戻ろうとしたのだ。",
+                    point: "破壊された存在ではなく、人工的な呪縛から解放された「自然への回帰」の象徴として描かれる。"
+                },
+                {
+                    name: "調律",
+                    desc: "一般的な意味では楽器の音程を合わせること。",
+                    quote: "人間が勝手に決めた、人間にとってのいい音を出す作業",
+                    point: "ここでは「自然を人間の都合の良い形にねじ曲げる行為」のメタファーとして機能している。"
+                },
+                {
+                    name: "脳のフィルター",
+                    desc: "人間の認識の仕組み。",
+                    quote: "脳が見たいと思っているものだけを見てしまう。",
+                    point: "視覚や聴覚において、生存に不要な情報を無意識に排除する機能。これが世界を狭め、同調圧力を生む原因とされる。"
+                }
+            ],
+            // キーワードデータ
+            keywords: [
+                { term: "async (非同期)", mean: "タイミングや状態が一致していないこと。", context: "異なる個体が、それぞれの固有のリズムを保ったまま共存する理想的な状態。" },
+                { term: "同期", mean: "複数の要素が同じタイミングで動作すること。", context: "人間が生理的に快感を覚える性質だが、没個性や同調圧力（檻）につながる危険性がある。" },
+                { term: "ノイズ", mean: "騒音、雑音。", context: "文脈によって排除される音。作者はこれを「意味のないもの」ではなく「音楽」として再定義する。" },
+                { term: "二項対立", mean: "二つの概念が対立している状態。", context: "「サウンドとノイズ」「人工と自然」など。作者はこの境界線を溶かそうと試みる。" },
+                { term: "不寛容", mean: "他者を受け入れないこと。", context: "現代社会の課題。同期しない音（他者）を許容することが解決の糸口となると説く。" },
+                { term: "必然性", mean: "必ずそうなる性質。", context: "どのような音も（たとえノイズであっても）存在する理由があるということ。" },
+                { term: "わら紙", mean: "粗悪な紙の一種。", context: "シンバルの上に置いて振動させた際、独特の良い音を出した素材。日常の些細な物の再評価。" },
+                { term: "人工的な力", mean: "人間が自然を制御しようとする力。", context: "ピアノの弦を張る何トンもの張力のこと。自然の摂理に逆らう行為の象徴。" },
+                { term: "檻", mean: "自由を奪う場所。", context: "無自覚な「同期」によって、人間が自らを閉じ込めてしまう閉塞的な状況の比喩。" },
+                { term: "フィールドレコーディング", mean: "屋外での録音。", context: "鳥の声、雨音、雑踏などを集め、楽曲に取り入れる手法。" }
+            ],
+            // 本文データ (HTMLタグを含めることで、改行や注釈リンクを表現)
+            rawText: `
+                <p>二〇一二年一月、東日本大震災から十か月後の宮城県を訪れた時、僕は津波をかぶった一台の「{{0|津波ピアノ}}」に遭遇した。そのピアノは、高校の体育館のステージ脇の倉庫で、数日間海水につかっていた。一九六六（昭和四十一）年度の卒業生から記念品として贈られたもので、震災の十日ほど前の卒業式でも演奏されていたものだった。鍵盤はところどころ沈んだままになっていて、弦も切れたりさびたりしている。外側にくっきりと残っている傷、泥水の痕……。痛々しかった。指を鍵盤に沈めてみると、自分の知っている音は鳴らなかった。</p>
+                <p>しかし僕は、この津波によって生まれた音に強くひかれるようになった。津波ピアノは、地震と津波という自然の大きな力で、ある意味、破壊された存在だ。もともとピアノ自体は木でできている。木は生きていて、自然とともに変化していくものなのに、ピアノは、人間により何トンという人工的な力で鉄や木を曲げて作られたもの。ピアノが奏でる音階も自然には存在しないものだ。</p>
+                <p>僕たち人間が「{{1|調律}}が狂ってきた」と言うのは、人間的な基準で言っているのにすぎないのではないか。{{9|調律}}というものは、人間が勝手に決めた、人間にとってのいい音を出す作業ではないか。このピアノは、自然が{{10|調律}}した元の形に戻ろうとしたのだ。人工的な{{11|調律}}から解放された音。いい音だ、とても貴重だと思った。半ば自然に帰ったピアノで「音楽」を奏でることはできないだろうか。</p>
+                <p>僕は、サウンドを発する道具として、人間が考案した{{12|調律}}に合わせてつくられた楽器よりも、音楽に加工される以前の音に、これまでよりも興味をもつようになった。今、僕が本当に聴きたい音はどういうものなんだろう。僕は音を探し始めた。</p>
+                <p>ニューヨークの自宅スタジオの裏庭で聴こえる鳥の声や雨の音、枯れ葉を踏みしめる音、通勤時間帯の新宿駅の雑踏の音……。さまざまな場所の音を録音し集めてみた。近所の楽器屋さんに行ってシンバルを買ってきて、コップでこすってみて、なにかおもしろい音が出ないかなと試してみた。コップの大きさが変われば、音も全部変わるから、茶碗やコーヒーカップ、いろんなコップを集めて音を出してみる。そうすると自分の好きな音が出てくる。他にも、振動しているシンバルの上に紙を置いてみたりした。厚い紙、薄い紙。特に{{2|わら紙}}のような薄い紙はすごくいい音がする。僕は身のまわりのさまざまな物が発する音を楽しみたくなってきた。</p>
+                <p>これらの音を、普通は音楽としては聴いていない。雑踏や工場の音などは、むしろ{{3|ノイズ}}と感じる人もいるだろう。サウンドとノイズは、本来なら{{4|二項対立}}的なものである。人間は、{{13|ノイズ}}は排除するもの、意味のないものとしてきた。しかし僕は、その{{14|ノイズ}}を聴いてみようと思った。もともと僕は、工事や工場の音が好きで、道路工事の現場があると、立ち止まって録音したりすることもあった。ある人にとってはただの騒音でも、僕にとっては音楽。{{15|ノイズ}}もサウンドも人の声も、全ての音が音楽なのだ。</p>
+                <p>自然の音や都会の雑踏の音、音にはそれぞれ独自のリズムや響きがある。音は同じ{{5|必然性}}で同じ重要性をもっていて、ゴーッというなんとなく聴こえている音も窓の外から聴こえる通りの音も、存在理由があって存在している。それなのに、人間が勝手にこれはいい音、これは悪い音と決めてしまう。二十四時間ほとんど音に囲まれて生きているのに、生存にあまり必要のない音は無視している。本当はこっちでも音が鳴っているのにそれは聴こえてこない、そういうこともよくある。</p>
+                <p>それは視覚でも同じで、脳が見たいと思っているものだけを見てしまう。つきつめれば、人間が持っている脳はフィルター越しに世界を見ている、認識していることになる。そのフィルターは人間を同じ一つの{{6|檻}}に閉じこめる。無自覚のうちに「{{7|同期}}」を促すことによって。</p>
+                <p>九十九％の音楽というのは、{{16|同期}}している音楽、{{16|同期}}を目ざす音楽だ。どうも人間はネイチャーとして、{{17|同期}}することに快感を覚えるらしく、放っておくと{{17|同期}}をしてしまうらしい。考えるという知的なレベルではなく、生理的に{{18|同期}}してしまう。例えば十人、二十人集まって、それぞれ好きな高さで「アー」と声を出していると、五分から十分くらいで同じ高さにまとまってきてしまう。みんながそれぞれ好きなリズムで手を叩いていても、絶対に合ってしまう。実は、合わせないほうが人間には難しいのだ。</p>
+                <p>でも僕は、あえてその{{19|同期}}しない音楽というのをつくってみようと思った。{{19|同期}}していない音楽、いわば誰もしゃべっていない言葉をしゃべること。人工的な音に枯れ葉を踏みしめる音や、動物の鳴き声などを重ね合わせた曲。一つ一つの{{20|同期}}しない音を共存させるのである。合わせない音楽、{{20|同期}}しない一つ一つの音から、楽器の音と自然の音が一体となった新しい音楽を生み出す。</p>
+                <p>一つのテンポに皆が合わせるのではなくて、それぞれの音やパートが固有のテンポをもつ音楽をつくる。バラバラにテンポを刻む多様な音を使って、あるいは人工的調律から解放されたピアノを使って、楽曲という一定のまとまりのあるものをつくること。これは、僕たち人間社会でも同じではないだろうか。{{8|不寛容}}な時代には、非同期、つまり{{21|同期}}しない音を聴くことが大切なのではないか。</p>
+            `,
+            // 注釈データ (IDで紐付け)
+            annotations: [
+                { id: 0, term: "津波ピアノ", yomi: "つなみぴあの", desc: "東日本大震災の津波で被災したピアノ。本作品の象徴的オブジェ。" },
+                { id: 1, term: "調律", yomi: "ちょうりつ", desc: "【基準】楽器の音の高さや音色を整えること。著者はここで、人間の基準の恣意性を指摘している。" },
+                { id: 2, term: "わら紙", yomi: "わらがみ", desc: "稲わらなどを原料とした、ざらざらとした素朴な紙。" },
+                { id: 3, term: "ノイズ", yomi: "のいず", desc: "【一般概念】雑音。音楽的には不要とされる音。" },
+                { id: 4, term: "二項対立", yomi: "にこうたいりつ", desc: "二つの概念が互いに矛盾・対立している関係。" },
+                { id: 5, term: "必然性", yomi: "ひつぜんせい", desc: "必ずそうなること。偶然の反対。" },
+                { id: 6, term: "檻", yomi: "おり", desc: "ここでは、人間の認識や自由を制限する「同調圧力」や「固定観念」の比喩。" },
+                { id: 7, term: "同期", yomi: "どうき", desc: "【社会的同調】無意識に他者に合わせてしまうこと。個性を奪う「檻」として機能する側面。" },
+                { id: 8, term: "不寛容", yomi: "ふかんよう", desc: "自分と異なる意見や存在を受け入れない態度。" },
+                
+                // 追加注釈 (文脈に合わせて細分化)
+                { id: 9, term: "調律", yomi: "ちょうりつ", desc: "【強制】人間にとって「良い」と決めた基準を、自然物に無理やり押し付ける行為としての側面。" },
+                { id: 10, term: "調律", yomi: "ちょうりつ", desc: "【自然の摂理】自然の法則に従って、物質があるべきバランスに戻ろうとする力。" },
+                { id: 11, term: "調律", yomi: "ちょうりつ", desc: "【束縛】人工的なルールや枠組み。ピアノ（木）にとっては不自然な拘束。" },
+                { id: 12, term: "調律", yomi: "ちょうりつ", desc: "【慣習】従来の音楽理論や人間社会が作り上げてきた、既存のルール。" },
+                
+                { id: 13, term: "ノイズ", yomi: "のいず", desc: "【排除対象】社会や人間の意識から「無意味」「不要」として切り捨てられるもの。" },
+                { id: 14, term: "ノイズ", yomi: "のいず", desc: "【発見】音楽として聴く対象へと変化した、かつての雑音。" },
+                { id: 15, term: "ノイズ", yomi: "のいず", desc: "【音楽の構成要素】もはや騒音ではなく、美しいサウンドと対等な価値を持つ音。" },
+                
+                { id: 16, term: "同期", yomi: "どうき", desc: "【音楽的協調】テンポやリズムを揃えること。これまでの音楽の99%が目指してきた秩序。" },
+                { id: 17, term: "同期", yomi: "どうき", desc: "【本能】人間が本能的に同じ動きや音に合わせてしまう性質。" },
+                { id: 18, term: "同期", yomi: "どうき", desc: "【生理現象】思考を伴わず、無意識のうちに身体レベルで他者とタイミングが合ってしまう現象。" },
+                { id: 19, term: "同期しない", yomi: "どうきしない", desc: "【試み】意図的にリズムをずらし、他者に合わせないようにする創作手法。async。" },
+                { id: 20, term: "同期しない", yomi: "どうきしない", desc: "【共存】互いに干渉せず、それぞれの個性を保ったまま共に在ること。" },
+                { id: 21, term: "同期しない", yomi: "どうきしない", desc: "【思想】他者に合わせず、多様性を認める態度。不寛容な時代への処方箋。" }
+            ]
+        };
+
+        /* * ==========================================
+         * 2. アプリケーションロジック (SYSTEM AREA)
+         * ==========================================
+         */
+
+        // 状態管理
+        const state = {
+            currentView: 'structure', // 初期ビュー
+            scrollPositions: {} // 各ビューのスクロール位置を保持（主にReader用）
+        };
+
+        // DOM要素の取得
+        const els = {
+            headerTitle: document.getElementById('header-title'),
+            headerAuthor: document.getElementById('header-author'),
+            readerTitle: document.getElementById('reader-title'),
+            readerAuthor: document.getElementById('reader-author'),
+            textContent: document.getElementById('text-content'),
+            annoBar: document.getElementById('annotation-bar'),
+            annoTerm: document.getElementById('anno-term'),
+            annoDesc: document.getElementById('anno-desc'),
+            containers: {
+                structure: document.getElementById('structure-container'),
+                elements: document.getElementById('elements-container'),
+                keywords: document.getElementById('keywords-container')
+            },
+            navButtons: document.querySelectorAll('.nav-btn'),
+            views: document.querySelectorAll('.view-section')
+        };
+
+        // 初期化処理
+        function init() {
+            // メタデータの反映
+            els.headerTitle.textContent = siteData.metadata.title;
+            els.headerAuthor.textContent = siteData.metadata.author;
+            els.readerTitle.textContent = siteData.metadata.title;
+            els.readerAuthor.textContent = siteData.metadata.author;
+
+            // 各セクションのレンダリング
+            renderStructure();
+            renderElements();
+            renderKeywords();
+            renderText();
+
+            // LocalStorageから読書位置を復元する準備
+            const savedScroll = localStorage.getItem('readerScrollPos');
+            if (savedScroll) {
+                state.scrollPositions['reader'] = parseInt(savedScroll, 10);
+            }
+
+            // 初期ビューの表示 (デフォルトはStructure)
+            switchView('structure');
+        }
+
+        // ビュー切り替えロジック
+        function switchView(targetId) {
+            // 現在のビューがReaderなら、スクロール位置を保存 (LocalStorage + State)
+            if (state.currentView === 'reader') {
+                const currentY = window.scrollY;
+                state.scrollPositions['reader'] = currentY;
+                localStorage.setItem('readerScrollPos', currentY);
+            } else {
+                // 他のビューでも一応保存しておく（UX向上）
+                state.scrollPositions[state.currentView] = window.scrollY;
+            }
+
+            // ステート更新
+            state.currentView = targetId;
+
+            // ビューの表示/非表示
+            els.views.forEach(view => {
+                if (view.id === `view-${targetId}`) {
+                    view.classList.add('active');
+                } else {
+                    view.classList.remove('active');
+                }
+            });
+
+            // ナビゲーションボタンのスタイル更新
+            els.navButtons.forEach(btn => {
+                if (btn.dataset.target === targetId) {
+                    btn.classList.add('bg-accent', 'text-white', 'shadow-sm');
+                    btn.classList.remove('hover:bg-gray-100', 'text-gray-600');
+                } else {
+                    btn.classList.remove('bg-accent', 'text-white', 'shadow-sm');
+                    btn.classList.add('hover:bg-gray-100', 'text-gray-600');
+                }
+            });
+
+            // 注釈バーを閉じる
+            closeAnnotation();
+
+            // スクロール位置の復元
+            if (targetId === 'reader' && state.scrollPositions['reader']) {
+                // 描画完了を待つためにわずかに遅延
+                setTimeout(() => {
+                    window.scrollTo(0, state.scrollPositions['reader']);
+                }, 10);
+            } else {
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // 1. Structure レンダリング
+        function renderStructure() {
+            const html = siteData.structure.map((item, index) => `
+                <div class="flex flex-col md:flex-row bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                    <div class="md:w-1/4 bg-slate-50 p-4 border-b md:border-b-0 md:border-r border-gray-100 flex flex-col justify-center">
+                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Part ${index + 1}</span>
+                        <h3 class="font-bold text-gray-800 mt-1">${item.part}</h3>
+                    </div>
+                    <div class="p-4 md:w-3/4">
+                        <details class="group">
+                            <summary class="flex justify-between items-center cursor-pointer">
+                                <h4 class="text-lg font-bold text-accent">${item.summary}</h4>
+                                <span class="text-gray-400 group-open:rotate-180 transition-transform">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            </summary>
+                            <div class="mt-3 text-gray-600 leading-relaxed text-sm animate-fade-in">
+                                <p>${item.detail}</p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    ${item.tags.map(tag => `<span class="px-2 py-1 bg-teal-50 text-teal-700 text-xs rounded-full">#${tag}</span>`).join('')}
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            `).join('');
+            els.containers.structure.innerHTML = html;
+        }
+
+        // 2. Elements レンダリング
+        function renderElements() {
+            const html = siteData.elements.map(item => `
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:border-accent/30 transition-colors cursor-pointer group" onclick="toggleElementDetail(this)">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-bold text-gray-800 group-hover:text-accent transition-colors">${item.name}</h3>
+                        <span class="text-gray-300 group-hover:text-accent">+</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2 line-clamp-2">${item.desc}</p>
+                    
+                    <!-- 隠し詳細エリア (JSでトグル) -->
+                    <div class="hidden mt-4 pt-4 border-t border-dashed border-gray-200 text-sm">
+                        <p class="mb-2"><span class="font-bold text-gray-700">解説:</span> ${item.desc}</p>
+                        <blockquote class="bg-gray-50 p-3 italic text-gray-600 border-l-4 border-gray-300 my-3">
+                            "${item.quote}"
+                        </blockquote>
+                        <p><span class="font-bold text-accent">Point:</span> ${item.point}</p>
+                    </div>
+                </div>
+            `).join('');
+            els.containers.elements.innerHTML = html;
+        }
+
+        // Elementsの手動トグル関数（detailsタグを使わないパターン）
+        function toggleElementDetail(el) {
+            const content = el.querySelector('div.hidden, div.block');
+            const icon = el.querySelector('span.text-gray-300');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                content.classList.add('block');
+                icon.textContent = '−';
+            } else {
+                content.classList.add('hidden');
+                content.classList.remove('block');
+                icon.textContent = '+';
+            }
+        }
+
+        // 3. Keywords レンダリング
+        function renderKeywords() {
+            const html = siteData.keywords.map(item => `
+                <details class="bg-white rounded-md border border-gray-200 overflow-hidden">
+                    <summary class="px-4 py-3 cursor-pointer hover:bg-gray-50 flex items-center transition-colors">
+                        <span class="w-2 h-2 bg-accent rounded-full mr-3"></span>
+                        <span class="font-bold text-gray-700">${item.term}</span>
+                    </summary>
+                    <div class="px-4 py-3 bg-slate-50 border-t border-gray-100 text-sm">
+                        <p class="font-bold text-gray-800 mb-1">意味: ${item.mean}</p>
+                        <p class="text-gray-600">文脈: ${item.context}</p>
+                    </div>
+                </details>
+            `).join('');
+            els.containers.keywords.innerHTML = html;
+        }
+
+        // 4. 本文レンダリング (正規表現による注釈埋め込み)
+        function renderText() {
+            let processedText = siteData.rawText;
+            
+            // {{ID|単語}} を <span class="annotation-trigger" data-id="ID">単語</span> に置換
+            processedText = processedText.replace(/\{\{(\d+)\|(.+?)\}\}/g, (match, id, word) => {
+                return `<span class="annotation-trigger" data-id="${id}" onclick="showAnnotation(${id}, this)">${word}</span>`;
+            });
+            
+            els.textContent.innerHTML = processedText;
+        }
+
+        // 5. 読解支援機能 (注釈表示)
+        function showAnnotation(id, element) {
+            // 前のハイライトを消す
+            document.querySelectorAll('.annotation-trigger').forEach(el => el.classList.remove('active-word'));
+            // クリックされた単語をハイライト
+            if(element) element.classList.add('active-word');
+
+            const data = siteData.annotations.find(a => a.id === id);
+            if (!data) return;
+
+            // コンテンツ更新
+            const titleHtml = `${data.term} <span class="text-xs font-normal text-gray-500 ml-2">(${data.yomi})</span>`;
+            els.annoTerm.innerHTML = titleHtml;
+            els.annoDesc.textContent = data.desc;
+
+            // バーを表示
+            els.annoBar.classList.remove('translate-y-full');
+        }
+
+        function closeAnnotation() {
+            els.annoBar.classList.add('translate-y-full');
+            document.querySelectorAll('.annotation-trigger').forEach(el => el.classList.remove('active-word'));
+        }
+
+        // イベントリスナー設定
+        document.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
