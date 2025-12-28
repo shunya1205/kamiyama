@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Standalone MindMap Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            overflow: hidden;
+            background-color: #f8fafc;
+            touch-action: none;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        #canvas-container:active {
+            cursor: grabbing;
+        }
+        .node {
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            cursor: pointer;
+        }
+        .node-dragging {
+            transition: none !important;
+            z-index: 100;
+            opacity: 0.8;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+        }
+        .node-active rect {
+            stroke: #3b82f6;
+            stroke-width: 3px;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+        }
+        .node-drop-target rect {
+            fill: #dbeafe !important;
+            stroke: #3b82f6 !important;
+            stroke-dasharray: 4;
+            animation: dash 1s linear infinite;
+        }
+        @keyframes dash {
+            to { stroke-dashoffset: -8; }
+        }
+        .connection {
+            fill: none;
+            stroke-width: 2.5;
+            transition: d 0.4s ease, stroke 0.3s;
+        }
+        .node-content-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .node-display-text {
+            font-family: sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            text-align: center;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.4;
+            width: 100%;
+        }
+        .node-textarea {
+            background: transparent;
+            border: none;
+            outline: none;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            font-family: sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 0;
+            margin: 0;
+            resize: none;
+            line-height: 1.4;
+            display: block;
+            pointer-events: auto;
+        }
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+            z-index: 50;
+        }
+        .hidden-sidebar {
+            transform: translateX(-100%);
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #1e293b;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            transform: translateY(100px);
+            transition: transform 0.3s;
+            z-index: 100;
+        }
+        .toast.show {
+            transform: translateY(0);
+        }
+        kbd {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 1px 4px;
+            font-size: 10px;
+            color: #475569;
+        }
+        .layout-selector {
+            background: white;
+            padding: 4px;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            display: flex;
+            gap: 2px;
+        }
+        .layout-btn {
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .layout-btn-active {
+            background: #3b82f6;
+            color: white;
+        }
+        .layout-btn-inactive {
+            color: #64748b;
+        }
+        .layout-btn-inactive:hover {
+            background: #f1f5f9;
+        }
+        .zoom-controls {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 40;
+        }
+        .zoom-btn {
+            background: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .zoom-btn:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast" class="toast">保存されました</div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed top-0 left-0 h-full w-72 bg-white shadow-2xl p-4 flex flex-col hidden-sidebar">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">マイ・マップ</h2>
+            <button id="close-sidebar" class="p-1 hover:bg-gray-100 rounded">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+        
+        <button id="btn-new-map" class="w-full mb-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i> 新規作成
+        </button>
+
+        <div id="map-list" class="flex-1 overflow-y-auto space-y-2">
+            <!-- Map items will be injected here -->
+        </div>
+    </div>
+
+    <!-- UI Overlays -->
+    <div class="fixed top-4 left-4 z-40 flex flex-col gap-3">
+        <div class="flex gap-2 items-center">
+            <button id="btn-menu" class="bg-white p-3 rounded-full shadow-lg hover:bg-gray-50 transition">
+                <i data-lucide="menu" class="w-6 h-6 text-gray-700"></i>
+            </button>
+            <div id="map-title-display" class="bg-white px-6 py-2 rounded-full shadow-lg font-bold text-gray-700 flex items-center cursor-pointer hover:bg-gray-50 min-w-[150px]">
+                無題のマインドマップ
+            </div>
+        </div>
+        
+        <div class="layout-selector w-fit">
+            <button id="layout-list" class="layout-btn layout-btn-active" onclick="changeLayout('list')">リスト型</button>
+            <button id="layout-mind" class="layout-btn layout-btn-inactive" onclick="changeLayout('mindmap')">マインドマップ型</button>
+        </div>
+    </div>
+
+    <!-- Zoom Controls -->
+    <div class="zoom-controls">
+        <button class="zoom-btn" onclick="adjustZoom(0.1)" title="拡大">
+            <i data-lucide="zoom-in" class="w-5 h-5"></i>
+        </button>
+        <button class="zoom-btn" onclick="adjustZoom(-0.1)" title="縮小">
+            <i data-lucide="zoom-out" class="w-5 h-5"></i>
+        </button>
+        <button class="zoom-btn" onclick="resetZoom()" title="リセット">
+            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+        </button>
+    </div>
+
+    <!-- Bottom Toolbar -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-4 md:gap-6 border border-gray-100">
+        <button id="btn-add-child" class="flex flex-col items-center gap-1 group">
+            <div class="p-2 bg-blue-50 group-hover:bg-blue-100 rounded-lg text-blue-600 transition">
+                <i data-lucide="git-branch" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] font-bold text-gray-500">子を追加 <kbd>Tab</kbd></span>
+        </button>
+        <button id="btn-add-sibling" class="flex flex-col items-center gap-1 group">
+            <div class="p-2 bg-purple-50 group-hover:bg-purple-100 rounded-lg text-purple-600 transition">
+                <i data-lucide="list-plus" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] font-bold text-gray-500">隣を追加 <kbd>Enter</kbd></span>
+        </button>
+        <div class="w-px h-8 bg-gray-200"></div>
+        <button id="btn-delete" class="flex flex-col items-center gap-1 group text-red-500">
+            <div class="p-2 bg-red-50 group-hover:bg-red-100 rounded-lg transition">
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] font-bold text-gray-500">削除</span>
+        </button>
+        <div class="w-px h-8 bg-gray-200"></div>
+        <button id="btn-save" class="flex flex-col items-center gap-1 group text-green-600">
+            <div class="p-2 bg-green-50 group-hover:bg-green-100 rounded-lg transition">
+                <i data-lucide="save" class="w-5 h-5"></i>
+            </div>
+            <span class="text-[10px] font-bold text-gray-500">保存</span>
+        </button>
+    </div>
+
+    <!-- Canvas -->
+    <div id="canvas-container">
+        <svg id="svg-canvas" width="100%" height="100%">
+            <g id="viewport">
+                <g id="links-group"></g>
+                <g id="nodes-group"></g>
+            </g>
+        </svg>
+    </div>
+
+    <script type="module">
+        // --- Standalone Logic (LocalStorage) ---
+        const BRANCH_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+        
+        let state = {
+            maps: [],
+            currentMapId: null,
+            currentMapData: {
+                title: "無題のマインドマップ",
+                layout: "list",
+                nodes: [{ id: 'root', text: '中心トピック', parentId: null, level: 0, color: '#1e293b' }]
+            },
+            selectedNodeId: 'root',
+            editingNodeId: null,
+            panX: 0,
+            panY: 0,
+            scale: 1.0,
+            minScale: 0.2,
+            maxScale: 3.0,
+            isPanning: false,
+            isDraggingNode: false,
+            dragTarget: null,
+            dragOffset: { x: 0, y: 0 },
+            dragStartPosition: { x: 0, y: 0 },
+            hasMovedDuringDrag: false,
+            hoverNodeId: null,
+            lastMousePos: { x: 0, y: 0 },
+            lastPinchDist: 0,
+            autoSaveTimer: null
+        };
+
+        const svg = document.getElementById('svg-canvas');
+        const viewport = document.getElementById('viewport');
+        const nodesGroup = document.getElementById('nodes-group');
+        const linksGroup = document.getElementById('links-group');
+        const sidebar = document.getElementById('sidebar');
+
+        // --- Data Persistence (LocalStorage) ---
+        function loadMapList() {
+            const data = localStorage.getItem('mindmaps');
+            state.maps = data ? JSON.parse(data) : [];
+            renderMapList();
+        }
+
+        function saveCurrentMap(isAuto = false) {
+            const mapId = state.currentMapId || crypto.randomUUID();
+            const now = Date.now();
+            
+            const mapData = {
+                id: mapId,
+                title: state.currentMapData.title,
+                layout: state.currentMapData.layout || 'list',
+                nodes: state.currentMapData.nodes,
+                updatedAt: now
+            };
+
+            const existingIdx = state.maps.findIndex(m => m.id === mapId);
+            if (existingIdx >= 0) {
+                state.maps[existingIdx] = mapData;
+            } else {
+                state.maps.push(mapData);
+            }
+
+            localStorage.setItem('mindmaps', JSON.stringify(state.maps));
+            state.currentMapId = mapId;
+            loadMapList();
+            if (!isAuto) showToast("保存されました");
+        }
+
+        function loadMap(id) {
+            const map = state.maps.find(m => m.id === id);
+            if (map) {
+                state.currentMapId = id;
+                state.currentMapData = JSON.parse(JSON.stringify(map));
+                state.selectedNodeId = 'root';
+                state.editingNodeId = null;
+                state.scale = 1.0;
+                updateLayoutUI();
+                centerViewport();
+                render();
+                toggleSidebar(false);
+            }
+        }
+
+        function deleteMap(id) {
+            state.maps = state.maps.filter(m => m.id !== id);
+            localStorage.setItem('mindmaps', JSON.stringify(state.maps));
+            if (state.currentMapId === id) {
+                state.currentMapId = null;
+                state.currentMapData = { title: "新しいマインドマップ", layout: "list", nodes: [{ id: 'root', text: '中心トピック', parentId: null, level: 0, color: '#1e293b' }] };
+                state.selectedNodeId = 'root';
+                centerViewport();
+                render();
+            }
+            loadMapList();
+        }
+
+        // --- Layout Engine ---
+        function calculateLayout() {
+            const nodes = state.currentMapData.nodes;
+            const layout = state.currentMapData.layout || 'list';
+            if (layout === 'mindmap') {
+                let yOffset = 0;
+                const processNode = (nodeId, level, x) => {
+                    const node = nodes.find(n => n.id === nodeId);
+                    if (!node) return 0;
+                    const children = nodes.filter(n => n.parentId === nodeId);
+                    node.level = level;
+                    node.x = x;
+                    
+                    // 動的なサイズを取得
+                    const size = measureNodeSize(node.text);
+                    const spacingY = size.height + 40;
+
+                    if (children.length === 0) { 
+                        node.y = yOffset; 
+                        yOffset += spacingY; 
+                        return node.y; 
+                    }
+                    const childYs = children.map(child => processNode(child.id, level + 1, x + 250));
+                    node.y = (Math.min(...childYs) + Math.max(...childYs)) / 2;
+                    return node.y;
+                };
+                yOffset = 0;
+                processNode('root', 0, 0);
+                const root = nodes.find(n => n.id === 'root');
+                const offset = root ? root.y : 0;
+                nodes.forEach(n => n.y -= offset);
+            } else {
+                let currentY = 0;
+                const processNode = (nodeId, level) => {
+                    const node = nodes.find(n => n.id === nodeId);
+                    if (!node) return;
+                    
+                    const size = measureNodeSize(node.text);
+                    
+                    node.level = level; 
+                    node.x = level * 60; 
+                    node.y = currentY; 
+                    currentY += (size.height + 40);
+                    
+                    nodes.filter(n => n.parentId === nodeId).forEach(child => processNode(child.id, level + 1));
+                };
+                processNode('root', 0);
+            }
+        }
+
+        function centerViewport() {
+            state.panX = window.innerWidth / (state.currentMapData.layout === 'mindmap' ? 4 : 3);
+            state.panY = window.innerHeight / (state.currentMapData.layout === 'mindmap' ? 2 : 4);
+        }
+
+        window.changeLayout = (layout) => {
+            state.currentMapData.layout = layout; updateLayoutUI(); render(); triggerAutoSave();
+        };
+
+        function updateLayoutUI() {
+            const layout = state.currentMapData.layout || 'list';
+            document.getElementById('layout-list').className = `layout-btn ${layout === 'list' ? 'layout-btn-active' : 'layout-btn-inactive'}`;
+            document.getElementById('layout-mind').className = `layout-btn ${layout === 'mindmap' ? 'layout-btn-active' : 'layout-btn-inactive'}`;
+        }
+
+        function addNewNode(parentId) {
+            const nodes = state.currentMapData.nodes;
+            const parent = nodes.find(n => n.id === parentId);
+            if (!parent) return;
+            let nodeColor = parent.id === 'root' ? BRANCH_COLORS[nodes.filter(n => n.parentId === 'root').length % BRANCH_COLORS.length] : parent.color;
+            const newNode = { id: crypto.randomUUID(), text: '新しい項目', parentId: parent.id, level: parent.level + 1, color: nodeColor };
+            nodes.push(newNode);
+            state.selectedNodeId = newNode.id;
+            state.editingNodeId = newNode.id;
+            render(); triggerAutoSave();
+        }
+
+        function addSiblingNode() {
+            const current = state.currentMapData.nodes.find(n => n.id === state.selectedNodeId);
+            if (!current || current.id === 'root') { addNewNode('root'); return; }
+            addNewNode(current.parentId);
+        }
+
+        function deleteNode() {
+            if (state.selectedNodeId === 'root') return;
+            const toDelete = new Set();
+            const findChildren = (pid) => { toDelete.add(pid); state.currentMapData.nodes.forEach(n => { if (n.parentId === pid) findChildren(n.id); }); };
+            findChildren(state.selectedNodeId);
+            state.currentMapData.nodes = state.currentMapData.nodes.filter(n => !toDelete.has(n.id));
+            state.selectedNodeId = 'root'; state.editingNodeId = null;
+            render(); triggerAutoSave();
+        }
+
+        function finishEditing(nodeId, newText) {
+            const node = state.currentMapData.nodes.find(n => n.id === nodeId);
+            if (node) {
+                node.text = newText || (node.id === 'root' ? '中心トピック' : 'テキストなし');
+                if (node.id === 'root') state.currentMapData.title = node.text;
+            }
+            state.editingNodeId = null; render(); triggerAutoSave();
+        }
+
+        function isDescendant(potentialChildId, potentialParentId) {
+            if (potentialChildId === potentialParentId) return true;
+            let current = state.currentMapData.nodes.find(n => n.id === potentialParentId);
+            while (current && current.parentId) { if (current.parentId === potentialChildId) return true; current = state.currentMapData.nodes.find(n => n.id === current.parentId); }
+            return false;
+        }
+
+        function measureNodeSize(text) {
+            const dummy = document.createElement('div');
+            dummy.className = 'node-display-text'; dummy.style.visibility = 'hidden'; dummy.style.position = 'absolute'; dummy.style.width = '200px'; dummy.textContent = text;
+            document.body.appendChild(dummy);
+            const w = Math.max(Math.min(dummy.scrollWidth + 32, 220), 120), h = Math.max(dummy.scrollHeight + 24, 44);
+            document.body.removeChild(dummy); return { width: w, height: h };
+        }
+
+        function getSVGPoint(clientX, clientY) {
+            const pt = svg.createSVGPoint(); pt.x = clientX; pt.y = clientY;
+            return pt.matrixTransform(viewport.getScreenCTM().inverse());
+        }
+
+        function updateSubtreeColor(nodeId, newColor) {
+            const node = state.currentMapData.nodes.find(n => n.id === nodeId);
+            if (node) {
+                node.color = newColor;
+                state.currentMapData.nodes.filter(n => n.parentId === nodeId).forEach(child => {
+                    updateSubtreeColor(child.id, newColor);
+                });
+            }
+        }
+
+        window.adjustZoom = (delta) => {
+            const oldScale = state.scale;
+            state.scale = Math.max(state.minScale, Math.min(state.maxScale, state.scale + delta));
+            render();
+        };
+
+        window.resetZoom = () => {
+            state.scale = 1.0;
+            centerViewport();
+            render();
+        };
+
+        function triggerAutoSave() {
+            if (state.autoSaveTimer) clearTimeout(state.autoSaveTimer);
+            state.autoSaveTimer = setTimeout(() => saveCurrentMap(true), 3000);
+        }
+
+        // --- Layoutのみを更新する（再描画せずに位置と線を調整） ---
+        function updateVisualLayout() {
+            calculateLayout();
+            
+            // ノードの位置を更新
+            state.currentMapData.nodes.forEach(node => {
+                const g = nodesGroup.querySelector(`g[data-id="${node.id}"]`);
+                if (g) {
+                    g.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+                }
+            });
+
+            // 線の形を更新
+            state.currentMapData.nodes.forEach(node => {
+                if (node.parentId) {
+                    const parent = state.currentMapData.nodes.find(n => n.id === node.parentId);
+                    const path = linksGroup.querySelector(`path[data-from="${parent.id}"][data-to="${node.id}"]`);
+                    if (path && parent) {
+                        path.setAttribute('d', createBezierPath(parent.x, parent.y, node.x, node.y, state.currentMapData.layout));
+                    }
+                }
+            });
+        }
+
+        function render() {
+            if (!state.isDraggingNode) calculateLayout();
+            nodesGroup.innerHTML = ''; linksGroup.innerHTML = '';
+            document.getElementById('map-title-display').textContent = state.currentMapData.title;
+            viewport.setAttribute('transform', `translate(${state.panX}, ${state.panY}) scale(${state.scale})`);
+            const nodes = state.currentMapData.nodes;
+
+            nodes.forEach(node => {
+                if (node.parentId) {
+                    const parent = nodes.find(n => n.id === node.parentId);
+                    if (parent) {
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttribute('d', createBezierPath(parent.x, parent.y, node.x, node.y, state.currentMapData.layout));
+                        path.setAttribute('class', 'connection'); 
+                        path.setAttribute('stroke', node.color);
+                        path.setAttribute('data-from', parent.id);
+                        path.setAttribute('data-to', node.id);
+                        if (state.isDraggingNode && (node.id === state.dragTarget?.id || isDescendant(state.dragTarget?.id, node.id))) path.setAttribute('opacity', '0.3');
+                        linksGroup.appendChild(path);
+                    }
+                }
+            });
+
+            nodes.forEach(node => {
+                const isEditing = state.editingNodeId === node.id;
+                const isDragging = state.isDraggingNode && state.dragTarget?.id === node.id;
+                const isHovered = state.hoverNodeId === node.id;
+                const { width, height } = measureNodeSize(node.text);
+                
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                let className = `node ${state.selectedNodeId === node.id ? 'node-active' : ''}`;
+                if (isDragging) className += ' node-dragging';
+                if (isHovered) className += ' node-drop-target';
+                g.setAttribute('class', className); 
+                g.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+                g.setAttribute('data-id', node.id);
+
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', -width / 2); rect.setAttribute('y', -height / 2); rect.setAttribute('width', width); rect.setAttribute('height', height); rect.setAttribute('rx', 12);
+                rect.setAttribute('fill', node.level === 0 ? '#1e293b' : 'white'); rect.setAttribute('stroke', node.color); rect.setAttribute('stroke-width', node.level === 0 ? 0 : 2);
+                g.appendChild(rect);
+
+                const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+                fo.setAttribute('x', -width / 2); fo.setAttribute('y', -height / 2); fo.setAttribute('width', width); fo.setAttribute('height', height);
+                const wrapper = document.createElement('div'); wrapper.className = 'node-content-wrapper';
+
+                if (isEditing) {
+                    const textarea = document.createElement('textarea'); textarea.className = 'node-textarea'; textarea.value = node.text; textarea.style.color = node.level === 0 ? 'white' : '#1e293b';
+                    
+                    // リアルタイムリサイズ
+                    textarea.oninput = () => {
+                        node.text = textarea.value;
+                        const newSize = measureNodeSize(node.text);
+                        
+                        // 自身のパーツを更新
+                        rect.setAttribute('width', newSize.width);
+                        rect.setAttribute('height', newSize.height);
+                        rect.setAttribute('x', -newSize.width / 2);
+                        rect.setAttribute('y', -newSize.height / 2);
+                        fo.setAttribute('width', newSize.width);
+                        fo.setAttribute('height', newSize.height);
+                        fo.setAttribute('x', -newSize.width / 2);
+                        fo.setAttribute('y', -newSize.height / 2);
+                        
+                        // 全体のレイアウトを更新
+                        updateVisualLayout();
+                    };
+
+                    textarea.onblur = () => finishEditing(node.id, textarea.value);
+                    textarea.onkeydown = (e) => {
+                        if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); finishEditing(node.id, textarea.value); }
+                        if (e.key === 'Escape') { state.editingNodeId = null; render(); }
+                    };
+                    wrapper.appendChild(textarea); setTimeout(() => { textarea.focus(); textarea.select(); }, 10);
+                } else {
+                    const display = document.createElement('div'); display.className = 'node-display-text'; display.style.color = node.level === 0 ? 'white' : '#1e293b';
+                    display.textContent = node.text; wrapper.appendChild(display);
+                }
+                fo.appendChild(wrapper); g.appendChild(fo); nodesGroup.appendChild(g);
+
+                g.addEventListener('pointerdown', (e) => {
+                    e.stopPropagation();
+                    if (isEditing) return;
+                    
+                    const pt = getSVGPoint(e.clientX, e.clientY);
+                    state.dragStartPosition = pt;
+                    state.hasMovedDuringDrag = false;
+                    
+                    const wasAlreadySelected = (state.selectedNodeId === node.id);
+                    state.selectedNodeId = node.id;
+                    
+                    // ドラッグ準備
+                    state.isDraggingNode = true;
+                    state.dragTarget = node;
+                    state.dragOffset = { x: pt.x - node.x, y: pt.y - node.y };
+                    
+                    render();
+                });
+            });
+            lucide.createIcons();
+        }
+
+        function createBezierPath(x1, y1, x2, y2, layout) {
+            const dx = (x2 - x1) / 2;
+            if (layout === 'list') return `M ${x1} ${y1} L ${x1} ${y2} L ${x2} ${y2}`;
+            return `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x1 + dx} ${y2}, ${x2} ${y2}`;
+        }
+
+        // --- Interaction Handlers ---
+        svg.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = -e.deltaY * 0.001;
+            const zoomPoint = getSVGPoint(e.clientX, e.clientY);
+            const oldScale = state.scale;
+            const newScale = Math.max(state.minScale, Math.min(state.maxScale, state.scale + delta));
+            
+            state.panX -= (zoomPoint.x * newScale - zoomPoint.x * oldScale);
+            state.panY -= (zoomPoint.y * newScale - zoomPoint.y * oldScale);
+            state.scale = newScale;
+            render();
+        }, { passive: false });
+
+        svg.onpointerdown = (e) => {
+            if (state.isDraggingNode) return;
+            state.isPanning = true; state.lastMousePos = { x: e.clientX, y: e.clientY };
+            state.editingNodeId = null; render();
+        };
+
+        svg.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                state.isPanning = false;
+                state.lastPinchDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            }
+        });
+
+        svg.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                const zoomFactor = dist / state.lastPinchDist;
+                const touchCenterX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                const touchCenterY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                const zoomPoint = getSVGPoint(touchCenterX, touchCenterY);
+                const oldScale = state.scale;
+                const newScale = Math.max(state.minScale, Math.min(state.maxScale, state.scale * zoomFactor));
+                state.panX -= (zoomPoint.x * newScale - zoomPoint.x * oldScale);
+                state.panY -= (zoomPoint.y * newScale - zoomPoint.y * oldScale);
+                state.scale = newScale;
+                state.lastPinchDist = dist;
+                render();
+            }
+        }, { passive: false });
+
+        window.onpointermove = (e) => {
+            if (state.isPanning) {
+                state.panX += e.clientX - state.lastMousePos.x; state.panY += e.clientY - state.lastMousePos.y;
+                state.lastMousePos = { x: e.clientX, y: e.clientY }; render();
+            } else if (state.isDraggingNode && state.dragTarget) {
+                const pt = getSVGPoint(e.clientX, e.clientY);
+                const dist = Math.sqrt(Math.pow(pt.x - state.dragStartPosition.x, 2) + Math.pow(pt.y - state.dragStartPosition.y, 2));
+                if (dist > 3) state.hasMovedDuringDrag = true;
+
+                if (state.hasMovedDuringDrag) {
+                    if (state.dragTarget.id !== 'root') {
+                        state.dragTarget.x = pt.x - state.dragOffset.x; 
+                        state.dragTarget.y = pt.y - state.dragOffset.y;
+                    }
+
+                    let foundHover = null;
+                    state.currentMapData.nodes.forEach(n => {
+                        if (n.id === state.dragTarget.id || isDescendant(state.dragTarget.id, n.id)) return;
+                        const s = measureNodeSize(n.text);
+                        if (Math.abs(pt.x - n.x) < s.width / 2 && Math.abs(pt.y - n.y) < s.height / 2) foundHover = n.id;
+                    });
+                    state.hoverNodeId = foundHover; render();
+                }
+            }
+        };
+
+        window.onpointerup = () => {
+            if (state.isDraggingNode && state.dragTarget) {
+                const targetId = state.dragTarget.id;
+                if (state.hasMovedDuringDrag) {
+                    if (state.hoverNodeId && targetId !== 'root') {
+                        const newParent = state.currentMapData.nodes.find(n => n.id === state.hoverNodeId);
+                        state.dragTarget.parentId = newParent.id;
+                        const newColor = newParent.id === 'root' ? BRANCH_COLORS[state.currentMapData.nodes.filter(n => n.parentId === 'root').indexOf(state.dragTarget) % BRANCH_COLORS.length] : newParent.color;
+                        updateSubtreeColor(targetId, newColor);
+                        triggerAutoSave();
+                    }
+                } else {
+                    state.editingNodeId = targetId;
+                }
+                state.isDraggingNode = false; state.dragTarget = null; state.hoverNodeId = null; render();
+            }
+            state.isPanning = false;
+        };
+
+        window.onkeydown = (e) => {
+            if (state.editingNodeId) return;
+            if (e.key === 'Tab') { e.preventDefault(); addNewNode(state.selectedNodeId); }
+            if (e.key === 'Enter') { e.preventDefault(); addSiblingNode(); }
+            if (e.key === 'Delete' || e.key === 'Backspace') { if (confirm('削除しますか？')) deleteNode(); }
+        };
+
+        // --- UI Events ---
+        document.getElementById('btn-add-child').onclick = () => addNewNode(state.selectedNodeId);
+        document.getElementById('btn-add-sibling').onclick = addSiblingNode;
+        document.getElementById('btn-delete').onclick = deleteNode;
+        document.getElementById('btn-save').onclick = () => saveCurrentMap();
+        document.getElementById('btn-menu').onclick = () => toggleSidebar(true);
+        document.getElementById('close-sidebar').onclick = () => toggleSidebar(false);
+        document.getElementById('btn-new-map').onclick = () => {
+            if (confirm('新規作成しますか？')) {
+                state.currentMapId = null;
+                state.currentMapData = { title: "新しいマインドマップ", layout: "list", nodes: [{ id: 'root', text: '中心トピック', parentId: null, level: 0, color: '#1e293b' }] };
+                state.selectedNodeId = 'root'; state.scale = 1.0; centerViewport(); render(); toggleSidebar(false);
+            }
+        };
+        document.getElementById('map-title-display').onclick = () => { state.selectedNodeId = 'root'; state.editingNodeId = 'root'; render(); };
+
+        function renderMapList() {
+            const list = document.getElementById('map-list'); list.innerHTML = '';
+            state.maps.sort((a,b) => b.updatedAt - a.updatedAt).forEach(m => {
+                const btn = document.createElement('div'); btn.className = 'group flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 cursor-pointer transition';
+                btn.innerHTML = `<span class="truncate font-medium text-gray-700">${m.title}</span><button class="delete-map opacity-0 group-hover:opacity-100 p-1 text-red-400 hover:text-red-600 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
+                btn.onclick = (e) => { if (!e.target.closest('.delete-map')) loadMap(m.id); };
+                btn.querySelector('.delete-map').onclick = async (e) => { e.stopPropagation(); if (confirm('削除しますか？')) deleteMap(m.id); };
+                list.appendChild(btn);
+            });
+            lucide.createIcons();
+        }
+
+        function toggleSidebar(show) { show ? sidebar.classList.remove('hidden-sidebar') : sidebar.classList.add('hidden-sidebar'); }
+        function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+        window.onload = () => {
+            loadMapList();
+            if (state.maps.length > 0) {
+                loadMap(state.maps.sort((a,b) => b.updatedAt - a.updatedAt)[0].id);
+            } else {
+                centerViewport();
+                render();
+            }
+            lucide.createIcons();
+        };
+        window.onresize = () => render();
+    </script>
+</body>
+</html>
