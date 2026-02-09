@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古文単語学習アプリ</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Zen Old Mincho (明朝体) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Zen Old Mincho"', 'serif'],
+                        sans: ['"Helvetica Neue"', 'Arial', 'sans-serif'],
+                    },
+                    colors: {
+                        'washi': '#fcfaf2',
+                        'aitetsu': '#393f4c', // 藍鉄色
+                        'matcha': '#c5c56a',
+                        'kincha': '#c7802d', // 金茶
+                        'sumi': '#2b2b2b',
+                        'gofun': '#fffffc', // 胡粉色
+                        'akabeni': '#cb4829', // 赤紅
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #fcfaf2;
+        }
+        /* スクロールバーのカスタマイズ */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af; 
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 10px -2px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+</head>
+<body class="bg-washi text-sumi font-serif min-h-screen relative">
+    <!-- 背景ノイズテクスチャ -->
+    <div class="fixed inset-0 bg-noise pointer-events-none z-0 mix-blend-multiply"></div>
+    
+    <div id="root" class="relative z-10"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useLayoutEffect, useMemo, useCallback } = React;
+
+        // アイコン (Lucide)
+        const Icons = {
+            BookOpen: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+            ),
+            Shuffle: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <polyline points="16 3 21 3 21 8"></polyline>
+                    <line x1="4" y1="20" x2="21" y2="3"></line>
+                    <polyline points="21 16 21 21 16 21"></polyline>
+                    <line x1="15" y1="15" x2="21" y2="21"></line>
+                    <line x1="4" y1="4" x2="9" y2="9"></line>
+                </svg>
+            ),
+            RotateCcw: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                </svg>
+            ),
+            Feather: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+                    <line x1="16" y1="8" x2="2" y2="22"></line>
+                    <line x1="17.5" y1="15" x2="9" y2="15"></line>
+                </svg>
+            ),
+            Eye: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+            ),
+            EyeOff: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+            ),
+            ArrowRight: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            ),
+            ArrowLeft: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            ),
+            Search: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            ),
+            CheckCircle: ({ size = 24, className = "", filled = false }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            ),
+            ExternalLink: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            ),
+            HelpCircle: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            ),
+            ChevronDown: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            ),
+             ChevronUp: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+            )
+        };
+
+        // データ定義
+        const initialData = [
+            {
+                id: 1,
+                title: "貴族の訪問",
+                sentence: "あてなる人のおはすれば、人々げに激しくののしる。",
+                translation: "上品な（身分が高い）人がいらっしゃるので、人々は本当に激しく大声で騒ぐ。",
+                words: [
+                { term: "あてなり", meaning: "身分が高い、上品だ" },
+                { term: "おはす", meaning: "いらっしゃる（尊敬語）" },
+                { term: "げに", meaning: "本当に、なるほど" },
+                { term: "ののしる", meaning: "大声で騒ぐ、評判になる" }
+                ]
+            },
+            {
+                id: 2,
+                title: "親子の情愛",
+                sentence: "いみじくうつくしき児をながめつつ、かなしと思ふ。",
+                translation: "たいそう可愛らしい子供をぼんやり見つめて、愛おしいと思う。",
+                words: [
+                { term: "いみじ", meaning: "たいそう、大変（良い・悪い両方）" },
+                { term: "うつくし", meaning: "かわいい、愛らしい" },
+                { term: "ながむ", meaning: "物思いにふける、ぼんやり見る" },
+                { term: "かなし", meaning: "愛おしい、かわいい" }
+                ]
+            },
+            {
+                id: 3,
+                title: "病床の祈り",
+                sentence: "あやしき家にて、病おこたるをねんじつつ、ゆかしきことを待つ。",
+                translation: "粗末な家で、病気が良くなるのを我慢して祈りながら、知りたい（見たい）ことを待つ。",
+                words: [
+                { term: "あやし", meaning: "不思議だ、身分が低い、粗末だ" },
+                { term: "おこたる", meaning: "病気が良くなる" },
+                { term: "ねんず", meaning: "我慢する、祈る" },
+                { term: "ゆかし", meaning: "見たい、聞きたい、知りたい" }
+                ]
+            },
+            {
+                id: 4,
+                title: "不安な道中",
+                sentence: "おぼつかなき道なれど、いつしかと急げば、やがて里に着きぬ。",
+                translation: "はっきりせず不安な道であるが、早く（着きたい）と急ぐと、そのまま（すぐに）里に着いた。",
+                words: [
+                { term: "おぼつかなし", meaning: "はっきりしない、不安だ、待ち遠しい" },
+                { term: "いつしか", meaning: "早く" },
+                { term: "やがて", meaning: "そのまま、すぐに" }
+                ]
+            },
+            {
+                id: 5,
+                title: "驚きの光景",
+                sentence: "ありがたき花を見て、あさましきまでおどろきぬ。",
+                translation: "めったにない（珍しい）花を見て、驚きあきれるほどまでハッと気づいた。",
+                words: [
+                { term: "ありがたし", meaning: "めったにない、珍しい" },
+                { term: "あさまし", meaning: "驚きあきれる、情けない" },
+                { term: "おどろく", meaning: "ハッと気づく、目が覚める" }
+                ]
+            },
+            {
+                id: 6,
+                title: "四季の趣",
+                sentence: "冬の月はさらなり。いとつきづきしけれど、さらに人見えず。",
+                translation: "冬の月は言うまでもない。とても似つかわしいけれど、まったく人が見えない。",
+                words: [
+                { term: "さらなり", meaning: "言うまでもない" },
+                { term: "いと", meaning: "とても" },
+                { term: "つきづきし", meaning: "ふさわしい、似つかわしい" },
+                { term: "さらに〜（打消）", meaning: "まったく〜ない" }
+                ]
+            },
+            {
+                id: 7,
+                title: "謙譲の作法",
+                sentence: "宿へまうで、文をたてまつりて、よしなきことを聞こゆ。",
+                translation: "宿へ参上して、手紙を差し上げて、つまらないことを申し上げる。",
+                words: [
+                { term: "まうづ", meaning: "参上する、参詣する" },
+                { term: "たてまつる", meaning: "差し上げる、〜し申し上げる" },
+                { term: "聞こゆ", meaning: "申し上げる（謙譲語）" }
+                ]
+            },
+            {
+                id: 8,
+                title: "暇つぶしの読書",
+                sentence: "つれづれなりければ、ついでにをかしき物語をあまた読む。",
+                translation: "退屈だったので、機会があるごとに興味深い物語をたくさん読む。",
+                words: [
+                { term: "つれづれなり", meaning: "退屈だ、手持ち無沙汰だ" },
+                { term: "ついで", meaning: "順序、機会" },
+                { term: "をかし", meaning: "趣がある、おもしろい" },
+                { term: "あまた", meaning: "たくさん、大勢" }
+                ]
+            },
+            {
+                id: 9,
+                title: "道理の究明",
+                sentence: "さるべき人をとぶらひ、事の理由（わけ）をあきらむれば、げに納得しぬ。",
+                translation: "しかるべき（立派な）人を訪ね、事の理由を明らかにしたところ、本当になるほどと納得した。",
+                words: [
+                { term: "さるべき", meaning: "しかるべき、立派な" },
+                { term: "とぶらふ", meaning: "訪ねる、見舞う、供養する" },
+                { term: "あきらむ", meaning: "明らかにする" },
+                { term: "げに", meaning: "本当に、なるほど" }
+                ]
+            },
+            {
+                id: 10,
+                title: "心の乱れ",
+                sentence: "おろかなる心にて、むげに泣きまどふは、かたはらいたし。",
+                translation: "いい加減な心で、ひどく泣きわめくのは、傍らで見ていて苦々しい（恥ずかしい）。",
+                words: [
+                { term: "おろかなり", meaning: "いい加減だ、不十分だ" },
+                { term: "むげに", meaning: "むやみに、ひどく" },
+                { term: "まどふ", meaning: "迷う、ひどく〜する" },
+                { term: "かたはらいたし", meaning: "苦々しい、恥ずかしい" }
+                ]
+            },
+            {
+                id: 11,
+                title: "強引な命令",
+                sentence: "「な泣きそ」とのたまへど、いふもおろかなり。",
+                translation: "「泣いてくれるな」とおっしゃるけれど、（その悲しさは）言い尽くせない。",
+                words: [
+                { term: "な〜そ", meaning: "〜するな、〜しないでくれ" },
+                { term: "のたまふ", meaning: "おっしゃる（尊敬語）" },
+                { term: "いふもおろかなり", meaning: "言い尽くせない" }
+                ]
+            },
+            {
+                id: 12,
+                title: "季節の移ろい",
+                sentence: "つとめて見れば、霧のあからさまなりしが、おのづから消えぬ。",
+                translation: "早朝に見ると、霧がほんのちょっと（一時的）であったのが、自然と消えた。",
+                words: [
+                { term: "つとめて", meaning: "早朝、翌朝" },
+                { term: "あからさまなり", meaning: "ほんのちょっと、一時的だ" },
+                { term: "おのづから", meaning: "自然に、たまたま" }
+                ]
+            },
+            {
+                id: 13,
+                title: "接客と立ち振る舞い",
+                sentence: "多くの人がわたりて、客をもてなすよしあり。",
+                translation: "多くの人がやって来て、客を振る舞う（世話をする）ための由緒（方法）がある。",
+                words: [
+                { term: "わたる", meaning: "行く、来る、通る" },
+                { term: "もてなす", meaning: "振る舞う、世話をする" },
+                { term: "よし", meaning: "理由、由緒、風情、方法" }
+                ]
+            },
+            {
+                id: 14,
+                title: "称賛と引け目",
+                sentence: "はづかしきほどめでたき人は、見ていてこころぐるし。",
+                translation: "（こちらが恥ずかしくなるほど）立派で、すばらしい人は、見ていて（こちらが申し訳なくて）心苦しい。",
+                words: [
+                { term: "はづかし", meaning: "恥ずかしい、立派だ" },
+                { term: "めでたし", meaning: "すばらしい、見事だ" },
+                { term: "こころぐるし", meaning: "心苦しい、気の毒だ" }
+                ]
+            },
+            {
+                id: 15,
+                title: "昼夜を問わぬ風流",
+                sentence: "ひねもす歌を詠み、よもすがら月を愛で、かたへの人と語る。",
+                translation: "一日中歌を詠み、一晩中月を愛でて、そば（仲間）の人と語り合う。",
+                words: [
+                { term: "ひねもす", meaning: "一日中" },
+                { term: "よもすがら", meaning: "一晩中" },
+                { term: "かたへ", meaning: "そば、片方、仲間" }
+                ]
+            },
+            {
+                id: 16,
+                title: "耐えがたい別れ",
+                sentence: "涙をこらへあへず、愛しき人におくれぬるはわびし。",
+                translation: "涙を堪えきれず、愛する人に先立たれて（取り残されて）しまったのは、つらくやりきれない。",
+                words: [
+                { term: "あふ（敢ふ）", meaning: "耐える、〜しきれない" },
+                { term: "おくる", meaning: "遅れる、先立たれる" },
+                { term: "わびし", meaning: "つらい、やりきれない" }
+                ]
+            },
+            {
+                id: 17,
+                title: "評価の基準",
+                sentence: "よしと思ふことも、人にはわろく聞こえ、よろしきこともあし。",
+                translation: "良いと思うことも、他人には良くなく聞こえ、悪くないことも悪い。",
+                words: [
+                { term: "よし", meaning: "良い" },
+                { term: "よろし", meaning: "悪くない、普通だ" },
+                { term: "わろし", meaning: "良くない、感心しない" },
+                { term: "あし", meaning: "悪い" }
+                ]
+            },
+            {
+                id: 18,
+                title: "世間の評判",
+                sentence: "おほかた、つゆ知らぬ人のおとにきくははしたなし。",
+                translation: "だいたいにおいて、少しも知らない人の噂を聞くのは、中途半端で（きまりが悪い）。",
+                words: [
+                { term: "おほかた", meaning: "だいたい、一般に" },
+                { term: "つゆ〜（打消）", meaning: "少しも〜ない" },
+                { term: "おとにきく", meaning: "噂に聞く、評判を聞く" },
+                { term: "はしたなし", meaning: "中途半端だ、きまり悪い" }
+                ]
+            },
+            {
+                id: 19,
+                title: "外見と準備",
+                sentence: "さうぞくを整へ、具して山へ行くも、道かしかまし。",
+                translation: "装束（衣服）を整え、連れて山へ行くけれど、道がやかましい。",
+                words: [
+                { term: "さうぞく", meaning: "衣服、衣装" },
+                { term: "具す", meaning: "連れる、伴う、備える" },
+                { term: "かしかまし", meaning: "やかましい、騒がしい" }
+                ]
+            },
+            {
+                id: 20,
+                title: "本心と誠実さ",
+                sentence: "ほいはまめなる道なれど、心はあだなり。",
+                translation: "本来の志は誠実な道であるけれど、心は浮ついている（不誠実だ）。",
+                words: [
+                { term: "ほい", meaning: "本来の目的" },
+                { term: "まめなり", meaning: "誠実だ、真面目だ" },
+                { term: "あだなり", meaning: "浮気だ、はかない、無駄だ" }
+                ]
+            },
+            {
+                id: 21,
+                title: "過去を懐かしむ",
+                sentence: "さて、さすがに昔のもとを慕ひて、すなはち泣きぬ。",
+                translation: "そうして、そうは言ってもやはり昔の根元（場所）を慕って、すぐに泣いてしまった。",
+                words: [
+                { term: "さて", meaning: "そのまま、そうして" },
+                { term: "さすがに", meaning: "そうは言ってもやはり" },
+                { term: "もと", meaning: "下、根元、もともとの所" },
+                { term: "すなはち", meaning: "すぐに" }
+                ]
+            },
+            {
+                id: 22,
+                title: "畏れと愚かさ",
+                sentence: "かたじけなくも、をこなる心をおどろおどろしく語る。",
+                translation: "もったいなく（恐れ多く）も、愚かな心を大げさに語る。",
+                words: [
+                { term: "かたじけなし", meaning: "もったいない、恐れ多い" },
+                { term: "をこなり", meaning: "愚かだ、馬鹿げている" },
+                { term: "おどろおどろし", meaning: "大げさだ、気味が悪い" }
+                ]
+            },
+            {
+                id: 23,
+                title: "思いがけない再会",
+                sentence: "なかなかに、としごろの友に会ふは、いとほし。",
+                translation: "なまじっか（かえって）、長年の友に会うのは、気の毒だ（または、いとしい）。",
+                words: [
+                { term: "なかなか", meaning: "なまじっか、かえって" },
+                { term: "としごろ", meaning: "長年、ここ数年" },
+                { term: "いとほし", meaning: "気の毒だ、かわいい" }
+                ]
+            },
+            {
+                id: 24,
+                title: "評判と不安",
+                sentence: "かしこき人のおぼえあるは、うしろめたし。",
+                translation: "恐れ多い（優れた）人が寵愛を受けているのは、不安だ（気がかりだ）。",
+                words: [
+                { term: "かしこし", meaning: "恐れ多い、優れている" },
+                { term: "おぼえ", meaning: "寵愛、評判" },
+                { term: "うしろめたし", meaning: "不安だ、気がかりだ" }
+                ]
+            },
+            {
+                id: 25,
+                title: "景色と現実",
+                sentence: "いたう寒ければ、かたちもむつかしくなりぬ。",
+                translation: "ひどく寒いので、容貌（顔立ち）も不快になってしまった。",
+                words: [
+                { term: "いたう", meaning: "ひどく、はなはだしく" },
+                { term: "かたち", meaning: "容貌、顔立ち" },
+                { term: "むつかし", meaning: "不快だ、わずらわしい" }
+            ]
+        }
+        ];
+
+        // 使い方ガイドコンポーネント
+        const UsageGuide = () => {
+            const [isOpen, setIsOpen] = useState(false);
+
+            return (
+                <div className="max-w-3xl mx-auto px-4 mt-6">
+                    <div className="bg-white/80 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                        <button 
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+                        >
+                            <div className="flex items-center gap-2 text-aitetsu font-bold">
+                                <Icons.HelpCircle size={20} className="text-matcha" />
+                                <span>アプリの使い方を見る</span>
+                            </div>
+                            {isOpen ? <Icons.ChevronUp size={20} className="text-gray-400" /> : <Icons.ChevronDown size={20} className="text-gray-400" />}
+                        </button>
+                        
+                        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <div className="p-4 pt-0 text-sm text-gray-700 leading-relaxed border-t border-gray-100 bg-gray-50/50">
+                                <ul className="space-y-3 font-sans mt-3">
+                                    <li className="flex items-start gap-2">
+                                        <div className="bg-white p-1 rounded border border-gray-200 text-aitetsu mt-0.5">
+                                            単語
+                                        </div>
+                                        <div>
+                                            <span className="font-bold">タップで意味を表示</span>
+                                            <p className="text-xs text-gray-500 mt-0.5">単語カードをタップすると意味が表示されます。</p>
+                                        </div>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <div className="text-matcha mt-0.5">
+                                            <Icons.CheckCircle size={20} filled={true} />
+                                        </div>
+                                        <div>
+                                            <span className="font-bold">チェック機能（保存されます）</span>
+                                            <p className="text-xs text-gray-500 mt-0.5">単語の右上の丸をタップすると、重要単語としてチェックできます。チェックは自動保存されます。</p>
+                                        </div>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <div className="text-aitetsu/60 mt-0.5">
+                                            <Icons.ExternalLink size={18} />
+                                        </div>
+                                        <div>
+                                            <span className="font-bold">出典へジャンプ</span>
+                                            <p className="text-xs text-gray-500 mt-0.5">「単語リスト」タブの出典リンクをタップすると、その単語が使われている例文にジャンプします。</p>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const KobunApp = () => {
+            // ローカルストレージキー
+            const STORAGE_KEY_CHECKED = 'kobun_checked_words_v1';
+
+            // 初期状態のロード
+            const getInitialMode = () => {
+                const saved = localStorage.getItem('kobun_view_mode');
+                if (['list', 'card', 'wordList'].includes(saved)) {
+                    return saved;
+                }
+                return 'list';
+            };
+
+            const getInitialIndex = () => {
+                const saved = localStorage.getItem('kobun_card_index');
+                return saved ? parseInt(saved) : 0;
+            };
+
+            const getInitialCheckedWords = () => {
+                const saved = localStorage.getItem(STORAGE_KEY_CHECKED);
+                return saved ? JSON.parse(saved) : {};
+            };
+
+            const [sentences, setSentences] = useState(initialData);
+            const [viewMode, setViewMode] = useState(getInitialMode);
+            const [currentCardIndex, setCurrentCardIndex] = useState(getInitialIndex);
+            const [checkedWords, setCheckedWords] = useState(getInitialCheckedWords);
+
+            // チェック状態の保存
+            useEffect(() => {
+                localStorage.setItem(STORAGE_KEY_CHECKED, JSON.stringify(checkedWords));
+            }, [checkedWords]);
+
+            // モード変更時に保存
+            useEffect(() => {
+                localStorage.setItem('kobun_view_mode', viewMode);
+            }, [viewMode]);
+
+            // 暗記カードのインデックス保存
+            useEffect(() => {
+                if (viewMode === 'card') {
+                    localStorage.setItem('kobun_card_index', currentCardIndex.toString());
+                }
+            }, [currentCardIndex, viewMode]);
+
+            // 一覧モードのスクロール保存と復元
+            useEffect(() => {
+                const saveScroll = () => {
+                    if (viewMode === 'list') {
+                        localStorage.setItem('kobun_scroll_y', window.scrollY.toString());
+                    }
+                };
+
+                let isTicking = false;
+                const onScroll = () => {
+                    if (!isTicking) {
+                        window.requestAnimationFrame(() => {
+                            saveScroll();
+                            isTicking = false;
+                        });
+                        isTicking = true;
+                    }
+                };
+
+                window.addEventListener('scroll', onScroll);
+
+                if (viewMode === 'list') {
+                    const savedY = localStorage.getItem('kobun_scroll_y');
+                    if (savedY) {
+                        setTimeout(() => window.scrollTo(0, parseInt(savedY)), 50);
+                    }
+                } else {
+                    window.scrollTo(0, 0);
+                }
+
+                return () => window.removeEventListener('scroll', onScroll);
+            }, [viewMode]);
+
+            // チェックの切り替え関数
+            const toggleWordCheck = (sentenceId, wordIndex) => {
+                const key = `${sentenceId}-${wordIndex}`;
+                setCheckedWords(prev => {
+                    const newState = { ...prev };
+                    if (newState[key]) {
+                        delete newState[key];
+                    } else {
+                        newState[key] = true;
+                    }
+                    return newState;
+                });
+            };
+
+            // 指定した文章へジャンプする関数
+            const handleJumpToSentence = (id) => {
+                setViewMode('list');
+                setTimeout(() => {
+                    const element = document.getElementById(`card-${id}`);
+                    if (element) {
+                        const headerOffset = 80;
+                        const elementPosition = element.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                    }
+                }, 100);
+            };
+
+            // シャッフル機能
+            const handleShuffle = () => {
+                const shuffled = [...sentences].sort(() => Math.random() - 0.5);
+                setSentences(shuffled);
+                setCurrentCardIndex(0);
+                window.scrollTo(0, 0);
+            };
+
+            // リセット機能
+            const handleReset = () => {
+                const sorted = [...initialData].sort((a, b) => a.id - b.id);
+                setSentences(sorted);
+                setCurrentCardIndex(0);
+                window.scrollTo(0, 0);
+            };
+
+            const NextCard = () => {
+                if (currentCardIndex < sentences.length - 1) {
+                    setCurrentCardIndex(prev => prev + 1);
+                }
+            };
+
+            const PrevCard = () => {
+                if (currentCardIndex > 0) {
+                    setCurrentCardIndex(prev => prev - 1);
+                }
+            };
+
+            return (
+                <div className="min-h-screen text-sumi font-serif pb-12">
+                    {/* Header */}
+                    <header className="bg-aitetsu text-gofun sticky top-0 z-50 shadow-md backdrop-blur-sm bg-opacity-95 transition-all duration-300">
+                        <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-gofun/10 p-2 rounded-lg backdrop-blur-md border border-gofun/20">
+                                    <Icons.BookOpen size={20} className="text-matcha" />
+                                </div>
+                                <div>
+                                    <h1 className="text-xl font-bold tracking-widest font-serif leading-none">古文単語学習アプリ</h1>
+                                </div>
+                            </div>
+                            <div className="flex gap-2 w-full md:w-auto">
+                                <button 
+                                    onClick={handleShuffle}
+                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gofun/10 hover:bg-gofun/20 text-gofun/90 rounded-lg transition-all duration-300 text-sm font-sans"
+                                >
+                                    <Icons.Shuffle size={16} />
+                                    <span>シャッフル</span>
+                                </button>
+                                <button 
+                                    onClick={handleReset}
+                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gofun/10 hover:bg-gofun/20 text-gofun/90 rounded-lg transition-all duration-300 text-sm font-sans"
+                                >
+                                    <Icons.RotateCcw size={16} />
+                                    <span>順番通りに戻す</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {/* Mode Switcher Tab */}
+                        <div className="flex w-full bg-sumi/20 backdrop-blur-md border-t border-gofun/10">
+                            <button 
+                                onClick={() => setViewMode('list')}
+                                className={`flex-1 py-3 text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'list' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
+                            >
+                                一覧で見る
+                                {viewMode === 'list' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
+                            </button>
+                            <div className="w-px bg-gofun/10 my-2"></div>
+                            <button 
+                                onClick={() => setViewMode('card')}
+                                className={`flex-1 py-3 text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'card' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
+                            >
+                                暗記カード
+                                {viewMode === 'card' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
+                            </button>
+                            <div className="w-px bg-gofun/10 my-2"></div>
+                             <button 
+                                onClick={() => setViewMode('wordList')}
+                                className={`flex-1 py-3 text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'wordList' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
+                            >
+                                単語リスト
+                                {viewMode === 'wordList' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
+                            </button>
+                        </div>
+                    </header>
+
+                    <UsageGuide />
+
+                    <main className="max-w-3xl mx-auto p-4 md:p-6 mt-4">
+                        {viewMode === 'list' && (
+                            <div className="space-y-8 animate-fade-in">
+                                {sentences.map((item, idx) => (
+                                    <SentenceCard 
+                                        key={item.id} 
+                                        data={item} 
+                                        index={idx} 
+                                        checkedWords={checkedWords}
+                                        onToggleCheck={toggleWordCheck}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        {viewMode === 'card' && (
+                            <div className="flex flex-col items-center min-h-[70vh] justify-center animate-fade-in">
+                                <div className="w-full relative">
+                                    <SentenceCard 
+                                        data={sentences[currentCardIndex]} 
+                                        isFocusMode 
+                                        checkedWords={checkedWords}
+                                        onToggleCheck={toggleWordCheck}
+                                    />
+                                    
+                                    {/* Card Progress Indicator */}
+                                    <div className="absolute -top-12 right-0 bg-aitetsu/10 text-aitetsu px-3 py-1 rounded-full text-xs font-bold font-sans">
+                                        {currentCardIndex + 1} / {sentences.length}
+                                    </div>
+                                </div>
+                                
+                                {/* Navigation Controls */}
+                                <div className="flex justify-between w-full max-w-sm mt-8 items-center gap-6">
+                                    <button 
+                                        onClick={PrevCard}
+                                        disabled={currentCardIndex === 0}
+                                        className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-white border border-gray-200 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-300 transition-all duration-300"
+                                    >
+                                        <Icons.ArrowLeft size={20} className="text-aitetsu group-hover:-translate-x-1 transition-transform" />
+                                        <span className="font-bold text-aitetsu text-sm tracking-widest">前へ</span>
+                                    </button>
+                                    
+                                    <button 
+                                        onClick={NextCard}
+                                        disabled={currentCardIndex === sentences.length - 1}
+                                        className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-aitetsu text-gofun shadow-lg shadow-aitetsu/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-800 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                                    >
+                                        <span className="font-bold text-sm tracking-widest">次へ</span>
+                                        <Icons.ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {viewMode === 'wordList' && (
+                             <div className="animate-fade-in bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                <WordList 
+                                    sentences={initialData} 
+                                    onJump={handleJumpToSentence}
+                                    checkedWords={checkedWords}
+                                    onToggleCheck={toggleWordCheck}
+                                />
+                             </div>
+                        )}
+                    </main>
+
+                    <footer className="text-center text-aitetsu/40 text-xs font-sans mt-20 mb-8 tracking-widest">
+                        <p>古文単語学習アプリ</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        // 単語リストコンポーネント
+        const WordList = ({ sentences, onJump, checkedWords, onToggleCheck }) => {
+            // 全単語をフラットな配列に変換
+            const allWords = useMemo(() => {
+                return sentences.flatMap(s => 
+                    s.words.map((w, wIdx) => ({
+                        ...w,
+                        sourceId: s.id,
+                        sourceTitle: s.title,
+                        wordIndex: wIdx
+                    }))
+                );
+            }, [sentences]);
+
+            return (
+                <div>
+                     <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                         <Icons.Search size={18} className="text-gray-400"/>
+                        <h2 className="font-bold text-aitetsu text-lg">収録単語一覧</h2>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                        {allWords.map((word, idx) => {
+                            const isChecked = !!checkedWords[`${word.sourceId}-${word.wordIndex}`];
+                            return (
+                                <div key={idx} className="p-4 hover:bg-gray-50 transition-colors grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 items-start">
+                                    <div className="md:col-span-4 font-serif font-bold text-lg text-aitetsu flex items-center gap-3">
+                                        <button 
+                                            onClick={() => onToggleCheck(word.sourceId, word.wordIndex)}
+                                            className={`
+                                                flex-shrink-0 transition-all duration-300 p-2 -ml-2 rounded-full
+                                                ${isChecked ? 'text-matcha scale-110' : 'text-gray-200 hover:text-gray-400'}
+                                            `}
+                                            title={isChecked ? "チェックを外す" : "チェックする"}
+                                        >
+                                            <Icons.CheckCircle size={28} filled={isChecked} />
+                                        </button>
+                                        {word.term}
+                                    </div>
+                                    <div className="md:col-span-5 text-gray-700 font-medium pl-11 md:pl-0">
+                                        {word.meaning}
+                                    </div>
+                                    <div className="md:col-span-3 text-xs md:text-right font-sans mt-1 md:mt-0 pl-11 md:pl-0">
+                                        <button 
+                                            onClick={() => onJump(word.sourceId)}
+                                            className="inline-flex items-center gap-1 text-aitetsu/60 hover:text-kincha hover:underline transition-colors group"
+                                        >
+                                            出典：{word.sourceTitle}
+                                            <Icons.ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity"/>
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
+        // 個別の文カードコンポーネント
+        const SentenceCard = ({ data, isFocusMode = false, index, checkedWords, onToggleCheck }) => {
+            const [showTranslation, setShowTranslation] = useState(false);
+            const [revealedWords, setRevealedWords] = useState({});
+
+            const toggleWord = (index) => {
+                setRevealedWords(prev => ({
+                    ...prev,
+                    [index]: !prev[index]
+                }));
+            };
+            
+            useEffect(() => {
+                if (isFocusMode) {
+                    setShowTranslation(false);
+                    setRevealedWords({});
+                }
+            }, [data.id, isFocusMode]);
+
+            return (
+                <div 
+                    id={isFocusMode ? undefined : `card-${data.id}`}
+                    className={`
+                        bg-gofun rounded-2xl border border-gray-100 overflow-hidden transition-all duration-500 relative group
+                        ${isFocusMode ? 'card-shadow scale-100' : 'hover:shadow-lg hover:border-gray-200 shadow-sm'}
+                    `}
+                >
+                    {/* Decorative Top Border */}
+                    <div className="h-1 bg-gradient-to-r from-aitetsu via-aitetsu to-matcha opacity-80"></div>
+
+                    {/* Card Header */}
+                    <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                        <div className="flex items-center gap-3">
+                            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-aitetsu text-gofun font-serif text-sm font-bold shadow-sm">
+                                {data.id}
+                            </span>
+                            <h2 className="font-bold text-aitetsu text-lg tracking-wide">{data.title}</h2>
+                        </div>
+                        {/* 和風装飾（霞） */}
+                        <div className="hidden sm:block opacity-10">
+                            <svg width="60" height="20" viewBox="0 0 60 20">
+                                <path d="M0 10 Q 15 0 30 10 T 60 10" fill="none" stroke="currentColor" strokeWidth="2" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div className="p-6 md:p-8">
+                        {/* Ancient Text */}
+                        <div className="mb-8 relative pl-4 border-l-4 border-matcha/50">
+                            <p className="text-2xl md:text-3xl font-serif leading-loose text-gray-800 tracking-wide">
+                                {data.sentence}
+                            </p>
+                        </div>
+
+                        {/* Word Chips Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                            {data.words.map((word, wIdx) => {
+                                const isChecked = !!checkedWords[`${data.id}-${wIdx}`];
+                                return (
+                                    <div key={wIdx} className="relative group/container">
+                                        <button
+                                            onClick={() => toggleWord(wIdx)}
+                                            className={`
+                                                relative p-4 rounded-xl text-left transition-all duration-300 border w-full
+                                                ${revealedWords[wIdx] 
+                                                    ? 'bg-aitetsu/5 border-aitetsu/30 shadow-inner' 
+                                                    : 'bg-white border-gray-200 hover:border-matcha hover:shadow-md hover:-translate-y-0.5'}
+                                            `}
+                                        >
+                                            <div className="flex justify-between items-center mb-1 pr-10"> {/* Right padding for check button */}
+                                                <span className={`font-serif font-bold text-xl transition-colors ${revealedWords[wIdx] ? 'text-aitetsu' : 'text-gray-700'}`}>
+                                                    {word.term}
+                                                </span>
+                                                <div className={`
+                                                    w-auto px-2 py-1 rounded-full flex items-center justify-center text-xs transition-colors
+                                                    ${revealedWords[wIdx] ? 'bg-aitetsu text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-matcha group-hover:text-white'}
+                                                `}>
+                                                    {revealedWords[wIdx] ? '隠す' : '意味'}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className={`
+                                                text-sm text-kincha font-bold overflow-hidden transition-all duration-300
+                                                ${revealedWords[wIdx] ? 'max-h-20 opacity-100 mt-2 pt-2 border-t border-gray-200/50' : 'max-h-0 opacity-0'}
+                                            `}>
+                                                {word.meaning}
+                                            </div>
+                                        </button>
+                                        
+                                        {/* Check Button (Overlaid on top right) */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onToggleCheck(data.id, wIdx);
+                                            }}
+                                            className={`
+                                                absolute top-0 right-0 p-4 z-10 transition-all duration-300
+                                                ${isChecked 
+                                                    ? 'text-matcha scale-100' 
+                                                    : 'text-gray-200 hover:text-gray-300 scale-95'}
+                                            `}
+                                            title="チェックする"
+                                        >
+                                            <Icons.CheckCircle size={24} filled={isChecked} />
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Translation Toggle */}
+                        <div className="border-t border-dashed border-gray-200 pt-6">
+                            <button 
+                                onClick={() => setShowTranslation(!showTranslation)}
+                                className="w-full group flex items-center justify-center gap-2 py-2 text-sm text-gray-400 hover:text-aitetsu transition-colors"
+                            >
+                                <span className={`transform transition-transform duration-300 ${showTranslation ? 'rotate-180' : ''}`}>
+                                    <Icons.Feather size={16} />
+                                </span>
+                                <span className="tracking-widest font-sans font-medium text-sm">
+                                    {showTranslation ? "現代語訳を隠す" : "現代語訳を見る"}
+                                </span>
+                            </button>
+                            
+                            <div className={`
+                                mt-4 text-gray-600 text-base leading-loose bg-gray-50/80 p-5 rounded-xl border border-gray-100/50 relative
+                                transition-all duration-500 ease-in-out origin-top overflow-hidden
+                                ${showTranslation ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0 py-0 border-0'}
+                            `}>
+                                <div className="absolute top-0 left-0 w-1 h-full bg-kincha/30"></div>
+                                <span className="font-bold text-kincha text-xs block mb-2 tracking-widest opacity-70">現代語訳</span>
+                                {data.translation}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<KobunApp />);
+    </script>
+</body>
+</html>
