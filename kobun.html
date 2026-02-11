@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>古文単語学習アプリ</title>
+
+    <title>【古文攻略】必須単語マスター</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -49,26 +50,15 @@
         body {
             background-color: #fcfaf2;
         }
-        /* スクロールバーのカスタマイズ */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #d1d5db; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af; 
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
         
         .card-shadow {
             box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 10px -2px rgba(0, 0, 0, 0.02);
         }
 
-        /* アニメーション */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -79,15 +69,12 @@
     </style>
 </head>
 <body class="bg-washi text-sumi font-serif min-h-screen relative">
-    <!-- 背景ノイズテクスチャ -->
     <div class="fixed inset-0 bg-noise pointer-events-none z-0 mix-blend-multiply"></div>
-    
     <div id="root" class="relative z-10"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef, useLayoutEffect, useMemo, useCallback } = React;
 
-        // アイコン (Lucide)
         const Icons = {
             BookOpen: ({ size = 24, className = "" }) => (
                 <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -115,18 +102,6 @@
                     <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
                     <line x1="16" y1="8" x2="2" y2="22"></line>
                     <line x1="17.5" y1="15" x2="9" y2="15"></line>
-                </svg>
-            ),
-            Eye: ({ size = 24, className = "" }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-            ),
-            EyeOff: ({ size = 24, className = "" }) => (
-                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                    <line x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
             ),
             ArrowRight: ({ size = 24, className = "" }) => (
@@ -190,16 +165,22 @@
                     <line x1="12" y1="16" x2="12" y2="12"></line>
                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                 </svg>
+            ),
+            Map: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                    <line x1="8" y1="2" x2="8" y2="18"></line>
+                    <line x1="16" y1="6" x2="16" y2="22"></line>
+                </svg>
             )
         };
 
-        // データ定義
         const initialData = [
             {
                 id: 1,
-                category: "身分やマナー",
+                category: "1. 「すごい人」に会った時：身分やマナーのシーン",
                 title: "貴族の来訪",
-                sentence: "あてなる人のおはすれば、人々げに激しくののしる。",
+                sentence: "**あてなる**人の**おはすれば**、人々**げに**激しく**ののしる**。",
                 translation: "身分が高く上品な方がいらっしゃるので、人々は本当に激しく大声で騒いでいる。",
                 description: "イメージは「街に超有名人がやってきた！」という状態。みんなが「うわあ！本物だ！すごい！」と大騒ぎしている様子です。現代だと「ののしる」は悪口ですが、古文では「ワァーッ！と盛り上がる」という意味でも使われます。",
                 words: [
@@ -211,35 +192,35 @@
             },
             {
                 id: 2,
-                category: "身分やマナー",
+                category: "1. 「すごい人」に会った時：身分やマナーのシーン",
                 title: "謙譲の作法",
-                sentence: "宿へまうで、文をたてまつりて、よしなきことを聞こゆ。",
+                sentence: "宿へ**まうで**、文を**たてまつりて**、よしなきことを**聞こゆ**。",
                 translation: "お宅へ参上して、手紙を差し上げて、つまらないことを申し上げる。",
                 description: "現代で言うなら「憧れの先輩にめちゃくちゃ丁寧にDMを送る」ようなシーンです。「突然すみません、大した用事ではないのですが…」と、自分をグッと下げて相手を立てるのが当時のマナーでした。",
                 words: [
                     { term: "まうづ", meaning: "参上する、お参りする（「行く・来」の謙譲語）" },
-                    { term: "たてまつる", meaning: "差し上げる（「あげる」の謙譲語。プレゼントや手紙を渡すとき）" },
-                    { term: "聞こゆ", meaning: "申し上げる（「言う」の謙譲語。手紙を送るという意味もある）" }
+                    { term: "たてまつる", meaning: "差し上げる（「あげる」の謙譲語. プレゼントや手紙を渡すとき）" },
+                    { term: "聞こゆ", meaning: "申し上げる（「言う」の謙譲語. 手紙を送るという意味もある）" }
                 ]
             },
             {
                 id: 3,
-                category: "身分やマナー",
+                category: "1. 「すごい人」に会った時：身分やマナーのシーン",
                 title: "強引な命令",
-                sentence: "「な泣きそ」とのたまへど、いふもおろかなり。",
+                sentence: "「**な泣きそ**」と**のたまへど**、**いふもおろかなり**。",
                 translation: "「泣いてくれるな」とおっしゃるけれど、（その悲しさは）言い尽くせない。",
                 description: "泣かないでとなだめられても、悲しすぎて「無理、言葉にならない……」と絶望しているシーン。あまりに感情がデカすぎて、説明が追いつかないほどヤバい状態です。",
                 words: [
                     { term: "な〜そ", meaning: "〜するな（「〜しないでね」という柔らかい禁止）" },
-                    { term: "のたまふ", meaning: "おっしゃる（「言う」の尊敬語。先生や親が言うイメージ）" },
+                    { term: "のたまふ", meaning: "おっしゃる（「言う」の尊敬語. 先生や親が言うイメージ）" },
                     { term: "いふもおろかなり", meaning: "言い尽くせない（「言うのが不十分になっちゃうくらい、すごい」）" }
                 ]
             },
             {
                 id: 4,
-                category: "驚きやときめき",
+                category: "2. 心がキュン！とした時：驚きやときめきのシーン",
                 title: "親子の情愛",
-                sentence: "いみじくうつくしき児をながめつつ、かなしと思ふ。",
+                sentence: "**いみじく****うつくしき**児を**ながめつつ**、**かなし**と思ふ。",
                 translation: "たいそう可愛らしい子供をぼんやり見つめて、愛おしいと思う。",
                 description: "赤ちゃんやペットを見て、「うわぁ、可愛すぎて心臓が痛い……」とキュンとしている状態。「かなし」は悲しいのではなく、可愛すぎて胸が締め付けられるような愛情のことです。",
                 words: [
@@ -251,11 +232,11 @@
             },
             {
                 id: 5,
-                category: "驚きやときめき",
+                category: "2. 心がキュン！とした時：驚きやときめきのシーン",
                 title: "驚きの光景",
-                sentence: "ありがたき花を見て、あさましきまでおどろきぬ。",
+                sentence: "**ありがたき**花を見て、**あさましき**まで**おどろきぬ**。",
                 translation: "めったにない珍しい花を見て、驚きあきれるほどまでハッと気づいた。",
-                description: "「え、何これ！？ マジか！」と、予想外のことに遭遇して目が覚めるような感覚です。「おどろく」は、寝ている状態やボーッとしている状態から「ハッと意識が戻る」ことを言います。",
+                description: "「え、何これ！？ マジか！」と, 予想外のことに遭遇して目が覚めるような感覚です。「おどろく」は, 寝ている状態やボーッとしている状態から「ハッと意識が戻る」ことを言います。",
                 words: [
                     { term: "ありがたし", meaning: "めったにない、珍しい（「サンキュー」ではなく「レアだ」）" },
                     { term: "あさまし", meaning: "驚きあきれる、ひどい（「ありえない！」というショック）" },
@@ -264,11 +245,11 @@
             },
             {
                 id: 6,
-                category: "驚きやときめき",
+                category: "2. 心がキュン！とした時：驚きやときめきのシーン",
                 title: "心の乱れ",
-                sentence: "おろかなる心にて、むげに泣きまどふは、かたはらいたし。",
+                sentence: "**おろかなる**心にて、**むげに****泣きまどふ**は、**かたはらいたし**。",
                 translation: "いい加減な心で、ひどく泣きわめくのは、傍らで見ていて苦々しい（恥ずかしい）。",
-                description: "友達が人前で「ギャーギャー泣き叫んでパニックになっている」のを、横で見ながら「うわぁ、見てるこっちが恥ずかしくなるよ……」と引いているシーンです。",
+                description: "友達が人前で「ギャーギャー泣き叫んでパニックになっている」のを, 横で見ながら「うわぁ、見てるこっちが恥ずかしくなるよ……」と引いているシーンです。",
                 words: [
                     { term: "おろかなり", meaning: "いい加減だ、不十分だ（「テキトー」な感じ）" },
                     { term: "むげに", meaning: "むやみに、ひどく" },
@@ -278,11 +259,11 @@
             },
             {
                 id: 7,
-                category: "病気やピンチ",
+                category: "3. 「助けて…」と不安な時：病気やピンチ의シーン",
                 title: "病床の祈り",
-                sentence: "あやしき家にて、病おこたるをねんじつつ、ゆかしきことを待つ。",
+                sentence: "**あやしき**家にて、病**おこたる**を**ねんじつつ**、**ゆかしき**ことを待つ。",
                 translation: "粗末な家で、病気が良くなるのを我慢して祈りながら、知りたい情報を待つ。",
-                description: "当時は薬がないので「病気の時は神頼み！」が基本。布団の中でジッと我慢（ねんず）しながら、誰かお見舞いに来て「推しの最新情報」とか聞かせてくれないかなぁ（ゆかし）と待っています。",
+                description: "当時は薬がないので「病気の時は神頼み！」が基本. 布団の中でジッと我慢（ねんず）しながら、誰かお見舞いに来て「推しの最新情報」とか聞かせてくれないかなぁ（ゆかし）と待っています。",
                 words: [
                     { term: "あやし", meaning: "身分が低い、粗末だ、不思議だ" },
                     { term: "おこたる", meaning: "病気が良くなる（※サボるじゃない！病気がサボって消えるイメージ）" },
@@ -292,9 +273,9 @@
             },
             {
                 id: 8,
-                category: "病気やピンチ",
+                category: "3. 「助けて…」と不安な時：病気やピンチのシーン",
                 title: "耐えがたい別れ",
-                sentence: "涙をこらへあへず、愛しき人におくれぬるはわびし。",
+                sentence: "涙を**こらへあへず**、愛しき人に**おくる**ぬるは**わびし**。",
                 translation: "涙を堪えきれず、愛する人に先立たれてしまったのは、つらくやりきれない。",
                 description: "大事な人が亡くなってしまい、自分だけが取り残された寂しさです。「おくる」は「（天国へ行く人に）遅れる」＝「自分だけ生き残っちゃった」という意味。一人ぼっちの心細さ（わびし）がすごいです。",
                 words: [
@@ -305,9 +286,9 @@
             },
             {
                 id: 9,
-                category: "病気やピンチ",
+                category: "3. 「助けて…」と不安な時：病気やピンチのシーン",
                 title: "不安な道中",
-                sentence: "おぼつかなき道なれど、いつしかと急げば、やがて里に着きぬ。",
+                sentence: "**おぼつかなき**道なれど、**いつしか**と急げば、**やがて**里に着きぬ。",
                 translation: "はっきりせず不安な道であるが、早く（着きたい）と急ぐと、そのまま（すぐに）里に着いた。",
                 description: "夜の山道で「スマホのライトもない、地図もない、どっちに行けばいいかわからない！」という超不安な状態（おぼつかなし）。だからこそ「早く（いつしか）帰りたい！」と急いで、パッと着いた（やがて）瞬間の安心感です。",
                 words: [
@@ -318,9 +299,9 @@
             },
             {
                 id: 10,
-                category: "時間や景色",
+                category: "4. 「エモい…」としみじみする時：時間や景色のシーン",
                 title: "四季の趣",
-                sentence: "冬の月はさらなり。いとつきづきしけれど、さらに人見えず。",
+                sentence: "冬の月は**さらなり**。いと**つきづきし**けれど、**さらに**人見えず。",
                 translation: "冬の月は言うまでもない。とても似つかわしいけれど、まったく人が見えない。",
                 description: "「冬の月、エモすぎん？」という清少納言のつぶやき。「さらなり」は「言うまでもなく最高」。「つきづきし」は「その場のエモい空気にピッタリ合ってる」という意味。誰もいない静かな夜、自分だけがこの景色を知っている……という優越感です。",
                 words: [
@@ -332,24 +313,24 @@
             },
             {
                 id: 11,
-                category: "時間や景色",
+                category: "4. 「エモい…」としみじみする時：時間や景色のシーン",
                 title: "季節の移ろい",
-                sentence: "つとめて見れば、霧のあからさまなりしが、おのづから消えぬ。",
+                sentence: "**つとめて**見れば、霧の**あからさまなり**しが、**おのづから**消えぬ。",
                 translation: "早朝に見ると、霧がほんのちょっと（一時的）であったのが、自然と消えた。",
-                description: "朝早く起きて（つとめて）外を見たら、霧が「ほんの一瞬だけ（あからさまなり）」見えて、すぐにふわぁ〜っと消えていった……。「あ、今一瞬だけ綺麗だったな」という、日常の小さなラッキーに感動しているシーンです。",
+                description: "朝早く起きて（つとめて）外を見たら、霧が「ほんの一瞬だけ（あからさまなり）」見えて、すぐにふわぁ〜っと消えていった……。「あ, 今一瞬だけ綺麗だったな」という, 日常の小さなラッキーに感動しているシーンです。",
                 words: [
-                    { term: "つとめて", meaning: "早朝（※「早朝に働く」から。テストに出る！）" },
+                    { term: "つとめて", meaning: "早朝（※「早朝に働く」から. テストに出る！）" },
                     { term: "あからさまなり", meaning: "ほんのちょっと、一時的だ（※「明白」じゃない！「ちょっとだけ」）" },
                     { term: "おのづから", meaning: "自然に、たまたま" }
                 ]
             },
             {
                 id: 12,
-                category: "性格やウワサ話",
+                category: "5. 「あの人、最高？それともイマイチ？」：性格やウワサ話のシーン",
                 title: "評価の「4段階」ランク",
-                sentence: "よしと思ふことも、人にはわろく聞こえ、よろしきこともあし。",
+                sentence: "**よし**と思ふことも, 人には**わろく**聞こえ, **よろしき**ことも**あし**。",
                 translation: "良いと思うことも、他人には良くなく聞こえ、悪くないことも悪い。",
-                description: "誰かを評価する時のランク付けです。よし：【最高！】SSランク、よろし：【悪くないね】Bランク、わろし：【ちょっとダメかな】Dランク、あし：【最悪】Fランク。",
+                description: "誰かを評価する時のランク付けです。よし：最高、よろし：悪くない（普通）、わろし：良くない（イマイチ）、あし：悪い（最悪）。",
                 words: [
                     { term: "よし", meaning: "最高、良い" },
                     { term: "よろし", meaning: "悪くない、まあまあ（普通）" },
@@ -359,11 +340,11 @@
             },
             {
                 id: 13,
-                category: "性格やウワサ話",
+                category: "5. 「あの人、最高？それともイマイチ？」：性格やウワサ話のシーン",
                 title: "本心と誠実さ",
-                sentence: "ほいはまめなる道なれど、心はあだなり。",
+                sentence: "**ほい**は**まめなる**道なれど、心は**あだなり**。",
                 translation: "本来の願いは誠実な道であるけれど、心は浮ついている。",
-                description: "「テスト勉強しなきゃ！（まめなり）」と思っているのに、「ついYouTube見ちゃう……（あだなり）」という、あの心の葛藤です。自分の理想（ほい）に追いつけない、あの人の性格を分析しているシーン。",
+                description: "「テスト勉強しなきゃ！（まめなり）」と思っているのに, 「ついYouTube見ちゃう……（あだなり）」という, あの心の葛藤です。自分の理想（ほい）に追いつけない, あの人の性格を分析しているシーン。",
                 words: [
                     { term: "ほい（本意）", meaning: "本来の目的、願い" },
                     { term: "まめなり", meaning: "誠実だ、真面目だ（豆みたいに中身がギュッと詰まってる）" },
@@ -372,11 +353,11 @@
             },
             {
                 id: 14,
-                category: "性格やウワサ話",
+                category: "5. 「あの人、最高？それともイマイチ？」：性格やウワサ話のシーン",
                 title: "評判と不安",
-                sentence: "かしこき人のおぼえあるは、うしろめたし。",
+                sentence: "**かしこき**人のおぼえあるは、**うしろめたし**。",
                 translation: "優れた人が評判（お気に入り）なのは、不安だ（気がかりだ）。",
-                description: "クラスのすごい人が先生にめちゃくちゃ気に入られている（おぼえ）のを見て、「あの人、このままいくと嫉妬されてイジメられたりしないかな……」とハラハラ心配している状態です。",
+                description: "クラスのすごい人が先生にめちゃくちゃ気に入られている（おぼえ）のを見て, 「あの人, このままいくと嫉妬されてイジメられたりしないかな……」とハラハラ心配している状態です。",
                 words: [
                     { term: "かしこし", meaning: "恐れ多い、優れている" },
                     { term: "おぼえ", meaning: "寵愛、評判（気に入られること）" },
@@ -385,11 +366,11 @@
             },
             {
                 id: 15,
-                category: "ハプニングや急ぎ",
+                category: "6. 急に話が動き出した時：ハプニングや急ぎのシーン",
                 title: "感情の爆発",
-                sentence: "さて、さすがに昔のもとを慕ひて、すなはち泣きぬ。",
+                sentence: "さて、**さすがに**昔のもとを慕ひて、**すなはち**泣きぬ。",
                 translation: "そうして、そうは言ってもやはり昔の場所を慕って、すぐに泣いてしまった。",
-                description: "一度は忘れたはずなのに、「やっぱり思い出したらソッコーで泣いちゃった」という、急に感情が溢れ出すシーン。物語が動く合図の言葉（さて、すなはち）が詰まっています。",
+                description: "一度は忘れたはずなのに, 「やっぱり思い出したらソッコーで泣ちゃった」という, 急に感情が溢れ出すシーン。物語が動く合図の言葉（さて, すなはち）が詰まっています。",
                 words: [
                     { term: "さて", meaning: "そのまま、そうして" },
                     { term: "さすがに", meaning: "そうは言ってもやはり（「とは言ってもね……」という心の逆転）" },
@@ -398,24 +379,24 @@
             },
             {
                 id: 16,
-                category: "ハプニングや急ぎ",
+                category: "6. 急に話が動き出した時：ハプニングや急ぎのシーン",
                 title: "待ち遠しさと焦り",
-                sentence: "こころもとなきままに、あたらしき文をおろかにす。",
+                sentence: "**こころもとなき**ままに、**あたらしき**文を**おろかに**す。",
                 translation: "じれったい（不安な）ままに、もったいない手紙を疎かにする。",
-                description: "「LINEの返信が来なくてソワソワ（こころもとなし）」して、不安で頭がいっぱいなせいで、目の前の大事な手紙（あたらし）を適当に（おろかに）扱っちゃうシーン。",
+                description: "「LINEの返信が来なくてソワソワ（こころもとなし）」して, 不安で頭がいっぱいなせいで, 目の前の大事な手紙（あたらし）を適当に（おろかに）扱っちゃうシーン。",
                 words: [
                     { term: "こころもとなし", meaning: "待ち遠しい、不安だ、はっきりしない" },
                     { term: "あたらし", meaning: "もったいない（※「新しい」じゃない！「もったいない」！）" },
-                    { term: "おろかなり", meaning: "いい加減だ（疎かにする。真面目にやらない感じ）" }
+                    { term: "おろかなり", meaning: "いい加減だ（疎かにする. 真面目にやらない感じ）" }
                 ]
             },
             {
                 id: 17,
-                category: "ハプニングや急ぎ",
+                category: "6. 急に話が動き出した時：ハプニングや急ぎのシーン",
                 title: "完璧すぎて困る",
-                sentence: "めづらしき人の、きよらなるは、なかななり。",
+                sentence: "**めづらしき**人の、**きよらなる**は、**なかなか**なり。",
                 translation: "めったにない素晴らしい人が、最高に美しいのは、むしろ逆効果だ。",
-                description: "「完璧すぎて逆に困る！」というハプニング。推しが尊すぎて、いざ会えたのに「近寄れねぇ……むしろ会わないほうが心臓に優しかったわ……」という、「むしろ逆効果」な状態です。",
+                description: "「完璧すぎて逆に困る！」というハプニング. 推しが尊すぎて, いざ会えたのに「近寄れねぇ……むしろ会わないほうが心臓に優しかったわ……」という, 「むしろ逆効果」な状態です。",
                 words: [
                     { term: "めづらし", meaning: "素晴らしい、めったにない（最高！の意）" },
                     { term: "きよらなり", meaning: "最高に美しい（美貌の最高ランク）" },
@@ -424,9 +405,9 @@
             },
             {
                 id: 18,
-                category: "人間ドラマ",
+                category: "7. 人間ドラマが起きた時：切ない恋やオーラがすごい人のシーン",
                 title: "性格の悪いやつ登場",
-                sentence: "さがなき童の、おどろおどろしく、むつかしき顔す。",
+                sentence: "**さがなき**童の、**おどろおどろしく**、**むつかしき**顔す。",
                 translation: "意地の悪い子供が、大げさに（気味悪く）、不快な顔をする。",
                 description: "物語によく出てくる「嫌なやつ」の登場シーン。「キモい顔してビビらせてくる」という最悪な空気感を説明しています。",
                 words: [
@@ -437,11 +418,11 @@
             },
             {
                 id: 19,
-                category: "人間ドラマ",
+                category: "7. 人間ドラマが起きた時：切ない恋やオーラがすごい人のシーン",
                 title: "圧倒的なオーラ",
-                sentence: "めざましきまでゆゆしき人は、はかなきことも言はず。",
+                sentence: "**めざましき**まで**ゆゆしき**人は、**はかなき**ことも言はず。",
                 translation: "目が覚めるほど（驚くほど）立派な人は、つまらないことも言わない。",
-                description: "クラスにいる「無口だけど、オーラがハンパなくて誰も逆らえない憧れの人」。その人が喋ると、どんな些細なこと（はかなし）でも重大に聞こえる凄みです。",
+                description: "クラスにいる「無口だけど、オーラがハンパなくて誰も逆らえない憧れの人」。その人が喋ると, どんな些細なこと（はかなし）でも重大に聞こえる凄みです。",
                 words: [
                     { term: "めざまし", meaning: "驚るほど素晴らしい、気に食わない" },
                     { term: "ゆゆし", meaning: "大変素晴らしい、不吉だ（神様レベルでヤバい）" },
@@ -450,11 +431,11 @@
             },
             {
                 id: 20,
-                category: "人間ドラマ",
+                category: "7. 人間ドラマが起きた時：切ない恋やオーラがすごい人のシーン",
                 title: "既読スルーの切なさ",
-                sentence: "あはれなりし人も、今はつれなくて、いとほし。",
+                sentence: "**あはれなり**し人も、今は**つれなくて**、**いとほし**。",
                 translation: "しみじみと心惹かれた人も、今は冷淡で、気の毒だ（または、いとしい）。",
-                description: "「あんなに仲良しだったのに、今は話しかけても既読スルー……（つれなし）」という切ない恋のドラマ。あんなに感動（あはれ）をくれた人が別人のようになってしまった寂しさ。",
+                description: "「あんなに仲良しだったのに, 今は話しかけても既読スルー……（つれなし）」という切ない恋のドラマ。あんなに感動（あはれ）をくれた人が別人のようになってしまった寂しさ。",
                 words: [
                     { term: "あはれなり", meaning: "しみじみと趣深い（心が「ああ…」と動かされる感動）" },
                     { term: "つれなし", meaning: "冷淡だ、平然としている（素っ気ない態度）" },
@@ -463,11 +444,11 @@
             },
             {
                 id: 21,
-                category: "人間ドラマ",
+                category: "7. 人間ドラマが起きた時：切ない恋やオーラがすごい人のシーン",
                 title: "贈り物に込める愛",
-                sentence: "なまめかしき女の、らうたしと思ひて、こころざしを見す。",
+                sentence: "**なまめかしき**女の、**らうたし**と思ひて、**こころざし**を見す。",
                 translation: "優雅で上品な女を、かわいいと思って、愛情（贈り物）を見せる。",
-                description: "「素敵な彼女（なまめかし）に、気合いを入れたプレゼントを贈る」シーン。古文では「愛」を言葉だけでなく、「こころざし（贈り物）」という形で示すのがドラマチックでした。",
+                description: "「素敵な彼女（なまめかし）に, 気合いを入れたプレゼントを贈る」シーン. 古文では「愛」を言葉だけでなく, 「こころざし（贈り物）」という形で示すのがドラマチックでした。",
                 words: [
                     { term: "なまめかし", meaning: "優雅だ、上品だ、若々しい" },
                     { term: "らうたし", meaning: "かわいい、愛らしい（ヨシヨシしてあげたい可愛さ）" },
@@ -476,11 +457,11 @@
             },
             {
                 id: 22,
-                category: "人間ドラマ",
+                category: "7. 人間ドラマが起きた時：切ない恋やオーラがすごい人のシーン",
                 title: "最悪な夜",
-                sentence: "すごき夜に、びんなきことの起きて、あやなし。",
+                sentence: "**すごき**夜に、**びんなき**ことの起きて、**あやなし**。",
                 translation: "しんみりと寂しい夜に、不都合なことが起きて、わけがわからない。",
-                description: "「一人で寂しい夜（すごし）に、追い打ちをかけるようなトラブル（びんなし）発生」。もう泣きっ面に蜂な、カオスなドラマです。",
+                description: "「一人で寂しい夜（すごし）に, 追い打ちをかけるようなトラブル（びんなし）発生」。もう泣きっ面に蜂な, カオスなドラマです。",
                 words: [
                     { term: "すごし", meaning: "しんみりと寂しい、ゾッとするほど美しい" },
                     { term: "びんなし", meaning: "不都合だ、気の毒だ（タイミング最悪）" },
@@ -489,11 +470,11 @@
             },
             {
                 id: 23,
-                category: "人間ドラマ",
+                category: "7. 人間ドラマが起きた時：切ない恋やオーラがすごい人のシーン",
                 title: "場が凍りつく瞬間",
-                sentence: "わびしきままに、すさまじきことを言ふは、心づきなし。",
+                sentence: "**わびしき**ままに、**すさまじき**ことを言ふは、**心づきなし**。",
                 translation: "つらい（やりきれない）あまりに、興ざめなことを言うのは、気に食わない。",
-                description: "盛り上がっている時に、いきなり冷めるようなマジレス（すさまじ）をされて、一気に場が凍りつく気まずい人間関係のシーン。",
+                description: "盛り上がっている時に, 「いきなり冷めるようなマジレス（すさまじ）」をされて, 一気に場が凍りつく気まずい人間関係のシーン。",
                 words: [
                     { term: "わびし", meaning: "つらい、やりきれない" },
                     { term: "すさまじ", meaning: "興ざめだ、面白くない、寒々しい" },
@@ -502,11 +483,11 @@
             },
             {
                 id: 24,
-                category: "人間ドラマ",
+                category: "7. 人間ドラマが起きた時：切ない恋やオーラがすごい人のシーン",
                 title: "もらい泣き",
-                sentence: "こころぐるしき人の、いとほしく泣くは、ねんじがたし。",
+                sentence: "**こころぐるしき**人の、**いとほしく**泣くは, **ねんじ**がたし。",
                 translation: "気の毒な人が、かわいそうに泣くのは、我慢するのが難しい。",
-                description: "「友達が泣いているのを見て、自分まで泣くのを我慢できない！」という感動の友情ドラマ。「もう見てられない、つらいよ（こころぐるし）」という共感です。",
+                description: "「友達が泣いているのを見て, 自分まで泣くのを我慢できない！」という感動の友情ドラマ. 「もう見てられない, つらいよ（こころぐるし）」という共感です。",
                 words: [
                     { term: "こころぐるし", meaning: "気の毒だ、心苦しい（見ていて自分も辛い）" },
                     { term: "いとほし", meaning: "気の毒だ、かわいい" },
@@ -515,11 +496,11 @@
             },
             {
                 id: 25,
-                category: "人間ドラマ",
+                category: "7. 人間ドラマが起きた時：切ない恋やオーラがすごい人のシーン",
                 title: "究極の純愛",
-                sentence: "あからさまなりしよしも、さらに忘れず、ねんじ通す。",
+                sentence: "**あからさまなり**し**よし**も、**さらに**忘れず、**ねんじ**通す。",
                 translation: "ほんのちょっとした縁（いきさつ）も、まったく忘れず、我慢し続ける。",
-                description: "「一瞬すれ違っただけの初恋（あからさまなり）を、一生想い続けて耐える」という超絶エモい純愛ドラマのラスト。一瞬の縁を大切にする古文の美学です。",
+                description: "「一瞬すれ違っただけの初恋（あからさまなり）を, 一生想い続けて耐える」という超絶エモい純愛ドラマのラスト. 一瞬の縁を大切にする古文の美学です。",
                 words: [
                     { term: "あからさまなり", meaning: "ほんのちょっと、一時的だ" },
                     { term: "よし", meaning: "理由、縁、方法、教養（ここでは「縁・いきさつ」）" },
@@ -529,27 +510,24 @@
             }
         ];
 
-        // 古文攻略ガイドコンポーネント
         const StudyGuide = () => {
             return (
                 <div className="space-y-8 animate-fade-in pb-12">
-                    {/* 読解の鉄則 */}
                     <section className="bg-white rounded-2xl p-6 shadow-sm border border-aitetsu/10 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-2 h-full bg-akabeni"></div>
                         <h2 className="text-xl font-bold text-aitetsu mb-4 flex items-center gap-2">
                             <Icons.BookOpen className="text-akabeni" size={24} />
                             古文読解の鉄則
                         </h2>
-                        <p className="text-gray-700 leading-loose">
+                        <p className="text-gray-700 leading-loose font-sans">
                             古文は<span className="text-akabeni font-bold underline decoration-akabeni/30 underline-offset-4">「主語が省略される」</span>ことが非常に多いです。単語を覚えるときは、「誰が、どんな状況で」使っているのか、当時の価値観と一緒にイメージしましょう。
                         </p>
                     </section>
 
-                    {/* 単語のワナ TOP 5 */}
                     <section className="bg-white rounded-2xl overflow-hidden shadow-sm border border-aitetsu/10">
                         <div className="bg-aitetsu text-gofun px-6 py-4 flex items-center gap-2">
                             <Icons.Info size={20} />
-                            <h2 className="font-bold tracking-widest">入試で狙われる「単語のワナ」TOP 5</h2>
+                            <h2 className="font-bold tracking-widest text-sm md:text-base">入試で狙われる「単語のワナ」TOP 5</h2>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm font-sans">
@@ -557,7 +535,7 @@
                                     <tr className="bg-gray-50 border-b border-gray-100 text-aitetsu/60">
                                         <th className="px-6 py-3 font-bold">単語</th>
                                         <th className="px-6 py-3 font-bold">× 現代語のイメージ</th>
-                                        <th className="px-6 py-3 font-bold text-matcha-700">○ 古文の正しい意味</th>
+                                        <th className="px-6 py-3 font-bold text-matcha">○ 古文の正しい意味</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100">
@@ -579,7 +557,6 @@
                         </div>
                     </section>
 
-                    {/* 古文攻略3つのポイント */}
                     <section className="space-y-4">
                         <h2 className="text-xl font-bold text-aitetsu flex items-center gap-2 px-2">
                             <Icons.Lightbulb className="text-matcha" size={24} />
@@ -589,9 +566,9 @@
                             {[
                                 { title: "1. 異世界のSNSと思え！", text: "「推しを崇める」「既読スルーに悩む」といった人間の感情は今も昔も同じ。「今の自分ならどう言うか？」を考えよう。" },
                                 { title: "2. 主語探しの探偵になれ！", text: "敬語がヒント。「おはす」なら偉い人、「たてまつる」なら自分。敬語から登場人物の上下関係を推理しよう。" },
-                                { title: "3. 訳にまどわされるな！", text: "「おどろく」「ありがたし」など、現代と同じ音で意味が違う『ギャップ単語』を優先的に覚えるのが合格への近道。" }
+                                { title: "3. 訳にまどわされるな！", text: "現代と同じ音で意味が違う『ギャップ単語』を優先的に覚えるのが合格への近道。" }
                             ].map((tip, i) => (
-                                <div key={i} className="bg-matcha/5 p-5 rounded-2xl border border-matcha/20">
+                                <div key={i} className="bg-matcha/5 p-5 rounded-2xl border border-matcha/20 shadow-sm">
                                     <h3 className="font-bold text-aitetsu mb-2">{tip.title}</h3>
                                     <p className="text-xs text-gray-600 leading-relaxed font-sans">{tip.text}</p>
                                 </div>
@@ -602,53 +579,32 @@
             );
         };
 
-        // 使い方ガイドコンポーネント
         const UsageGuide = () => {
             const [isOpen, setIsOpen] = useState(false);
-
             return (
                 <div className="max-w-3xl mx-auto px-4 mt-6">
                     <div className="bg-white/80 border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                        <button 
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
-                        >
+                        <button onClick={() => setIsOpen(!isOpen)} className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                             <div className="flex items-center gap-2 text-aitetsu font-bold">
                                 <Icons.HelpCircle size={20} className="text-matcha" />
-                                <span>アプリの使い方を見る</span>
+                                <span className="text-sm">アプリの使い方を見る</span>
                             </div>
                             {isOpen ? <Icons.ChevronUp size={20} className="text-gray-400" /> : <Icons.ChevronDown size={20} className="text-gray-400" />}
                         </button>
-                        
-                        <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                            <div className="p-4 pt-0 text-sm text-gray-700 leading-relaxed border-t border-gray-100 bg-gray-50/50">
-                                <ul className="space-y-3 font-sans mt-3">
+                        <div className={`transition-all duration-300 overflow-hidden ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                            <div className="p-4 pt-0 text-sm text-gray-700 leading-relaxed border-t border-gray-100 bg-gray-50/50 font-sans">
+                                <ul className="space-y-3 mt-3">
                                     <li className="flex items-start gap-2">
-                                        <div className="bg-white p-1 rounded border border-gray-200 text-aitetsu mt-0.5">
-                                            単語
-                                        </div>
-                                        <div>
-                                            <span className="font-bold">タップで意味を表示</span>
-                                            <p className="text-xs text-gray-500 mt-0.5">単語カードをタップすると意味が表示されます。</p>
-                                        </div>
+                                        <div className="bg-white px-1.5 py-0.5 rounded border border-gray-200 text-xs mt-0.5">単語</div>
+                                        <div><span className="font-bold">タップで意味を表示</span></div>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <div className="text-matcha mt-0.5">
-                                            <Icons.CheckCircle size={20} filled={true} />
-                                        </div>
-                                        <div>
-                                            <span className="font-bold">チェック機能（保存されます）</span>
-                                            <p className="text-xs text-gray-500 mt-0.5">重要単語としてチェックできます。チェックは自動保存されます。</p>
-                                        </div>
+                                        <div className="text-matcha mt-0.5"><Icons.CheckCircle size={18} filled={true} /></div>
+                                        <div><span className="font-bold">チェック機能</span>：覚えた単語にはチェックを入れていこう！効率よく勉強できるよ。</div>
                                     </li>
                                     <li className="flex items-start gap-2">
-                                        <div className="text-aitetsu/60 mt-0.5">
-                                            <Icons.ExternalLink size={18} />
-                                        </div>
-                                        <div>
-                                            <span className="font-bold">出典へジャンプ</span>
-                                            <p className="text-xs text-gray-500 mt-0.5">「単語リスト」タブの出典リンクをタップすると、例文にジャンプします。</p>
-                                        </div>
+                                        <div className="text-aitetsu/60 mt-0.5"><Icons.ExternalLink size={16} /></div>
+                                        <div><span className="font-bold">出典へジャンプ</span>：その単語が使われている例文へ移動します。</div>
                                     </li>
                                 </ul>
                             </div>
@@ -660,73 +616,22 @@
 
         const KobunApp = () => {
             const STORAGE_KEY_CHECKED = 'kobun_checked_words_v1';
-
-            const getInitialMode = () => {
-                const saved = localStorage.getItem('kobun_view_mode');
-                if (['list', 'card', 'wordList', 'tips'].includes(saved)) {
-                    return saved;
-                }
-                return 'list';
-            };
-
-            const getInitialIndex = () => {
-                const saved = localStorage.getItem('kobun_card_index');
-                return saved ? parseInt(saved) : 0;
-            };
-
-            const getInitialCheckedWords = () => {
-                const saved = localStorage.getItem(STORAGE_KEY_CHECKED);
-                return saved ? JSON.parse(saved) : {};
-            };
-
+            const [viewMode, setViewMode] = useState(() => localStorage.getItem('kobun_view_mode') || 'list');
+            const [currentCardIndex, setCurrentCardIndex] = useState(() => parseInt(localStorage.getItem('kobun_card_index') || '0'));
+            const [checkedWords, setCheckedWords] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEY_CHECKED) || '{}'));
             const [sentences, setSentences] = useState(initialData);
-            const [viewMode, setViewMode] = useState(getInitialMode);
-            const [currentCardIndex, setCurrentCardIndex] = useState(getInitialIndex);
-            const [checkedWords, setCheckedWords] = useState(getInitialCheckedWords);
+
+            useEffect(() => { localStorage.setItem(STORAGE_KEY_CHECKED, JSON.stringify(checkedWords)); }, [checkedWords]);
+            useEffect(() => { localStorage.setItem('kobun_view_mode', viewMode); }, [viewMode]);
+            useEffect(() => { if (viewMode === 'card') localStorage.setItem('kobun_card_index', currentCardIndex.toString()); }, [currentCardIndex, viewMode]);
 
             useEffect(() => {
-                localStorage.setItem(STORAGE_KEY_CHECKED, JSON.stringify(checkedWords));
-            }, [checkedWords]);
-
-            useEffect(() => {
-                localStorage.setItem('kobun_view_mode', viewMode);
-            }, [viewMode]);
-
-            useEffect(() => {
-                if (viewMode === 'card') {
-                    localStorage.setItem('kobun_card_index', currentCardIndex.toString());
-                }
-            }, [currentCardIndex, viewMode]);
-
-            useEffect(() => {
-                const saveScroll = () => {
-                    if (viewMode === 'list') {
-                        localStorage.setItem('kobun_scroll_y', window.scrollY.toString());
-                    }
-                };
-
-                let isTicking = false;
-                const onScroll = () => {
-                    if (!isTicking) {
-                        window.requestAnimationFrame(() => {
-                            saveScroll();
-                            isTicking = false;
-                        });
-                        isTicking = true;
-                    }
-                };
-
-                window.addEventListener('scroll', onScroll);
-
                 if (viewMode === 'list') {
                     const savedY = localStorage.getItem('kobun_scroll_y');
-                    if (savedY) {
-                        setTimeout(() => window.scrollTo(0, parseInt(savedY)), 50);
-                    }
-                } else {
-                    window.scrollTo(0, 0);
-                }
-
+                    if (savedY) setTimeout(() => window.scrollTo(0, parseInt(savedY)), 50);
+                } else { window.scrollTo(0, 0); }
+                const onScroll = () => { if (viewMode === 'list') localStorage.setItem('kobun_scroll_y', window.scrollY.toString()); };
+                window.addEventListener('scroll', onScroll);
                 return () => window.removeEventListener('scroll', onScroll);
             }, [viewMode]);
 
@@ -734,11 +639,7 @@
                 const key = `${sentenceId}-${wordIndex}`;
                 setCheckedWords(prev => {
                     const newState = { ...prev };
-                    if (newState[key]) {
-                        delete newState[key];
-                    } else {
-                        newState[key] = true;
-                    }
+                    if (newState[key]) delete newState[key]; else newState[key] = true;
                     return newState;
                 });
             };
@@ -746,105 +647,55 @@
             const handleJumpToSentence = (id) => {
                 setViewMode('list');
                 setTimeout(() => {
-                    const element = document.getElementById(`card-${id}`);
-                    if (element) {
-                        const headerOffset = 80;
-                        const elementPosition = element.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                        
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: "smooth"
-                        });
-                    }
+                    const el = document.getElementById(`card-${id}`);
+                    if (el) window.scrollTo({ top: el.offsetTop - 100, behavior: "smooth" });
                 }, 100);
             };
 
-            const handleShuffle = () => {
-                const shuffled = [...sentences].sort(() => Math.random() - 0.5);
-                setSentences(shuffled);
-                setCurrentCardIndex(0);
-                window.scrollTo(0, 0);
-            };
+            const handleShuffle = () => { setSentences([...sentences].sort(() => Math.random() - 0.5)); setCurrentCardIndex(0); };
+            const handleReset = () => { setSentences(initialData); setCurrentCardIndex(0); };
 
-            const handleReset = () => {
-                const sorted = [...initialData].sort((a, b) => a.id - b.id);
-                setSentences(sorted);
-                setCurrentCardIndex(0);
-                window.scrollTo(0, 0);
-            };
-
-            const NextCard = () => {
-                if (currentCardIndex < sentences.length - 1) {
-                    setCurrentCardIndex(prev => prev + 1);
-                }
-            };
-
-            const PrevCard = () => {
-                if (currentCardIndex > 0) {
-                    setCurrentCardIndex(prev => prev - 1);
-                }
-            };
+            const groupedSentences = useMemo(() => {
+                const groups = [];
+                sentences.forEach(s => {
+                    const lastGroup = groups[groups.length - 1];
+                    if (lastGroup && lastGroup.category === s.category) { lastGroup.items.push(s); }
+                    else { groups.push({ category: s.category, items: [s] }); }
+                });
+                return groups;
+            }, [sentences]);
 
             return (
                 <div className="min-h-screen text-sumi font-serif pb-12">
-                    <header className="bg-aitetsu text-gofun sticky top-0 z-50 shadow-md backdrop-blur-sm bg-opacity-95 transition-all duration-300">
+                    <header className="bg-aitetsu text-gofun sticky top-0 z-50 shadow-md backdrop-blur-sm bg-opacity-95 transition-all">
                         <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="bg-gofun/10 p-2 rounded-lg backdrop-blur-md border border-gofun/20">
                                     <Icons.BookOpen size={20} className="text-matcha" />
                                 </div>
-                                <div>
-                                    <h1 className="text-xl font-bold tracking-widest font-serif leading-none">古文単語学習アプリ</h1>
-                                </div>
+                                <h1 className="text-xl font-bold tracking-widest leading-none">古文攻略マスター</h1>
                             </div>
                             <div className="flex gap-2 w-full md:w-auto">
-                                <button 
-                                    onClick={handleShuffle}
-                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gofun/10 hover:bg-gofun/20 text-gofun/90 rounded-lg transition-all duration-300 text-sm font-sans"
-                                >
-                                    <Icons.Shuffle size={16} />
-                                    <span>シャッフル</span>
+                                <button onClick={handleShuffle} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gofun/10 hover:bg-gofun/20 rounded-lg transition-all text-xs font-sans">
+                                    <Icons.Shuffle size={14} /><span>シャッフル</span>
                                 </button>
-                                <button 
-                                    onClick={handleReset}
-                                    className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gofun/10 hover:bg-gofun/20 text-gofun/90 rounded-lg transition-all duration-300 text-sm font-sans"
-                                >
-                                    <Icons.RotateCcw size={16} />
-                                    <span>リセット</span>
+                                <button onClick={handleReset} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gofun/10 hover:bg-gofun/20 rounded-lg transition-all text-xs font-sans">
+                                    <Icons.RotateCcw size={14} /><span>リセット</span>
                                 </button>
                             </div>
                         </div>
-                        
-                        <div className="flex w-full bg-sumi/20 backdrop-blur-md border-t border-gofun/10 overflow-x-auto">
-                            <button 
-                                onClick={() => setViewMode('list')}
-                                className={`flex-1 min-w-[100px] py-3 text-xs md:text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'list' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
-                            >
-                                一覧
-                                {viewMode === 'list' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
-                            </button>
-                            <button 
-                                onClick={() => setViewMode('card')}
-                                className={`flex-1 min-w-[100px] py-3 text-xs md:text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'card' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
-                            >
-                                カード
-                                {viewMode === 'card' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
-                            </button>
-                             <button 
-                                onClick={() => setViewMode('wordList')}
-                                className={`flex-1 min-w-[100px] py-3 text-xs md:text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'wordList' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
-                            >
-                                リスト
-                                {viewMode === 'wordList' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
-                            </button>
-                            <button 
-                                onClick={() => setViewMode('tips')}
-                                className={`flex-1 min-w-[100px] py-3 text-xs md:text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'tips' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
-                            >
-                                攻略ガイド
-                                {viewMode === 'tips' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
-                            </button>
+                        <div className="flex w-full bg-sumi/20 border-t border-gofun/10 overflow-x-auto scrollbar-hide">
+                            {[
+                                { id: 'list', label: '一覧' },
+                                { id: 'card', label: 'カード' },
+                                { id: 'wordList', label: '単語帳' },
+                                { id: 'tips', label: '攻略ガイド' }
+                            ].map(tab => (
+                                <button key={tab.id} onClick={() => setViewMode(tab.id)} className={`flex-1 min-w-[100px] py-3 text-xs font-bold tracking-widest transition-all relative ${viewMode === tab.id ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun'}`}>
+                                    {tab.label}
+                                    {viewMode === tab.id && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
+                                </button>
+                            ))}
                         </div>
                     </header>
 
@@ -852,116 +703,82 @@
 
                     <main className="max-w-3xl mx-auto p-4 md:p-6 mt-4">
                         {viewMode === 'list' && (
-                            <div className="space-y-8 animate-fade-in">
-                                {sentences.map((item, idx) => (
-                                    <SentenceCard 
-                                        key={item.id} 
-                                        data={item} 
-                                        index={idx} 
-                                        checkedWords={checkedWords}
-                                        onToggleCheck={toggleWordCheck}
-                                    />
+                            <div className="space-y-12 animate-fade-in">
+                                {groupedSentences.map((group, gIdx) => (
+                                    <div key={gIdx} className="space-y-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-matcha/30"></div>
+                                            <h3 className="text-matcha font-bold text-xs md:text-sm tracking-[0.2em] whitespace-nowrap bg-matcha/5 px-4 py-1 rounded-full border border-matcha/10 flex items-center gap-2 font-sans">
+                                                <Icons.Map size={14} />
+                                                {group.category}
+                                            </h3>
+                                            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-matcha/30"></div>
+                                        </div>
+                                        {group.items.map((item) => (
+                                            <SentenceCard key={item.id} data={item} checkedWords={checkedWords} onToggleCheck={toggleWordCheck} />
+                                        ))}
+                                    </div>
                                 ))}
                             </div>
                         )}
 
                         {viewMode === 'card' && (
-                            <div className="flex flex-col items-center min-h-[70vh] justify-center animate-fade-in">
-                                <div className="w-full relative">
-                                    <SentenceCard 
-                                        data={sentences[currentCardIndex]} 
-                                        isFocusMode 
-                                        checkedWords={checkedWords}
-                                        onToggleCheck={toggleWordCheck}
-                                    />
-                                    <div className="absolute -top-12 right-0 bg-aitetsu/10 text-aitetsu px-3 py-1 rounded-full text-xs font-bold font-sans">
+                            <div className="flex flex-col items-center min-h-[60vh] justify-center animate-fade-in">
+                                <div className="w-full relative max-w-2xl">
+                                    <SentenceCard data={sentences[currentCardIndex]} isFocusMode checkedWords={checkedWords} onToggleCheck={toggleWordCheck} />
+                                    <div className="absolute -top-10 right-0 text-aitetsu/40 text-[10px] font-bold font-sans">
                                         {currentCardIndex + 1} / {sentences.length}
                                     </div>
                                 </div>
-                                <div className="flex justify-between w-full max-w-sm mt-8 items-center gap-6">
-                                    <button 
-                                        onClick={PrevCard}
-                                        disabled={currentCardIndex === 0}
-                                        className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-white border border-gray-200 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-all duration-300"
-                                    >
-                                        <Icons.ArrowLeft size={20} className="text-aitetsu" />
-                                        <span className="font-bold text-aitetsu text-sm">前へ</span>
+                                <div className="flex justify-between w-full max-w-sm mt-8 gap-6">
+                                    <button onClick={() => setCurrentCardIndex(Math.max(0, currentCardIndex - 1))} disabled={currentCardIndex === 0} className="flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-white border border-gray-200 shadow-sm disabled:opacity-30 transition-all">
+                                        <Icons.ArrowLeft size={20} /><span className="font-bold text-sm">前へ</span>
                                     </button>
-                                    <button 
-                                        onClick={NextCard}
-                                        disabled={currentCardIndex === sentences.length - 1}
-                                        className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-aitetsu text-gofun shadow-lg disabled:opacity-30 hover:bg-gray-800 transition-all duration-300"
-                                    >
-                                        <span className="font-bold text-sm">次へ</span>
-                                        <Icons.ArrowRight size={20} />
+                                    <button onClick={() => setCurrentCardIndex(Math.min(sentences.length - 1, currentCardIndex + 1))} disabled={currentCardIndex === sentences.length - 1} className="flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-aitetsu text-gofun shadow-lg disabled:opacity-30 hover:bg-gray-800 transition-all">
+                                        <span className="font-bold text-sm">次へ</span><Icons.ArrowRight size={20} />
                                     </button>
                                 </div>
                             </div>
                         )}
 
                         {viewMode === 'wordList' && (
-                             <div className="animate-fade-in bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                                <WordList 
-                                    sentences={initialData} 
-                                    onJump={handleJumpToSentence}
-                                    checkedWords={checkedWords}
-                                    onToggleCheck={toggleWordCheck}
-                                />
+                             <div className="animate-fade-in bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                                <WordList sentences={initialData} onJump={handleJumpToSentence} checkedWords={checkedWords} onToggleCheck={toggleWordCheck} />
                              </div>
                         )}
 
                         {viewMode === 'tips' && <StudyGuide />}
                     </main>
 
-                    <footer className="text-center text-aitetsu/40 text-xs font-sans mt-20 mb-8 tracking-widest">
-                        <p>古文単語学習アプリ</p>
+                    <footer className="text-center text-aitetsu/20 text-[10px] font-sans mt-20 mb-8 tracking-[0.3em] uppercase">
+                        &copy; 2026 古文攻略マスター
                     </footer>
                 </div>
             );
         };
 
         const WordList = ({ sentences, onJump, checkedWords, onToggleCheck }) => {
-            const allWords = useMemo(() => {
-                return sentences.flatMap(s => 
-                    s.words.map((w, wIdx) => ({
-                        ...w,
-                        sourceId: s.id,
-                        sourceTitle: s.title,
-                        wordIndex: wIdx
-                    }))
-                );
-            }, [sentences]);
-
+            const allWords = useMemo(() => sentences.flatMap(s => s.words.map((w, wIdx) => ({ ...w, sourceId: s.id, sourceTitle: s.title, wordIndex: wIdx }))), [sentences]);
             return (
                 <div>
-                     <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                         <Icons.Search size={18} className="text-gray-400"/>
-                        <h2 className="font-bold text-aitetsu text-lg">収録単語一覧</h2>
+                    <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                        <Icons.Search size={18} className="text-gray-400"/><h2 className="font-bold text-aitetsu">収録単語一覧</h2>
                     </div>
                     <div className="divide-y divide-gray-100 font-sans">
                         {allWords.map((word, idx) => {
                             const isChecked = !!checkedWords[`${word.sourceId}-${word.wordIndex}`];
                             return (
-                                <div key={idx} className="p-4 hover:bg-gray-50 transition-colors grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 items-start">
+                                <div key={idx} className="p-4 hover:bg-gray-50 transition-colors grid grid-cols-1 md:grid-cols-12 gap-2 items-start text-sm">
                                     <div className="md:col-span-4 font-serif font-bold text-lg text-aitetsu flex items-center gap-3">
-                                        <button 
-                                            onClick={() => onToggleCheck(word.sourceId, word.wordIndex)}
-                                            className={`flex-shrink-0 transition-all ${isChecked ? 'text-matcha scale-110' : 'text-gray-200 hover:text-gray-400'}`}
-                                        >
-                                            <Icons.CheckCircle size={28} filled={isChecked} />
+                                        <button onClick={() => onToggleCheck(word.sourceId, word.wordIndex)} className={`flex-shrink-0 transition-all ${isChecked ? 'text-matcha scale-110' : 'text-gray-200 hover:text-gray-400'}`}>
+                                            <Icons.CheckCircle size={24} filled={isChecked} />
                                         </button>
                                         {word.term}
                                     </div>
-                                    <div className="md:col-span-5 text-gray-700 font-medium pl-11 md:pl-0">
-                                        {word.meaning}
-                                    </div>
-                                    <div className="md:col-span-3 text-xs md:text-right mt-1 md:mt-0 pl-11 md:pl-0">
-                                        <button 
-                                            onClick={() => onJump(word.sourceId)}
-                                            className="inline-flex items-center gap-1 text-aitetsu/60 hover:text-kincha hover:underline transition-colors group"
-                                        >
-                                            出典：{word.sourceTitle}
-                                            <Icons.ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity"/>
+                                    <div className="md:col-span-5 text-gray-600 font-medium pl-9 md:pl-0 flex items-center h-full min-h-[2.5rem]">{word.meaning}</div>
+                                    <div className="md:col-span-3 text-[10px] md:text-right pl-9 md:pl-0">
+                                        <button onClick={() => onJump(word.sourceId)} className="text-aitetsu/40 hover:text-matcha transition-colors group flex items-center gap-1 md:justify-end">
+                                            出典：{word.sourceTitle}<Icons.ExternalLink size={10} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </button>
                                     </div>
                                 </div>
@@ -975,61 +792,45 @@
         const SentenceCard = ({ data, isFocusMode = false, checkedWords, onToggleCheck }) => {
             const [showTranslation, setShowTranslation] = useState(false);
             const [revealedWords, setRevealedWords] = useState({});
+            const toggleWord = (i) => setRevealedWords(p => ({ ...p, [i]: !p[i] }));
+            useEffect(() => { if (isFocusMode) { setShowTranslation(false); setRevealedWords({}); } }, [data.id, isFocusMode]);
 
-            const toggleWord = (index) => {
-                setRevealedWords(prev => ({
-                    ...prev,
-                    [index]: !prev[index]
-                }));
+            // ** で囲まれた部分を赤字にする関数
+            const renderSentence = (text) => {
+                if (!text) return null;
+                const parts = text.split('**');
+                return parts.map((part, i) => (
+                    i % 2 === 1 ? <span key={i} className="text-akabeni font-bold">{part}</span> : part
+                ));
             };
-            
-            useEffect(() => {
-                if (isFocusMode) {
-                    setShowTranslation(false);
-                    setRevealedWords({});
-                }
-            }, [data.id, isFocusMode]);
 
             return (
-                <div 
-                    id={isFocusMode ? undefined : `card-${data.id}`}
-                    className={`bg-gofun rounded-2xl border border-gray-100 overflow-hidden transition-all duration-500 relative group ${isFocusMode ? 'card-shadow' : 'hover:shadow-lg hover:border-gray-200 shadow-sm'}`}
-                >
+                <div id={isFocusMode ? undefined : `card-${data.id}`} className={`bg-gofun rounded-2xl border border-gray-100 overflow-hidden transition-all duration-500 relative ${isFocusMode ? 'card-shadow' : 'hover:shadow-lg hover:border-gray-200 shadow-sm'}`}>
                     <div className="h-1 bg-gradient-to-r from-aitetsu via-aitetsu to-matcha opacity-80"></div>
-
                     <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                         <div className="flex items-center gap-3">
-                            <span className="flex items-center justify-center w-8 h-8 rounded-full bg-aitetsu text-gofun font-serif text-sm font-bold shadow-sm">
-                                {data.id}
-                            </span>
-                            <div>
-                                <div className="text-[10px] text-matcha font-bold font-sans tracking-widest uppercase mb-0.5">{data.category}</div>
-                                <h2 className="font-bold text-aitetsu text-lg tracking-wide leading-none">{data.title}</h2>
-                            </div>
+                            <span className="flex items-center justify-center w-7 h-7 rounded-full bg-aitetsu text-gofun font-serif text-xs font-bold shadow-sm">{data.id}</span>
+                            <h2 className="font-bold text-aitetsu tracking-wider text-sm md:text-base">{data.title}</h2>
                         </div>
-                        <div className="hidden sm:block opacity-10">
-                            <svg width="60" height="20" viewBox="0 0 60 20">
-                                <path d="M0 10 Q 15 0 30 10 T 60 10" fill="none" stroke="currentColor" strokeWidth="2" />
-                            </svg>
-                        </div>
+                        <div className="text-[10px] text-matcha font-bold font-sans tracking-widest hidden sm:block opacity-60">あるある場面</div>
                     </div>
 
                     <div className="p-6 md:p-8">
-                        <div className="mb-8 relative pl-4 border-l-4 border-matcha/50">
-                            <p className="text-2xl md:text-3xl font-serif leading-loose text-gray-800 tracking-wide">
-                                {data.sentence}
+                        <div className="mb-8 relative pl-5 border-l-4 border-matcha/40">
+                            <p className="text-2xl md:text-3xl font-serif leading-[1.8] text-gray-800 tracking-wide">
+                                {renderSentence(data.sentence)}
                             </p>
                         </div>
 
                         {data.description && (
-                            <div className="mb-8 bg-aitetsu/[0.03] p-5 rounded-2xl border border-aitetsu/5 text-sm text-gray-700 leading-relaxed relative group/aruaru">
+                            <div className="mb-8 bg-matcha/5 p-5 rounded-2xl border border-matcha/10 relative group/aruaru transition-all hover:bg-matcha/10">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <div className="bg-matcha text-white p-1 rounded-lg">
-                                        <Icons.Lightbulb size={14} />
+                                    <div className="bg-matcha text-white p-1 rounded-lg shadow-sm">
+                                        <Icons.Lightbulb size={12} />
                                     </div>
-                                    <span className="font-bold text-aitetsu text-xs tracking-widest">古文のあるあるシーン</span>
+                                    <span className="font-bold text-aitetsu text-[10px] tracking-[0.2em]">古文のあるあるシーン</span>
                                 </div>
-                                <p className="font-sans text-gray-600">{data.description}</p>
+                                <p className="font-sans text-xs md:text-sm text-gray-600 leading-relaxed">{data.description}</p>
                             </div>
                         )}
 
@@ -1037,31 +838,16 @@
                             {data.words.map((word, wIdx) => {
                                 const isChecked = !!checkedWords[`${data.id}-${wIdx}`];
                                 return (
-                                    <div key={wIdx} className="relative group/container">
-                                        <button
-                                            onClick={() => toggleWord(wIdx)}
-                                            className={`relative p-4 rounded-xl text-left transition-all duration-300 border w-full ${revealedWords[wIdx] ? 'bg-aitetsu/5 border-aitetsu/30 shadow-inner' : 'bg-white border-gray-200 hover:border-matcha hover:shadow-md hover:-translate-y-0.5'}`}
-                                        >
+                                    <div key={wIdx} className="relative group">
+                                        <button onClick={() => toggleWord(wIdx)} className={`relative p-4 rounded-xl text-left transition-all duration-300 border w-full font-sans ${revealedWords[wIdx] ? 'bg-aitetsu/5 border-aitetsu/20' : 'bg-white border-gray-100 hover:border-matcha hover:shadow-md hover:-translate-y-0.5'}`}>
                                             <div className="flex justify-between items-center mb-1 pr-10">
-                                                <span className={`font-serif font-bold text-xl transition-colors ${revealedWords[wIdx] ? 'text-aitetsu' : 'text-gray-700'}`}>
-                                                    {word.term}
-                                                </span>
-                                                <div className={`px-2 py-1 rounded-full text-[10px] transition-colors ${revealedWords[wIdx] ? 'bg-aitetsu text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-matcha group-hover:text-white'}`}>
-                                                    {revealedWords[wIdx] ? '隠す' : '意味'}
-                                                </div>
+                                                <span className={`font-serif font-bold text-lg transition-colors ${revealedWords[wIdx] ? 'text-aitetsu' : 'text-gray-700'}`}>{word.term}</span>
+                                                <span className={`text-[9px] px-1.5 py-0.5 rounded-full transition-colors ${revealedWords[wIdx] ? 'bg-aitetsu text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-matcha group-hover:text-white'}`}>{revealedWords[wIdx] ? '隠す' : '意味'}</span>
                                             </div>
-                                            <div className={`text-sm text-kincha font-bold overflow-hidden transition-all duration-300 ${revealedWords[wIdx] ? 'max-h-40 opacity-100 mt-2 pt-2 border-t border-gray-200/50' : 'max-h-0 opacity-0'}`}>
-                                                {word.meaning}
-                                            </div>
+                                            <div className={`text-xs text-kincha font-bold overflow-hidden transition-all duration-300 ${revealedWords[wIdx] ? 'max-h-40 opacity-100 mt-2 pt-2 border-t border-gray-100' : 'max-h-0 opacity-0'}`}>{word.meaning}</div>
                                         </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onToggleCheck(data.id, wIdx);
-                                            }}
-                                            className={`absolute top-0 right-0 p-4 z-10 transition-all ${isChecked ? 'text-matcha scale-100' : 'text-gray-200 hover:text-gray-300 scale-95'}`}
-                                        >
-                                            <Icons.CheckCircle size={24} filled={isChecked} />
+                                        <button onClick={(e) => { e.stopPropagation(); onToggleCheck(data.id, wIdx); }} className={`absolute top-0 right-0 p-4 z-10 transition-all ${isChecked ? 'text-matcha scale-100' : 'text-gray-200 hover:text-gray-300 scale-95'}`}>
+                                            <Icons.CheckCircle size={22} filled={isChecked} />
                                         </button>
                                     </div>
                                 );
@@ -1069,16 +855,13 @@
                         </div>
 
                         <div className="border-t border-dashed border-gray-200 pt-6">
-                            <button 
-                                onClick={() => setShowTranslation(!showTranslation)}
-                                className="w-full group flex items-center justify-center gap-2 py-2 text-sm text-gray-400 hover:text-aitetsu transition-colors"
-                            >
-                                <Icons.Feather size={16} className={showTranslation ? 'rotate-180 transition-transform' : 'transition-transform'} />
-                                <span className="tracking-widest font-sans font-medium">{showTranslation ? "現代語訳を隠す" : "現代語訳を見る"}</span>
+                            <button onClick={() => setShowTranslation(!showTranslation)} className="w-full flex items-center justify-center gap-2 py-2 text-xs text-gray-400 hover:text-aitetsu transition-colors font-sans font-bold tracking-widest">
+                                <Icons.Feather size={14} className={showTranslation ? 'rotate-180 transition-transform' : 'transition-transform'} />
+                                {showTranslation ? "現代語訳を隠す" : "現代語訳を見る"}
                             </button>
-                            <div className={`mt-4 text-gray-600 text-base leading-loose bg-gray-50/80 p-5 rounded-xl border border-gray-100/50 relative transition-all duration-500 overflow-hidden ${showTranslation ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 py-0 border-0'}`}>
+                            <div className={`mt-4 text-gray-600 text-sm md:text-base leading-loose bg-gray-50/80 p-5 rounded-xl border border-gray-100 relative transition-all duration-500 overflow-hidden font-serif ${showTranslation ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 py-0 border-0'}`}>
                                 <div className="absolute top-0 left-0 w-1 h-full bg-kincha/30"></div>
-                                <span className="font-bold text-kincha text-[10px] block mb-2 tracking-widest opacity-70">現代語訳</span>
+                                <span className="font-bold text-kincha text-[9px] block mb-2 tracking-[0.2em] uppercase opacity-60">現代語訳</span>
                                 {data.translation}
                             </div>
                         </div>
