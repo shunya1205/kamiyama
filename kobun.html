@@ -67,6 +67,15 @@
         .card-shadow {
             box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 10px -2px rgba(0, 0, 0, 0.02);
         }
+
+        /* アニメーション */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-washi text-sumi font-serif min-h-screen relative">
@@ -167,6 +176,20 @@
                 <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                     <polyline points="18 15 12 9 6 15"></polyline>
                 </svg>
+            ),
+            Lightbulb: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <path d="M9 18h6"></path>
+                    <path d="M10 22h4"></path>
+                    <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path>
+                </svg>
+            ),
+            Info: ({ size = 24, className = "" }) => (
+                <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
             )
         };
 
@@ -174,290 +197,410 @@
         const initialData = [
             {
                 id: 1,
-                title: "貴族の訪問",
+                category: "身分やマナー",
+                title: "貴族の来訪",
                 sentence: "あてなる人のおはすれば、人々げに激しくののしる。",
-                translation: "上品な（身分が高い）人がいらっしゃるので、人々は本当に激しく大声で騒ぐ。",
+                translation: "身分が高く上品な方がいらっしゃるので、人々は本当に激しく大声で騒いでいる。",
+                description: "イメージは「街に超有名人がやってきた！」という状態。みんなが「うわあ！本物だ！すごい！」と大騒ぎしている様子です。現代だと「ののしる」は悪口ですが、古文では「ワァーッ！と盛り上がる」という意味でも使われます。",
                 words: [
-                { term: "あてなり", meaning: "身分が高い、上品だ" },
-                { term: "おはす", meaning: "いらっしゃる（尊敬語）" },
-                { term: "げに", meaning: "本当に、なるほど" },
-                { term: "ののしる", meaning: "大声で騒ぐ、評判になる" }
+                    { term: "あてなり", meaning: "身分が高い、上品だ（クラスの憧れの人みたいな「気品」がある感じ）" },
+                    { term: "おはす", meaning: "いらっしゃる（「行く・来・居」の尊敬語。王様レベルの人に使う）" },
+                    { term: "げに", meaning: "本当に、なるほど（「それな！」「マジで」という納得の相槌）" },
+                    { term: "ののしる", meaning: "大声で騒ぐ、評判になる（※悪口とは限らない！「バズってる」状態）" }
                 ]
             },
             {
                 id: 2,
-                title: "親子の情愛",
-                sentence: "いみじくうつくしき児をながめつつ、かなしと思ふ。",
-                translation: "たいそう可愛らしい子供をぼんやり見つめて、愛おしいと思う。",
+                category: "身分やマナー",
+                title: "謙譲の作法",
+                sentence: "宿へまうで、文をたてまつりて、よしなきことを聞こゆ。",
+                translation: "お宅へ参上して、手紙を差し上げて、つまらないことを申し上げる。",
+                description: "現代で言うなら「憧れの先輩にめちゃくちゃ丁寧にDMを送る」ようなシーンです。「突然すみません、大した用事ではないのですが…」と、自分をグッと下げて相手を立てるのが当時のマナーでした。",
                 words: [
-                { term: "いみじ", meaning: "たいそう、大変（良い・悪い両方）" },
-                { term: "うつくし", meaning: "かわいい、愛らしい" },
-                { term: "ながむ", meaning: "物思いにふける、ぼんやり見る" },
-                { term: "かなし", meaning: "愛おしい、かわいい" }
+                    { term: "まうづ", meaning: "参上する、お参りする（「行く・来」の謙譲語）" },
+                    { term: "たてまつる", meaning: "差し上げる（「あげる」の謙譲語。プレゼントや手紙を渡すとき）" },
+                    { term: "聞こゆ", meaning: "申し上げる（「言う」の謙譲語。手紙を送るという意味もある）" }
                 ]
             },
             {
                 id: 3,
-                title: "病床の祈り",
-                sentence: "あやしき家にて、病おこたるをねんじつつ、ゆかしきことを待つ。",
-                translation: "粗末な家で、病気が良くなるのを我慢して祈りながら、知りたい（見たい）ことを待つ。",
+                category: "身分やマナー",
+                title: "強引な命令",
+                sentence: "「な泣きそ」とのたまへど、いふもおろかなり。",
+                translation: "「泣いてくれるな」とおっしゃるけれど、（その悲しさは）言い尽くせない。",
+                description: "泣かないでとなだめられても、悲しすぎて「無理、言葉にならない……」と絶望しているシーン。あまりに感情がデカすぎて、説明が追いつかないほどヤバい状態です。",
                 words: [
-                { term: "あやし", meaning: "不思議だ、身分が低い、粗末だ" },
-                { term: "おこたる", meaning: "病気が良くなる" },
-                { term: "ねんず", meaning: "我慢する、祈る" },
-                { term: "ゆかし", meaning: "見たい、聞きたい、知りたい" }
+                    { term: "な〜そ", meaning: "〜するな（「〜しないでね」という柔らかい禁止）" },
+                    { term: "のたまふ", meaning: "おっしゃる（「言う」の尊敬語。先生や親が言うイメージ）" },
+                    { term: "いふもおろかなり", meaning: "言い尽くせない（「言うのが不十分になっちゃうくらい、すごい」）" }
                 ]
             },
             {
                 id: 4,
-                title: "不安な道中",
-                sentence: "おぼつかなき道なれど、いつしかと急げば、やがて里に着きぬ。",
-                translation: "はっきりせず不安な道であるが、早く（着きたい）と急ぐと、そのまま（すぐに）里に着いた。",
+                category: "驚きやときめき",
+                title: "親子の情愛",
+                sentence: "いみじくうつくしき児をながめつつ、かなしと思ふ。",
+                translation: "たいそう可愛らしい子供をぼんやり見つめて、愛おしいと思う。",
+                description: "赤ちゃんやペットを見て、「うわぁ、可愛すぎて心臓が痛い……」とキュンとしている状態。「かなし」は悲しいのではなく、可愛すぎて胸が締め付けられるような愛情のことです。",
                 words: [
-                { term: "おぼつかなし", meaning: "はっきりしない、不安だ、待ち遠しい" },
-                { term: "いつしか", meaning: "早く" },
-                { term: "やがて", meaning: "そのまま、すぐに" }
+                    { term: "いみじ", meaning: "たいそう、大変（プラスにもマイナスにも使える「ヤバい」）" },
+                    { term: "うつくし", meaning: "かわいい（※「綺麗」ではなく、小さいものを愛でる気持ち）" },
+                    { term: "ながむ", meaning: "ぼんやり見る（物思いにふけって、考え事をしている感じ）" },
+                    { term: "かなし", meaning: "愛おしい、かわいい（※「悲しい」じゃない！テストに絶対出る！）" }
                 ]
             },
             {
                 id: 5,
+                category: "驚きやときめき",
                 title: "驚きの光景",
                 sentence: "ありがたき花を見て、あさましきまでおどろきぬ。",
-                translation: "めったにない（珍しい）花を見て、驚きあきれるほどまでハッと気づいた。",
+                translation: "めったにない珍しい花を見て、驚きあきれるほどまでハッと気づいた。",
+                description: "「え、何これ！？ マジか！」と、予想外のことに遭遇して目が覚めるような感覚です。「おどろく」は、寝ている状態やボーッとしている状態から「ハッと意識が戻る」ことを言います。",
                 words: [
-                { term: "ありがたし", meaning: "めったにない、珍しい" },
-                { term: "あさまし", meaning: "驚きあきれる、情けない" },
-                { term: "おどろく", meaning: "ハッと気づく、目が覚める" }
+                    { term: "ありがたし", meaning: "めったにない、珍しい（「サンキュー」ではなく「レアだ」）" },
+                    { term: "あさまし", meaning: "驚きあきれる、ひどい（「ありえない！」というショック）" },
+                    { term: "おどろく", meaning: "ハッと気づく、目が覚める" }
                 ]
             },
             {
                 id: 6,
-                title: "四季の趣",
-                sentence: "冬の月はさらなり。いとつきづきしけれど、さらに人見えず。",
-                translation: "冬の月は言うまでもない。とても似つかわしいけれど、まったく人が見えない。",
+                category: "驚きやときめき",
+                title: "心の乱れ",
+                sentence: "おろかなる心にて、むげに泣きまどふは、かたはらいたし。",
+                translation: "いい加減な心で、ひどく泣きわめくのは、傍らで見ていて苦々しい（恥ずかしい）。",
+                description: "友達が人前で「ギャーギャー泣き叫んでパニックになっている」のを、横で見ながら「うわぁ、見てるこっちが恥ずかしくなるよ……」と引いているシーンです。",
                 words: [
-                { term: "さらなり", meaning: "言うまでもない" },
-                { term: "いと", meaning: "とても" },
-                { term: "つきづきし", meaning: "ふさわしい、似つかわしい" },
-                { term: "さらに〜（打消）", meaning: "まったく〜ない" }
+                    { term: "おろかなり", meaning: "いい加減だ、不十分だ（「テキトー」な感じ）" },
+                    { term: "むげに", meaning: "むやみに、ひどく" },
+                    { term: "まどふ", meaning: "ひどく～する、迷う（パニックになってワタワタするイメージ）" },
+                    { term: "かたはらいたし", meaning: "恥ずかしい、苦々しい（「隣（かたわら）が痛い」＝見てるのが辛い）" }
                 ]
             },
             {
                 id: 7,
-                title: "謙譲の作法",
-                sentence: "宿へまうで、文をたてまつりて、よしなきことを聞こゆ。",
-                translation: "宿へ参上して、手紙を差し上げて、つまらないことを申し上げる。",
+                category: "病気やピンチ",
+                title: "病床の祈り",
+                sentence: "あやしき家にて、病おこたるをねんじつつ、ゆかしきことを待つ。",
+                translation: "粗末な家で、病気が良くなるのを我慢して祈りながら、知りたい情報を待つ。",
+                description: "当時は薬がないので「病気の時は神頼み！」が基本。布団の中でジッと我慢（ねんず）しながら、誰かお見舞いに来て「推しの最新情報」とか聞かせてくれないかなぁ（ゆかし）と待っています。",
                 words: [
-                { term: "まうづ", meaning: "参上する、参詣する" },
-                { term: "たてまつる", meaning: "差し上げる、〜し申し上げる" },
-                { term: "聞こゆ", meaning: "申し上げる（謙譲語）" }
+                    { term: "あやし", meaning: "身分が低い、粗末だ、不思議だ" },
+                    { term: "おこたる", meaning: "病気が良くなる（※サボるじゃない！病気がサボって消えるイメージ）" },
+                    { term: "ねんず", meaning: "我慢する、祈る（「念じる」）" },
+                    { term: "ゆかし", meaning: "見たい、聞きたい、知りたい（「行きたい」くらい気になる）" }
                 ]
             },
             {
                 id: 8,
-                title: "暇つぶしの読書",
-                sentence: "つれづれなりければ、ついでにをかしき物語をあまた読む。",
-                translation: "退屈だったので、機会があるごとに興味深い物語をたくさん読む。",
+                category: "病気やピンチ",
+                title: "耐えがたい別れ",
+                sentence: "涙をこらへあへず、愛しき人におくれぬるはわびし。",
+                translation: "涙を堪えきれず、愛する人に先立たれてしまったのは、つらくやりきれない。",
+                description: "大事な人が亡くなってしまい、自分だけが取り残された寂しさです。「おくる」は「（天国へ行く人に）遅れる」＝「自分だけ生き残っちゃった」という意味。一人ぼっちの心細さ（わびし）がすごいです。",
                 words: [
-                { term: "つれづれなり", meaning: "退屈だ、手持ち無沙汰だ" },
-                { term: "ついで", meaning: "順序、機会" },
-                { term: "をかし", meaning: "趣がある、おもしろい" },
-                { term: "あまた", meaning: "たくさん、大勢" }
+                    { term: "あふ（敢ふ）", meaning: "〜しきる（「〜あへず」で「〜しきれない」）" },
+                    { term: "おくる", meaning: "先立たれる、取り残される（死別シーンの重要語）" },
+                    { term: "わびし", meaning: "つらい、やりきれない（ガッカリしてやる気が出ない感じ）" }
                 ]
             },
             {
                 id: 9,
-                title: "道理の究明",
-                sentence: "さるべき人をとぶらひ、事の理由（わけ）をあきらむれば、げに納得しぬ。",
-                translation: "しかるべき（立派な）人を訪ね、事の理由を明らかにしたところ、本当になるほどと納得した。",
+                category: "病気やピンチ",
+                title: "不安な道中",
+                sentence: "おぼつかなき道なれど、いつしかと急げば、やがて里に着きぬ。",
+                translation: "はっきりせず不安な道であるが、早く（着きたい）と急ぐと、そのまま（すぐに）里に着いた。",
+                description: "夜の山道で「スマホのライトもない、地図もない、どっちに行けばいいかわからない！」という超不安な状態（おぼつかなし）。だからこそ「早く（いつしか）帰りたい！」と急いで、パッと着いた（やがて）瞬間の安心感です。",
                 words: [
-                { term: "さるべき", meaning: "しかるべき、立派な" },
-                { term: "とぶらふ", meaning: "訪ねる、見舞う、供養する" },
-                { term: "あきらむ", meaning: "明らかにする" },
-                { term: "げに", meaning: "本当に、なるほど" }
+                    { term: "おぼつかなし", meaning: "はっきりしない、不安だ、待ち遠しい" },
+                    { term: "いつしか", meaning: "早く（「いつの間にか」じゃない！「いつになったら着くの！」という焦り）" },
+                    { term: "やがて", meaning: "すぐに、そのまま（※「後で」ではない！即座に！）" }
                 ]
             },
             {
                 id: 10,
-                title: "心の乱れ",
-                sentence: "おろかなる心にて、むげに泣きまどふは、かたはらいたし。",
-                translation: "いい加減な心で、ひどく泣きわめくのは、傍らで見ていて苦々しい（恥ずかしい）。",
+                category: "時間や景色",
+                title: "四季の趣",
+                sentence: "冬の月はさらなり。いとつきづきしけれど、さらに人見えず。",
+                translation: "冬の月は言うまでもない。とても似つかわしいけれど、まったく人が見えない。",
+                description: "「冬の月、エモすぎん？」という清少納言のつぶやき。「さらなり」は「言うまでもなく最高」。「つきづきし」は「その場のエモい空気にピッタリ合ってる」という意味。誰もいない静かな夜、自分だけがこの景色を知っている……という優越感です。",
                 words: [
-                { term: "おろかなり", meaning: "いい加減だ、不十分だ" },
-                { term: "むげに", meaning: "むやみに、ひどく" },
-                { term: "まどふ", meaning: "迷う、ひどく〜する" },
-                { term: "かたはらいたし", meaning: "苦々しい、恥ずかしい" }
+                    { term: "さらなり", meaning: "言うまでもない" },
+                    { term: "いと", meaning: "とても" },
+                    { term: "つきづきし", meaning: "ふさわしい、似つかわしい" },
+                    { term: "さらに〜（打消）", meaning: "まったく〜ない（絶対ムリ！レベルの強い否定）" }
                 ]
             },
             {
                 id: 11,
-                title: "強引な命令",
-                sentence: "「な泣きそ」とのたまへど、いふもおろかなり。",
-                translation: "「泣いてくれるな」とおっしゃるけれど、（その悲しさは）言い尽くせない。",
+                category: "時間や景色",
+                title: "季節の移ろい",
+                sentence: "つとめて見れば、霧のあからさまなりしが、おのづから消えぬ。",
+                translation: "早朝に見ると、霧がほんのちょっと（一時的）であったのが、自然と消えた。",
+                description: "朝早く起きて（つとめて）外を見たら、霧が「ほんの一瞬だけ（あからさまなり）」見えて、すぐにふわぁ〜っと消えていった……。「あ、今一瞬だけ綺麗だったな」という、日常の小さなラッキーに感動しているシーンです。",
                 words: [
-                { term: "な〜そ", meaning: "〜するな、〜しないでくれ" },
-                { term: "のたまふ", meaning: "おっしゃる（尊敬語）" },
-                { term: "いふもおろかなり", meaning: "言い尽くせない" }
+                    { term: "つとめて", meaning: "早朝（※「早朝に働く」から。テストに出る！）" },
+                    { term: "あからさまなり", meaning: "ほんのちょっと、一時的だ（※「明白」じゃない！「ちょっとだけ」）" },
+                    { term: "おのづから", meaning: "自然に、たまたま" }
                 ]
             },
             {
                 id: 12,
-                title: "季節の移ろい",
-                sentence: "つとめて見れば、霧のあからさまなりしが、おのづから消えぬ。",
-                translation: "早朝に見ると、霧がほんのちょっと（一時的）であったのが、自然と消えた。",
+                category: "性格やウワサ話",
+                title: "評価の「4段階」ランク",
+                sentence: "よしと思ふことも、人にはわろく聞こえ、よろしきこともあし。",
+                translation: "良いと思うことも、他人には良くなく聞こえ、悪くないことも悪い。",
+                description: "誰かを評価する時のランク付けです。よし：【最高！】SSランク、よろし：【悪くないね】Bランク、わろし：【ちょっとダメかな】Dランク、あし：【最悪】Fランク。",
                 words: [
-                { term: "つとめて", meaning: "早朝、翌朝" },
-                { term: "あからさまなり", meaning: "ほんのちょっと、一時的だ" },
-                { term: "おのづから", meaning: "自然に、たまたま" }
+                    { term: "よし", meaning: "最高、良い" },
+                    { term: "よろし", meaning: "悪くない、まあまあ（普通）" },
+                    { term: "わろし", meaning: "良くない、感心しない（イマイチ）" },
+                    { term: "あし", meaning: "悪い（最悪）" }
                 ]
             },
             {
                 id: 13,
-                title: "接客と立ち振る舞い",
-                sentence: "多くの人がわたりて、客をもてなすよしあり。",
-                translation: "多くの人がやって来て、客を振る舞う（世話をする）ための由緒（方法）がある。",
+                category: "性格やウワサ話",
+                title: "本心と誠実さ",
+                sentence: "ほいはまめなる道なれど、心はあだなり。",
+                translation: "本来の願いは誠実な道であるけれど、心は浮ついている。",
+                description: "「テスト勉強しなきゃ！（まめなり）」と思っているのに、「ついYouTube見ちゃう……（あだなり）」という、あの心の葛藤です。自分の理想（ほい）に追いつけない、あの人の性格を分析しているシーン。",
                 words: [
-                { term: "わたる", meaning: "行く、来る、通る" },
-                { term: "もてなす", meaning: "振る舞う、世話をする" },
-                { term: "よし", meaning: "理由、由緒、風情、方法" }
+                    { term: "ほい（本意）", meaning: "本来の目的、願い" },
+                    { term: "まめなり", meaning: "誠実だ、真面目だ（豆みたいに中身がギュッと詰まってる）" },
+                    { term: "あだなり", meaning: "浮気だ、はかない、無駄だ（中身がスカスカでヒラヒラしてる）" }
                 ]
             },
             {
                 id: 14,
-                title: "称賛と引け目",
-                sentence: "はづかしきほどめでたき人は、見ていてこころぐるし。",
-                translation: "（こちらが恥ずかしくなるほど）立派で、すばらしい人は、見ていて（こちらが申し訳なくて）心苦しい。",
+                category: "性格やウワサ話",
+                title: "評判と不安",
+                sentence: "かしこき人のおぼえあるは、うしろめたし。",
+                translation: "優れた人が評判（お気に入り）なのは、不安だ（気がかりだ）。",
+                description: "クラスのすごい人が先生にめちゃくちゃ気に入られている（おぼえ）のを見て、「あの人、このままいくと嫉妬されてイジメられたりしないかな……」とハラハラ心配している状態です。",
                 words: [
-                { term: "はづかし", meaning: "恥ずかしい、立派だ" },
-                { term: "めでたし", meaning: "すばらしい、見事だ" },
-                { term: "こころぐるし", meaning: "心苦しい、気の毒だ" }
+                    { term: "かしこし", meaning: "恐れ多い、優れている" },
+                    { term: "おぼえ", meaning: "寵愛、評判（気に入られること）" },
+                    { term: "うしろめたし", meaning: "不安だ、気がかりだ（※罪悪感じゃない！）" }
                 ]
             },
             {
                 id: 15,
-                title: "昼夜を問わぬ風流",
-                sentence: "ひねもす歌を詠み、よもすがら月を愛で、かたへの人と語る。",
-                translation: "一日中歌を詠み、一晩中月を愛でて、そば（仲間）の人と語り合う。",
+                category: "ハプニングや急ぎ",
+                title: "感情の爆発",
+                sentence: "さて、さすがに昔のもとを慕ひて、すなはち泣きぬ。",
+                translation: "そうして、そうは言ってもやはり昔の場所を慕って、すぐに泣いてしまった。",
+                description: "一度は忘れたはずなのに、「やっぱり思い出したらソッコーで泣いちゃった」という、急に感情が溢れ出すシーン。物語が動く合図の言葉（さて、すなはち）が詰まっています。",
                 words: [
-                { term: "ひねもす", meaning: "一日中" },
-                { term: "よもすがら", meaning: "一晩中" },
-                { term: "かたへ", meaning: "そば、片方、仲間" }
+                    { term: "さて", meaning: "そのまま、そうして" },
+                    { term: "さすがに", meaning: "そうは言ってもやはり（「とは言ってもね……」という心の逆転）" },
+                    { term: "すなはち", meaning: "すぐに（※動作が光の速さで起きること）" }
                 ]
             },
             {
                 id: 16,
-                title: "耐えがたい別れ",
-                sentence: "涙をこらへあへず、愛しき人におくれぬるはわびし。",
-                translation: "涙を堪えきれず、愛する人に先立たれて（取り残されて）しまったのは、つらくやりきれない。",
+                category: "ハプニングや急ぎ",
+                title: "待ち遠しさと焦り",
+                sentence: "こころもとなきままに、あたらしき文をおろかにす。",
+                translation: "じれったい（不安な）ままに、もったいない手紙を疎かにする。",
+                description: "「LINEの返信が来なくてソワソワ（こころもとなし）」して、不安で頭がいっぱいなせいで、目の前の大事な手紙（あたらし）を適当に（おろかに）扱っちゃうシーン。",
                 words: [
-                { term: "あふ（敢ふ）", meaning: "耐える、〜しきれない" },
-                { term: "おくる", meaning: "遅れる、先立たれる" },
-                { term: "わびし", meaning: "つらい、やりきれない" }
+                    { term: "こころもとなし", meaning: "待ち遠しい、不安だ、はっきりしない" },
+                    { term: "あたらし", meaning: "もったいない（※「新しい」じゃない！「もったいない」！）" },
+                    { term: "おろかなり", meaning: "いい加減だ（疎かにする。真面目にやらない感じ）" }
                 ]
             },
             {
                 id: 17,
-                title: "評価の基準",
-                sentence: "よしと思ふことも、人にはわろく聞こえ、よろしきこともあし。",
-                translation: "良いと思うことも、他人には良くなく聞こえ、悪くないことも悪い。",
+                category: "ハプニングや急ぎ",
+                title: "完璧すぎて困る",
+                sentence: "めづらしき人の、きよらなるは、なかななり。",
+                translation: "めったにない素晴らしい人が、最高に美しいのは、むしろ逆効果だ。",
+                description: "「完璧すぎて逆に困る！」というハプニング。推しが尊すぎて、いざ会えたのに「近寄れねぇ……むしろ会わないほうが心臓に優しかったわ……」という、「むしろ逆効果」な状態です。",
                 words: [
-                { term: "よし", meaning: "良い" },
-                { term: "よろし", meaning: "悪くない、普通だ" },
-                { term: "わろし", meaning: "良くない、感心しない" },
-                { term: "あし", meaning: "悪い" }
+                    { term: "めづらし", meaning: "素晴らしい、めったにない（最高！の意）" },
+                    { term: "きよらなり", meaning: "最高に美しい（美貌の最高ランク）" },
+                    { term: "なかなか", meaning: "むしろ〜、かえって（※「しないほうがマシ」という逆効果な感じ）" }
                 ]
             },
             {
                 id: 18,
-                title: "世間の評判",
-                sentence: "おほかた、つゆ知らぬ人のおとにきくははしたなし。",
-                translation: "だいたいにおいて、少しも知らない人の噂を聞くのは、中途半端で（きまりが悪い）。",
+                category: "人間ドラマ",
+                title: "性格の悪いやつ登場",
+                sentence: "さがなき童の、おどろおどろしく、むつかしき顔す。",
+                translation: "意地の悪い子供が、大げさに（気味悪く）、不快な顔をする。",
+                description: "物語によく出てくる「嫌なやつ」の登場シーン。「キモい顔してビビらせてくる」という最悪な空気感を説明しています。",
                 words: [
-                { term: "おほかた", meaning: "だいたい、一般に" },
-                { term: "つゆ〜（打消）", meaning: "少しも〜ない" },
-                { term: "おとにきく", meaning: "噂に聞く、評判を聞く" },
-                { term: "はしたなし", meaning: "中途半端だ、きまり悪い" }
+                    { term: "さがなし", meaning: "意地が悪い、いたずらだ（性格がひねくれている）" },
+                    { term: "おどろおどろし", meaning: "大げさだ、気味悪い" },
+                    { term: "むつかし", meaning: "不快だ、気味悪い、煩わしい（「あー、もう嫌だ！」）" }
                 ]
             },
             {
                 id: 19,
-                title: "外見と準備",
-                sentence: "さうぞくを整へ、具して山へ行くも、道かしかまし。",
-                translation: "装束（衣服）を整え、連れて山へ行くけれど、道がやかましい。",
+                category: "人間ドラマ",
+                title: "圧倒的なオーラ",
+                sentence: "めざましきまでゆゆしき人は、はかなきことも言はず。",
+                translation: "目が覚めるほど（驚くほど）立派な人は、つまらないことも言わない。",
+                description: "クラスにいる「無口だけど、オーラがハンパなくて誰も逆らえない憧れの人」。その人が喋ると、どんな些細なこと（はかなし）でも重大に聞こえる凄みです。",
                 words: [
-                { term: "さうぞく", meaning: "衣服、衣装" },
-                { term: "具す", meaning: "連れる、伴う、備える" },
-                { term: "かしかまし", meaning: "やかましい、騒がしい" }
+                    { term: "めざまし", meaning: "驚るほど素晴らしい、気に食わない" },
+                    { term: "ゆゆし", meaning: "大変素晴らしい、不吉だ（神様レベルでヤバい）" },
+                    { term: "はかなし", meaning: "つまらない、頼りない、あっけない" }
                 ]
             },
             {
                 id: 20,
-                title: "本心と誠実さ",
-                sentence: "ほいはまめなる道なれど、心はあだなり。",
-                translation: "本来の志は誠実な道であるけれど、心は浮ついている（不誠実だ）。",
+                category: "人間ドラマ",
+                title: "既読スルーの切なさ",
+                sentence: "あはれなりし人も、今はつれなくて、いとほし。",
+                translation: "しみじみと心惹かれた人も、今は冷淡で、気の毒だ（または、いとしい）。",
+                description: "「あんなに仲良しだったのに、今は話しかけても既読スルー……（つれなし）」という切ない恋のドラマ。あんなに感動（あはれ）をくれた人が別人のようになってしまった寂しさ。",
                 words: [
-                { term: "ほい", meaning: "本来の目的" },
-                { term: "まめなり", meaning: "誠実だ、真面目だ" },
-                { term: "あだなり", meaning: "浮気だ、はかない、無駄だ" }
+                    { term: "あはれなり", meaning: "しみじみと趣深い（心が「ああ…」と動かされる感動）" },
+                    { term: "つれなし", meaning: "冷淡だ、平然としている（素っ気ない態度）" },
+                    { term: "いとほし", meaning: "気の毒だ、かわいい（放っておけない、胸が痛む）" }
                 ]
             },
             {
                 id: 21,
-                title: "過去を懐かしむ",
-                sentence: "さて、さすがに昔のもとを慕ひて、すなはち泣きぬ。",
-                translation: "そうして、そうは言ってもやはり昔の根元（場所）を慕って、すぐに泣いてしまった。",
+                category: "人間ドラマ",
+                title: "贈り物に込める愛",
+                sentence: "なまめかしき女の、らうたしと思ひて、こころざしを見す。",
+                translation: "優雅で上品な女を、かわいいと思って、愛情（贈り物）を見せる。",
+                description: "「素敵な彼女（なまめかし）に、気合いを入れたプレゼントを贈る」シーン。古文では「愛」を言葉だけでなく、「こころざし（贈り物）」という形で示すのがドラマチックでした。",
                 words: [
-                { term: "さて", meaning: "そのまま、そうして" },
-                { term: "さすがに", meaning: "そうは言ってもやはり" },
-                { term: "もと", meaning: "下、根元、もともとの所" },
-                { term: "すなはち", meaning: "すぐに" }
+                    { term: "なまめかし", meaning: "優雅だ、上品だ、若々しい" },
+                    { term: "らうたし", meaning: "かわいい、愛らしい（ヨシヨシしてあげたい可愛さ）" },
+                    { term: "こころざし", meaning: "愛情、贈り物、意向" }
                 ]
             },
             {
                 id: 22,
-                title: "畏れと愚かさ",
-                sentence: "かたじけなくも、をこなる心をおどろおどろしく語る。",
-                translation: "もったいなく（恐れ多く）も、愚かな心を大げさに語る。",
+                category: "人間ドラマ",
+                title: "最悪な夜",
+                sentence: "すごき夜に、びんなきことの起きて、あやなし。",
+                translation: "しんみりと寂しい夜に、不都合なことが起きて、わけがわからない。",
+                description: "「一人で寂しい夜（すごし）に、追い打ちをかけるようなトラブル（びんなし）発生」。もう泣きっ面に蜂な、カオスなドラマです。",
                 words: [
-                { term: "かたじけなし", meaning: "もったいない、恐れ多い" },
-                { term: "をこなり", meaning: "愚かだ、馬鹿げている" },
-                { term: "おどろおどろし", meaning: "大げさだ、気味が悪い" }
+                    { term: "すごし", meaning: "しんみりと寂しい、ゾッとするほど美しい" },
+                    { term: "びんなし", meaning: "不都合だ、気の毒だ（タイミング最悪）" },
+                    { term: "あやなし", meaning: "わけがわからない、つまらない（筋道が通らない）" }
                 ]
             },
             {
                 id: 23,
-                title: "思いがけない再会",
-                sentence: "なかなかに、としごろの友に会ふは、いとほし。",
-                translation: "なまじっか（かえって）、長年の友に会うのは、気の毒だ（または、いとしい）。",
+                category: "人間ドラマ",
+                title: "場が凍りつく瞬間",
+                sentence: "わびしきままに、すさまじきことを言ふは、心づきなし。",
+                translation: "つらい（やりきれない）あまりに、興ざめなことを言うのは、気に食わない。",
+                description: "盛り上がっている時に、いきなり冷めるようなマジレス（すさまじ）をされて、一気に場が凍りつく気まずい人間関係のシーン。",
                 words: [
-                { term: "なかなか", meaning: "なまじっか、かえって" },
-                { term: "としごろ", meaning: "長年、ここ数年" },
-                { term: "いとほし", meaning: "気の毒だ、かわいい" }
+                    { term: "わびし", meaning: "つらい、やりきれない" },
+                    { term: "すさまじ", meaning: "興ざめだ、面白くない、寒々しい" },
+                    { term: "心づきなし", meaning: "気に食わない、愛想が尽きる" }
                 ]
             },
             {
                 id: 24,
-                title: "評判と不安",
-                sentence: "かしこき人のおぼえあるは、うしろめたし。",
-                translation: "恐れ多い（優れた）人が寵愛を受けているのは、不安だ（気がかりだ）。",
+                category: "人間ドラマ",
+                title: "もらい泣き",
+                sentence: "こころぐるしき人の、いとほしく泣くは、ねんじがたし。",
+                translation: "気の毒な人が、かわいそうに泣くのは、我慢するのが難しい。",
+                description: "「友達が泣いているのを見て、自分まで泣くのを我慢できない！」という感動の友情ドラマ。「もう見てられない、つらいよ（こころぐるし）」という共感です。",
                 words: [
-                { term: "かしこし", meaning: "恐れ多い、優れている" },
-                { term: "おぼえ", meaning: "寵愛、評判" },
-                { term: "うしろめたし", meaning: "不安だ、気がかりだ" }
+                    { term: "こころぐるし", meaning: "気の毒だ、心苦しい（見ていて自分も辛い）" },
+                    { term: "いとほし", meaning: "気の毒だ、かわいい" },
+                    { term: "ねんず", meaning: "我慢する、祈る" }
                 ]
             },
             {
                 id: 25,
-                title: "景色と現実",
-                sentence: "いたう寒ければ、かたちもむつかしくなりぬ。",
-                translation: "ひどく寒いので、容貌（顔立ち）も不快になってしまった。",
+                category: "人間ドラマ",
+                title: "究極の純愛",
+                sentence: "あからさまなりしよしも、さらに忘れず、ねんじ通す。",
+                translation: "ほんのちょっとした縁（いきさつ）も、まったく忘れず、我慢し続ける。",
+                description: "「一瞬すれ違っただけの初恋（あからさまなり）を、一生想い続けて耐える」という超絶エモい純愛ドラマのラスト。一瞬の縁を大切にする古文の美学です。",
                 words: [
-                { term: "いたう", meaning: "ひどく、はなはだしく" },
-                { term: "かたち", meaning: "容貌、顔立ち" },
-                { term: "むつかし", meaning: "不快だ、わずらわしい" }
-            ]
-        }
+                    { term: "あからさまなり", meaning: "ほんのちょっと、一時的だ" },
+                    { term: "よし", meaning: "理由、縁、方法、教養（ここでは「縁・いきさつ」）" },
+                    { term: "さらに〜（打消）", meaning: "まったく〜ない" },
+                    { term: "ねんず", meaning: "我慢する、心の中で祈る" }
+                ]
+            }
         ];
+
+        // 古文攻略ガイドコンポーネント
+        const StudyGuide = () => {
+            return (
+                <div className="space-y-8 animate-fade-in pb-12">
+                    {/* 読解の鉄則 */}
+                    <section className="bg-white rounded-2xl p-6 shadow-sm border border-aitetsu/10 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-2 h-full bg-akabeni"></div>
+                        <h2 className="text-xl font-bold text-aitetsu mb-4 flex items-center gap-2">
+                            <Icons.BookOpen className="text-akabeni" size={24} />
+                            古文読解の鉄則
+                        </h2>
+                        <p className="text-gray-700 leading-loose">
+                            古文は<span className="text-akabeni font-bold underline decoration-akabeni/30 underline-offset-4">「主語が省略される」</span>ことが非常に多いです。単語を覚えるときは、「誰が、どんな状況で」使っているのか、当時の価値観と一緒にイメージしましょう。
+                        </p>
+                    </section>
+
+                    {/* 単語のワナ TOP 5 */}
+                    <section className="bg-white rounded-2xl overflow-hidden shadow-sm border border-aitetsu/10">
+                        <div className="bg-aitetsu text-gofun px-6 py-4 flex items-center gap-2">
+                            <Icons.Info size={20} />
+                            <h2 className="font-bold tracking-widest">入試で狙われる「単語のワナ」TOP 5</h2>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left text-sm font-sans">
+                                <thead>
+                                    <tr className="bg-gray-50 border-b border-gray-100 text-aitetsu/60">
+                                        <th className="px-6 py-3 font-bold">単語</th>
+                                        <th className="px-6 py-3 font-bold">× 現代語のイメージ</th>
+                                        <th className="px-6 py-3 font-bold text-matcha-700">○ 古文の正しい意味</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-100">
+                                    {[
+                                        { term: "ありがたし", x: "ありがとう", o: "めったにない、レアだ" },
+                                        { term: "おどろく", x: "びっくりする", o: "ハッと気づく、目が覚める" },
+                                        { term: "おこたる", x: "サボる", o: "（病気が）良くなる" },
+                                        { term: "うつくし", x: "綺麗だ", o: "かわいい、愛らしい" },
+                                        { term: "すなはち", x: "つまり、要するに", o: "すぐに、即座に" }
+                                    ].map((trap, i) => (
+                                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
+                                            <td className="px-6 py-4 font-serif font-bold text-lg text-aitetsu">{trap.term}</td>
+                                            <td className="px-6 py-4 text-gray-400 line-through">{trap.x}</td>
+                                            <td className="px-6 py-4 font-bold text-matcha">{trap.o}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    {/* 古文攻略3つのポイント */}
+                    <section className="space-y-4">
+                        <h2 className="text-xl font-bold text-aitetsu flex items-center gap-2 px-2">
+                            <Icons.Lightbulb className="text-matcha" size={24} />
+                            攻略のポイント
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {[
+                                { title: "1. 異世界のSNSと思え！", text: "「推しを崇める」「既読スルーに悩む」といった人間の感情は今も昔も同じ。「今の自分ならどう言うか？」を考えよう。" },
+                                { title: "2. 主語探しの探偵になれ！", text: "敬語がヒント。「おはす」なら偉い人、「たてまつる」なら自分。敬語から登場人物の上下関係を推理しよう。" },
+                                { title: "3. 訳にまどわされるな！", text: "「おどろく」「ありがたし」など、現代と同じ音で意味が違う『ギャップ単語』を優先的に覚えるのが合格への近道。" }
+                            ].map((tip, i) => (
+                                <div key={i} className="bg-matcha/5 p-5 rounded-2xl border border-matcha/20">
+                                    <h3 className="font-bold text-aitetsu mb-2">{tip.title}</h3>
+                                    <p className="text-xs text-gray-600 leading-relaxed font-sans">{tip.text}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </div>
+            );
+        };
 
         // 使い方ガイドコンポーネント
         const UsageGuide = () => {
@@ -495,7 +638,7 @@
                                         </div>
                                         <div>
                                             <span className="font-bold">チェック機能（保存されます）</span>
-                                            <p className="text-xs text-gray-500 mt-0.5">単語の右上の丸をタップすると、重要単語としてチェックできます。チェックは自動保存されます。</p>
+                                            <p className="text-xs text-gray-500 mt-0.5">重要単語としてチェックできます。チェックは自動保存されます。</p>
                                         </div>
                                     </li>
                                     <li className="flex items-start gap-2">
@@ -504,7 +647,7 @@
                                         </div>
                                         <div>
                                             <span className="font-bold">出典へジャンプ</span>
-                                            <p className="text-xs text-gray-500 mt-0.5">「単語リスト」タブの出典リンクをタップすると、その単語が使われている例文にジャンプします。</p>
+                                            <p className="text-xs text-gray-500 mt-0.5">「単語リスト」タブの出典リンクをタップすると、例文にジャンプします。</p>
                                         </div>
                                     </li>
                                 </ul>
@@ -516,13 +659,11 @@
         };
 
         const KobunApp = () => {
-            // ローカルストレージキー
             const STORAGE_KEY_CHECKED = 'kobun_checked_words_v1';
 
-            // 初期状態のロード
             const getInitialMode = () => {
                 const saved = localStorage.getItem('kobun_view_mode');
-                if (['list', 'card', 'wordList'].includes(saved)) {
+                if (['list', 'card', 'wordList', 'tips'].includes(saved)) {
                     return saved;
                 }
                 return 'list';
@@ -543,24 +684,20 @@
             const [currentCardIndex, setCurrentCardIndex] = useState(getInitialIndex);
             const [checkedWords, setCheckedWords] = useState(getInitialCheckedWords);
 
-            // チェック状態の保存
             useEffect(() => {
                 localStorage.setItem(STORAGE_KEY_CHECKED, JSON.stringify(checkedWords));
             }, [checkedWords]);
 
-            // モード変更時に保存
             useEffect(() => {
                 localStorage.setItem('kobun_view_mode', viewMode);
             }, [viewMode]);
 
-            // 暗記カードのインデックス保存
             useEffect(() => {
                 if (viewMode === 'card') {
                     localStorage.setItem('kobun_card_index', currentCardIndex.toString());
                 }
             }, [currentCardIndex, viewMode]);
 
-            // 一覧モードのスクロール保存と復元
             useEffect(() => {
                 const saveScroll = () => {
                     if (viewMode === 'list') {
@@ -593,7 +730,6 @@
                 return () => window.removeEventListener('scroll', onScroll);
             }, [viewMode]);
 
-            // チェックの切り替え関数
             const toggleWordCheck = (sentenceId, wordIndex) => {
                 const key = `${sentenceId}-${wordIndex}`;
                 setCheckedWords(prev => {
@@ -607,7 +743,6 @@
                 });
             };
 
-            // 指定した文章へジャンプする関数
             const handleJumpToSentence = (id) => {
                 setViewMode('list');
                 setTimeout(() => {
@@ -625,7 +760,6 @@
                 }, 100);
             };
 
-            // シャッフル機能
             const handleShuffle = () => {
                 const shuffled = [...sentences].sort(() => Math.random() - 0.5);
                 setSentences(shuffled);
@@ -633,7 +767,6 @@
                 window.scrollTo(0, 0);
             };
 
-            // リセット機能
             const handleReset = () => {
                 const sorted = [...initialData].sort((a, b) => a.id - b.id);
                 setSentences(sorted);
@@ -655,7 +788,6 @@
 
             return (
                 <div className="min-h-screen text-sumi font-serif pb-12">
-                    {/* Header */}
                     <header className="bg-aitetsu text-gofun sticky top-0 z-50 shadow-md backdrop-blur-sm bg-opacity-95 transition-all duration-300">
                         <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
                             <div className="flex items-center gap-3">
@@ -679,35 +811,39 @@
                                     className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-gofun/10 hover:bg-gofun/20 text-gofun/90 rounded-lg transition-all duration-300 text-sm font-sans"
                                 >
                                     <Icons.RotateCcw size={16} />
-                                    <span>順番通りに戻す</span>
+                                    <span>リセット</span>
                                 </button>
                             </div>
                         </div>
                         
-                        {/* Mode Switcher Tab */}
-                        <div className="flex w-full bg-sumi/20 backdrop-blur-md border-t border-gofun/10">
+                        <div className="flex w-full bg-sumi/20 backdrop-blur-md border-t border-gofun/10 overflow-x-auto">
                             <button 
                                 onClick={() => setViewMode('list')}
-                                className={`flex-1 py-3 text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'list' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
+                                className={`flex-1 min-w-[100px] py-3 text-xs md:text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'list' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
                             >
-                                一覧で見る
+                                一覧
                                 {viewMode === 'list' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
                             </button>
-                            <div className="w-px bg-gofun/10 my-2"></div>
                             <button 
                                 onClick={() => setViewMode('card')}
-                                className={`flex-1 py-3 text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'card' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
+                                className={`flex-1 min-w-[100px] py-3 text-xs md:text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'card' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
                             >
-                                暗記カード
+                                カード
                                 {viewMode === 'card' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
                             </button>
-                            <div className="w-px bg-gofun/10 my-2"></div>
                              <button 
                                 onClick={() => setViewMode('wordList')}
-                                className={`flex-1 py-3 text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'wordList' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
+                                className={`flex-1 min-w-[100px] py-3 text-xs md:text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'wordList' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
                             >
-                                単語リスト
+                                リスト
                                 {viewMode === 'wordList' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
+                            </button>
+                            <button 
+                                onClick={() => setViewMode('tips')}
+                                className={`flex-1 min-w-[100px] py-3 text-xs md:text-sm font-bold tracking-widest transition-colors duration-300 relative ${viewMode === 'tips' ? 'text-matcha bg-black/20' : 'text-gray-400 hover:text-gofun hover:bg-white/5'}`}
+                            >
+                                攻略ガイド
+                                {viewMode === 'tips' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-matcha"></span>}
                             </button>
                         </div>
                     </header>
@@ -738,31 +874,26 @@
                                         checkedWords={checkedWords}
                                         onToggleCheck={toggleWordCheck}
                                     />
-                                    
-                                    {/* Card Progress Indicator */}
                                     <div className="absolute -top-12 right-0 bg-aitetsu/10 text-aitetsu px-3 py-1 rounded-full text-xs font-bold font-sans">
                                         {currentCardIndex + 1} / {sentences.length}
                                     </div>
                                 </div>
-                                
-                                {/* Navigation Controls */}
                                 <div className="flex justify-between w-full max-w-sm mt-8 items-center gap-6">
                                     <button 
                                         onClick={PrevCard}
                                         disabled={currentCardIndex === 0}
-                                        className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-white border border-gray-200 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-300 transition-all duration-300"
+                                        className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-white border border-gray-200 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-50 transition-all duration-300"
                                     >
-                                        <Icons.ArrowLeft size={20} className="text-aitetsu group-hover:-translate-x-1 transition-transform" />
-                                        <span className="font-bold text-aitetsu text-sm tracking-widest">前へ</span>
+                                        <Icons.ArrowLeft size={20} className="text-aitetsu" />
+                                        <span className="font-bold text-aitetsu text-sm">前へ</span>
                                     </button>
-                                    
                                     <button 
                                         onClick={NextCard}
                                         disabled={currentCardIndex === sentences.length - 1}
-                                        className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-aitetsu text-gofun shadow-lg shadow-aitetsu/20 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-800 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                                        className="flex-1 group flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-aitetsu text-gofun shadow-lg disabled:opacity-30 hover:bg-gray-800 transition-all duration-300"
                                     >
-                                        <span className="font-bold text-sm tracking-widest">次へ</span>
-                                        <Icons.ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                        <span className="font-bold text-sm">次へ</span>
+                                        <Icons.ArrowRight size={20} />
                                     </button>
                                 </div>
                             </div>
@@ -778,6 +909,8 @@
                                 />
                              </div>
                         )}
+
+                        {viewMode === 'tips' && <StudyGuide />}
                     </main>
 
                     <footer className="text-center text-aitetsu/40 text-xs font-sans mt-20 mb-8 tracking-widest">
@@ -787,9 +920,7 @@
             );
         };
 
-        // 単語リストコンポーネント
         const WordList = ({ sentences, onJump, checkedWords, onToggleCheck }) => {
-            // 全単語をフラットな配列に変換
             const allWords = useMemo(() => {
                 return sentences.flatMap(s => 
                     s.words.map((w, wIdx) => ({
@@ -807,7 +938,7 @@
                          <Icons.Search size={18} className="text-gray-400"/>
                         <h2 className="font-bold text-aitetsu text-lg">収録単語一覧</h2>
                     </div>
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-gray-100 font-sans">
                         {allWords.map((word, idx) => {
                             const isChecked = !!checkedWords[`${word.sourceId}-${word.wordIndex}`];
                             return (
@@ -815,11 +946,7 @@
                                     <div className="md:col-span-4 font-serif font-bold text-lg text-aitetsu flex items-center gap-3">
                                         <button 
                                             onClick={() => onToggleCheck(word.sourceId, word.wordIndex)}
-                                            className={`
-                                                flex-shrink-0 transition-all duration-300 p-2 -ml-2 rounded-full
-                                                ${isChecked ? 'text-matcha scale-110' : 'text-gray-200 hover:text-gray-400'}
-                                            `}
-                                            title={isChecked ? "チェックを外す" : "チェックする"}
+                                            className={`flex-shrink-0 transition-all ${isChecked ? 'text-matcha scale-110' : 'text-gray-200 hover:text-gray-400'}`}
                                         >
                                             <Icons.CheckCircle size={28} filled={isChecked} />
                                         </button>
@@ -828,7 +955,7 @@
                                     <div className="md:col-span-5 text-gray-700 font-medium pl-11 md:pl-0">
                                         {word.meaning}
                                     </div>
-                                    <div className="md:col-span-3 text-xs md:text-right font-sans mt-1 md:mt-0 pl-11 md:pl-0">
+                                    <div className="md:col-span-3 text-xs md:text-right mt-1 md:mt-0 pl-11 md:pl-0">
                                         <button 
                                             onClick={() => onJump(word.sourceId)}
                                             className="inline-flex items-center gap-1 text-aitetsu/60 hover:text-kincha hover:underline transition-colors group"
@@ -845,8 +972,7 @@
             );
         };
 
-        // 個別の文カードコンポーネント
-        const SentenceCard = ({ data, isFocusMode = false, index, checkedWords, onToggleCheck }) => {
+        const SentenceCard = ({ data, isFocusMode = false, checkedWords, onToggleCheck }) => {
             const [showTranslation, setShowTranslation] = useState(false);
             const [revealedWords, setRevealedWords] = useState({});
 
@@ -867,23 +993,20 @@
             return (
                 <div 
                     id={isFocusMode ? undefined : `card-${data.id}`}
-                    className={`
-                        bg-gofun rounded-2xl border border-gray-100 overflow-hidden transition-all duration-500 relative group
-                        ${isFocusMode ? 'card-shadow scale-100' : 'hover:shadow-lg hover:border-gray-200 shadow-sm'}
-                    `}
+                    className={`bg-gofun rounded-2xl border border-gray-100 overflow-hidden transition-all duration-500 relative group ${isFocusMode ? 'card-shadow' : 'hover:shadow-lg hover:border-gray-200 shadow-sm'}`}
                 >
-                    {/* Decorative Top Border */}
                     <div className="h-1 bg-gradient-to-r from-aitetsu via-aitetsu to-matcha opacity-80"></div>
 
-                    {/* Card Header */}
                     <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                         <div className="flex items-center gap-3">
                             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-aitetsu text-gofun font-serif text-sm font-bold shadow-sm">
                                 {data.id}
                             </span>
-                            <h2 className="font-bold text-aitetsu text-lg tracking-wide">{data.title}</h2>
+                            <div>
+                                <div className="text-[10px] text-matcha font-bold font-sans tracking-widest uppercase mb-0.5">{data.category}</div>
+                                <h2 className="font-bold text-aitetsu text-lg tracking-wide leading-none">{data.title}</h2>
+                            </div>
                         </div>
-                        {/* 和風装飾（霞） */}
                         <div className="hidden sm:block opacity-10">
                             <svg width="60" height="20" viewBox="0 0 60 20">
                                 <path d="M0 10 Q 15 0 30 10 T 60 10" fill="none" stroke="currentColor" strokeWidth="2" />
@@ -892,14 +1015,24 @@
                     </div>
 
                     <div className="p-6 md:p-8">
-                        {/* Ancient Text */}
                         <div className="mb-8 relative pl-4 border-l-4 border-matcha/50">
                             <p className="text-2xl md:text-3xl font-serif leading-loose text-gray-800 tracking-wide">
                                 {data.sentence}
                             </p>
                         </div>
 
-                        {/* Word Chips Grid */}
+                        {data.description && (
+                            <div className="mb-8 bg-aitetsu/[0.03] p-5 rounded-2xl border border-aitetsu/5 text-sm text-gray-700 leading-relaxed relative group/aruaru">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="bg-matcha text-white p-1 rounded-lg">
+                                        <Icons.Lightbulb size={14} />
+                                    </div>
+                                    <span className="font-bold text-aitetsu text-xs tracking-widest">古文のあるあるシーン</span>
+                                </div>
+                                <p className="font-sans text-gray-600">{data.description}</p>
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                             {data.words.map((word, wIdx) => {
                                 const isChecked = !!checkedWords[`${data.id}-${wIdx}`];
@@ -907,46 +1040,26 @@
                                     <div key={wIdx} className="relative group/container">
                                         <button
                                             onClick={() => toggleWord(wIdx)}
-                                            className={`
-                                                relative p-4 rounded-xl text-left transition-all duration-300 border w-full
-                                                ${revealedWords[wIdx] 
-                                                    ? 'bg-aitetsu/5 border-aitetsu/30 shadow-inner' 
-                                                    : 'bg-white border-gray-200 hover:border-matcha hover:shadow-md hover:-translate-y-0.5'}
-                                            `}
+                                            className={`relative p-4 rounded-xl text-left transition-all duration-300 border w-full ${revealedWords[wIdx] ? 'bg-aitetsu/5 border-aitetsu/30 shadow-inner' : 'bg-white border-gray-200 hover:border-matcha hover:shadow-md hover:-translate-y-0.5'}`}
                                         >
-                                            <div className="flex justify-between items-center mb-1 pr-10"> {/* Right padding for check button */}
+                                            <div className="flex justify-between items-center mb-1 pr-10">
                                                 <span className={`font-serif font-bold text-xl transition-colors ${revealedWords[wIdx] ? 'text-aitetsu' : 'text-gray-700'}`}>
                                                     {word.term}
                                                 </span>
-                                                <div className={`
-                                                    w-auto px-2 py-1 rounded-full flex items-center justify-center text-xs transition-colors
-                                                    ${revealedWords[wIdx] ? 'bg-aitetsu text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-matcha group-hover:text-white'}
-                                                `}>
+                                                <div className={`px-2 py-1 rounded-full text-[10px] transition-colors ${revealedWords[wIdx] ? 'bg-aitetsu text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-matcha group-hover:text-white'}`}>
                                                     {revealedWords[wIdx] ? '隠す' : '意味'}
                                                 </div>
                                             </div>
-                                            
-                                            <div className={`
-                                                text-sm text-kincha font-bold overflow-hidden transition-all duration-300
-                                                ${revealedWords[wIdx] ? 'max-h-20 opacity-100 mt-2 pt-2 border-t border-gray-200/50' : 'max-h-0 opacity-0'}
-                                            `}>
+                                            <div className={`text-sm text-kincha font-bold overflow-hidden transition-all duration-300 ${revealedWords[wIdx] ? 'max-h-40 opacity-100 mt-2 pt-2 border-t border-gray-200/50' : 'max-h-0 opacity-0'}`}>
                                                 {word.meaning}
                                             </div>
                                         </button>
-                                        
-                                        {/* Check Button (Overlaid on top right) */}
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onToggleCheck(data.id, wIdx);
                                             }}
-                                            className={`
-                                                absolute top-0 right-0 p-4 z-10 transition-all duration-300
-                                                ${isChecked 
-                                                    ? 'text-matcha scale-100' 
-                                                    : 'text-gray-200 hover:text-gray-300 scale-95'}
-                                            `}
-                                            title="チェックする"
+                                            className={`absolute top-0 right-0 p-4 z-10 transition-all ${isChecked ? 'text-matcha scale-100' : 'text-gray-200 hover:text-gray-300 scale-95'}`}
                                         >
                                             <Icons.CheckCircle size={24} filled={isChecked} />
                                         </button>
@@ -955,27 +1068,17 @@
                             })}
                         </div>
 
-                        {/* Translation Toggle */}
                         <div className="border-t border-dashed border-gray-200 pt-6">
                             <button 
                                 onClick={() => setShowTranslation(!showTranslation)}
                                 className="w-full group flex items-center justify-center gap-2 py-2 text-sm text-gray-400 hover:text-aitetsu transition-colors"
                             >
-                                <span className={`transform transition-transform duration-300 ${showTranslation ? 'rotate-180' : ''}`}>
-                                    <Icons.Feather size={16} />
-                                </span>
-                                <span className="tracking-widest font-sans font-medium text-sm">
-                                    {showTranslation ? "現代語訳を隠す" : "現代語訳を見る"}
-                                </span>
+                                <Icons.Feather size={16} className={showTranslation ? 'rotate-180 transition-transform' : 'transition-transform'} />
+                                <span className="tracking-widest font-sans font-medium">{showTranslation ? "現代語訳を隠す" : "現代語訳を見る"}</span>
                             </button>
-                            
-                            <div className={`
-                                mt-4 text-gray-600 text-base leading-loose bg-gray-50/80 p-5 rounded-xl border border-gray-100/50 relative
-                                transition-all duration-500 ease-in-out origin-top overflow-hidden
-                                ${showTranslation ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0 py-0 border-0'}
-                            `}>
+                            <div className={`mt-4 text-gray-600 text-base leading-loose bg-gray-50/80 p-5 rounded-xl border border-gray-100/50 relative transition-all duration-500 overflow-hidden ${showTranslation ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 py-0 border-0'}`}>
                                 <div className="absolute top-0 left-0 w-1 h-full bg-kincha/30"></div>
-                                <span className="font-bold text-kincha text-xs block mb-2 tracking-widest opacity-70">現代語訳</span>
+                                <span className="font-bold text-kincha text-[10px] block mb-2 tracking-widest opacity-70">現代語訳</span>
                                 {data.translation}
                             </div>
                         </div>
